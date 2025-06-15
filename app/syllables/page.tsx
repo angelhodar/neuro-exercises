@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ExerciseProvider } from "@/contexts/ExerciseContext"
+import { ExerciseProvider } from "@/contexts/exercise-context"
 import { SyllablesExercise } from "@/components/syllables/syllables-exercise"
 import { SyllablesConfigForm } from "@/components/syllables/syllables-config-form"
 import type { SyllablesConfig } from "@/components/syllables/syllables-schema"
@@ -33,7 +33,7 @@ export default function SyllablesPage() {
                   ← Volver a la Configuración
                 </button>
               </div>
-              <SyllablesExercise {...config} />
+              <SyllablesExercise config={config} />
             </div>
           </ExerciseProvider>
         )}

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import type { ExerciseState } from "@/contexts/ExerciseContext"
+import type { ExerciseState } from "@/contexts/exercise-context"
 
 interface ExerciseControlsProps {
   exerciseState: ExerciseState

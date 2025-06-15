@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useExerciseExecution } from "@/contexts/ExerciseContext"
+import { useExerciseExecution } from "@/contexts/exercise-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -14,7 +14,9 @@ import {
   type SpanishWord,
 } from "./syllables-schema"
 
-interface SyllablesExerciseProps extends SyllablesConfig {}
+interface SyllablesExerciseProps {
+  config: SyllablesConfig
+}
 
 interface QuestionState {
   currentWord: SpanishWord | null
@@ -25,7 +27,8 @@ interface QuestionState {
   timerId: NodeJS.Timeout | null
 }
 
-export function SyllablesExercise({ syllablesCount, timeLimit, totalQuestions }: SyllablesExerciseProps) {
+export function SyllablesExercise({ config }: SyllablesExerciseProps) {
+  const { syllablesCount, timeLimit, totalQuestions } = config
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 
@@ -44,6 +47,7 @@ export function SyllablesExercise({ syllablesCount, timeLimit, totalQuestions }:
   // Select a random word
   function selectRandomWord(): SpanishWord {
     const randomIndex = Math.floor(Math.random() * availableWords.length)
+    // @ts-ignore Its ok
     return availableWords[randomIndex]
   }
 

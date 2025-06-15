@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ExerciseProvider } from "@/contexts/ExerciseContext"
+import { ExerciseProvider } from "@/contexts/exercise-context"
 import { ReactionTimeGrid } from "@/components/reaction-time-grid/reaction-time-grid"
 import { ReactionTimeConfigForm } from "@/components/reaction-time-grid/reaction-time-config-form"
 import type { ReactionTimeGridConfig } from "@/components/reaction-time-grid/reaction-time-grid-schema"
@@ -33,7 +33,7 @@ export default function ReactionGridPage() {
                   ← Volver a la Configuración
                 </button>
               </div>
-              <ReactionTimeGrid {...config} />
+              <ReactionTimeGrid config={config} />
             </div>
           </ExerciseProvider>
         )}

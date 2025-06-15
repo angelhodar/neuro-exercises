@@ -1,11 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useExerciseExecution } from "@/contexts/ExerciseContext"
+import { useExerciseExecution } from "@/contexts/exercise-context"
 import { Cell } from "./cell"
 import { ExerciseControls } from "./exercise-controls"
 import { ExerciseResults } from "./exercise-results"
 import type { ReactionTimeGridConfig, ReactionTimeQuestionResult } from "./reaction-time-grid-schema"
+
+interface ReactionTimeGridProps {
+  config: ReactionTimeGridConfig
+}
 
 interface QuestionState {
   targetCells: number[] | null
@@ -15,7 +19,9 @@ interface QuestionState {
   reactionTimes: number[]
 }
 
-export function ReactionTimeGrid({ gridSize, delayMin, delayMax, cells, totalQuestions }: ReactionTimeGridConfig) {
+export function ReactionTimeGrid({ config }: ReactionTimeGridProps) {
+  const { gridSize, delayMin, delayMax, cells } = config
+  
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 

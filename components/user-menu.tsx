@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, LogOut, Settings, Loader2 } from "lucide-react"
-import { signOut, useSession } from "@/lib/auth-client"
+import { signOut, useSession } from "@/lib/auth/auth.client"
 
 export function UserMenu() {
   const { data: session, isPending } = useSession()

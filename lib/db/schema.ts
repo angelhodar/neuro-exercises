@@ -160,6 +160,23 @@ export const exerciseResults = pgTable(
   ],
 )
 
+export const medias = pgTable("medias", {
+  id: serial().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).notNull(),
+  blobKey: varchar("blob_key", { length: 500 }).notNull(),
+  authorId: text("creator_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  foreignKey({
+    columns: [table.authorId],
+    foreignColumns: [users.id],
+    name: "medias_creator_fk"
+  })
+])
+
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
   createdExerciseLinks: many(exerciseLinks, {
@@ -223,6 +240,13 @@ export const exerciseResultsRelations = relations(exerciseResults, ({ one }) => 
   }),
 }))
 
+export const mediasRelations = relations(medias, ({ one }) => ({
+  author: one(users, {
+    fields: [medias.authorId],
+    references: [users.id],
+  }),
+}))
+
 // Types
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -247,3 +271,6 @@ export type NewExerciseLinkItem = typeof exerciseLinkItems.$inferInsert
 
 export type ExerciseResult = typeof exerciseResults.$inferSelect
 export type NewExerciseResult = typeof exerciseResults.$inferInsert
+
+export type Media = typeof medias.$inferSelect
+export type NewMedia = typeof medias.$inferInsert

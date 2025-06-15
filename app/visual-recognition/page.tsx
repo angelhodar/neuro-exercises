@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ExerciseProvider } from "@/contexts/ExerciseContext"
+import { ExerciseProvider } from "@/contexts/exercise-context"
 import { VisualRecognitionExercise } from "@/components/visual-recognition/visual-recognition-exercise"
 import { VisualRecognitionConfigForm } from "@/components/visual-recognition/visual-recognition-config-form"
 import type { VisualRecognitionConfig } from "@/components/visual-recognition/visual-recognition-schema"
@@ -10,7 +10,6 @@ export default function VisualRecognitionPage() {
   const [config, setConfig] = useState<VisualRecognitionConfig | null>(null)
 
   function handleConfigSubmit(newConfig: VisualRecognitionConfig) {
-    console.log("Configuración de reconocimiento visual:", newConfig)
     setConfig(newConfig)
   }
 
@@ -33,7 +32,7 @@ export default function VisualRecognitionPage() {
                   ← Volver a la Configuración
                 </button>
               </div>
-              <VisualRecognitionExercise {...config} />
+              <VisualRecognitionExercise config={config} />
             </div>
           </ExerciseProvider>
         )}

@@ -131,7 +131,7 @@ export const syllablesSpecificConfigSchema = z.object({
 export function syllablesConfigRefinements(data: z.infer<typeof syllablesSpecificConfigSchema>, ctx: z.RefinementCtx) {
   // Validate that we have words available for the selected syllable count
   const availableWords = spanishWordsDataset[data.syllablesCount as keyof typeof spanishWordsDataset]
-  if (!availableWords || availableWords.length === 0) {
+  if (!availableWords) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `No hay palabras disponibles para ${data.syllablesCount} sílabas`,

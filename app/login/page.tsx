@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Brain, ArrowLeft } from "lucide-react"
-import { signIn, signUp } from "@/lib/auth-client"
+import { signIn, signUp } from "@/lib/auth/auth.client"
 
 export default function LoginPage() {
   const router = useRouter()

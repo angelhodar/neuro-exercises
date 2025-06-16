@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { baseExerciseConfigSchema, type ExercisePreset, type BaseExerciseConfig } from "@/schemas/base-schemas"
+import { baseExerciseConfigSchema, type ExercisePreset, type BaseExerciseConfig } from "@/lib/schemas/base-schemas"
 
 // Update the reaction time specific configuration schema with Spanish validation messages
 export const reactionTimeSpecificConfigSchema = z.object({

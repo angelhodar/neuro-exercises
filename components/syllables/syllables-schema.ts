@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { baseExerciseConfigSchema, type ExercisePreset } from "@/schemas/base-schemas"
+import { baseExerciseConfigSchema, type ExercisePreset } from "@/lib/schemas/base-schemas"
 
 // Extended Spanish words dataset with 20+ words per syllable count
 export const spanishWordsDataset = {

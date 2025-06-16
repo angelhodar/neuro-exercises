@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { baseExerciseConfigSchema, type ExercisePreset } from "@/schemas/base-schemas"
+import { baseExerciseConfigSchema, type ExercisePreset } from "@/lib/schemas/base-schemas"
 
 // Image categories with their respective images
 export const imageCategories = {

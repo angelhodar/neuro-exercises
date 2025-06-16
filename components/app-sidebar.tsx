@@ -1,7 +1,9 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { Activity, Brain, Home, Users, BarChart3, Share2, Link2 } from "lucide-react"
+import { useSession, signOut } from "@/lib/auth/auth.client"
+import Link from "next/link"
+import { Activity, Brain, Home, Users, BarChart3, Settings, LogOut, Share2, Link2 } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +17,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
 
 // Datos de navegación
 const navigationItems = [
@@ -82,6 +85,7 @@ const navigationItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   return (
     <Sidebar>
@@ -118,12 +122,12 @@ export function AppSidebar() {
             <SidebarMenuButton asChild>
               <Link href="/dashboard/profile">
                 <Settings className="h-4 w-4" />
-                <span>{userName}</span>
+                <span>{session?.user.name}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <Button variant="ghost" onClick={signOut} className="w-full justify-start">
+            <Button variant="ghost" onClick={() => signOut()} className="w-full justify-start">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Cerrar Sesión</span>
             </Button>

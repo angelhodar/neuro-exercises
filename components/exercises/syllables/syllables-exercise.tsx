@@ -5,7 +5,7 @@ import { useExerciseExecution } from "@/contexts/exercise-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { ExerciseControls } from "../reaction-time-grid/exercise-controls"
+import { ExerciseControls } from "../exercise-controls"
 import { SyllablesResults } from "./syllables-results"
 import {
   spanishWordsDataset,

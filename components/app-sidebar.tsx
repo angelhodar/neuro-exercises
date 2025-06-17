@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "@/lib/auth/auth.client"
 import Link from "next/link"
-import { Activity, Brain, Home, Users, BarChart3, Settings, LogOut, Share2, Link2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +17,8 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
+import { Activity, Brain, Home, Users, Settings, LogOut, Share2, Link2 } from "lucide-react"
 
-// Datos de navegación
 const navigationItems = [
   {
     title: "Principal",
@@ -36,7 +35,7 @@ const navigationItems = [
     items: [
       {
         title: "Reflejos Visuales",
-        url: "/dashboard/exercises/grid",
+        url: "/dashboard/exercises/reaction-grid",
         icon: Activity,
       },
       {
@@ -48,7 +47,7 @@ const navigationItems = [
         title: "Reconocimiento Visual",
         url: "/dashboard/exercises/visual-recognition",
         icon: Activity,
-      }      
+      }
     ],
   },
   {
@@ -56,12 +55,12 @@ const navigationItems = [
     items: [
       {
         title: "Crear Enlace",
-        url: "/dashboard/share",
+        url: "/dashboard/links/create",
         icon: Share2,
       },
       {
         title: "Mis Enlaces",
-        url: "/dashboard/shared-links",
+        url: "/dashboard/links",
         icon: Link2,
       },
     ],
@@ -73,12 +72,7 @@ const navigationItems = [
         title: "Usuarios",
         url: "/dashboard/users",
         icon: Users,
-      },
-      {
-        title: "Estadísticas",
-        url: "/dashboard/statistics",
-        icon: BarChart3,
-      },
+      }
     ],
   },
 ]

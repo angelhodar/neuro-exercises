@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation"
 import { getExerciseFromRegistry, exerciseRegistry } from "@/app/registry/exercises"
-import { ExerciseRunner } from "@/components/exercise-runner"
+import { ExerciseRunner } from "@/components/exercises/exercise-runner"
 
-export default async function DynamicExercisePage(
-  props: {
-    params: Promise<{ slug: string }>
-  }
-) {
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
+
+export default async function DynamicExercisePage(props: PageProps) {
   const params = await props.params;
+
   if (!getExerciseFromRegistry(params.slug)) notFound()
 
   return <ExerciseRunner slug={params.slug} />

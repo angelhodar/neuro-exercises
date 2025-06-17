@@ -1,17 +1,17 @@
 import type { ComponentType } from "react"
 import { z, type ZodTypeAny } from "zod"
 
-import { VisualRecognitionExercise } from "@/components/visual-recognition/visual-recognition-exercise"
-import { VisualRecognitionConfigForm } from "@/components/visual-recognition/visual-recognition-config-form"
-import { visualRecognitionConfigSchema, visualRecognitionPresets } from "@/components/visual-recognition/visual-recognition-schema"
+import { VisualRecognitionExercise } from "@/components/exercises/visual-recognition/visual-recognition-exercise"
+import { VisualRecognitionConfigForm } from "@/components/exercises/visual-recognition/visual-recognition-config-form"
+import { visualRecognitionConfigSchema, visualRecognitionPresets } from "@/components/exercises/visual-recognition/visual-recognition-schema"
 
-import { SyllablesExercise } from "@/components/syllables/syllables-exercise"
-import { SyllablesConfigForm } from "@/components/syllables/syllables-config-form"
-import { syllablesConfigSchema, syllablesPresets } from "@/components/syllables/syllables-schema"
+import { SyllablesExercise } from "@/components/exercises/syllables/syllables-exercise"
+import { SyllablesConfigForm } from "@/components/exercises/syllables/syllables-config-form"
+import { syllablesConfigSchema, syllablesPresets } from "@/components/exercises/syllables/syllables-schema"
 
-import { ReactionTimeGrid } from "@/components/reaction-time-grid/reaction-time-grid"
-import { ReactionTimeConfigForm } from "@/components/reaction-time-grid/reaction-time-config-form"
-import { reactionTimeGridConfigSchema, reactionTimePresets } from "@/components/reaction-time-grid/reaction-time-grid-schema"
+import { ReactionTimeGrid } from "@/components/exercises/reaction-time-grid/reaction-time-grid"
+import { ReactionTimeConfigForm } from "@/components/exercises/reaction-time-grid/reaction-time-config-form"
+import { reactionTimeGridConfigSchema, reactionTimePresets } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
 
 export type AnyExerciseEntry = {
   schema: ZodTypeAny

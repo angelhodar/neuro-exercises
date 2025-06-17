@@ -1,4 +1,4 @@
-import { ExerciseCard } from "@/components/exercise-card";
+import { ExerciseCard } from "@/components/exercises/exercise-card";
 import { getAvailableExercises } from "@/app/actions/exercises";
 
 export const dynamic = "force-dynamic";

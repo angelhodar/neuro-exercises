@@ -12,6 +12,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
+import { createSelectSchema, createInsertSchema, createUpdateSchema } from "drizzle-zod"
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -246,6 +247,22 @@ export const mediasRelations = relations(medias, ({ one }) => ({
     references: [users.id],
   }),
 }))
+
+export const exerciseSelectSchema = createSelectSchema(exercises)
+export const exerciseInsertSchema = createInsertSchema(exercises)
+export const exerciseUpdateSchema = createUpdateSchema(exercises)
+
+export const exerciseLinkSelectSchema = createSelectSchema(exerciseLinks)
+export const exerciseLinkInsertSchema = createInsertSchema(exerciseLinks)
+export const exerciseLinkUpdateSchema = createUpdateSchema(exerciseLinks)
+
+export const exerciseLinkItemSelectSchema = createSelectSchema(exerciseLinkItems)
+export const exerciseLinkItemInsertSchema = createInsertSchema(exerciseLinkItems)
+export const exerciseLinkItemUpdateSchema = createUpdateSchema(exerciseLinkItems)
+
+export const exerciseResultSelectSchema = createSelectSchema(exerciseResults)
+export const exerciseResultInsertSchema = createInsertSchema(exerciseResults)
+export const exerciseResultUpdateSchema = createUpdateSchema(exerciseResults)
 
 // Types
 export type User = typeof users.$inferSelect

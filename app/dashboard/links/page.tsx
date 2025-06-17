@@ -17,7 +17,6 @@ import {
 import { CopyLinkButton } from "./copy-link-button"
 import { LinkActionsDropdown } from "./link-actions-dropdown"
 import { getUserExerciseLinks } from "@/app/actions/links"
-import type { User } from "@/lib/db/schema"
 
 // Forzar renderizado dinámico
 export const dynamic = "force-dynamic"

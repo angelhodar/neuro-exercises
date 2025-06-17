@@ -4,7 +4,7 @@ import { nanoid } from "nanoid"
 import { eq, desc, and } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { exerciseLinks, exerciseLinkItems, exercises, users } from "@/lib/db/schema"
-import type { NewExerciseLink } from "@/lib/db/schema"
+import type { NewExerciseLink, NewExerciseLinkItem } from "@/lib/db/schema"
 import { getCurrentUser } from "./users"
 
 // Generar un token seguro usando nanoid
@@ -13,7 +13,7 @@ function generateSecureToken(): string {
 }
 
 // Crear un nuevo enlace compartible
-export async function createExerciseLink(linkData: NewExerciseLink) {
+export async function createExerciseLink(link: NewExerciseLink, items: Array<NewExerciseLinkItem>) {
   try {
     const currentUser = await getCurrentUser()
 
@@ -27,31 +27,25 @@ export async function createExerciseLink(linkData: NewExerciseLink) {
     // Usar transacción para insertar el enlace y sus elementos
     const result = await db.transaction(async (tx) => {
       // Insertar el enlace principal
-      const [link] = await tx
+      const [newLink] = await tx
         .insert(exerciseLinks)
         .values({
           creatorId: currentUser.id,
-          targetUserId: linkData.targetUserId,
+          targetUserId: link.targetUserId,
           publicId: publicId,
-          title: linkData.title,
-          description: linkData.description || null
+          title: link.title,
+          description: link.description || null
         })
         .returning()
 
-      // Insertar los elementos del enlace (ejercicios)
-      if (linkData.items && linkData.items.length > 0) {
-        const linkItems = linkData.items.map((item, index) => ({
-          linkId: link.id,
-          exerciseId: item.exerciseId,
-          config: item.config,
-          position: item.position || index,
-        }))
+      const itemsToInsert = items.map((item) => ({
+        ...item,
+        linkId: newLink.id
+      }))
 
-        const insertedItems = await tx.insert(exerciseLinkItems).values(linkItems).returning()
-        return { ...link, items: insertedItems }
-      }
+      const insertedItems = await tx.insert(exerciseLinkItems).values(itemsToInsert).returning()
 
-      return { ...link, items: [] }
+      return { ...newLink, items: insertedItems }
     })
 
     return result
@@ -119,11 +113,11 @@ export async function getUserExerciseLinks() {
             exerciseId: item.exerciseId,
             exercise: item.exercise
               ? {
-                  id: item.exercise.id,
-                  slug: item.exercise.slug,
-                  displayName: item.exercise.displayName,
-                  category: item.exercise.category,
-                }
+                id: item.exercise.id,
+                slug: item.exercise.slug,
+                displayName: item.exercise.displayName,
+                category: item.exercise.category,
+              }
               : null,
             config: item.config,
             position: item.position,
@@ -143,7 +137,7 @@ export async function getUserExerciseLinks() {
 export async function deleteExerciseLink(linkId: number) {
   try {
     const currentUser = await getCurrentUser()
-    
+
     if (!currentUser) {
       throw new Error("Usuario no autenticado")
     }
@@ -226,13 +220,13 @@ export async function getExerciseLinkByPublicId(publicId: string) {
         exerciseId: item.exerciseId,
         exercise: item.exercise
           ? {
-              id: item.exercise.id,
-              slug: item.exercise.slug,
-              displayName: item.exercise.displayName,
-              category: item.exercise.category,
-              description: item.exercise.description,
-              thumbnailUrl: item.exercise.thumbnailUrl,
-            }
+            id: item.exercise.id,
+            slug: item.exercise.slug,
+            displayName: item.exercise.displayName,
+            category: item.exercise.category,
+            description: item.exercise.description,
+            thumbnailUrl: item.exercise.thumbnailUrl,
+          }
           : null,
         config: item.config,
         position: item.position,

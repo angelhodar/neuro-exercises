@@ -8,8 +8,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { ExerciseBaseFields } from "@/components/exercise-base-fields"
-import { ExerciseConfigPresetSelector } from "@/components/exercise-config-preset-selector"
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
+import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector"
 import {
   syllablesConfigSchema,
   defaultSyllablesConfig,

@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { ExerciseBaseFields } from "@/components/exercise-base-fields"
-import { ExerciseConfigPresetSelector } from "@/components/exercise-config-preset-selector"
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
+import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector"
 import {
   reactionTimeGridConfigSchema,
   defaultReactionTimeConfig,
@@ -106,7 +106,6 @@ function ReactionTimeConfigFields() {
   )
 }
 
-// Update the main form component with Spanish text
 export function ReactionTimeConfigForm({ defaultConfig, onSubmit }: ReactionTimeConfigFormProps) {
   const form = useForm<ReactionTimeGridConfig>({
     resolver: zodResolver(reactionTimeGridConfigSchema),
@@ -131,23 +130,17 @@ export function ReactionTimeConfigForm({ defaultConfig, onSubmit }: ReactionTime
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Configuración de la Cuadrícula de Tiempo de Reacción</CardTitle>
-        <CardDescription>Configura los parámetros para tu ejercicio de tiempo de reacción</CardDescription>
+        <CardTitle>Configuración del ejercicio</CardTitle>
+        <CardDescription>Configura los parámetros para el ejercicio de tiempo de reacción</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <ExerciseConfigPresetSelector presets={reactionTimePresets} />
-
             <Separator />
-
             <ReactionTimeConfigFields />
-
             <Separator />
-
             <ExerciseBaseFields />
-
-            {/* Form Actions */}
             <div className="flex justify-end">
               <Button type="submit">Comenzar Ejercicio</Button>
             </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useExerciseExecution } from "@/contexts/exercise-context"
 import { Cell } from "./cell"
-import { ExerciseControls } from "./exercise-controls"
+import { ExerciseControls } from "../exercise-controls"
 import { ExerciseResults } from "./exercise-results"
 import type { ReactionTimeGridConfig, ReactionTimeQuestionResult } from "./reaction-time-grid-schema"
 

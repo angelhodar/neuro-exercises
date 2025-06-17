@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
-import { ExerciseBaseFields } from "@/components/exercise-base-fields"
-import { ExerciseConfigPresetSelector } from "@/components/exercise-config-preset-selector"
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
+import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector"
 import {
   visualRecognitionConfigSchema,
   defaultVisualRecognitionConfig,

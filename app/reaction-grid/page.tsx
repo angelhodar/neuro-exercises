@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { ExerciseProvider } from "@/contexts/exercise-context"
-import { ReactionTimeGrid } from "@/components/reaction-time-grid/reaction-time-grid"
-import { ReactionTimeConfigForm } from "@/components/reaction-time-grid/reaction-time-config-form"
-import type { ReactionTimeGridConfig } from "@/components/reaction-time-grid/reaction-time-grid-schema"
+import { ReactionTimeGrid } from "@/components/exercises/reaction-time-grid/reaction-time-grid"
+import { ReactionTimeConfigForm } from "@/components/exercises/reaction-time-grid/reaction-time-config-form"
+import type { ReactionTimeGridConfig } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
 
 export default function ReactionGridPage() {
   const [config, setConfig] = useState<ReactionTimeGridConfig | null>(null)

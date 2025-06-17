@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ExerciseControls } from "../reaction-time-grid/exercise-controls";
+import { ExerciseControls } from "../exercise-controls";
 import { VisualRecognitionResults } from "./visual-recognition-results";
 import {
   imageCategories,

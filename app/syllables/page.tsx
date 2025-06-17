@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { ExerciseProvider } from "@/contexts/exercise-context"
-import { SyllablesExercise } from "@/components/syllables/syllables-exercise"
-import { SyllablesConfigForm } from "@/components/syllables/syllables-config-form"
-import type { SyllablesConfig } from "@/components/syllables/syllables-schema"
+import { SyllablesExercise } from "@/components/exercises/syllables/syllables-exercise"
+import { SyllablesConfigForm } from "@/components/exercises/syllables/syllables-config-form"
+import type { SyllablesConfig } from "@/components/exercises/syllables/syllables-schema"
 
 export default function SyllablesPage() {
   const [config, setConfig] = useState<SyllablesConfig | null>(null)

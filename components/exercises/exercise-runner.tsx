@@ -7,31 +7,29 @@ import { getExerciseFromRegistry } from "@/app/registry/exercises"
 
 interface ExerciseRunnerProps {
   slug: string
+  config?: any
 }
 
-export function ExerciseRunner({ slug }: ExerciseRunnerProps) {
+export function ExerciseRunner({ slug, config }: ExerciseRunnerProps) {
   const exerciseDetails = getExerciseFromRegistry(slug)
 
   if (!exerciseDetails) return notFound()
 
   const {
     schema,
-    defaultConfig,
     ConfigFormComponent,
     ExerciseComponent,
   } = exerciseDetails
 
-  const [config, setConfig] = useState(() => {
-    if (defaultConfig) {
-      return schema.parse(defaultConfig)
-    }
+  const [computedConfig, setComputedConfig] = useState(() => {
+    if (config) return schema.parse(config)
     return null
   })
 
   function handleConfigSubmit(newConfigData: unknown) {
     try {
       const validatedConfig = schema.parse(newConfigData)
-      setConfig(validatedConfig)
+      setComputedConfig(validatedConfig)
     } catch (error) {
       console.error("Form validation failed:", error)
       alert("La configuración no es válida. Por favor, revisa los campos.")
@@ -39,20 +37,13 @@ export function ExerciseRunner({ slug }: ExerciseRunnerProps) {
   }
 
   function handleReset() {
-    setConfig(null)
+    setComputedConfig(null)
   }
 
-  if (!config) {
-    return (
-      <ConfigFormComponent
-        onSubmit={handleConfigSubmit}
-        initialValues={defaultConfig}
-      />
-    )
-  }
+  if (!computedConfig) return <ConfigFormComponent onSubmit={handleConfigSubmit} />
 
   return (
-    <ExerciseProvider totalQuestions={config.totalQuestions}>
+    <ExerciseProvider totalQuestions={computedConfig.totalQuestions}>
       <div className="space-y-4">
         <div className="flex justify-center">
           <button
@@ -62,7 +53,7 @@ export function ExerciseRunner({ slug }: ExerciseRunnerProps) {
             ← Volver a la Configuración
           </button>
         </div>
-        <ExerciseComponent config={config} />
+        <ExerciseComponent config={computedConfig} />
       </div>
     </ExerciseProvider>
   )

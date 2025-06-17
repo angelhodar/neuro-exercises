@@ -25,12 +25,22 @@ interface VisualRecognitionConfigFormProps {
   onSubmit: (config: VisualRecognitionConfig) => void
 }
 
-function VisualRecognitionConfigFields() {
-  const { control, watch } = useFormContext<VisualRecognitionConfig>()
-  const imagesPerQuestion = watch("imagesPerQuestion")
-  const correctImagesCount = watch("correctImagesCount")
-  const categories = watch("categories")
-  const showImageNames = watch("showImageNames")
+interface VisualRecognitionConfigFieldsProps {
+  basePath?: string
+}
+
+export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFieldsProps) {
+  const { basePath = "" } = props
+  const { control, watch } = useFormContext()
+
+  const imagesPerQuestionPath = `${basePath}imagesPerQuestion` as const
+  const correctImagesCountPath = `${basePath}correctImagesCount` as const
+  const timeLimitPath = `${basePath}timeLimit` as const
+  const showImageNamesPath = `${basePath}showImageNames` as const
+  const categoriesPath = `${basePath}categories` as const
+
+  const imagesPerQuestion = watch(imagesPerQuestionPath)
+  const showImageNames = watch(showImageNamesPath)
 
   const categoryLabels: Record<ImageCategory, string> = {
     animales: "Animales",
@@ -40,82 +50,92 @@ function VisualRecognitionConfigFields() {
   }
 
   return (
-    <>
-      {/* Image Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Configuración de Imágenes</h3>
+    <div className="space-y-4">
+      <FormField
+        control={control}
+        name={imagesPerQuestionPath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Imágenes por Pregunta</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="6"
+                {...field}
+                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+              />
+            </FormControl>
+            <FormDescription>Número total de imágenes mostradas por pregunta (4-12)</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="imagesPerQuestion"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Imágenes por Pregunta</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="6" {...field} />
-              </FormControl>
-              <FormDescription>Número total de imágenes mostradas por pregunta (4-12)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <FormField
+        control={control}
+        name={correctImagesCountPath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Imágenes Correctas</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="2"
+                {...field}
+                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+              />
+            </FormControl>
+            <FormDescription>
+              Número de imágenes correctas de la categoría objetivo (1-
+              {Math.min(6, (imagesPerQuestion || 0) - 1)})
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="correctImagesCount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Imágenes Correctas</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="2" {...field} />
-              </FormControl>
+      <FormField
+        control={control}
+        name={timeLimitPath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Límite de Tiempo (segundos)</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="30"
+                {...field}
+                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+              />
+            </FormControl>
+            <FormDescription>Tiempo máximo permitido por pregunta (10-180 segundos)</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name={showImageNamesPath}
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">Mostrar Nombres de Imágenes</FormLabel>
               <FormDescription>
-                Número de imágenes correctas de la categoría objetivo (1-{Math.min(6, imagesPerQuestion - 1)})
+                {showImageNames
+                  ? "Los nombres aparecerán debajo de cada imagen (más fácil)"
+                  : "Solo se mostrarán las imágenes sin nombres (más difícil)"}
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="timeLimit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Límite de Tiempo (segundos)</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="30" {...field} />
-              </FormControl>
-              <FormDescription>Tiempo máximo permitido por pregunta (10-180 segundos)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="showImageNames"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Mostrar Nombres de Imágenes</FormLabel>
-                <FormDescription>
-                  {showImageNames
-                    ? "Los nombres aparecerán debajo de cada imagen (más fácil)"
-                    : "Solo se mostrarán las imágenes sin nombres (más difícil)"}
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
+            </div>
+            <FormControl>
+              <Switch checked={field.value} onCheckedChange={field.onChange} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
 
       <Separator />
 
-      {/* Categories Configuration */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Categorías de Imágenes</h3>
         <p className="text-sm text-muted-foreground">
@@ -124,7 +144,7 @@ function VisualRecognitionConfigFields() {
 
         <FormField
           control={control}
-          name="categories"
+          name={categoriesPath}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Seleccionar Categorías</FormLabel>
@@ -134,9 +154,10 @@ function VisualRecognitionConfigFields() {
                     <Checkbox
                       checked={field.value?.includes(category)}
                       onCheckedChange={(checked) => {
+                        const currentValue = field.value || []
                         return checked
-                          ? field.onChange([...field.value, category])
-                          : field.onChange(field.value?.filter((value) => value !== category))
+                          ? field.onChange([...currentValue, category])
+                          : field.onChange(currentValue.filter((value: string) => value !== category))
                       }}
                     />
                     <div className="space-y-1 leading-none">
@@ -152,28 +173,8 @@ function VisualRecognitionConfigFields() {
             </FormItem>
           )}
         />
-
-        {/* Preview selected categories */}
-        {categories && categories.length > 0 && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Categorías Seleccionadas</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.map((category) => (
-                  <div key={category} className="text-center">
-                    <div className="text-sm font-medium">{categoryLabels[category as ImageCategory]}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {imageCategories[category as ImageCategory].length} imágenes
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
       </div>
-    </>
+    </div>
   )
 }
 

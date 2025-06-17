@@ -36,7 +36,7 @@ export function VisualRecognitionExercise({
   const {
     imagesPerQuestion,
     correctImagesCount,
-    timeLimit,
+    timeLimitPerQuestion,
     categories,
     showImageNames,
     totalQuestions,
@@ -57,7 +57,7 @@ export function VisualRecognitionExercise({
     correctImageIds: [],
     selectedImageIds: [],
     startTime: null,
-    timeLeft: timeLimit,
+    timeLeft: timeLimitPerQuestion,
     timerId: null,
   });
 
@@ -138,7 +138,7 @@ export function VisualRecognitionExercise({
       correctImageIds,
       selectedImageIds: [],
       startTime: Date.now(),
-      timeLeft: timeLimit,
+      timeLeft: timeLimitPerQuestion,
     }));
 
     // Start timer
@@ -209,7 +209,7 @@ export function VisualRecognitionExercise({
       targetCategory: questionState.targetCategory,
       correctImages: questionState.correctImageIds,
       selectedImages: questionState.selectedImageIds,
-      timeSpent: timeLimit * 1000,
+      timeSpent: timeLimitPerQuestion * 1000,
       timeExpired: true,
     };
 
@@ -238,7 +238,7 @@ export function VisualRecognitionExercise({
     };
   }, []);
 
-  const timeProgress = ((timeLimit - questionState.timeLeft) / timeLimit) * 100;
+  const timeProgress = ((timeLimitPerQuestion - questionState.timeLeft) / timeLimitPerQuestion) * 100;
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">

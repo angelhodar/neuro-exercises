@@ -13,6 +13,11 @@ import {
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from "drizzle-zod"
+import { BaseExerciseConfig } from "../schemas/base-schemas"
+
+interface ConfigSchema extends BaseExerciseConfig {
+  [x: string]: any
+}
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -119,7 +124,7 @@ export const exerciseLinkItems = pgTable(
     id: serial().primaryKey(),
     linkId: integer("link_id").notNull(),
     exerciseId: integer("exercise_id").notNull(),
-    config: jsonb(),
+    config: jsonb().$type<ConfigSchema>(),
     position: integer().notNull(),
     createdAt: timestamps.createdAt,
   },
@@ -168,8 +173,7 @@ export const medias = pgTable("medias", {
   category: varchar("category", { length: 100 }).notNull(),
   blobKey: varchar("blob_key", { length: 500 }).notNull(),
   authorId: text("creator_id").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  ...timestamps
 }, (table) => [
   foreignKey({
     columns: [table.authorId],

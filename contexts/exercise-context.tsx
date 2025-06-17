@@ -1,12 +1,9 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, PropsWithChildren, useContext, useState } from "react"
+import { BaseExerciseConfig } from "@/lib/schemas/base-schemas"
 
 export type ExerciseState = "ready" | "executing" | "paused" | "finished"
-
-export interface ExerciseConfig {
-  totalQuestions: number
-}
 
 interface ExerciseExecutionContext {
   currentQuestionIndex: number
@@ -23,10 +20,7 @@ interface ExerciseExecutionContext {
 
 const ExerciseContext = createContext<ExerciseExecutionContext | null>(null)
 
-interface ExerciseProviderProps {
-  children: ReactNode
-  totalQuestions: number
-}
+type ExerciseProviderProps = BaseExerciseConfig & PropsWithChildren
 
 export function ExerciseProvider({ children, totalQuestions }: ExerciseProviderProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -84,12 +78,12 @@ export function ExerciseProvider({ children, totalQuestions }: ExerciseProviderP
   return <ExerciseContext.Provider value={contextValue}>{children}</ExerciseContext.Provider>
 }
 
-export function useExerciseExecution(): ExerciseExecutionContext {
+export function useExerciseExecution() {
   const context = useContext(ExerciseContext)
 
   if (!context) {
     throw new Error("useExerciseExecution must be used within ExerciseProvider")
   }
 
-  return context as ExerciseExecutionContext
+  return context
 }

@@ -14,7 +14,6 @@ import {
   syllablesConfigSchema,
   defaultSyllablesConfig,
   syllablesPresets,
-  spanishWordsDataset,
   type SyllablesConfig,
 } from "./syllables-schema"
 
@@ -23,86 +22,53 @@ interface SyllablesConfigFormProps {
   onSubmit: (config: SyllablesConfig) => void
 }
 
-function SyllablesConfigFields() {
-  const { control, watch } = useFormContext<SyllablesConfig>()
-  const syllablesCount = watch("syllablesCount")
-  const availableWords = syllablesCount ? spanishWordsDataset[syllablesCount as keyof typeof spanishWordsDataset] : []
+interface SyllablesConfigFieldsProps {
+  basePath?: string
+}
+
+export function SyllablesConfigFields(props: SyllablesConfigFieldsProps) {
+  const { basePath = ""} = props
+  const { control } = useFormContext()
+
+  const syllablesCountPath = `${basePath}syllablesCount`
 
   return (
-    <>
-      {/* Syllables Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Configuración de Sílabas</h3>
-
-        <FormField
-          control={control}
-          name="syllablesCount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número de Sílabas</FormLabel>
-              <Select
-                onValueChange={(value) => field.onChange(Number.parseInt(value))}
-                defaultValue={field.value?.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el número de sílabas" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="3">3 sílabas</SelectItem>
-                  <SelectItem value="4">4 sílabas</SelectItem>
-                  <SelectItem value="5">5 sílabas</SelectItem>
-                  <SelectItem value="6">6 sílabas</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Las palabras tendrán esta cantidad de sílabas ({availableWords?.length || 0} palabras disponibles)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="timeLimit"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Límite de Tiempo (segundos)</FormLabel>
+    <div className="space-y-4">
+      <FormField
+        control={control}
+        name={syllablesCountPath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Número de Sílabas</FormLabel>
+            <Select
+              onValueChange={(value) => field.onChange(Number.parseInt(value))}
+              defaultValue={field.value?.toString()}
+            >
               <FormControl>
-                <Input type="number" placeholder="30" {...field} />
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona el número de sílabas" />
+                </SelectTrigger>
               </FormControl>
-              <FormDescription>Tiempo máximo permitido por pregunta (5-120 segundos)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Preview */}
-      {availableWords && availableWords.length > 0 && (
-        <>
-          <Separator />
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium">Ejemplos de Palabras</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-              {availableWords.slice(0, 4).map((wordData, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="font-medium">{wordData.word}:</span>
-                  <span className="text-muted-foreground">{wordData.syllables.join(" - ")}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </>
+              <SelectContent>
+                <SelectItem value="3">3 sílabas</SelectItem>
+                <SelectItem value="4">4 sílabas</SelectItem>
+                <SelectItem value="5">5 sílabas</SelectItem>
+                <SelectItem value="6">6 sílabas</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Las palabras tendrán esta cantidad de sílabas
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   )
 }
 
 export function SyllablesConfigForm({ defaultConfig, onSubmit }: SyllablesConfigFormProps) {
-  const form = useForm<SyllablesConfig>({
+  const form = useForm({
     resolver: zodResolver(syllablesConfigSchema),
     defaultValues: {
       ...defaultSyllablesConfig,
@@ -131,16 +97,10 @@ export function SyllablesConfigForm({ defaultConfig, onSubmit }: SyllablesConfig
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <ExerciseConfigPresetSelector presets={syllablesPresets} />
-
             <Separator />
-
             <SyllablesConfigFields />
-
             <Separator />
-
             <ExerciseBaseFields />
-
-            {/* Form Actions */}
             <div className="flex justify-end">
               <Button type="submit">Comenzar Ejercicio</Button>
             </div>

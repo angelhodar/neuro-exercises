@@ -119,12 +119,7 @@ export const syllablesSpecificConfigSchema = z.object({
     .number()
     .min(3, "Mínimo 3 sílabas")
     .max(6, "Máximo 6 sílabas")
-    .int("El número de sílabas debe ser un número entero"),
-  timeLimit: z.coerce
-    .number()
-    .min(5, "Mínimo 5 segundos por pregunta")
-    .max(120, "Máximo 120 segundos por pregunta")
-    .int("El límite de tiempo debe ser un número entero"),
+    .int("El número de sílabas debe ser un número entero")
 })
 
 // Reusable refinement function for syllables configurations
@@ -187,7 +182,6 @@ export type SpanishWord = {
 // Default configuration
 export const defaultSyllablesConfig: SyllablesConfig = {
   syllablesCount: 4,
-  timeLimit: 30,
   totalQuestions: 10,
 }
 
@@ -195,22 +189,18 @@ export const defaultSyllablesConfig: SyllablesConfig = {
 export const syllablesPresets: Record<ExercisePreset, SyllablesConfig> = {
   easy: {
     syllablesCount: 3,
-    timeLimit: 45,
     totalQuestions: 5,
   },
   medium: {
     syllablesCount: 4,
-    timeLimit: 30,
     totalQuestions: 10,
   },
   hard: {
     syllablesCount: 5,
-    timeLimit: 20,
     totalQuestions: 15,
   },
   expert: {
     syllablesCount: 6,
-    timeLimit: 15,
     totalQuestions: 20,
   },
 }

@@ -10,7 +10,6 @@ interface ExerciseCardProps {
 }
 
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
-  // Usar los nombres correctos de snake_case de Supabase
   const { slug, displayName, category, description, thumbnailUrl } = exercise
 
   return (
@@ -46,17 +45,6 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
             </div>
           </div>
         )}
-
-        <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>Configurable</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Target className="h-4 w-4" />
-            <span>Adaptativo</span>
-          </div>
-        </div>
       </CardContent>
 
       <CardFooter>

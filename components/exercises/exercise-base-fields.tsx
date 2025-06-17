@@ -4,16 +4,22 @@ import { useFormContext } from "react-hook-form"
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-export function ExerciseBaseFields() {
+interface ExerciseBaseFieldsProps {
+  basePath?: string
+}
+
+export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
+  const { basePath = "" } = props
   const { control } = useFormContext()
+
+  const totalQuestionsPath = `${basePath}totalQuestions`
+  const timerDurationPath = `${basePath}timerDuration`
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Configuración del Ejercicio</h3>
-
       <FormField
         control={control}
-        name="totalQuestions"
+        name={totalQuestionsPath}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Total de Preguntas</FormLabel>
@@ -25,6 +31,26 @@ export function ExerciseBaseFields() {
           </FormItem>
         )}
       />
+
+      <FormField
+          control={control}
+          name={timerDurationPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duración (segundos)</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="60"
+                  {...field}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                />
+              </FormControl>
+              <FormDescription>Límite de tiempo por pregunta</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
     </div>
   )
 }

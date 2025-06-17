@@ -1,41 +1,26 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { medias, users } from "@/lib/db/schema"
+import { medias } from "@/lib/db/schema"
 import { eq, desc } from "drizzle-orm"
 import { put, del } from "@vercel/blob"
 import { revalidatePath } from "next/cache"
 
 export async function getMedias() {
-  const result = await db
-    .select({
-      id: medias.id,
-      name: medias.name,
-      description: medias.description,
-      category: medias.category,
-      blobKey: medias.blobKey,
-      createdAt: medias.createdAt,
-      updatedAt: medias.updatedAt,
+  const result = await db.query.medias.findMany({
+    with: {
       author: {
-        id: users.id,
-        name: users.name,
-        email: users.email,
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+        },
       },
-    })
-    .from(medias)
-    .leftJoin(users, eq(medias.authorId, users.id))
-    .orderBy(desc(medias.createdAt))
+    },
+    orderBy: desc(medias.createdAt),
+  });
 
-  // Ensure all fields are properly typed
-  return result.map((item) => ({
-    ...item,
-    description: item.description || null,
-    author: item.author || null,
-  }))
-}
-
-export async function getUsers() {
-  return await db.select().from(users)
+  return result;
 }
 
 export async function uploadMedia(formData: FormData) {

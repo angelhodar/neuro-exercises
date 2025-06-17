@@ -28,7 +28,7 @@ interface QuestionState {
 }
 
 export function SyllablesExercise({ config }: SyllablesExerciseProps) {
-  const { syllablesCount, timeLimit, totalQuestions } = config
+  const { syllablesCount, timeLimitPerQuestion, totalQuestions } = config
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 
@@ -37,7 +37,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     scrambledSyllables: [],
     selectedSyllables: [],
     startTime: null,
-    timeLeft: timeLimit,
+    timeLeft: timeLimitPerQuestion,
     timerId: null,
   })
 
@@ -56,7 +56,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     const scrambled = [...syllables]
     for (let i = scrambled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
-      ;[scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]]
+        ;[scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]]
     }
     return scrambled
   }
@@ -74,7 +74,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
       scrambledSyllables: scrambled,
       selectedSyllables: [],
       startTime: Date.now(),
-      timeLeft: timeLimit,
+      timeLeft: timeLimitPerQuestion,
     }))
 
     // Start timer
@@ -161,7 +161,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
       targetWord: questionState.currentWord.word,
       targetSyllables: questionState.currentWord.syllables,
       selectedSyllables: questionState.selectedSyllables,
-      timeSpent: timeLimit * 1000,
+      timeSpent: timeLimitPerQuestion * 1000,
       timeExpired: true,
     }
 
@@ -190,7 +190,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     }
   }, [])
 
-  const timeProgress = ((timeLimit - questionState.timeLeft) / timeLimit) * 100
+  const timeProgress = ((timeLimitPerQuestion - questionState.timeLeft) / timeLimitPerQuestion) * 100
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">

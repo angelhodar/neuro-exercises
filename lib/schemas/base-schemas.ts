@@ -7,6 +7,10 @@ export const baseExerciseConfigSchema = z.object({
     .min(1, "Debe tener al menos 1 pregunta")
     .max(100, "No puede tener más de 100 preguntas")
     .int("El total de preguntas debe ser un número entero"),
+  timeLimitPerQuestion: z.coerce
+    .number()
+    .min(0, "No puede ser un numero negativo")
+    .default(0)
 })
 
 // Exercise preset type

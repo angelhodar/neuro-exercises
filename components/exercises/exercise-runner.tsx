@@ -43,7 +43,7 @@ export function ExerciseRunner({ slug, config }: ExerciseRunnerProps) {
   if (!computedConfig) return <ConfigFormComponent onSubmit={handleConfigSubmit} />
 
   return (
-    <ExerciseProvider totalQuestions={computedConfig.totalQuestions}>
+    <ExerciseProvider totalQuestions={computedConfig.totalQuestions} timeLimitPerQuestion={computedConfig.timeLimitPerQuestion}>
       <div className="space-y-4">
         <div className="flex justify-center">
           <button

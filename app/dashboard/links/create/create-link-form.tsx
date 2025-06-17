@@ -11,20 +11,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { exerciseLinkInsertSchema, type Exercise } from "@/lib/db/schema"
-import type { User } from "@/lib/db/schema"
+import { exerciseLinkInsertSchema, type Exercise, type User } from "@/lib/db/schema"
+import { getExerciseFromRegistry } from "@/app/registry/exercises"
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
 
-// Esquema de validación para el formulario
 const linkCreationSchema = exerciseLinkInsertSchema
   .extend({
     exercises: z
       .array(
         z.object({
           exerciseId: z.number(),
+          slug: z.string(),
           config: z.record(z.any()).default({}),
         }),
       )
@@ -32,9 +34,10 @@ const linkCreationSchema = exerciseLinkInsertSchema
   })
   .omit({
     id: true,
+    creatorId: true,
     publicId: true,
     createdAt: true,
-    updatedAt: true
+    updatedAt: true,
   })
 
 type LinkCreationForm = z.infer<typeof linkCreationSchema>
@@ -63,20 +66,22 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
     name: "exercises",
   })
 
-  const addExercise = (exerciseId: number) => {
-    // Verificar que el ejercicio no esté ya agregado
-    const existingExercise = fields.find((field) => field.exerciseId === exerciseId)
-    if (existingExercise) {
+  const addExercise = (exercise: Exercise) => {
+    if (fields.some((field) => field.exerciseId === exercise.id)) {
       toast.error("Este ejercicio ya está agregado")
       return
     }
 
-    // Obtener valores por defecto específicos del ejercicio
+    const exerciseMeta = getExerciseFromRegistry(exercise.slug)
+    const defaultConfig = exerciseMeta?.defaultConfig || {}
+
     append({
-      exerciseId,
+      exerciseId: exercise.id,
+      slug: exercise.slug,
       config: {
         timerDuration: 60,
         totalQuestions: 10,
+        ...defaultConfig,
       },
     })
   }
@@ -93,7 +98,6 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
     try {
       setIsSubmitting(true)
 
-      // Preparar los datos para enviar
       const linkData = {
         targetUserId: data.targetUserId,
         title: data.title,
@@ -107,10 +111,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
 
       const response = await fetch("/api/links", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(linkData),
       })
 
@@ -129,11 +130,14 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
     }
   }
 
+  const onSubmitError = (err: any) => {
+    console.log(err)
+  }
+
   return (
     <div className="max-w-4xl space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Información básica del enlace */}
+        <form onSubmit={form.handleSubmit(onSubmit, onSubmitError)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Información del Enlace</CardTitle>
@@ -210,7 +214,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
             </CardContent>
           </Card>
 
-          {/* Selección de ejercicios */}
+          {/* Card for Available Exercises */}
           <Card>
             <CardHeader>
               <CardTitle>Ejercicios Disponibles</CardTitle>
@@ -241,8 +245,8 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                         <Button
                           type="button"
                           variant={isAdded ? "secondary" : "outline"}
-                          size="sm"
-                          onClick={() => addExercise(exercise.id)}
+                          size="icon"
+                          onClick={() => addExercise(exercise)} // Pass the full exercise object
                           disabled={isAdded}
                         >
                           {isAdded ? "Agregado" : <Plus className="h-4 w-4" />}
@@ -255,94 +259,64 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
             </CardContent>
           </Card>
 
-          {/* Ejercicios seleccionados */}
           {fields.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Ejercicios Seleccionados ({fields.length})</CardTitle>
                 <CardDescription>Configura cada ejercicio individualmente</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {fields.map((field, index) => {
-                  const exercise = getExerciseById(field.exerciseId)
-                  if (!exercise) return null
+              <CardContent className="space-y-6">
+                <Accordion type="single" collapsible className="w-full">
+                  {fields.map((field, index) => {
+                    const exercise = getExerciseById(field.exerciseId)
+                    if (!exercise) return null
 
-                  return (
-                    <div key={field.id} className="rounded-lg border p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-medium">{exercise.displayName}</h4>
-                            <Badge variant="outline">{exercise.category}</Badge>
-                          </div>
+                    const exerciseMeta = getExerciseFromRegistry(field.slug)
+                    const ConfigFields = exerciseMeta?.ConfigFieldsComponent
 
-                          {/* Configuración básica del ejercicio */}
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <FormField
-                              control={form.control}
-                              name={`exercises.${index}.config.timerDuration`}
-                              render={({ field: configField }) => (
-                                <FormItem>
-                                  <FormLabel>Duración (segundos)</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      min="10"
-                                      max="300"
-                                      {...configField}
-                                      onChange={(e) => configField.onChange(Number.parseInt(e.target.value))}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
+                    if (!ConfigFields) return null
 
-                            <FormField
-                              control={form.control}
-                              name={`exercises.${index}.config.totalQuestions`}
-                              render={({ field: configField }) => (
-                                <FormItem>
-                                  <FormLabel>Número de preguntas</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      min="1"
-                                      max="50"
-                                      {...configField}
-                                      onChange={(e) => configField.onChange(Number.parseInt(e.target.value))}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-
+                    return (
+                      <AccordionItem key={field.id} value={field.id} className="relative">
                         <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
-                          onClick={() => removeExercise(index)}
-                          className="text-destructive hover:text-destructive"
+                          size="icon"
+                          className="absolute top-3 right-6 text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            // Stop propagation to prevent the accordion from toggling when the button is clicked
+                            e.stopPropagation()
+                            removeExercise(index)
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </div>
-                  )
-                })}
+                        <AccordionTrigger className="hover:no-underline">
+                          <div className="flex items-center gap-4 flex-1">
+                            <span className="text-lg font-medium">{exercise.displayName}</span>
+                            <Badge variant="outline">{exercise.category}</Badge>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="pt-4 pb-2 space-y-6 border-t">
+                            <ExerciseBaseFields basePath={`exercises.${index}.config.`} />
+                            <Separator />
+                            <ConfigFields basePath={`exercises.${index}.config.`} />
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )
+                  })}
+                </Accordion>
               </CardContent>
             </Card>
           )}
 
-          <Separator />
-
-          {/* Botones de acción */}
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={() => router.push("/dashboard/links")}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting || fields.length === 0}>
+            <Button type="submit" disabled={isSubmitting || fields.length === 0} className="disabled:bg-opacity/50">
               {isSubmitting ? "Creando..." : "Crear Enlace"}
             </Button>
           </div>

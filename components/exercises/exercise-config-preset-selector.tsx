@@ -4,20 +4,18 @@ import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import type { ExercisePreset } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
 
-interface ExerciseConfigPresetSelectorProps<T extends Record<ExercisePreset, object>> {
-  presets: T
+interface ExerciseConfigPresetSelectorProps {
+  presets: Record<ExercisePreset, object>
 }
 
-export function ExerciseConfigPresetSelector<T extends Record<ExercisePreset, object>>({
+export function ExerciseConfigPresetSelector({
   presets,
-}: ExerciseConfigPresetSelectorProps<T>) {
+}: ExerciseConfigPresetSelectorProps) {
   const { reset } = useFormContext()
 
   function handlePresetSelect(presetKey: ExercisePreset) {
     const preset = presets[presetKey]
-    if (preset) {
-      reset(preset)
-    }
+    if (preset) reset(preset)
   }
 
   return (

@@ -21,93 +21,94 @@ interface ReactionTimeConfigFormProps {
   onSubmit: (config: ReactionTimeGridConfig) => void
 }
 
-// Update the ReactionTimeConfigFields component with Spanish labels and descriptions
-function ReactionTimeConfigFields() {
-  const { control, watch } = useFormContext<ReactionTimeGridConfig>()
+interface ReactionTimeConfigFieldsProps {
+  basePath?: string
+}
+
+export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
+  const { basePath = "" } = props
+  const { control, watch } = useFormContext()
+
+  const gridSizePath = `${basePath}gridSize`
+  const cellsPath = `${basePath}cells`
+  const delayMinPath = `${basePath}delayMin`
+  const delayMaxPath = `${basePath}delayMax`
+  
   const gridSize = watch("gridSize")
   const maxCells = gridSize * gridSize
 
   return (
-    <>
-      {/* Grid Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Configuración de la Cuadrícula</h3>
+    <div className="space-y-4">
+      <FormField
+        control={control}
+        name={gridSizePath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tamaño de la Cuadrícula</FormLabel>
+            <FormControl>
+              <Input type="number" placeholder="10" {...field} />
+            </FormControl>
+            <FormDescription>Número de celdas en cada fila y columna (3-20)</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={control}
-          name="gridSize"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tamaño de la Cuadrícula</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="10" {...field} />
-              </FormControl>
-              <FormDescription>Número de celdas en cada fila y columna (3-20)</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="cells"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Celdas Objetivo</FormLabel>
-              <FormControl>
-                <Input type="number" placeholder="1" {...field} />
-              </FormControl>
-              <FormDescription>Número de celdas a resaltar por pregunta (1-{maxCells})</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={control}
+        name={cellsPath}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Celdas Objetivo</FormLabel>
+            <FormControl>
+              <Input type="number" placeholder="1" {...field} />
+            </FormControl>
+            <FormDescription>Número de celdas a resaltar por pregunta (1-{maxCells})</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <Separator />
 
-      {/* Timing Configuration */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Configuración de Tiempo</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={control}
-            name="delayMin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Retraso Mínimo (ms)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="1000" {...field} />
-                </FormControl>
-                <FormDescription>Tiempo mínimo antes de que aparezca el objetivo</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormField
+          control={control}
+          name={delayMinPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Retraso Mínimo (ms)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="1000" {...field} />
+              </FormControl>
+              <FormDescription>Tiempo mínimo antes de que aparezca el objetivo</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={control}
-            name="delayMax"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Retraso Máximo (ms)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="3000" {...field} />
-                </FormControl>
-                <FormDescription>Tiempo máximo antes de que aparezca el objetivo</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={control}
+          name={delayMaxPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Retraso Máximo (ms)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="3000" {...field} />
+              </FormControl>
+              <FormDescription>Tiempo máximo antes de que aparezca el objetivo</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-    </>
+    </div>
   )
 }
 
 export function ReactionTimeConfigForm({ defaultConfig, onSubmit }: ReactionTimeConfigFormProps) {
-  const form = useForm<ReactionTimeGridConfig>({
+  const form = useForm({
     resolver: zodResolver(reactionTimeGridConfigSchema),
     defaultValues: {
       ...defaultReactionTimeConfig,

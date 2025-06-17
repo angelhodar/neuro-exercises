@@ -1,17 +1,10 @@
-"use client"
-
+import { getAvailableUsers } from "@/app/actions/users"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User } from "lucide-react"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+export default async function UsersPage() {
+  const users = await getAvailableUsers()
 
-// Datos de ejemplo
-const mockUsers = [
-  { id: 1, name: "María García", progress: 75, lastActive: "Hoy" },
-  { id: 2, name: "Juan Pérez", progress: 45, lastActive: "Ayer" },
-  { id: 3, name: "Ana Rodríguez", progress: 90, lastActive: "Hace 3 días" },
-]
-
-export default function UsersPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex items-center justify-between border-b pb-4">
@@ -23,12 +16,11 @@ export default function UsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Usuarios Activos</CardTitle>
-          <CardDescription>Lista de usuarios y su progreso</CardDescription>
+          <CardTitle>Usuarios</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {mockUsers.map((user) => (
+            {users.map((user) => (
               <div key={user.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -36,13 +28,6 @@ export default function UsersPage() {
                   </div>
                   <div>
                     <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">Activo: {user.lastActive}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-sm font-medium">{user.progress}%</div>
-                  <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full bg-primary" style={{ width: `${user.progress}%` }} />
                   </div>
                 </div>
               </div>

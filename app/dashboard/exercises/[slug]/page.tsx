@@ -11,7 +11,7 @@ export default async function DynamicExercisePage(props: PageProps) {
 
   if (!getExerciseFromRegistry(params.slug)) notFound()
 
-  return <ExerciseRunner slug={params.slug} />
+  return <div className="full min-h-dvh mx-auto justify-center items-center p-6"><ExerciseRunner slug={params.slug} /></div>
 }
 
 export async function generateStaticParams() {

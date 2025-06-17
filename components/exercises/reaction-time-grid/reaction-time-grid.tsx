@@ -21,7 +21,6 @@ interface QuestionState {
 
 export function ReactionTimeGrid({ config }: ReactionTimeGridProps) {
   const { gridSize, delayMin, delayMax, cells } = config
-  
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 

@@ -8,7 +8,7 @@ import { getAvailableExercises } from "@/app/actions/exercises"
 
 export const metadata: Metadata = {
   title: "Crear Enlace",
-  description: "Crear un nuevo enlace para compartir ejercicios.",
+  description: "Crear un nuevo enlace para compartir ejercicios",
 }
 
 export default async function CreateLinkPage() {
@@ -30,7 +30,9 @@ export default async function CreateLinkPage() {
           </div>
         </div>
       </div>
-      <CreateLinkForm users={users} exercises={exercises} />
+      <div className="flex w-full justify-center items-center mx-auto">
+        <CreateLinkForm users={users} exercises={exercises} />
+      </div>
     </div>
   )
 }

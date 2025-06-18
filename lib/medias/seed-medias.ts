@@ -1,13 +1,19 @@
 // seed-medias.ts
 import 'dotenv/config';
+
 import { list } from '@vercel/blob';
 import path from 'path';
 import { db } from '../db';
 import { medias } from '../db/schema';
 
-const DEFAULT_AUTHOR_ID = '9Qvl1Pq4MuzDk4ughAihTvZlbtqcJSUL';
-
 async function seedMediaFromBlobs() {
+  const author = await db.query.users.findFirst();
+
+  if (!author) {
+    console.log('No user found. Exiting.');
+    return;
+  }
+
   console.log('Fetching blobs from Vercel...');
 
   const { blobs } = await list();
@@ -29,7 +35,7 @@ async function seedMediaFromBlobs() {
       description: null,
       category: category,
       blobKey: blob.pathname,
-      authorId: DEFAULT_AUTHOR_ID,
+      authorId: author.id,
       createdAt: blob.uploadedAt,
     };
   });

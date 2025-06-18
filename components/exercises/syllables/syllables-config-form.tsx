@@ -1,11 +1,11 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import { useForm, useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
@@ -19,7 +19,7 @@ import {
 
 interface SyllablesConfigFormProps {
   defaultConfig?: Partial<SyllablesConfig>
-  onSubmit: (config: SyllablesConfig) => void
+  onSubmit?: (config: SyllablesConfig) => void
 }
 
 interface SyllablesConfigFieldsProps {
@@ -68,6 +68,8 @@ export function SyllablesConfigFields(props: SyllablesConfigFieldsProps) {
 }
 
 export function SyllablesConfigForm({ defaultConfig, onSubmit }: SyllablesConfigFormProps) {
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(syllablesConfigSchema),
     defaultValues: {
@@ -77,13 +79,17 @@ export function SyllablesConfigForm({ defaultConfig, onSubmit }: SyllablesConfig
   })
 
   function handleSubmit(data: SyllablesConfig) {
-    console.log("Formulario de sílabas enviado con datos:", data)
     try {
       const validatedData = syllablesConfigSchema.parse(data)
-      console.log("Datos de sílabas validados:", validatedData)
-      onSubmit(validatedData)
+      if (onSubmit) {
+        onSubmit(validatedData)
+        return
+      }
+      const params = new URLSearchParams();
+      params.set("config", JSON.stringify(validatedData));
+      router.push(`?${params.toString()}`);
     } catch (error) {
-      console.error("Error de validación del esquema de sílabas:", error)
+      console.error(error)
     }
   }
 

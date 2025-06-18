@@ -31,7 +31,7 @@ import {
 export type AnyExerciseEntry = {
   schema: ZodTypeAny
   defaultConfig?: any
-  ConfigFormComponent: ComponentType<{ onSubmit: (data: any) => void; initialValues?: any }>
+  ConfigFormComponent: ComponentType<{ onSubmit?: (data: any) => void; initialValues?: any }>
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>
   ExerciseComponent: ComponentType<{ config: any }>
 }
@@ -40,7 +40,7 @@ type TypedExerciseEntry<T extends ZodTypeAny> = {
   schema: T
   defaultConfig: z.infer<T>
   ConfigFormComponent: ComponentType<{
-    onSubmit: (data: z.infer<T>) => void
+    onSubmit?: (data: z.infer<T>) => void
     initialValues?: z.infer<T>
   }>
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>

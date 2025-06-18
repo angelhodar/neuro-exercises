@@ -1,21 +1,29 @@
-import { notFound } from "next/navigation"
-import { getExerciseFromRegistry, exerciseRegistry } from "@/app/registry/exercises"
-import { ExerciseRunner } from "@/components/exercises/exercise-runner"
+import { notFound } from "next/navigation";
+import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { ExerciseProvider } from "@/contexts/exercise-context";
 
 interface PageProps {
-  params: Promise<{ slug: string }>
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function DynamicExercisePage(props: PageProps) {
-  const params = await props.params;
+export default async function Page({ params, searchParams }: PageProps) {
+    const { slug } = await params;
+    const { config: configString } = await searchParams;
 
-  if (!getExerciseFromRegistry(params.slug)) notFound()
+    const exerciseDetails = getExerciseFromRegistry(slug);
 
-  return <div className="full min-h-dvh mx-auto justify-center items-center p-6"><ExerciseRunner slug={params.slug} /></div>
-}
+    if (!exerciseDetails) notFound();
 
-export async function generateStaticParams() {
-  return Object.keys(exerciseRegistry).map((slug) => ({
-    slug,
-  }))
-}
+    const { schema, ConfigFormComponent, ExerciseComponent } = exerciseDetails
+
+    const config = schema.safeParse(JSON.parse(configString as string || "{}"));
+
+    if (!config.success) return <ConfigFormComponent />;
+
+    const parsedConfig = config.data;
+
+    return (<ExerciseProvider totalQuestions={parsedConfig.totalQuestions}>
+        <ExerciseComponent config={config.data} />
+    </ExerciseProvider>)
+} 

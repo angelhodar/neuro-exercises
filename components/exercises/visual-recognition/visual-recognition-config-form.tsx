@@ -1,6 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import { useForm, useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,14 +16,14 @@ import {
   visualRecognitionConfigSchema,
   defaultVisualRecognitionConfig,
   visualRecognitionPresets,
-  imageCategories,
+  categoryDisplayNames,
   type VisualRecognitionConfig,
   type ImageCategory,
 } from "./visual-recognition-schema"
 
 interface VisualRecognitionConfigFormProps {
   defaultConfig?: Partial<VisualRecognitionConfig>
-  onSubmit: (config: VisualRecognitionConfig) => void
+  onSubmit?: (config: VisualRecognitionConfig) => void
 }
 
 interface VisualRecognitionConfigFieldsProps {
@@ -35,19 +36,11 @@ export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFiel
 
   const imagesPerQuestionPath = `${basePath}imagesPerQuestion` as const
   const correctImagesCountPath = `${basePath}correctImagesCount` as const
-  const timeLimitPath = `${basePath}timeLimit` as const
   const showImageNamesPath = `${basePath}showImageNames` as const
   const categoriesPath = `${basePath}categories` as const
 
   const imagesPerQuestion = watch(imagesPerQuestionPath)
   const showImageNames = watch(showImageNamesPath)
-
-  const categoryLabels: Record<ImageCategory, string> = {
-    animales: "Animales",
-    frutas: "Frutas",
-    vehiculos: "Vehículos",
-    objetos: "Objetos",
-  }
 
   return (
     <div className="space-y-4">
@@ -96,26 +89,6 @@ export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFiel
 
       <FormField
         control={control}
-        name={timeLimitPath}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Límite de Tiempo (segundos)</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="30"
-                {...field}
-                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
-              />
-            </FormControl>
-            <FormDescription>Tiempo máximo permitido por pregunta (10-180 segundos)</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={control}
         name={showImageNamesPath}
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -149,7 +122,7 @@ export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFiel
             <FormItem>
               <FormLabel>Seleccionar Categorías</FormLabel>
               <div className="grid grid-cols-2 gap-4">
-                {(Object.keys(imageCategories) as ImageCategory[]).map((category) => (
+                {(Object.keys(categoryDisplayNames) as ImageCategory[]).map((category) => (
                   <div key={category} className="flex flex-row items-start space-x-3 space-y-0">
                     <Checkbox
                       checked={field.value?.includes(category)}
@@ -161,10 +134,7 @@ export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFiel
                       }}
                     />
                     <div className="space-y-1 leading-none">
-                      <label className="text-sm font-normal">{categoryLabels[category]}</label>
-                      <p className="text-xs text-muted-foreground">
-                        {imageCategories[category].length} imágenes disponibles
-                      </p>
+                      <label className="text-sm font-normal">{categoryDisplayNames[category]}</label>
                     </div>
                   </div>
                 ))}
@@ -179,7 +149,9 @@ export function VisualRecognitionConfigFields(props: VisualRecognitionConfigFiel
 }
 
 export function VisualRecognitionConfigForm({ defaultConfig, onSubmit }: VisualRecognitionConfigFormProps) {
-  const form = useForm<VisualRecognitionConfig>({
+  const router = useRouter();
+
+  const form = useForm({
     resolver: zodResolver(visualRecognitionConfigSchema),
     defaultValues: {
       ...defaultVisualRecognitionConfig,
@@ -188,13 +160,17 @@ export function VisualRecognitionConfigForm({ defaultConfig, onSubmit }: VisualR
   })
 
   function handleSubmit(data: VisualRecognitionConfig) {
-    console.log("Formulario de reconocimiento visual enviado con datos:", data)
     try {
       const validatedData = visualRecognitionConfigSchema.parse(data)
-      console.log("Datos de reconocimiento visual validados:", validatedData)
-      onSubmit(validatedData)
+      if (onSubmit) {
+        onSubmit(validatedData)
+        return
+      }
+      const params = new URLSearchParams();
+      params.set("config", JSON.stringify(validatedData));
+      router.push(`?${params.toString()}`);
     } catch (error) {
-      console.error("Error de validación del esquema de reconocimiento visual:", error)
+      console.error(error)
     }
   }
 
@@ -210,16 +186,10 @@ export function VisualRecognitionConfigForm({ defaultConfig, onSubmit }: VisualR
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <ExerciseConfigPresetSelector presets={visualRecognitionPresets} />
-
             <Separator />
-
             <VisualRecognitionConfigFields />
-
             <Separator />
-
             <ExerciseBaseFields />
-
-            {/* Form Actions */}
             <div className="flex justify-end">
               <Button type="submit">Comenzar Ejercicio</Button>
             </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import { useForm, useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,7 +19,7 @@ import {
 
 interface ReactionTimeConfigFormProps {
   defaultConfig?: Partial<ReactionTimeGridConfig>
-  onSubmit: (config: ReactionTimeGridConfig) => void
+  onSubmit?: (config: ReactionTimeGridConfig) => void
 }
 
 interface ReactionTimeConfigFieldsProps {
@@ -33,7 +34,7 @@ export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
   const cellsPath = `${basePath}cells`
   const delayMinPath = `${basePath}delayMin`
   const delayMaxPath = `${basePath}delayMax`
-  
+
   const gridSize = watch("gridSize")
   const maxCells = gridSize * gridSize
 
@@ -108,6 +109,8 @@ export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
 }
 
 export function ReactionTimeConfigForm({ defaultConfig, onSubmit }: ReactionTimeConfigFormProps) {
+  const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(reactionTimeGridConfigSchema),
     defaultValues: {
@@ -117,14 +120,17 @@ export function ReactionTimeConfigForm({ defaultConfig, onSubmit }: ReactionTime
   })
 
   function handleSubmit(data: ReactionTimeGridConfig) {
-    console.log("Formulario enviado con datos:", data)
     try {
-      // Validate the data manually to catch any schema issues
       const validatedData = reactionTimeGridConfigSchema.parse(data)
-      console.log("Datos validados:", validatedData)
-      onSubmit(validatedData)
+      if (onSubmit) {
+        onSubmit(validatedData)
+        return
+      }
+      const params = new URLSearchParams();
+      params.set("config", JSON.stringify(validatedData));
+      router.push(`?${params.toString()}`);
     } catch (error) {
-      console.error("Error de validación del esquema:", error)
+      console.error(error)
     }
   }
 

@@ -28,7 +28,7 @@ interface QuestionState {
 }
 
 export function SyllablesExercise({ config }: SyllablesExerciseProps) {
-  const { syllablesCount, timeLimitPerQuestion, totalQuestions } = config
+  const { syllablesCount, timeLimitPerQuestion = 0, totalQuestions } = config
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 

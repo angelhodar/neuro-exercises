@@ -1,9 +1,5 @@
-"use client"
-
-import { usePathname } from "next/navigation"
-import { useSession, signOut } from "@/lib/auth/auth.client"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import type * as React from "react"
+import { Brain, Home, Users, FileImage, Target, Zap, Plus, Eye, Settings, LogOut } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -17,119 +13,178 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Activity, Brain, Home, Users, Settings, LogOut, Image, Share2, Link2 } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import Image from "next/image"
+import Link from "next/link"
 
-const navigationItems = [
-  {
-    title: "Principal",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: Home,
-      },
-    ],
-  },
-  {
-    title: "Ejercicios",
-    items: [
-      {
-        title: "Reflejos Visuales",
-        url: "/dashboard/exercises/reaction-grid",
-        icon: Activity,
-      },
-      {
-        title: "Unir Sílabas",
-        url: "/dashboard/exercises/syllables",
-        icon: Activity,
-      },
-      {
-        title: "Reconocimiento Visual",
-        url: "/dashboard/exercises/visual-recognition",
-        icon: Activity,
-      }
-    ],
-  },
-  {
-    title: "Compartir",
-    items: [
-      {
-        title: "Crear Enlace",
-        url: "/dashboard/links/create",
-        icon: Share2,
-      },
-      {
-        title: "Mis Enlaces",
-        url: "/dashboard/links",
-        icon: Link2,
-      },
-    ],
-  },
-  {
-    title: "Gestión",
-    items: [
-      {
-        title: "Usuarios",
-        url: "/dashboard/users",
-        icon: Users,
-      },
-      {
-        title: "Media",
-        url: "/dashboard/medias",
-        icon: Image,
-      }
-    ],
-  },
-]
+// Datos del menú
+const data = {
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: Home,
+    },
+  ],
+  exercises: [
+    {
+      title: "Cuadrícula",
+      url: "/dashboard/exercises/reaction-grid",
+      icon: Brain,
+    },
+    {
+      title: "Sílabas",
+      url: "/dashboard/exercises/syllables",
+      icon: Target,
+    },
+    {
+      title: "Reconocimiento Visual",
+      url: "/dashboard/exercises/visual-recognition",
+      icon: Zap,
+    },
+  ],
+  management: [
+    {
+      title: "Usuarios",
+      url: "/dashboard/users",
+      icon: Users,
+    },
+    {
+      title: "Biblioteca Multimedia",
+      url: "/dashboard/media",
+      icon: FileImage,
+    },
+  ],
+  sharing: [
+    {
+      title: "Crear Enlaces",
+      url: "/dashboard/links/create",
+      icon: Plus,
+    },
+    {
+      title: "Mis Enlaces",
+      url: "/dashboard/links",
+      icon: Eye,
+    },
+  ],
+}
 
-export function AppSidebar() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar>
+    <Sidebar {...props}>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-2">
-          <Brain className="h-6 w-6 text-primary" />
-          <span className="font-bold">NeuroExercise</span>
-        </div>
+        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1">
+          <Image
+            src="/logo.png"
+            alt="NeuroGranada Logo"
+            width={32}
+            height={32}
+            className="h-8 w-8"
+          />
+          <span className="text-lg font-bold text-blue-900">NeuroGranada</span>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
-        {navigationItems.map((group) => (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={pathname === item.url}>
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        {/* Dashboard Principal */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.navMain.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Ejercicios Interactivos */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Ejercicios Interactivos</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.exercises.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Gestión */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Gestión</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.management.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Enlaces Compartidos */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Enlaces Compartidos</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.sharing.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/dashboard/profile">
-                <Settings className="h-4 w-4" />
-                <span>{session?.user.name}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <Button variant="ghost" onClick={() => signOut()} className="w-full justify-start">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Cerrar Sesión</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="w-full">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarFallback>JD</AvatarFallback>
+                  </Avatar>
+                  <span>Juan Pérez</span>
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Configuración</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Cerrar Sesión</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

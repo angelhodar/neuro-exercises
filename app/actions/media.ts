@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { medias } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
+import { eq, desc, and, ne } from "drizzle-orm"
 import { put, del } from "@vercel/blob"
 import { revalidatePath } from "next/cache"
 import { togetherai } from "@ai-sdk/togetherai";
@@ -12,7 +12,11 @@ import { getCurrentUser } from "@/app/actions/users";
 
 export async function getMedias(category?: string) {
   const result = await db.query.medias.findMany({
-    where: category ? (fields, { eq }) => eq(fields.category, category) : undefined,
+    where: (fields, { eq, and, ne }) => {
+      const conditions = [ne(fields.category, "thumbnails")];
+      if (category) conditions.push(eq(fields.category, category));
+      return and(...conditions);
+    },
     with: {
       author: {
         columns: {

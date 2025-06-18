@@ -25,8 +25,9 @@ export default function MediaCard({ media }: MediaCardProps) {
       try {
         await deleteMedia(media.id, media.blobKey);
         router.refresh();
-      } catch (e: any) {
-        setError(e.message || "Error eliminando la imagen");
+      } catch (e) {
+        console.error(e)
+        setError("Error eliminando la imagen");
       }
     });
   }
@@ -34,8 +35,8 @@ export default function MediaCard({ media }: MediaCardProps) {
   return (
     <div className="relative border rounded-lg shadow p-4 flex flex-col items-center bg-white">
       <Badge
-        className="absolute left-3 top-3 text-base px-4 py-1 rounded-lg z-10 shadow-lg select-none bg-blue-600 text-white"
-        style={{ fontSize: '1.15rem' }}
+        className="absolute left-2 top-2 text-xs px-2 py-1 sm:px-3 sm:py-2 rounded-lg z-10 shadow-lg select-none bg-blue-600 text-white"
+        style={{ fontSize: '0.95rem' }}
       >
         {categoryDisplayNames[media.category] || media.category}
       </Badge>
@@ -48,9 +49,7 @@ export default function MediaCard({ media }: MediaCardProps) {
       >
         <Trash2 className="w-6 h-6 text-red-600" />
       </button>
-      <Image src={createMediaUrl(media.blobKey)} alt={media.name} width={400} height={300} className="object-cover rounded mb-2" />
-      <div className="font-semibold text-lg mb-1 text-center">{media.name}</div>
-      <div className="text-gray-600 text-sm mb-1 text-center">{media.description}</div>
+      <Image src={createMediaUrl(media.blobKey)} alt={media.name} width={300} height={300} className="object-cover rounded mb-2" />
       {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
     </div>
   );

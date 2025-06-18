@@ -5,19 +5,21 @@ import { experimental_generateImage as generateImage } from 'ai';
 import { put } from '@vercel/blob';
 import { Buffer } from 'buffer';
 
+export const categoryDisplayNames: Record<string, string> = {
+  animals: "Animales",
+  clothing: "Ropa",
+  flowers: "Flores",
+  food: "Comida",
+  furniture: "Muebles",
+  household_objects: "Objetos del hogar",
+  musical_instruments: "Instrumentos musicales",
+  sports_equipment: "Material deportivo",
+  tools: "Herramientas",
+  vehicles: "Vehículos",
+};
+
 // 10 diverse categories suitable for neurological exercises
-const categories = [
-  'food',
-  'animals',
-  'vehicles',
-  'household_objects',
-  'clothing',
-  'musical_instruments',
-  'sports_equipment',
-  'flowers',
-  'tools',
-  'furniture'
-];
+const categories = Object.keys(categoryDisplayNames);
 
 // Specific prompts and object names for each category
 const categoryData = {

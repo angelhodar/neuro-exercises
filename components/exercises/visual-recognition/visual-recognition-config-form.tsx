@@ -12,11 +12,11 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields"
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector"
+import { categoryDisplayNames } from "@/lib/medias/generate"
 import {
   visualRecognitionConfigSchema,
   defaultVisualRecognitionConfig,
   visualRecognitionPresets,
-  categoryDisplayNames,
   type VisualRecognitionConfig,
   type ImageCategory,
 } from "./visual-recognition-schema"

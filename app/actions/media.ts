@@ -5,9 +5,14 @@ import { medias } from "@/lib/db/schema"
 import { eq, desc } from "drizzle-orm"
 import { put, del } from "@vercel/blob"
 import { revalidatePath } from "next/cache"
+import { togetherai } from "@ai-sdk/togetherai";
+import { experimental_generateImage as generateImage } from "ai";
+import { Buffer } from "buffer";
+import { getCurrentUser } from "@/app/actions/users";
 
-export async function getMedias() {
+export async function getMedias(category?: string) {
   const result = await db.query.medias.findMany({
+    where: category ? (fields, { eq }) => eq(fields.category, category) : undefined,
     with: {
       author: {
         columns: {
@@ -95,5 +100,45 @@ export async function updateMedia(
   } catch (error) {
     console.error("Update error:", error)
     throw new Error("Failed to update media")
+  }
+}
+
+export async function generateMedia({ prompt, category }: { prompt: string, category: string }) {
+  if (!prompt || !category) {
+    throw new Error("Faltan campos obligatorios para generar la imagen");
+  }
+
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) throw new Error("No hay usuario autenticado");
+
+    const { images } = await generateImage({
+      model: togetherai.image('black-forest-labs/FLUX.1-schnell-Free'),
+      prompt: `Generate an image of ${prompt.toLowerCase()}, clear and simple, centered, suitable for cognitive exercises, white background`,
+      size: "512x512",
+    });
+    const [image] = images;
+    if (!image) throw new Error("No se generó ninguna imagen");
+    const imageBuffer = Buffer.from(image.uint8Array);
+    const filename = `${category}/${prompt.replaceAll(" ", "-")}.png`;
+    // Subir a Vercel Blob
+    const blob = await put(filename, imageBuffer, {
+      access: 'public',
+      contentType: 'image/png',
+      addRandomSuffix: true
+    });
+    // Guardar en la base de datos
+    await db.insert(medias).values({
+      name: prompt,
+      description: null,
+      category,
+      blobKey: blob.pathname,
+      authorId: user.id,
+    });
+    return { success: true, url: blob.url };
+  } catch (error) {
+    console.error("Error generando media:", error);
+    throw new Error("No se pudo generar la imagen");
   }
 }

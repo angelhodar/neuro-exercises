@@ -8,12 +8,12 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ExerciseControls } from "../exercise-controls";
 import { VisualRecognitionResults } from "./visual-recognition-results";
+import { categoryDisplayNames } from "@/lib/medias/generate";
 import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
   type ImageCategory,
-  type ImageData,
-  categoryDisplayNames
+  type ImageData
 } from "./visual-recognition-schema";
 import { createMediaUrl } from "@/lib/utils";
 

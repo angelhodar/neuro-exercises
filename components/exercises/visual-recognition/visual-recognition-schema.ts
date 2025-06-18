@@ -1,18 +1,6 @@
 import { z } from "zod"
 import { baseExerciseConfigSchema, type ExercisePreset } from "@/lib/schemas/base-schemas"
-
-export const categoryDisplayNames: Record<string, string> = {
-  animals: "Animales",
-  clothing: "Ropa",
-  flowers: "Flores",
-  food: "Comida",
-  furniture: "Muebles",
-  household_objects: "Objetos del hogar",
-  musical_instruments: "Instrumentos musicales",
-  sports_equipment: "Material deportivo",
-  tools: "Herramientas",
-  vehicles: "Vehículos",
-};
+import { categoryDisplayNames } from "@/lib/medias/generate"
 
 export type ImageCategory = keyof typeof categoryDisplayNames;
 

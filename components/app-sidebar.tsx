@@ -17,7 +17,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Activity, Brain, Home, Users, Settings, LogOut, Share2, Link2 } from "lucide-react"
+import { Activity, Brain, Home, Users, Settings, LogOut, Image, Share2, Link2 } from "lucide-react"
 
 const navigationItems = [
   {
@@ -72,6 +72,11 @@ const navigationItems = [
         title: "Usuarios",
         url: "/dashboard/users",
         icon: Users,
+      },
+      {
+        title: "Media",
+        url: "/dashboard/medias",
+        icon: Image,
       }
     ],
   },

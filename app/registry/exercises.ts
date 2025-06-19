@@ -10,6 +10,7 @@ import {
   visualRecognitionConfigSchema,
   visualRecognitionPresets,
 } from "@/components/exercises/visual-recognition/visual-recognition-schema"
+import { VisualRecognitionResults } from "@/components/exercises/visual-recognition/visual-recognition-results"
 
 import { SyllablesExercise } from "@/components/exercises/syllables/syllables-exercise"
 import {
@@ -17,6 +18,7 @@ import {
   SyllablesConfigFields,
 } from "@/components/exercises/syllables/syllables-config-form"
 import { syllablesConfigSchema, syllablesPresets } from "@/components/exercises/syllables/syllables-schema"
+import { SyllablesResults } from "@/components/exercises/syllables/syllables-results"
 
 import { ReactionTimeGrid } from "@/components/exercises/reaction-time-grid/reaction-time-grid"
 import {
@@ -27,6 +29,7 @@ import {
   reactionTimeGridConfigSchema,
   reactionTimePresets,
 } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
+import { ExerciseResults as ReactionTimeGridResults } from "@/components/exercises/reaction-time-grid/exercise-results"
 
 export type AnyExerciseEntry = {
   schema: ZodTypeAny
@@ -34,6 +37,7 @@ export type AnyExerciseEntry = {
   ConfigFormComponent: ComponentType<{ onSubmit?: (data: any) => void; initialValues?: any }>
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>
   ExerciseComponent: ComponentType<{ config: any }>
+  ResultsComponent: ComponentType<any>
 }
 
 type TypedExerciseEntry<T extends ZodTypeAny> = {
@@ -47,7 +51,7 @@ type TypedExerciseEntry<T extends ZodTypeAny> = {
   ExerciseComponent: ComponentType<{ config: z.infer<T> }>
 }
 
-function createExerciseEntry<T extends ZodTypeAny>(entry: TypedExerciseEntry<T>): TypedExerciseEntry<T> {
+function createExerciseEntry<T extends ZodTypeAny>(entry: TypedExerciseEntry<T> & { ResultsComponent: ComponentType<any> }) {
   return entry
 }
 
@@ -58,6 +62,7 @@ export const exerciseRegistry = {
     ConfigFormComponent: VisualRecognitionConfigForm,
     ConfigFieldsComponent: VisualRecognitionConfigFields,
     ExerciseComponent: VisualRecognitionExercise,
+    ResultsComponent: VisualRecognitionResults,
   }),
   syllables: createExerciseEntry({
     schema: syllablesConfigSchema,
@@ -65,6 +70,7 @@ export const exerciseRegistry = {
     ConfigFormComponent: SyllablesConfigForm,
     ConfigFieldsComponent: SyllablesConfigFields,
     ExerciseComponent: SyllablesExercise,
+    ResultsComponent: SyllablesResults,
   }),
   "reaction-grid": createExerciseEntry({
     schema: reactionTimeGridConfigSchema,
@@ -72,6 +78,7 @@ export const exerciseRegistry = {
     ConfigFormComponent: ReactionTimeConfigForm,
     ConfigFieldsComponent: ReactionTimeConfigFields,
     ExerciseComponent: ReactionTimeGrid,
+    ResultsComponent: ReactionTimeGridResults,
   }),
 }
 

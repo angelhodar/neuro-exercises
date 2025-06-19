@@ -226,7 +226,7 @@ export const exerciseLinksRelations = relations(exerciseLinks, ({ one, many }) =
   exerciseLinkItems: many(exerciseLinkItems),
 }))
 
-export const exerciseLinkItemsRelations = relations(exerciseLinkItems, ({ one, many }) => ({
+export const exerciseLinkItemsRelations = relations(exerciseLinkItems, ({ one }) => ({
   exerciseLink: one(exerciseLinks, {
     fields: [exerciseLinkItems.linkId],
     references: [exerciseLinks.id],
@@ -235,7 +235,7 @@ export const exerciseLinkItemsRelations = relations(exerciseLinkItems, ({ one, m
     fields: [exerciseLinkItems.exerciseId],
     references: [exercises.id],
   }),
-  exerciseResults: many(exerciseResults),
+  exerciseResults: one(exerciseResults),
 }))
 
 export const exerciseResultsRelations = relations(exerciseResults, ({ one }) => ({

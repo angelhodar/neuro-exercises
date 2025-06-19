@@ -11,7 +11,7 @@ interface QuestionResult {
 
 interface ExerciseResultsProps {
   results: QuestionResult[]
-  onReset: () => void
+  onReset?: () => void
   gridSize: number
 }
 
@@ -130,7 +130,7 @@ export function ExerciseResults({ results, onReset, gridSize }: ExerciseResultsP
         </Table>
       </div>
 
-      <Button onClick={onReset}>Intentar de Nuevo</Button>
+      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

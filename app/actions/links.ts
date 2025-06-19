@@ -3,7 +3,7 @@
 import { nanoid } from "nanoid"
 import { eq, desc, and } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { exerciseLinks, exerciseLinkItems } from "@/lib/db/schema"
+import { exerciseLinks, exerciseLinkItems, exerciseResults } from "@/lib/db/schema"
 import type { NewExerciseLink, NewExerciseLinkItem } from "@/lib/db/schema"
 import { getCurrentUser } from "./users"
 
@@ -118,17 +118,13 @@ export async function getExerciseLinkByPublicId(publicId: string) {
     const linkWithDetails = await db.query.exerciseLinks.findFirst({
       where: eq(exerciseLinks.publicId, publicId),
       with: {
-        targetUser: {
-          columns: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        },
+        targetUser: true,
+        creator: true,
         exerciseLinkItems: {
           orderBy: exerciseLinkItems.position,
           with: {
             exercise: true,
+            exerciseResults: true
           },
         },
       },
@@ -138,5 +134,18 @@ export async function getExerciseLinkByPublicId(publicId: string) {
   } catch (error) {
     console.error("Error getting exercise link by public ID:", error)
     return null
+  }
+}
+
+export async function saveExerciseResults(exerciseItemId: number, results: any) {
+  try {
+    await db.insert(exerciseResults).values({
+      linkItemId: exerciseItemId,
+      results,
+    });
+    return { ok: true };
+  } catch (error) {
+    console.error("Error guardando resultados del ejercicio:", error);
+    throw error;
   }
 }

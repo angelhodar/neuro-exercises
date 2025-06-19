@@ -7,7 +7,7 @@ import type { VisualRecognitionQuestionResult } from "./visual-recognition-schem
 
 interface VisualRecognitionResultsProps {
   results: VisualRecognitionQuestionResult[]
-  onReset: () => void
+  onReset?: () => void
 }
 
 export function VisualRecognitionResults({ results, onReset }: VisualRecognitionResultsProps) {
@@ -138,7 +138,7 @@ export function VisualRecognitionResults({ results, onReset }: VisualRecognition
         </Table>
       </div>
 
-      <Button onClick={onReset}>Intentar de Nuevo</Button>
+      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

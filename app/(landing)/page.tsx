@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Brain, Users, Trophy, Play, CheckCircle, ArrowRight, MapPin } from "lucide-react"
 import Image from "next/image"
 
-export default function Component() {
+export default function Home() {
   return (
     <>
       {/* Hero Section */}

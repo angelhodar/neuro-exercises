@@ -1,5 +1,16 @@
-import type * as React from "react"
-import { Brain, Home, Users, FileImage, Target, Zap, Plus, Eye, Settings, LogOut } from "lucide-react"
+import type { ComponentProps } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  Brain,
+  Home,
+  Users,
+  FileImage,
+  Target,
+  Zap,
+  Plus,
+  Eye,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,13 +23,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Image from "next/image"
-import Link from "next/link"
+} from "@/components/ui/sidebar";
+import { UserDropdown } from "@/components/user-dropdown";
 
-// Datos del menú
 const data = {
   navMain: [
     {
@@ -68,9 +75,9 @@ const data = {
       icon: Eye,
     },
   ],
-}
+};
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -164,31 +171,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <span>Juan Pérez</span>
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configuración</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Cerrar Sesión</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserDropdown />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

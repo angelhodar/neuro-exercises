@@ -6,7 +6,7 @@ import type { SyllablesQuestionResult } from "./syllables-schema"
 
 interface SyllablesResultsProps {
   results: SyllablesQuestionResult[]
-  onReset: () => void
+  onReset?: () => void
 }
 
 export function SyllablesResults({ results, onReset }: SyllablesResultsProps) {
@@ -101,7 +101,7 @@ export function SyllablesResults({ results, onReset }: SyllablesResultsProps) {
         </Table>
       </div>
 
-      <Button onClick={onReset}>Intentar de Nuevo</Button>
+      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

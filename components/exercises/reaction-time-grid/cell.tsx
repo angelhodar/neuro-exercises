@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import * as m from "motion/react-m"
 import { cn } from "@/lib/utils"
 
 interface CellProps {
@@ -12,7 +12,7 @@ interface CellProps {
 
 export function Cell({ isTarget, isSelected, onClick, disabled }: CellProps) {
   return (
-    <motion.button
+    <m.button
       className={cn(
         "aspect-square w-full rounded-md transition-colors",
         isTarget

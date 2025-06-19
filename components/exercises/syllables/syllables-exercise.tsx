@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useExerciseExecution } from "@/contexts/exercise-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { ExerciseControls } from "../exercise-controls"
 import { SyllablesResults } from "./syllables-results"
 import {
@@ -22,13 +21,10 @@ interface QuestionState {
   currentWord: SpanishWord | null
   scrambledSyllables: string[]
   selectedSyllables: string[]
-  startTime: number | null
-  timeLeft: number
-  timerId: NodeJS.Timeout | null
 }
 
 export function SyllablesExercise({ config }: SyllablesExerciseProps) {
-  const { syllablesCount, timeLimitPerQuestion = 0, totalQuestions } = config
+  const { syllablesCount, totalQuestions } = config
   const { exerciseState, currentQuestionIndex, addQuestionResult, startExercise, resetExercise, results } =
     useExerciseExecution()
 
@@ -36,9 +32,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     currentWord: null,
     scrambledSyllables: [],
     selectedSyllables: [],
-    startTime: null,
-    timeLeft: timeLimitPerQuestion,
-    timerId: null,
   })
 
   // Get available words for the selected syllable count
@@ -68,28 +61,11 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     const word = selectRandomWord()
     const scrambled = scrambleSyllables(word.syllables)
 
-    setQuestionState((prev) => ({
-      ...prev,
+    setQuestionState({
       currentWord: word,
       scrambledSyllables: scrambled,
       selectedSyllables: [],
-      startTime: Date.now(),
-      timeLeft: timeLimitPerQuestion,
-    }))
-
-    // Start timer
-    const timer = setInterval(() => {
-      setQuestionState((prev) => {
-        if (prev.timeLeft <= 1) {
-          // Time expired
-          handleTimeExpired()
-          return prev
-        }
-        return { ...prev, timeLeft: prev.timeLeft - 1 }
-      })
-    }, 1000)
-
-    setQuestionState((prev) => ({ ...prev, timerId: timer }))
+    })
   }
 
   // Handle syllable click
@@ -127,42 +103,14 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
 
   // Submit answer
   function submitAnswer(selectedSyllables: string[]) {
-    if (!questionState.currentWord || !questionState.startTime) return
-
-    // Clear timer
-    if (questionState.timerId) {
-      clearInterval(questionState.timerId)
-    }
-
-    const endTime = Date.now()
-    const timeSpent = endTime - questionState.startTime
+    if (!questionState.currentWord) return
 
     const result: SyllablesQuestionResult = {
       targetWord: questionState.currentWord.word,
       targetSyllables: questionState.currentWord.syllables,
       selectedSyllables,
-      timeSpent,
+      timeSpent: 0,
       timeExpired: false,
-    }
-
-    addQuestionResult(result)
-  }
-
-  // Handle time expired
-  function handleTimeExpired() {
-    if (!questionState.currentWord || !questionState.startTime) return
-
-    // Clear timer
-    if (questionState.timerId) {
-      clearInterval(questionState.timerId)
-    }
-
-    const result: SyllablesQuestionResult = {
-      targetWord: questionState.currentWord.word,
-      targetSyllables: questionState.currentWord.syllables,
-      selectedSyllables: questionState.selectedSyllables,
-      timeSpent: timeLimitPerQuestion * 1000,
-      timeExpired: true,
     }
 
     addQuestionResult(result)
@@ -173,24 +121,9 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     if (exerciseState === "executing") {
       setupNewQuestion()
     }
-
-    return () => {
-      if (questionState.timerId) {
-        clearInterval(questionState.timerId)
-      }
-    }
   }, [currentQuestionIndex, exerciseState])
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (questionState.timerId) {
-        clearInterval(questionState.timerId)
-      }
-    }
-  }, [])
-
-  const timeProgress = ((timeLimitPerQuestion - questionState.timeLeft) / timeLimitPerQuestion) * 100
+  // Cleanup on unmount (no timer to clear)
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
@@ -206,10 +139,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
                 <p className="text-sm">
                   Pregunta {currentQuestionIndex + 1} de {totalQuestions}
                 </p>
-                <div className="flex items-center gap-2 justify-center">
-                  <span className="text-sm">Tiempo: {questionState.timeLeft}s</span>
-                  <Progress value={timeProgress} className="w-32" />
-                </div>
               </div>
             )}
           </div>

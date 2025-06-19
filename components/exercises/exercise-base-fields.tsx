@@ -16,17 +16,17 @@ export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
   const timerDurationPath = `${basePath}timerDuration`
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-2 gap-4">
       <FormField
         control={control}
         name={totalQuestionsPath}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Total de Preguntas</FormLabel>
+            <FormLabel>Número de preguntas</FormLabel>
             <FormControl>
               <Input type="number" placeholder="10" {...field} onChange={(e) => field.onChange(e.target.value)} />
             </FormControl>
-            <FormDescription>Número de preguntas en el ejercicio (1-100)</FormDescription>
+            <FormDescription>Total de preguntas del ejercicio</FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -37,7 +37,7 @@ export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
           name={timerDurationPath}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Duración (segundos)</FormLabel>
+              <FormLabel>Límite de tiempo por pregunta</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -46,7 +46,7 @@ export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
                   onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
                 />
               </FormControl>
-              <FormDescription>Límite de tiempo por pregunta</FormDescription>
+              <FormDescription>En segundos</FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -22,7 +22,7 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
               {description || "Ejercicio de entrenamiento cognitivo"}
             </CardDescription>
           </div>
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary" className="ml-2 capitalize">
             {category}
           </Badge>
         </div>

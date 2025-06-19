@@ -15,7 +15,7 @@ export function Header() {
         />
         <span className="ml-2 text-xl font-bold text-blue-900">NeuroGranada</span>
       </Link>
-      <Button asChild className="bg-blue-600 hover:bg-blue-700">
+      <Button asChild className="hover:bg-blue-600">
         <Link href="/login">Acceder</Link>
       </Button>
     </header>

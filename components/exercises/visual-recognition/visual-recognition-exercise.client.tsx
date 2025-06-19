@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useExerciseExecution } from "@/contexts/exercise-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ExerciseControls } from "../exercise-controls";
 import { VisualRecognitionResults } from "./visual-recognition-results";
@@ -13,7 +12,7 @@ import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
   type ImageCategory,
-  type ImageData
+  type ImageData,
 } from "./visual-recognition-schema";
 import { createMediaUrl } from "@/lib/utils";
 
@@ -27,9 +26,6 @@ interface QuestionState {
   displayedImages: ImageData[];
   correctImageIds: string[];
   selectedImageIds: string[];
-  startTime: number | null;
-  timeLeft: number;
-  timerId: NodeJS.Timeout | null;
 }
 
 export function VisualRecognitionExerciseClient({
@@ -39,7 +35,6 @@ export function VisualRecognitionExerciseClient({
   const {
     imagesPerQuestion,
     correctImagesCount,
-    timeLimitPerQuestion = 0,
     categories,
     showImageNames,
     totalQuestions,
@@ -59,9 +54,6 @@ export function VisualRecognitionExerciseClient({
     displayedImages: [],
     correctImageIds: [],
     selectedImageIds: [],
-    startTime: null,
-    timeLeft: timeLimitPerQuestion,
-    timerId: null,
   });
 
   // Select random images for the question
@@ -76,7 +68,9 @@ export function VisualRecognitionExerciseClient({
     ] as ImageCategory;
 
     // Get correct images from target category
-    const targetCategoryImages = images.filter(img => img.category === targetCategory);
+    const targetCategoryImages = images.filter(
+      (img) => img.category === targetCategory
+    );
     const shuffledTargetImages = [...targetCategoryImages].sort(
       () => 0.5 - Math.random()
     );
@@ -95,7 +89,7 @@ export function VisualRecognitionExerciseClient({
     );
 
     distractorCategories.forEach((category) => {
-      const categoryImages = images.filter(img => img.category === category);
+      const categoryImages = images.filter((img) => img.category === category);
       const shuffledCategoryImages = [...categoryImages].sort(
         () => 0.5 - Math.random()
       );
@@ -127,29 +121,12 @@ export function VisualRecognitionExerciseClient({
     const { targetCategory, displayedImages, correctImageIds } =
       selectImagesForQuestion();
 
-    setQuestionState((prev) => ({
-      ...prev,
+    setQuestionState({
       targetCategory,
       displayedImages,
       correctImageIds,
       selectedImageIds: [],
-      startTime: Date.now(),
-      timeLeft: timeLimitPerQuestion,
-    }));
-
-    // Start timer
-    const timer = setInterval(() => {
-      setQuestionState((prev) => {
-        if (prev.timeLeft <= 1) {
-          // Time expired
-          handleTimeExpired();
-          return prev;
-        }
-        return { ...prev, timeLeft: prev.timeLeft - 1 };
-      });
-    }, 1000);
-
-    setQuestionState((prev) => ({ ...prev, timerId: timer }));
+    });
   }
 
   // Handle image click
@@ -171,42 +148,14 @@ export function VisualRecognitionExerciseClient({
 
   // Submit answer
   function submitAnswer() {
-    if (!questionState.targetCategory || !questionState.startTime) return;
-
-    // Clear timer
-    if (questionState.timerId) {
-      clearInterval(questionState.timerId);
-    }
-
-    const endTime = Date.now();
-    const timeSpent = endTime - questionState.startTime;
+    if (!questionState.targetCategory) return;
 
     const result: VisualRecognitionQuestionResult = {
       targetCategory: questionState.targetCategory,
       correctImages: questionState.correctImageIds,
       selectedImages: questionState.selectedImageIds,
-      timeSpent,
+      timeSpent: 0,
       timeExpired: false,
-    };
-
-    addQuestionResult(result);
-  }
-
-  // Handle time expired
-  function handleTimeExpired() {
-    if (!questionState.targetCategory || !questionState.startTime) return;
-
-    // Clear timer
-    if (questionState.timerId) {
-      clearInterval(questionState.timerId);
-    }
-
-    const result: VisualRecognitionQuestionResult = {
-      targetCategory: questionState.targetCategory,
-      correctImages: questionState.correctImageIds,
-      selectedImages: questionState.selectedImageIds,
-      timeSpent: timeLimitPerQuestion * 1000,
-      timeExpired: true,
     };
 
     addQuestionResult(result);
@@ -217,24 +166,9 @@ export function VisualRecognitionExerciseClient({
     if (exerciseState === "executing") {
       setupNewQuestion();
     }
-
-    return () => {
-      if (questionState.timerId) {
-        clearInterval(questionState.timerId);
-      }
-    };
   }, [currentQuestionIndex, exerciseState]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (questionState.timerId) {
-        clearInterval(questionState.timerId);
-      }
-    };
-  }, []);
-
-  const timeProgress = ((timeLimitPerQuestion - questionState.timeLeft) / timeLimitPerQuestion) * 100;
+  // Cleanup on unmount (no timer to clear)
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
@@ -246,36 +180,17 @@ export function VisualRecognitionExerciseClient({
       ) : (
         <>
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold mb-2">
-              Ejercicio de Reconocimiento Visual
-            </h2>
-            <p className="text-gray-600">
-              Selecciona todas las imágenes que pertenecen a la categoría
-              indicada
-            </p>
             {exerciseState === "executing" && questionState.targetCategory && (
               <div className="mt-4 space-y-2">
                 <p className="text-sm">
                   Pregunta {currentQuestionIndex + 1} de {totalQuestions}
                 </p>
-                <div className="flex items-center gap-2 justify-center">
-                  <span className="text-sm">
-                    Tiempo: {questionState.timeLeft}s
-                  </span>
-                  <Progress value={timeProgress} className="w-32" />
-                </div>
                 <div className="mt-4">
                   <Badge variant="outline" className="text-lg px-4 py-2">
-                    Busca: {categoryDisplayNames[questionState.targetCategory]}
+                    Categoría:{" "}
+                    {categoryDisplayNames[questionState.targetCategory]}
                   </Badge>
                 </div>
-                {!showImageNames && (
-                  <div className="mt-2">
-                    <Badge variant="secondary" className="text-xs">
-                      Modo Difícil: Sin nombres de imágenes
-                    </Badge>
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -301,7 +216,9 @@ export function VisualRecognitionExerciseClient({
                             onClick={() => handleImageClick(image.id)}
                           >
                             <img
-                              src={createMediaUrl(image.url) || "/placeholder.svg"}
+                              src={
+                                createMediaUrl(image.url) || "/placeholder.svg"
+                              }
                               alt={
                                 showImageNames
                                   ? image.name
@@ -352,4 +269,4 @@ export function VisualRecognitionExerciseClient({
       )}
     </div>
   );
-} 
+}

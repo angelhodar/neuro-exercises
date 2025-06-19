@@ -2,14 +2,14 @@ import type { ComponentProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Brain,
   Home,
   Users,
   FileImage,
-  Target,
-  Zap,
   Plus,
   Eye,
+  Grid3x3,
+  BookOpen,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,7 +29,7 @@ import { UserDropdown } from "@/components/user-dropdown";
 const data = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Inicio",
       url: "/dashboard",
       icon: Home,
     },
@@ -38,17 +38,17 @@ const data = {
     {
       title: "Cuadrícula",
       url: "/dashboard/exercises/reaction-grid",
-      icon: Brain,
+      icon: Grid3x3,
     },
     {
       title: "Sílabas",
       url: "/dashboard/exercises/syllables",
-      icon: Target,
+      icon: BookOpen,
     },
     {
-      title: "Reconocimiento Visual",
+      title: "Reconocimiento visual",
       url: "/dashboard/exercises/visual-recognition",
-      icon: Zap,
+      icon: ImageIcon,
     },
   ],
   management: [
@@ -58,19 +58,19 @@ const data = {
       icon: Users,
     },
     {
-      title: "Biblioteca Multimedia",
+      title: "Biblioteca multimedia",
       url: "/dashboard/media",
       icon: FileImage,
     },
   ],
   sharing: [
     {
-      title: "Crear Enlaces",
+      title: "Crear enlaces",
       url: "/dashboard/links/create",
       icon: Plus,
     },
     {
-      title: "Mis Enlaces",
+      title: "Mis enlaces",
       url: "/dashboard/links",
       icon: Eye,
     },

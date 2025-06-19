@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useFormContext } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import type { ExercisePreset } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
+import { useFormContext } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import type { ExercisePreset } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema";
 
 interface ExerciseConfigPresetSelectorProps {
-  presets: Record<ExercisePreset, object>
+  presets: Record<ExercisePreset, object>;
 }
 
 export function ExerciseConfigPresetSelector({
   presets,
 }: ExerciseConfigPresetSelectorProps) {
-  const { reset } = useFormContext()
+  const { reset } = useFormContext();
 
   function handlePresetSelect(presetKey: ExercisePreset) {
-    const preset = presets[presetKey]
-    if (preset) reset(preset)
+    const preset = presets[presetKey];
+    if (preset) reset(preset);
   }
 
   return (
@@ -31,12 +31,17 @@ export function ExerciseConfigPresetSelector({
             variant="outline"
             size="sm"
             onClick={() => handlePresetSelect(key)}
-            className="capitalize"
           >
-            {key === "easy" ? "fácil" : key === "medium" ? "medio" : key === "hard" ? "difícil" : "experto"}
+            {key === "easy"
+              ? "Fácil"
+              : key === "medium"
+              ? "Medio"
+              : key === "hard"
+              ? "Difícil"
+              : "Experto"}
           </Button>
         ))}
       </div>
     </div>
-  )
+  );
 }

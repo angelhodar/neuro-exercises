@@ -5,6 +5,7 @@ export const createExerciseSchema = z.object({
   displayName: z.string().min(1, "El nombre es obligatorio"),
   category: z.string().min(1, "La categoría es obligatoria"),
   description: z.string().optional(),
+  prompt: z.string().min(1, "El prompt es obligatorio"),
   thumbnail: z.instanceof(File).optional(),
 });
 

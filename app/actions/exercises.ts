@@ -50,11 +50,12 @@ export async function createExercise(data: CreateExerciseSchema): Promise<Exerci
   try {
     const parsed = createExerciseSchema.parse(data);
 
+    const { thumbnail, prompt, ...rest } = parsed;
+
     let thumbnailPath: string | undefined = undefined;
 
-    if (parsed.thumbnail instanceof File) {
-      const file = parsed.thumbnail;
-      const upload = await put(`thumbnails/${file.name}`, file, {
+    if (thumbnail instanceof File) {
+      const upload = await put(`thumbnails/${thumbnail.name}`, thumbnail, {
         access: "public",
         addRandomSuffix: true,
       });
@@ -62,9 +63,21 @@ export async function createExercise(data: CreateExerciseSchema): Promise<Exerci
     }
 
     const [created] = await db.insert(exercises).values({
-      ...parsed,
+      ...rest,
       thumbnailUrl: thumbnailPath,
     }).returning();
+
+    if (created) {
+      try {
+        const { createExercisePR } = await import("../../lib/github/pr");
+        createExercisePR(created, prompt).catch((err: unknown) =>
+          console.error("Error creando PR de ejercicio:", err),
+        );
+      } catch (err: unknown) {
+        console.error("No se pudo cargar el helper de GitHub:", err);
+      }
+    }
+
     return created || null;
   } catch (error) {
     console.error("Error al crear el ejercicio:", error);

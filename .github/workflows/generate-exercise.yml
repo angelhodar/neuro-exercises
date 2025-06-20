@@ -1,0 +1,29 @@
+name: Generar Ejercicio IA
+
+on:
+  pull_request:
+    paths:
+      - 'docs/exercises/**'
+    types: [opened]
+
+jobs:
+  generate-exercise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci --ignore-scripts
+
+      - name: Ejecutar script de generación
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: npx -y tsx ./scripts/generate-exercise.ts 

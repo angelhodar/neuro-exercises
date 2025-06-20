@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectTrigger,
@@ -43,6 +44,7 @@ export default function CreateExerciseButton() {
       displayName: "",
       category: categories[0],
       description: "",
+      prompt: "",
       thumbnail: undefined,
     },
   });
@@ -137,6 +139,19 @@ export default function CreateExerciseButton() {
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Input placeholder="Descripción (opcional)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="prompt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prompt</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Prompt" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

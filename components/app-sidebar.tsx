@@ -10,6 +10,7 @@ import {
   Grid3x3,
   BookOpen,
   Image as ImageIcon,
+  Palette,
 } from "lucide-react";
 import {
   Sidebar,
@@ -49,6 +50,11 @@ const data = {
       title: "Reconocimiento visual",
       url: "/dashboard/exercises/visual-recognition",
       icon: ImageIcon,
+    },
+    {
+      title: "Secuencia de colores",
+      url: "/dashboard/exercises/color-sequence",
+      icon: Palette,
     },
   ],
   management: [

@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Regla de Cursor: Guía para la Creación de Nuevos Ejercicios
+
+**Objetivo:**  
+Asegurar que todos los nuevos ejercicios sigan una estructura coherente, reutilicen componentes base y se integren correctamente en el registro de ejercicios.
+
+## 1. Esquema de datos (`schema`)
+- Crea un archivo para definir los esquemas de datos del ejercicio usando `zod`.
+- Extiende siempre el esquema base (`baseExerciseConfigSchema`) desde `lib/schemas/base-schemas.ts`.
+- Proporciona mensajes de validación en español.
+
+## 2. Formulario de configuración (`config-form`)
+- Crea un archivo para el formulario de configuración del ejercicio.
+- Define dos componentes:
+  - Uno para los campos específicos del ejercicio.
+  - Otro que combine los campos base y los específicos, formando el formulario completo.
+- Utiliza los componentes base de formulario existentes (por ejemplo, de `components/ui/`).
+
+## 3. Resultados del ejercicio (`results`)
+- Crea un archivo para mostrar los resultados del ejercicio.
+- Este componente debe recibir los datos de resultados y presentarlos de forma clara y visualmente consistente con otros ejercicios.
+
+## 4. Ejecución del ejercicio (`exercise`)
+- Crea uno o dos archivos para la ejecución:
+  - Si el ejercicio requiere lógica de servidor para obtener datos dinámicos, crea dos archivos:  
+    - Uno para la lógica del lado del servidor (por ejemplo, `<ejercicio>.tsx`).
+    - Otro para la lógica del lado del cliente (por ejemplo, `<ejercicio>.client.tsx`).
+  - Si no requiere lógica de servidor, solo crea el componente de cliente.
+- Asegúrate de que el componente principal gestione el flujo del ejercicio y la comunicación con el backend si es necesario.
+
+## 5. Registro del ejercicio
+- Una vez creados los archivos anteriores, registra el nuevo ejercicio en `app/registry/exercises.ts`.
+- Especifica los componentes de configuración, ejecución y resultados en el registro.
+- Asegúrate de que el registro incluya toda la información necesaria para que el ejercicio sea accesible desde la aplicación.
+
+## 6. Buenas prácticas adicionales
+- Usa nombres de archivos y componentes en inglés, siguiendo el patrón de los ejercicios existentes.
+- Mantén los mensajes y textos visibles para el usuario en español.
+- Reutiliza componentes y utilidades existentes siempre que sea posible.
+- Documenta brevemente cada componente y función principal. 

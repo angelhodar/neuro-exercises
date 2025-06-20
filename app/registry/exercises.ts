@@ -31,6 +31,17 @@ import {
 } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema"
 import { ExerciseResults as ReactionTimeGridResults } from "@/components/exercises/reaction-time-grid/exercise-results"
 
+import { ColorSequenceExercise } from "@/components/exercises/color-sequence/color-sequence-exercise"
+import {
+  ColorSequenceConfigForm,
+  ColorSequenceConfigFields,
+} from "@/components/exercises/color-sequence/color-sequence-config-form"
+import {
+  colorSequenceConfigSchema,
+  colorSequencePresets,
+} from "@/components/exercises/color-sequence/color-sequence-schema"
+import { ColorSequenceResults } from "@/components/exercises/color-sequence/color-sequence-results"
+
 export type AnyExerciseEntry = {
   schema: ZodTypeAny
   defaultConfig?: any
@@ -79,6 +90,14 @@ export const exerciseRegistry = {
     ConfigFieldsComponent: ReactionTimeConfigFields,
     ExerciseComponent: ReactionTimeGrid,
     ResultsComponent: ReactionTimeGridResults,
+  }),
+  "color-sequence": createExerciseEntry({
+    schema: colorSequenceConfigSchema,
+    defaultConfig: colorSequencePresets.easy,
+    ConfigFormComponent: ColorSequenceConfigForm,
+    ConfigFieldsComponent: ColorSequenceConfigFields,
+    ExerciseComponent: ColorSequenceExercise,
+    ResultsComponent: ColorSequenceResults,
   }),
 }
 

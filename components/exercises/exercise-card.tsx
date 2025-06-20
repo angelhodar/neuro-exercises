@@ -3,7 +3,8 @@ import { Play } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Exercise } from "@/lib/db/schema"
-import { createMediaUrl } from "@/lib/utils"
+import { createMediaUrl, cn } from "@/lib/utils"
+import { getExerciseFromRegistry } from "@/app/registry/exercises"
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -12,13 +13,24 @@ interface ExerciseCardProps {
 export function ExerciseCard({ exercise }: ExerciseCardProps) {
   const { slug, displayName, category, description, thumbnailUrl } = exercise
 
+  const isRegistered = !!getExerciseFromRegistry(slug)
+  const href = isRegistered ? `/dashboard/exercises/${slug}` : `/dashboard/exercises/pending/${slug}`
+
   return (
-    <Link href={`/dashboard/exercises/${slug}`} className="block group focus:outline-none h-full">
-      <Card className="transition-all cursor-pointer hover:shadow-2xl hover:-translate-y-1 border border-muted-foreground/10 rounded-2xl group-focus:ring-2 group-focus:ring-primary/40 h-full">
+    <Link
+      href={href}
+      className={cn(
+        "block group focus:outline-none h-full",
+        !isRegistered && "opacity-50"
+      )}
+    >
+      <Card className={`transition-all border border-muted-foreground/10 rounded-2xl group-focus:ring-2 group-focus:ring-primary/40 h-full ${isRegistered ? "cursor-pointer hover:shadow-2xl hover:-translate-y-1" : "pointer-events-auto"}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <CardTitle className="text-lg group-hover:text-primary transition-colors">{displayName}</CardTitle>
+              <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                {displayName}
+              </CardTitle>
               <CardDescription className="mt-1 line-clamp-2">
                 {description}
               </CardDescription>

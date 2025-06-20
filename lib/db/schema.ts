@@ -84,6 +84,7 @@ export const exercises = pgTable(
     displayName: varchar("display_name", { length: 255 }).notNull(),
     category: varchar({ length: 100 }).notNull(),
     description: text(),
+    prNumber: integer("pr_number"),
     thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     ...timestamps,
   },

@@ -3,7 +3,7 @@
 import { Buffer } from "buffer";
 import { db } from "@/lib/db";
 import { medias } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, arrayContains, ne, and } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { togetherai } from "@ai-sdk/togetherai";
@@ -13,11 +13,13 @@ import type { CreateMediaSchema } from "@/lib/schemas/medias";
 
 const MODEL = "black-forest-labs/FLUX.1-schnell-Free";
 
-export async function getMedias(category?: string) {
+export async function getMedias(labels?: string[]) {
   const result = await db.query.medias.findMany({
-    where: (fields, { eq, and, ne }) => {
-      const conditions = [ne(fields.category, "thumbnails")];
-      if (category) conditions.push(eq(fields.category, category));
+    where: (fields) => {
+      const conditions = [ne(fields.labels, ["thumbnails"])];
+      if (labels && labels.length > 0) {
+        conditions.push(arrayContains(fields.labels, labels));
+      }
       return and(...conditions);
     },
     with: {
@@ -49,7 +51,7 @@ async function generateMediaFromPrompt(prompt: string) {
 }
 
 export async function uploadMedia(data: CreateMediaSchema) {
-  const { prompt, category, name, description, file } = data;
+  const { prompt, labels, name, description, file } = data;
 
   try {
     const user = await getCurrentUser();
@@ -59,7 +61,8 @@ export async function uploadMedia(data: CreateMediaSchema) {
     const data = file
       ? await file.arrayBuffer()
       : await generateMediaFromPrompt(prompt!);
-    const fileName = `${category}/${
+      
+    const fileName = `media/${
       file ? file.name.replaceAll(" ", "-") : prompt!.replaceAll(" ", "-")
     }.png`;
 
@@ -71,7 +74,7 @@ export async function uploadMedia(data: CreateMediaSchema) {
     await db.insert(medias).values({
       name: name,
       description: description || null,
-      category,
+      labels: labels,
       blobKey: blob.pathname,
       authorId: user.id,
     });

@@ -33,7 +33,7 @@ async function seedMediaFromBlobs() {
     return {
       name: filename,
       description: null,
-      category: category,
+      labels: [category],
       blobKey: blob.pathname,
       authorId: author.id,
       createdAt: blob.uploadedAt,

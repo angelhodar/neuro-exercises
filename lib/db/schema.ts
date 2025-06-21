@@ -170,7 +170,7 @@ export const medias = pgTable("medias", {
   id: serial().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  category: varchar("category", { length: 100 }).notNull(),
+  labels: text("labels").array().default([]),
   blobKey: varchar("blob_key", { length: 500 }).notNull(),
   authorId: text("creator_id").notNull(),
   ...timestamps
@@ -179,7 +179,8 @@ export const medias = pgTable("medias", {
     columns: [table.authorId],
     foreignColumns: [users.id],
     name: "medias_creator_fk"
-  })
+  }),
+  index("medias_labels_idx").on(table.labels)
 ])
 
 // Relations

@@ -10,12 +10,14 @@ import {
 } from "@/components/dashboard-header";
 
 interface Props {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ labels?: string }>;
 }
 
 export default async function MediasPage({ searchParams }: Props) {
-  const { category } = await searchParams;
-  const medias = await getMedias(category);
+  const { labels } = await searchParams;
+  // Convertir el string de labels a array si existe
+  const labelsArray: string[] | undefined = labels ? labels.split(',').map(label => label.trim()) : undefined;
+  const medias = await getMedias(labelsArray);
 
   return (
     <div className="p-6">
@@ -27,7 +29,7 @@ export default async function MediasPage({ searchParams }: Props) {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <CategoryFilter selectedCategory={category || ""} />
+          <CategoryFilter selectedCategory={labels || ""} />
           <CreateMediaButton />
         </DashboardHeaderActions>
       </DashboardHeader>

@@ -5,7 +5,7 @@ export const createMediaSchema = z
     name: z.string().min(1, "El nombre es obligatorio"),
     description: z.string().optional(),
     prompt: z.string().optional(),
-    category: z.string().min(1, "La categoría es obligatoria"),
+    labels: z.array(z.string()).min(1, "Debes seleccionar al menos una etiqueta"),
     file: z.instanceof(File).optional(),
   })
   .refine((data) => data.prompt || data.file, {

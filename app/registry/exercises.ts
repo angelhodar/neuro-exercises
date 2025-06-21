@@ -42,6 +42,17 @@ import {
 } from "@/components/exercises/color-sequence/color-sequence-schema"
 import { ColorSequenceResults } from "@/components/exercises/color-sequence/color-sequence-results"
 
+import {
+  StimulusCountConfigForm,
+  StimulusCountConfigFields,
+} from "@/components/exercises/stimulus-count/stimulus-count-config-form"
+import {
+  stimulusCountConfigSchema,
+  stimulusCountPresets,
+} from "@/components/exercises/stimulus-count/stimulus-count-schema"
+import { StimulusCountExercise } from "@/components/exercises/stimulus-count/stimulus-count-exercise"
+import { StimulusCountResults } from "@/components/exercises/stimulus-count/stimulus-count-results"
+
 export type AnyExerciseEntry = {
   schema: ZodTypeAny
   defaultConfig?: any
@@ -98,6 +109,14 @@ export const exerciseRegistry = {
     ConfigFieldsComponent: ColorSequenceConfigFields,
     ExerciseComponent: ColorSequenceExercise,
     ResultsComponent: ColorSequenceResults,
+  }),
+  "stimulus-count": createExerciseEntry({
+    schema: stimulusCountConfigSchema,
+    defaultConfig: stimulusCountPresets.easy,
+    ConfigFormComponent: StimulusCountConfigForm,
+    ConfigFieldsComponent: StimulusCountConfigFields,
+    ExerciseComponent: StimulusCountExercise,
+    ResultsComponent: StimulusCountResults,
   }),
 }
 

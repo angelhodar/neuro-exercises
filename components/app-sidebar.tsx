@@ -11,6 +11,7 @@ import {
   BookOpen,
   Image as ImageIcon,
   Palette,
+  Circle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,11 @@ const data = {
       title: "Secuencia de colores",
       url: "/dashboard/exercises/color-sequence",
       icon: Palette,
+    },
+    {
+      title: "Conteo de estímulos",
+      url: "/dashboard/exercises/stimulus-count",
+      icon: Circle,
     },
   ],
   management: [

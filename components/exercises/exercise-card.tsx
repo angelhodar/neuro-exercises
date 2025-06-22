@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { Play } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import type { Exercise } from "@/lib/db/schema"
 import { createMediaUrl } from "@/lib/utils"
 
@@ -9,8 +10,8 @@ interface ExerciseCardProps {
   exercise: Exercise
 }
 
-export function ExerciseCard({ exercise }: ExerciseCardProps) {
-  const { slug, displayName, category, description, thumbnailUrl } = exercise
+export default function ExerciseCard({ exercise }: ExerciseCardProps) {
+  const { slug, displayName, tags, thumbnailUrl } = exercise
 
   return (
     <Link href={`/dashboard/exercises/${slug}`} className="block group focus:outline-none h-full">
@@ -19,13 +20,12 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <CardTitle className="text-lg group-hover:text-primary transition-colors">{displayName}</CardTitle>
-              <CardDescription className="mt-1 line-clamp-2">
-                {description}
-              </CardDescription>
+              {tags && tags.length > 0 && (
+                <Badge variant="outline" className="w-fit">
+                  {tags[0]}
+                </Badge>
+              )}
             </div>
-            <Badge variant="secondary" className="ml-2 capitalize">
-              {category}
-            </Badge>
           </div>
         </CardHeader>
 
@@ -47,6 +47,12 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
             </div>
           )}
         </CardContent>
+
+        <CardFooter>
+          <Button variant="outline" size="sm" className="w-full">
+            Configurar
+          </Button>
+        </CardFooter>
       </Card>
     </Link>
   )

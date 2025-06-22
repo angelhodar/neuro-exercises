@@ -2,7 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,14 +27,18 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
-import { categoryDisplayNames } from "@/lib/medias/generate";
 import {
   visualRecognitionConfigSchema,
   defaultVisualRecognitionConfig,
   visualRecognitionPresets,
   type VisualRecognitionConfig,
-  type ImageCategory,
 } from "./visual-recognition-schema";
+import {
+  TagsInput,
+  TagsInputInput,
+  TagsInputItem,
+  TagsInputList,
+} from "@/components/ui/tags-input";
 
 interface VisualRecognitionConfigFormProps {
   defaultConfig?: Partial<VisualRecognitionConfig>;
@@ -48,7 +53,7 @@ export function VisualRecognitionConfigFields(
   props: VisualRecognitionConfigFieldsProps
 ) {
   const { basePath = "" } = props;
-  const { control, watch } = useFormContext();
+  const { control, watch } = useForm();
 
   const imagesPerQuestionPath = `${basePath}imagesPerQuestion` as const;
   const correctImagesCountPath = `${basePath}correctImagesCount` as const;
@@ -114,36 +119,27 @@ export function VisualRecognitionConfigFields(
         name={categoriesPath}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Categorías de imágenes</FormLabel>
-            <div className="grid grid-cols-2 gap-4">
-              {(Object.keys(categoryDisplayNames) as ImageCategory[]).map(
-                (category) => (
-                  <div
-                    key={category}
-                    className="flex flex-row items-start space-x-3 space-y-0"
-                  >
-                    <Checkbox
-                      checked={field.value?.includes(category)}
-                      onCheckedChange={(checked) => {
-                        const currentValue = field.value || [];
-                        return checked
-                          ? field.onChange([...currentValue, category])
-                          : field.onChange(
-                              currentValue.filter(
-                                (value: string) => value !== category
-                              )
-                            );
-                      }}
-                    />
-                    <div className="space-y-1 leading-none">
-                      <label className="text-sm font-normal">
-                        {categoryDisplayNames[category]}
-                      </label>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
+            <FormLabel>Etiquetas de las imágenes</FormLabel>
+            <FormControl>
+              <TagsInput
+                value={field.value ?? []}
+                onValueChange={(tags) => {
+                  field.onChange(tags);
+                }}
+              >
+                <TagsInputList>
+                  {field.value?.map((tag: string) => (
+                    <TagsInputItem key={tag} value={tag}>
+                      {tag}
+                    </TagsInputItem>
+                  ))}
+                  <TagsInputInput placeholder="Añade etiquetas y presiona Enter..." />
+                </TagsInputList>
+              </TagsInput>
+            </FormControl>
+            <FormDescription>
+              Añade al menos dos etiquetas para las imágenes que se usarán en el ejercicio.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

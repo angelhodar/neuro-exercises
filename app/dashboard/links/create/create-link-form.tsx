@@ -346,14 +346,11 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                             <h4 className="font-medium">
                               {exercise.displayName}
                             </h4>
-                            {exercise.description && (
+                            {exercise.tags && exercise.tags.length > 0 && (
                               <p className="text-sm text-muted-foreground">
-                                {exercise.description}
+                                {exercise.tags.join(", ")}
                               </p>
                             )}
-                            <Badge variant="secondary" className="mt-2">
-                              {exercise.category}
-                            </Badge>
                           </div>
                           <Button
                             type="button"
@@ -422,9 +419,6 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                                 <span className="text-lg font-medium">
                                   {exercise.displayName}
                                 </span>
-                                <Badge variant="outline">
-                                  {exercise.category}
-                                </Badge>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>

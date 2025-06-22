@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { createMediaSchema, CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadMedia } from "@/app/actions/media";
-import { MediaCategoriesInput } from "@/components/ui/templates/media-categories";
+import { MediaTagsInput } from "@/components/ui/templates/media-tags";
 
 export default function CreateMediaButton() {
   const [open, setOpen] = useState(false);
@@ -37,7 +37,7 @@ export default function CreateMediaButton() {
       name: "",
       description: "",
       prompt: "",
-      labels: [],
+      tags: [],
       file: undefined,
     },
   });
@@ -102,12 +102,12 @@ export default function CreateMediaButton() {
             />
             <FormField
               control={form.control}
-              name="labels"
+              name="tags"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Etiquetas</FormLabel>
                   <FormControl>
-                    <MediaCategoriesInput
+                    <MediaTagsInput
                       value={field.value || []}
                       onChange={field.onChange}
                       placeholder="Añadir etiqueta..."

@@ -1,11 +1,11 @@
 "use client";
 
 import * as TagsInput from "@diceui/tags-input";
-import { RefreshCcw, X } from "lucide-react";
+import { X } from "lucide-react";
 import * as React from "react";
 import { forwardRef } from "react";
 
-interface MediaCategoriesInputProps {
+interface MediaTagsInputProps {
   value?: string[];
   onChange?: (value: string[]) => void;
   placeholder?: string;
@@ -14,23 +14,19 @@ interface MediaCategoriesInputProps {
   className?: string;
 }
 
-export const MediaCategoriesInput = forwardRef<
+export const MediaTagsInput = forwardRef<
   HTMLDivElement,
-  MediaCategoriesInputProps
+  MediaTagsInputProps
 >(({ 
   value = [], 
   onChange, 
-  placeholder = "Agregar categoría...", 
-  label = "Categorías",
+  placeholder = "Agregar etiqueta...", 
+  label = "Etiquetas",
   disabled = false,
   className 
 }, ref) => {
   const handleValueChange = (newValue: string[]) => {
     onChange?.(newValue);
-  };
-
-  const handleClear = () => {
-    onChange?.([]);
   };
 
   return (
@@ -63,17 +59,8 @@ export const MediaCategoriesInput = forwardRef<
           className="flex-1 bg-transparent outline-hidden placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-zinc-400"
         />
       </div>
-      {value.length > 0 && (
-        <TagsInput.Clear 
-          onClick={handleClear}
-          className="flex h-9 items-center justify-center gap-2 rounded-sm border border-input bg-transparent text-zinc-800 shadow-xs hover:bg-zinc-100/80 dark:text-zinc-300 dark:hover:bg-zinc-900/80"
-        >
-          <RefreshCcw className="h-4 w-4" />
-          Limpiar
-        </TagsInput.Clear>
-      )}
     </TagsInput.Root>
   );
 });
 
-MediaCategoriesInput.displayName = "MediaCategoriesInput";
+MediaTagsInput.displayName = "MediaTagsInput";

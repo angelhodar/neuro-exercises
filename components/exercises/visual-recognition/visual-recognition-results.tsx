@@ -11,13 +11,6 @@ interface VisualRecognitionResultsProps {
 }
 
 export function VisualRecognitionResults({ results, onReset }: VisualRecognitionResultsProps) {
-  const categoryLabels: Record<string, string> = {
-    animales: "Animales",
-    frutas: "Frutas",
-    vehiculos: "Vehículos",
-    objetos: "Objetos",
-  }
-
   // Helper function to calculate accuracy for a result
   function calculateAccuracy(result: VisualRecognitionQuestionResult): number {
     const correctSelections = result.selectedImages.filter((id) => result.correctImages.includes(id)).length
@@ -77,7 +70,7 @@ export function VisualRecognitionResults({ results, onReset }: VisualRecognition
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">#</TableHead>
-              <TableHead>Categoría</TableHead>
+              <TableHead>Etiqueta Objetivo</TableHead>
               <TableHead>Correctas</TableHead>
               <TableHead>Seleccionadas</TableHead>
               <TableHead>Tiempo</TableHead>
@@ -95,7 +88,7 @@ export function VisualRecognitionResults({ results, onReset }: VisualRecognition
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{categoryLabels[result.targetCategory] || result.targetCategory}</Badge>
+                    <Badge variant="outline" className="capitalize">{result.targetTag}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">{result.correctImages.length} imágenes</div>

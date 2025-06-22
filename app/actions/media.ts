@@ -2,8 +2,8 @@
 
 import { Buffer } from "buffer";
 import { db } from "@/lib/db";
-import { medias } from "@/lib/db/schema";
-import { eq, desc, arrayContains, ne, and } from "drizzle-orm";
+import { medias, type Media } from "@/lib/db/schema";
+import { eq, desc, ilike, arrayContains } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { togetherai } from "@ai-sdk/togetherai";
@@ -13,14 +13,13 @@ import type { CreateMediaSchema } from "@/lib/schemas/medias";
 
 const MODEL = "black-forest-labs/FLUX.1-schnell-Free";
 
-export async function getMedias(labels?: string[]) {
+export async function getMedias(searchTerm?: string, limit?: number) {
   const result = await db.query.medias.findMany({
     where: (fields) => {
-      const conditions = [ne(fields.labels, ["thumbnails"])];
-      if (labels && labels.length > 0) {
-        conditions.push(arrayContains(fields.labels, labels));
+      if (searchTerm && searchTerm.trim()) {
+        return ilike(fields.name, `%${searchTerm.trim()}%`);
       }
-      return and(...conditions);
+      return undefined;
     },
     with: {
       author: {
@@ -32,6 +31,19 @@ export async function getMedias(labels?: string[]) {
       },
     },
     orderBy: desc(medias.createdAt),
+    limit,
+  });
+
+  return result;
+}
+
+export async function getMediasByTags(tags: string[]): Promise<Media[]> {
+  if (!tags || tags.length === 0) {
+    return [];
+  }
+
+  const result = await db.query.medias.findMany({
+    where: arrayContains(medias.tags, tags),
   });
 
   return result;
@@ -51,7 +63,7 @@ async function generateMediaFromPrompt(prompt: string) {
 }
 
 export async function uploadMedia(data: CreateMediaSchema) {
-  const { prompt, labels, name, description, file } = data;
+  const { prompt, tags, name, description, file } = data;
 
   try {
     const user = await getCurrentUser();
@@ -74,7 +86,7 @@ export async function uploadMedia(data: CreateMediaSchema) {
     await db.insert(medias).values({
       name: name,
       description: description || null,
-      labels: labels,
+      tags: tags,
       blobKey: blob.pathname,
       authorId: user.id,
     });

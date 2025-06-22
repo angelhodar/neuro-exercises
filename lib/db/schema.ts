@@ -75,19 +75,21 @@ export const verifications = pgTable("verifications", {
   ...timestamps,
 })
 
-// Your existing tables with updated foreign key references
 export const exercises = pgTable(
   "exercises",
   {
     id: serial().primaryKey(),
     slug: varchar({ length: 100 }).notNull().unique(),
     displayName: varchar("display_name", { length: 255 }).notNull(),
-    category: varchar({ length: 100 }).notNull(),
+    tags: text("tags").array().notNull().default([]),
     description: text(),
     thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     ...timestamps,
   },
-  (table) => [uniqueIndex("exercises_slug_idx").on(table.slug), index("exercises_category_idx").on(table.category)],
+  (table) => [
+    uniqueIndex("exercises_slug_idx").on(table.slug), 
+    index("exercises_tags_idx").on(table.tags)
+  ],
 )
 
 export const exerciseLinks = pgTable(
@@ -170,7 +172,7 @@ export const medias = pgTable("medias", {
   id: serial().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  labels: text("labels").array().default([]),
+  tags: text("tags").array().default([]),
   blobKey: varchar("blob_key", { length: 500 }).notNull(),
   authorId: text("creator_id").notNull(),
   ...timestamps
@@ -180,7 +182,7 @@ export const medias = pgTable("medias", {
     foreignColumns: [users.id],
     name: "medias_creator_fk"
   }),
-  index("medias_labels_idx").on(table.labels)
+  index("medias_tags_idx").on(table.tags)
 ])
 
 // Relations

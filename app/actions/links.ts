@@ -70,7 +70,7 @@ export async function getUserExerciseLinks() {
                 id: true,
                 slug: true,
                 displayName: true,
-                category: true,
+                tags: true,
               },
             },
           },

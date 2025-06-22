@@ -14,11 +14,11 @@ import MediaCard from "./media-card"
 interface MediaSelectorProps {
   selectedMedias: Media[]
   onMediasChange: (medias: Media[]) => void
-  title: string
+  selectionMode?: "single" | "multiple"
 }
 
 export default function MediaSelector(props: MediaSelectorProps) {
-  const { selectedMedias, onMediasChange, title } = props
+  const { selectedMedias, onMediasChange, selectionMode = "multiple" } = props
 
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -28,8 +28,13 @@ export default function MediaSelector(props: MediaSelectorProps) {
   const { data: searchResults = [], isLoading, error, isFetching } = useMediaSearch(debouncedSearchTerm, isOpen)
 
   const addMedia = (media: Media) => {
-    if (!selectedMedias.find((selected) => selected.id === media.id)) {
-      onMediasChange([...selectedMedias, media])
+    if (selectionMode === "single") {
+      onMediasChange([media])
+      setIsOpen(false) // Close dialog on selection
+    } else {
+      if (!selectedMedias.find((selected) => selected.id === media.id)) {
+        onMediasChange([...selectedMedias, media])
+      }
     }
   }
 
@@ -40,13 +45,16 @@ export default function MediaSelector(props: MediaSelectorProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">{title}</Label>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Añadir imágenes
-            </Button>
+            {selectionMode === "single" && selectedMedias.length > 0 ? (
+              <MediaCard media={selectedMedias[0]} variant="preview" onRemove={() => removeMedia(selectedMedias[0].id)} />
+            ) : (
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                {selectionMode === "single" ? "Seleccionar imagen" : "Añadir imágenes"}
+              </Button>
+            )}
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
@@ -114,7 +122,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
       </div>
 
       {/* Preview de imágenes seleccionadas */}
-      {selectedMedias.length > 0 && (
+      {selectionMode === "multiple" && selectedMedias.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {selectedMedias.map((media) => (
             <div key={media.id} className="group">
@@ -129,7 +137,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
         </div>
       )}
 
-      {selectedMedias.length === 0 && (
+      {selectionMode === "multiple" && selectedMedias.length === 0 && (
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
           <p className="text-muted-foreground">No hay imágenes seleccionadas</p>
           <p className="text-sm text-muted-foreground mt-1">Haz clic en "Añadir imágenes" para comenzar</p>

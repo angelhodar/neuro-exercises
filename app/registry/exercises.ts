@@ -53,6 +53,17 @@ import {
 import { StimulusCountExercise } from "@/components/exercises/stimulus-count/stimulus-count-exercise"
 import { StimulusCountResults } from "@/components/exercises/stimulus-count/stimulus-count-results"
 
+import { OddOneOutExercise } from "@/components/exercises/odd-one-out/odd-one-out-exercise"
+import {
+  OddOneOutConfigFields,
+  OddOneOutConfigForm,
+} from "@/components/exercises/odd-one-out/odd-one-out-config-form"
+import {
+  oddOneOutConfigSchema,
+  defaultOddOneOutConfig,
+} from "@/components/exercises/odd-one-out/odd-one-out-schema"
+import { OddOneOutResults } from "@/components/exercises/odd-one-out/odd-one-out-results"
+
 export type AnyExerciseEntry = {
   schema: ZodTypeAny
   defaultConfig?: any
@@ -117,6 +128,14 @@ export const exerciseRegistry = {
     ConfigFieldsComponent: StimulusCountConfigFields,
     ExerciseComponent: StimulusCountExercise,
     ResultsComponent: StimulusCountResults,
+  }),
+  "odd-one-out": createExerciseEntry({
+    schema: oddOneOutConfigSchema,
+    defaultConfig: defaultOddOneOutConfig,
+    ConfigFormComponent: OddOneOutConfigForm,
+    ConfigFieldsComponent: OddOneOutConfigFields,
+    ExerciseComponent: OddOneOutExercise,
+    ResultsComponent: OddOneOutResults,
   }),
 }
 

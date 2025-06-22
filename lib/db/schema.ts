@@ -10,8 +10,9 @@ import {
   uniqueIndex,
   foreignKey,
   boolean,
+  pgMaterializedView,
 } from "drizzle-orm/pg-core"
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from "drizzle-zod"
 import { BaseExerciseConfig } from "../schemas/base-schemas"
 
@@ -184,6 +185,11 @@ export const medias = pgTable("medias", {
   }),
   index("medias_tags_idx").on(table.tags)
 ])
+
+// Materialized view for distinct media tags
+export const mediaTagsView = pgMaterializedView("media_tags", {
+  tag: text("tag").primaryKey(),
+}).as(sql`SELECT DISTINCT unnest(${medias.tags}) AS tag FROM ${medias}`);
 
 // Relations
 export const userRelations = relations(users, ({ many }) => ({

@@ -9,7 +9,7 @@ export default function MediaSearchInput() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedSearchTerm = useDebounce(searchTerm, 200);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
@@ -23,10 +23,10 @@ export default function MediaSearchInput() {
 
   return (
     <Input
-      placeholder="Buscar por etiqueta..."
+      placeholder="Buscar por nombre..."
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}
-      className="max-w-lg"
+      className="max-w-2xl"
     />
   );
 }

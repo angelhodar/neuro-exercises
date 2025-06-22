@@ -126,7 +126,7 @@ export default function CreateExerciseButton() {
                 <FormItem>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descripción (opcional)" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,7 +137,7 @@ export default function CreateExerciseButton() {
               name="thumbnail"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Imagen en miniatura (opcional)</FormLabel>
+                  <FormLabel>Miniatura</FormLabel>
                   <FormControl>
                     <Input
                       type="file"

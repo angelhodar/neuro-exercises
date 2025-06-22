@@ -9,7 +9,6 @@ interface MediaTagsInputProps {
   value?: string[];
   onChange?: (value: string[]) => void;
   placeholder?: string;
-  label?: string;
   disabled?: boolean;
   className?: string;
 }
@@ -21,7 +20,6 @@ export const MediaTagsInput = forwardRef<
   value = [], 
   onChange, 
   placeholder = "Agregar etiqueta...", 
-  label = "Etiquetas",
   disabled = false,
   className 
 }, ref) => {
@@ -38,9 +36,6 @@ export const MediaTagsInput = forwardRef<
       editable
       disabled={disabled}
     >
-      <TagsInput.Label className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-        {label}
-      </TagsInput.Label>
       <div className="flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm focus-within:ring-1 focus-within:ring-zinc-500 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-within:ring-zinc-400">
         {value.map((tag) => (
           <TagsInput.Item

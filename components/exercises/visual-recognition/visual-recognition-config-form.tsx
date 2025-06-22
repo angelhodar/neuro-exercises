@@ -2,16 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm, useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -22,10 +15,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
+import MultiSelectTags from "@/components/ui/templates/multiselect-tags";
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
 import {
   visualRecognitionConfigSchema,
@@ -33,12 +26,6 @@ import {
   visualRecognitionPresets,
   type VisualRecognitionConfig,
 } from "./visual-recognition-schema";
-import {
-  TagsInput,
-  TagsInputInput,
-  TagsInputItem,
-  TagsInputList,
-} from "@/components/ui/tags-input";
 
 interface VisualRecognitionConfigFormProps {
   defaultConfig?: Partial<VisualRecognitionConfig>;
@@ -53,12 +40,12 @@ export function VisualRecognitionConfigFields(
   props: VisualRecognitionConfigFieldsProps
 ) {
   const { basePath = "" } = props;
-  const { control, watch } = useForm();
+  const { control, watch } = useFormContext();
 
-  const imagesPerQuestionPath = `${basePath}imagesPerQuestion` as const;
-  const correctImagesCountPath = `${basePath}correctImagesCount` as const;
-  const showImageNamesPath = `${basePath}showImageNames` as const;
-  const categoriesPath = `${basePath}categories` as const;
+  const imagesPerQuestionPath = `${basePath}imagesPerQuestion`;
+  const correctImagesCountPath = `${basePath}correctImagesCount`;
+  const showImageNamesPath = `${basePath}showImageNames`;
+  const tagsPath = `${basePath}tags`;
 
   const showImageNames = watch(showImageNamesPath);
 
@@ -116,29 +103,19 @@ export function VisualRecognitionConfigFields(
 
       <FormField
         control={control}
-        name={categoriesPath}
+        name={tagsPath}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Etiquetas de las imágenes</FormLabel>
             <FormControl>
-              <TagsInput
+              <MultiSelectTags
                 value={field.value ?? []}
-                onValueChange={(tags) => {
-                  field.onChange(tags);
-                }}
-              >
-                <TagsInputList>
-                  {field.value?.map((tag: string) => (
-                    <TagsInputItem key={tag} value={tag}>
-                      {tag}
-                    </TagsInputItem>
-                  ))}
-                  <TagsInputInput placeholder="Añade etiquetas y presiona Enter..." />
-                </TagsInputList>
-              </TagsInput>
+                onChange={(tags: string[]) => field.onChange(tags)}
+              />
             </FormControl>
             <FormDescription>
-              Añade al menos dos etiquetas para las imágenes que se usarán en el ejercicio.
+              Añade al menos 2 etiquetas para las imágenes que se usarán en el
+              ejercicio.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -200,9 +177,7 @@ export function VisualRecognitionConfigForm({
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>
-          Reconocimiento Visual
-        </CardTitle>
+        <CardTitle>Reconocimiento Visual</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>

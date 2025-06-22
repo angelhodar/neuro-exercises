@@ -94,7 +94,7 @@ export default function CreateMediaButton() {
                 <FormItem>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descripción (opcional)" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,8 +120,8 @@ export default function CreateMediaButton() {
                 </FormItem>
               )}
             />
-            <Tabs defaultValue="generate" className="mb-4">
-              <TabsList className="w-full flex">
+            <Tabs defaultValue="generate">
+              <TabsList className="w-full flex mb-4">
                 <TabsTrigger value="generate" className="flex-1">
                   Generar con IA
                 </TabsTrigger>

@@ -3,7 +3,7 @@
 import { Buffer } from "buffer";
 import { db } from "@/lib/db";
 import { medias, type Media } from "@/lib/db/schema";
-import { eq, desc, ilike, arrayContains } from "drizzle-orm";
+import { eq, desc, ilike, arrayOverlaps } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { togetherai } from "@ai-sdk/togetherai";
@@ -43,7 +43,7 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
   }
 
   const result = await db.query.medias.findMany({
-    where: arrayContains(medias.tags, tags),
+    where: arrayOverlaps(medias.tags, tags),
   });
 
   return result;

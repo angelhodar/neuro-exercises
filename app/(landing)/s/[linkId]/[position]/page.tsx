@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseResultsCollector } from "./exercise-results";
 
@@ -25,7 +25,7 @@ export default async function ExercisePage({ params }: PageProps) {
 
   if (!config) notFound();
 
-  const exerciseEntry = getExerciseFromRegistry(exercise.slug);
+  const exerciseEntry = getExerciseFromServerRegistry(exercise.slug);
 
   if (!exerciseEntry) notFound();
 

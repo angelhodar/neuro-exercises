@@ -3,7 +3,6 @@
 import { PropsWithChildren } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { z, ZodTypeAny } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,32 +10,37 @@ import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
-import type { ExercisePreset } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 
-interface ExerciseConfigFormProps<TSchema extends ZodTypeAny> extends PropsWithChildren {
+interface ExerciseConfigFormProps extends PropsWithChildren {
+  slug: string;
   title: string;
-  schema: TSchema;
-  defaultValues?: Partial<z.infer<TSchema>>;
-  presets?: Record<ExercisePreset, Partial<z.infer<TSchema>>>;
-  onSubmit?: (config: z.infer<TSchema>) => void;
+  onSubmit?: (config: any) => void;
 }
 
-export function ExerciseConfigForm<TSchema extends ZodTypeAny>({
+export function ExerciseConfigForm({
+  slug,
   title,
-  schema,
-  defaultValues,
-  presets,
   onSubmit,
   children,
-}: ExerciseConfigFormProps<TSchema>) {
+}: ExerciseConfigFormProps) {
   const router = useRouter();
 
-  const form = useForm<z.infer<TSchema>>({
+  const exerciseDetails = getExerciseFromClientRegistry(slug);
+
+  if (!exerciseDetails) {
+    console.error(`No se encontró el ejercicio con slug '${slug}' en el registro.`);
+    return null;
+  }
+
+  const { schema, presets } = exerciseDetails;
+
+  const form = useForm<any>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as z.infer<TSchema>,
+    defaultValues: presets?.easy,
   });
 
-  function handleSubmit(data: z.infer<TSchema>) {
+  function handleSubmit(data: any) {
     try {
       const validatedData = schema.parse(data);
       if (onSubmit) {

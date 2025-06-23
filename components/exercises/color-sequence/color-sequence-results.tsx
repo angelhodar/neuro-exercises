@@ -1,15 +1,11 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ColorSequenceQuestionResult } from "./color-sequence-schema";
 
 interface ColorSequenceResultsProps {
   results: ColorSequenceQuestionResult[];
-  onReset?: () => void;
 }
 
-export function ColorSequenceResults({ results, onReset }: ColorSequenceResultsProps) {
+export function ColorSequenceResults({ results }: ColorSequenceResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length;
   const accuracy = (totalCorrect / results.length) * 100;
 
@@ -75,8 +71,6 @@ export function ColorSequenceResults({ results, onReset }: ColorSequenceResultsP
           </TableBody>
         </Table>
       </div>
-
-      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   );
 } 

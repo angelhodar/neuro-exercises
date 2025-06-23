@@ -1,16 +1,12 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import type { VisualRecognitionQuestionResult } from "./visual-recognition-schema"
 
 interface VisualRecognitionResultsProps {
   results: VisualRecognitionQuestionResult[]
-  onReset?: () => void
 }
 
-export function VisualRecognitionResults({ results, onReset }: VisualRecognitionResultsProps) {
+export function VisualRecognitionResults({ results }: VisualRecognitionResultsProps) {
   // Helper function to calculate accuracy for a result
   function calculateAccuracy(result: VisualRecognitionQuestionResult): number {
     const correctSelections = result.selectedImages.filter((id) => result.correctImages.includes(id)).length
@@ -130,8 +126,6 @@ export function VisualRecognitionResults({ results, onReset }: VisualRecognition
           </TableBody>
         </Table>
       </div>
-
-      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

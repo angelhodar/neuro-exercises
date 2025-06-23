@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
   import { Button } from "@/components/ui/button";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 
 interface PageProps {
   params: Promise<{ linkId: string; position: string }>;
@@ -24,13 +24,11 @@ export default async function ExerciseResultsPage({ params }: PageProps) {
 
   if (!exerciseResults || !exerciseResults.results) notFound();
 
-  const exerciseEntry = getExerciseFromRegistry(exercise.slug);
+  const exerciseEntry = getExerciseFromServerRegistry(exercise.slug);
 
   if (!exerciseEntry) notFound();
 
   const { ResultsComponent } = exerciseEntry;
-
-  
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">

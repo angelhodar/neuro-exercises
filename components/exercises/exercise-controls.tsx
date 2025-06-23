@@ -7,7 +7,7 @@ export function ExerciseControls() {
   const { exerciseState, startExercise, resetExercise } = useExerciseExecution()
 
   return (
-    <div className="flex gap-4 mt-4">
+    <div className="flex gap-4 mt-4 mx-auto">
       {exerciseState === "ready" && <Button onClick={startExercise}>Comenzar Ejercicio</Button>}
       {exerciseState === "executing" && (
         <Button variant="outline" onClick={resetExercise}>

@@ -38,7 +38,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
@@ -46,11 +45,10 @@ import {
   type Exercise,
   type User,
 } from "@/lib/db/schema";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import {
   Stepper,
-  StepperDescription,
   StepperIndicator,
   StepperItem,
   StepperSeparator,
@@ -111,8 +109,8 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
       return;
     }
 
-    const exerciseMeta = getExerciseFromRegistry(exercise.slug);
-    const defaultConfig = exerciseMeta?.defaultConfig || {};
+    const exerciseMeta = getExerciseFromClientRegistry(exercise.slug);
+    const defaultConfig = exerciseMeta?.presets?.easy ?? {};
 
     append({
       exerciseId: exercise.id,
@@ -388,7 +386,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                         const exercise = getExerciseById(field.exerciseId);
                         if (!exercise) return null;
 
-                        const exerciseMeta = getExerciseFromRegistry(
+                        const exerciseMeta = getExerciseFromClientRegistry(
                           field.slug
                         );
                         const ConfigFields =

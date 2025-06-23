@@ -13,15 +13,19 @@ import MediaSelector from "@/components/ui/templates/media-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type OddOneOutConfig } from "./odd-one-out-schema";
 
-export function OddOneOutConfigFields() {
-  const { control, watch } = useFormContext<OddOneOutConfig>();
+interface OddOneOutConfigFieldsProps {
+  basePath?: string;
+}
+
+export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
+  const { control, watch } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "questions",
   });
 
-  const totalQuestions = watch("totalQuestions");
+  const totalQuestions = watch(`${basePath}totalQuestions`);
 
   // Sync the field array with the totalQuestions value
   useEffect(() => {
@@ -52,7 +56,7 @@ export function OddOneOutConfigFields() {
           <CardContent className="space-y-4">
             <FormField
               control={control}
-              name={`questions.${index}.patternMedias`}
+              name={`${basePath}questions.${index}.patternMedias`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Imágenes del patrón</FormLabel>
@@ -68,7 +72,7 @@ export function OddOneOutConfigFields() {
             />
             <FormField
               control={control}
-              name={`questions.${index}.outlierMedia`}
+              name={`${basePath}questions.${index}.outlierMedia`}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Imagen diferente</FormLabel>

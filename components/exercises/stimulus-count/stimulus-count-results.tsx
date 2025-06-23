@@ -1,15 +1,11 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { StimulusCountQuestionResult } from "./stimulus-count-schema"
+import type { StimulusCountQuestionResult } from "./stimulus-count-schema"
 
 interface StimulusCountResultsProps {
   results: StimulusCountQuestionResult[]
-  onReset?: () => void
 }
 
-export function StimulusCountResults({ results, onReset }: StimulusCountResultsProps) {
+export function StimulusCountResults({ results }: StimulusCountResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length
   const accuracy = results.length > 0 ? (totalCorrect / results.length) * 100 : 0
 
@@ -68,8 +64,6 @@ export function StimulusCountResults({ results, onReset }: StimulusCountResultsP
           </TableBody>
         </Table>
       </div>
-
-      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 } 

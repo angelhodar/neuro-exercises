@@ -1,6 +1,6 @@
 import { CreateLinkForm } from "./create-link-form"
 import { getAvailableUsers } from "@/app/actions/users"
-import { getAvailableExercises } from "@/app/actions/exercises"
+import { getExercises } from "@/app/actions/exercises"
 import {
   DashboardHeader,
   DashboardHeaderTitle,
@@ -8,7 +8,7 @@ import {
 } from "@/components/dashboard-header"
 
 export default async function CreateLinkPage() {
-  const [users, exercises] = await Promise.all([getAvailableUsers(), getAvailableExercises()])
+  const [users, exercises] = await Promise.all([getAvailableUsers(), getExercises()])
 
   return (
     <div className="container relative">

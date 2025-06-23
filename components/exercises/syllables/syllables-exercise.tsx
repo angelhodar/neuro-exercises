@@ -126,7 +126,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       {exerciseState === "finished" ? (
-        <SyllablesResults results={results as SyllablesQuestionResult[]} onReset={resetExercise} />
+        <SyllablesResults results={results as SyllablesQuestionResult[]} />
       ) : (
         <>
           <div className="text-center mb-4">

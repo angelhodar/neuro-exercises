@@ -153,7 +153,7 @@ export function VisualRecognitionExerciseClient({
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       {exerciseState === "finished" ? (
-        <VisualRecognitionResults results={results as VisualRecognitionQuestionResult[]} onReset={resetExercise} />
+        <VisualRecognitionResults results={results as VisualRecognitionQuestionResult[]} />
       ) : (
         <>
           <div className="text-center mb-4">

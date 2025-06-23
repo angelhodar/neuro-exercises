@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseControls } from "@/components/exercises/exercise-controls";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
@@ -14,11 +15,13 @@ export default async function Page({ params, searchParams }: PageProps) {
   const { slug } = await params;
   const { config: configString } = await searchParams;
 
-  const exerciseDetails = getExerciseFromRegistry(slug);
+  const exerciseDetails = getExerciseFromServerRegistry(slug);
+  const clientEntry = getExerciseFromClientRegistry(slug);
 
-  if (!exerciseDetails) notFound();
+  if (!exerciseDetails || !clientEntry) notFound();
 
-  const { schema, ConfigFieldsComponent, ExerciseComponent } = exerciseDetails;
+  const { schema, ExerciseComponent } = exerciseDetails;
+  const { ConfigFieldsComponent } = clientEntry;
 
   const exercise = await getExerciseBySlug(slug);
 
@@ -28,7 +31,7 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   if (!config.success)
     return (
-      <ExerciseConfigForm schema={schema} title={exercise.displayName}>
+      <ExerciseConfigForm slug={slug} title={exercise.displayName}>
         <ConfigFieldsComponent />
       </ExerciseConfigForm>
     );

@@ -1,23 +1,14 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-interface QuestionResult {
-  targetCells: number[]
-  selectedCells: number[]
-  reactionTimes: number[]
-}
+import type { ReactionTimeQuestionResult } from "./reaction-time-grid-schema";
 
 interface ExerciseResultsProps {
-  results: QuestionResult[]
-  onReset?: () => void
-  gridSize: number
+  results: ReactionTimeQuestionResult[];
+  gridSize: number;
 }
 
-export function ExerciseResults({ results, onReset, gridSize }: ExerciseResultsProps) {
+export function ExerciseResults({ results, gridSize }: ExerciseResultsProps) {
   // Helper function to check if a result is correct
-  function calculateCorrectSelections(result: QuestionResult): number {
+  function calculateCorrectSelections(result: ReactionTimeQuestionResult): number {
     return result.selectedCells.filter((cell) => result.targetCells.includes(cell)).length
   }
 
@@ -129,8 +120,6 @@ export function ExerciseResults({ results, onReset, gridSize }: ExerciseResultsP
           </TableBody>
         </Table>
       </div>
-
-      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

@@ -1,19 +1,13 @@
 import { z } from "zod";
 import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
-
-const selectedMediaSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  blobKey: z.string(),
-  tags: z.array(z.string())
-});
+import { selectableMediaSchema } from "@/lib/schemas/medias";
 
 // Schema for a single question configuration
 export const oddOneOutQuestionSchema = z.object({
   patternMedias: z
-    .array(selectedMediaSchema)
+    .array(selectableMediaSchema)
     .min(2, "Cada pregunta debe tener al menos 2 imágenes de patrón."),
-  outlierMedia: selectedMediaSchema.nullable(),
+  outlierMedia: selectableMediaSchema,
 });
 
 // Main configuration schema for the exercise
@@ -31,20 +25,19 @@ export const oddOneOutConfigSchema = baseExerciseConfigSchema.extend({
     });
   }
 
-  // Refine 2: Each question must have an outlier selected
-  data.questions.forEach((question, index) => {
-    if (!question.outlierMedia) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Debes seleccionar una imagen 'diferente'.",
-        path: [`questions`, index, 'outlierMedia'],
-      });
-    }
-  });
+  // Refine 2: Cada pregunta debe tener un outlier definido (ya forzado por el schema)
+});
+
+export const oddOneOutResultSchema = z.object({
+  questionIndex: z.number(),
+  isCorrect: z.boolean(),
+  selectedId: z.number(),
+  correctId: z.number(),
 });
 
 export type OddOneOutConfig = z.infer<typeof oddOneOutConfigSchema>;
 export type OddOneOutQuestion = z.infer<typeof oddOneOutQuestionSchema>;
+export type OddOneOutResult = z.infer<typeof oddOneOutResultSchema>;
 
 export const defaultOddOneOutConfig: OddOneOutConfig = {
   totalQuestions: 1, // Start with one question by default
@@ -52,7 +45,7 @@ export const defaultOddOneOutConfig: OddOneOutConfig = {
   questions: [
     {
       patternMedias: [],
-      outlierMedia: null,
+      outlierMedia: { id: 0, name: "", blobKey: "", tags: [] },
     },
   ],
 }; 

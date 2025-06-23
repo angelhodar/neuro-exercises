@@ -1,14 +1,14 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { Media } from "@/lib/db/schema"
+import { SelectableMediaSchema } from "@/lib/schemas/medias"
 
 interface SearchResponse {
-  media: Media[]
+  media: SelectableMediaSchema[]
   success: boolean
 }
 
-const searchMedia = async (query: string): Promise<Media[]> => {
+const searchMedia = async (query: string): Promise<SelectableMediaSchema[]> => {
   const response = await fetch(`/api/media/search?q=${encodeURIComponent(query)}&limit=20`)
 
   if (!response.ok) {

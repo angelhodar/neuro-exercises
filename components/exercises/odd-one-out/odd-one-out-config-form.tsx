@@ -47,7 +47,7 @@ export function OddOneOutConfigFields() {
 
     if (currentLength < targetLength) {
       for (let i = currentLength; i < targetLength; i++) {
-        append({ patternMedias: [], outlierMedia: null });
+        append({ patternMedias: [], outlierMedia: { id: 0, name: "", blobKey: "", tags: [] } });
       }
     } else if (currentLength > targetLength) {
       for (let i = currentLength; i > targetLength; i--) {
@@ -91,7 +91,7 @@ export function OddOneOutConfigFields() {
                     <MediaSelector
                       selectedMedias={field.value ? [field.value] : []}
                       onMediasChange={(medias) =>
-                        field.onChange(medias[0] || null)
+                        field.onChange(medias[0] || { id: 0, name: "", blobKey: "", tags: [] })
                       }
                       selectionMode="single"
                     />
@@ -149,7 +149,7 @@ export function OddOneOutConfigForm({
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Configurar Ejercicio: Odd-One-Out</CardTitle>
+        <CardTitle>¿Cual te has dejado?</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>

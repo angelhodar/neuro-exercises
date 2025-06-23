@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
@@ -8,7 +9,7 @@ import type { Exercise } from "@/lib/db/schema";
 import {
   createExerciseSchema,
   CreateExerciseSchema,
-} from "@/lib/schemas/exercises";
+} from "@/lib/schemas/exercises"
 
 export async function getExercises() {
   const allExercises = await db.query.exercises.findMany({
@@ -70,6 +71,8 @@ export async function createExercise(
         thumbnailUrl: thumbnailPath,
       })
       .returning();
+
+    revalidatePath("/dashboard");
     return created || null;
   } catch (error) {
     console.error("Error al crear el ejercicio:", error);

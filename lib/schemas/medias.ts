@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+export const selectableMediaSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  blobKey: z.string(),
+  tags: z.array(z.string())
+});
+
+export type SelectableMediaSchema = z.infer<typeof selectableMediaSchema>;
+
 export const createMediaSchema = z
   .object({
     name: z.string().min(1, "El nombre es obligatorio"),

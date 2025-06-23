@@ -3,17 +3,16 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useMediaSearch } from "@/hooks/use-media-search"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Search, Plus, Loader2 } from "lucide-react"
-import { Media } from "@/lib/db/schema"
 import MediaCard from "./media-card"
+import { SelectableMediaSchema } from "@/lib/schemas/medias"
 
 interface MediaSelectorProps {
-  selectedMedias: Media[]
-  onMediasChange: (medias: Media[]) => void
+  selectedMedias: SelectableMediaSchema[]
+  onMediasChange: (medias: SelectableMediaSchema[]) => void
   selectionMode?: "single" | "multiple"
 }
 
@@ -27,7 +26,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
 
   const { data: searchResults = [], isLoading, error, isFetching } = useMediaSearch(debouncedSearchTerm, isOpen)
 
-  const addMedia = (media: Media) => {
+  const addMedia = (media: SelectableMediaSchema) => {
     if (selectionMode === "single") {
       onMediasChange([media])
       setIsOpen(false) // Close dialog on selection

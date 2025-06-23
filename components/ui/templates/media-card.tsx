@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { createMediaUrl } from "@/lib/utils";
-import { Media } from "@/lib/db/schema";
+import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 interface MediaCardProps {
-  media: Media;
+  media: SelectableMediaSchema;
   variant?: "default" | "selectable" | "preview";
   isSelected?: boolean;
   onSelect?: () => void;

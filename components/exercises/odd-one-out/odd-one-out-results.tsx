@@ -8,18 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, XCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-// Assuming results are passed like this from the exercise link context
-interface Result {
-  questionIndex: number;
-  isCorrect: boolean;
-  selectedId: number;
-  correctId: number;
-}
+import { OddOneOutResult } from "./odd-one-out-schema";
 
 interface OddOneOutResultsProps {
-  results: Result[];
+  results: OddOneOutResult[];
 }
 
 export function OddOneOutResults({ results }: OddOneOutResultsProps) {

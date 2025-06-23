@@ -7,7 +7,9 @@ export const oddOneOutQuestionSchema = z.object({
   patternMedias: z
     .array(selectableMediaSchema)
     .min(2, "Cada pregunta debe tener al menos 2 imágenes de patrón."),
-  outlierMedia: selectableMediaSchema,
+  outlierMedia: z
+  .array(selectableMediaSchema)
+  .max(1, "Cada pregunta debe tener máximo una imagen diferente."),
 });
 
 // Main configuration schema for the exercise
@@ -26,6 +28,22 @@ export const oddOneOutConfigSchema = baseExerciseConfigSchema.extend({
   }
 
   // Refine 2: Cada pregunta debe tener un outlier definido (ya forzado por el schema)
+  if (data.questions.some(question => question.outlierMedia.length !== 1)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Cada pregunta debe tener un outlier definido.",
+      path: ["questions"],
+    });
+  }
+
+  // Refine 3: Cada pregunta debe tener al menos 2 imágenes de patrón
+  if (data.questions.some(question => question.patternMedias.length < 2)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Cada pregunta debe tener al menos 2 imágenes de patrón.",
+      path: ["questions"],
+    });
+  }
 });
 
 export const oddOneOutResultSchema = z.object({
@@ -40,12 +58,12 @@ export type OddOneOutQuestion = z.infer<typeof oddOneOutQuestionSchema>;
 export type OddOneOutResult = z.infer<typeof oddOneOutResultSchema>;
 
 export const defaultOddOneOutConfig: OddOneOutConfig = {
-  totalQuestions: 1, // Start with one question by default
+  totalQuestions: 10,
   timeLimitPerQuestion: 0,
   questions: [
     {
       patternMedias: [],
-      outlierMedia: { id: 0, name: "", blobKey: "", tags: [] },
+      outlierMedia: []
     },
   ],
 }; 

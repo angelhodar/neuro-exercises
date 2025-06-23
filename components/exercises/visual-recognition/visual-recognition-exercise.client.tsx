@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useExerciseExecution } from "@/contexts/exercise-context";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -211,8 +211,6 @@ export function VisualRecognitionExerciseClient({
               </div>
             </div>
           )}
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
       )}
     </div>

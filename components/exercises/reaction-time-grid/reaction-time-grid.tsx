@@ -1,9 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useExerciseExecution } from "@/contexts/exercise-context"
+import { useExerciseExecution } from "@/hooks/use-exercise-execution"
 import { Cell } from "./cell"
-import { ExerciseControls } from "../exercise-controls"
 import { ExerciseResults } from "./exercise-results"
 import type { ReactionTimeGridConfig, ReactionTimeQuestionResult } from "./reaction-time-grid-schema"
 
@@ -146,13 +145,7 @@ export function ReactionTimeGrid({ config }: ReactionTimeGridProps) {
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
-      {exerciseState === "finished" ? (
-        <ExerciseResults
-          results={results as ReactionTimeQuestionResult[]}
-          onReset={resetExercise}
-          gridSize={gridSize}
-        />
-      ) : (
+      {exerciseState === "executing" ? (
         <>
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold mb-2">Prueba de Tiempo de Reacción</h2>
@@ -178,9 +171,9 @@ export function ReactionTimeGrid({ config }: ReactionTimeGridProps) {
               />
             ))}
           </div>
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
+      ) : (
+        <ExerciseResults results={results as ReactionTimeQuestionResult[]} gridSize={config.gridSize} />
       )}
     </div>
   )

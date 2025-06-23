@@ -27,7 +27,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { UserDropdown } from "@/components/user-dropdown";
+import { UserDropdown } from "./user-dropdown";
 
 const data = {
   navMain: [

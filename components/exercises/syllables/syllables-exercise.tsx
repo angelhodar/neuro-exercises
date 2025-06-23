@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useExerciseExecution } from "@/contexts/exercise-context"
+import { useExerciseExecution } from "@/hooks/use-exercise-execution"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ExerciseControls } from "../exercise-controls"
@@ -123,8 +123,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     }
   }, [currentQuestionIndex, exerciseState])
 
-  // Cleanup on unmount (no timer to clear)
-
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       {exerciseState === "finished" ? (
@@ -191,8 +189,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
               </Card>
             </div>
           )}
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
       )}
     </div>

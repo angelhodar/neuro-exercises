@@ -1,35 +1,18 @@
 "use client";
 
-import { useFieldArray, useForm, useFormContext } from "react-hook-form";
+import { useEffect } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import MediaSelector from "@/components/ui/templates/media-selector";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Form } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import {
-  oddOneOutConfigSchema,
-  defaultOddOneOutConfig,
-  type OddOneOutConfig,
-} from "./odd-one-out-schema";
-import { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type OddOneOutConfig } from "./odd-one-out-schema";
 
-// This component now syncs its fields based on the 'totalQuestions' value
 export function OddOneOutConfigFields() {
   const { control, watch } = useFormContext<OddOneOutConfig>();
 
@@ -47,7 +30,10 @@ export function OddOneOutConfigFields() {
 
     if (currentLength < targetLength) {
       for (let i = currentLength; i < targetLength; i++) {
-        append({ patternMedias: [], outlierMedia: { id: 0, name: "", blobKey: "", tags: [] } });
+        append({
+          patternMedias: [],
+          outlierMedia: [],
+        });
       }
     } else if (currentLength > targetLength) {
       for (let i = currentLength; i > targetLength; i--) {
@@ -55,7 +41,6 @@ export function OddOneOutConfigFields() {
       }
     }
   }, [totalQuestions, fields.length, append, remove]);
-
 
   return (
     <div className="space-y-6">
@@ -89,10 +74,8 @@ export function OddOneOutConfigFields() {
                   <FormLabel>Imagen diferente</FormLabel>
                   <FormControl>
                     <MediaSelector
-                      selectedMedias={field.value ? [field.value] : []}
-                      onMediasChange={(medias) =>
-                        field.onChange(medias[0] || { id: 0, name: "", blobKey: "", tags: [] })
-                      }
+                      selectedMedias={field.value ?? []}
+                      onMediasChange={field.onChange}
                       selectionMode="single"
                     />
                   </FormControl>
@@ -106,68 +89,3 @@ export function OddOneOutConfigFields() {
     </div>
   );
 }
-
-// Full form component no longer needs to sync totalQuestions from the array
-interface OddOneOutConfigFormProps {
-  defaultConfig?: Partial<OddOneOutConfig>;
-  onSubmit?: (config: OddOneOutConfig) => void;
-}
-
-export function OddOneOutConfigForm({
-  defaultConfig,
-  onSubmit,
-}: OddOneOutConfigFormProps) {
-  const router = useRouter();
-
-  const form = useForm<OddOneOutConfig>({
-    resolver: zodResolver(oddOneOutConfigSchema),
-    defaultValues: {
-      ...defaultOddOneOutConfig,
-      ...defaultConfig,
-    },
-  });
-
-  function handleSubmit(data: OddOneOutConfig) {
-    try {
-      const validatedData = oddOneOutConfigSchema.parse(data);
-      if (onSubmit) {
-        onSubmit(validatedData);
-        return;
-      }
-      const params = new URLSearchParams();
-      params.set("config", JSON.stringify(validatedData));
-      router.push(`?${params.toString()}`);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
-  }
-
-  function handleError(error: any) {
-    console.error("Error submitting form:", error);
-  }
-
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>¿Cual te has dejado?</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit, handleError)}
-            className="space-y-6"
-          >
-            <Separator />
-            <ExerciseBaseFields />
-            <Separator />
-            <OddOneOutConfigFields />
-            <Separator />
-            <div className="flex justify-end">
-              <Button type="submit">Comenzar Ejercicio</Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-} 

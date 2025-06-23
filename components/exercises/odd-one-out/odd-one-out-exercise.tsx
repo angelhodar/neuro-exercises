@@ -14,7 +14,7 @@ export async function OddOneOutExercise({ config }: OddOneOutExerciseProps) {
     new Set(
       config.questions.flatMap((q) => [
         ...q.patternMedias.map((m) => m.id),
-        q.outlierMedia.id,
+        ...q.outlierMedia.map((m) => m.id),
       ])
     )
   )

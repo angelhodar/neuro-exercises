@@ -2,7 +2,7 @@
 
 import React from "react"
 import { useEffect, useRef, useState } from "react"
-import { useExerciseExecution } from "@/contexts/exercise-context"
+import { useExerciseExecution } from "@/hooks/use-exercise-execution"
 import { ExerciseControls } from "@/components/exercises/exercise-controls"
 import { StimulusCountResults } from "./stimulus-count-results"
 import type {
@@ -118,8 +118,6 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
               />
             )}
           </div>
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
       )}
     </div>

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       media,
-      success: true
+      success: true,
     });
   } catch (error) {
     console.error("Error searching media:", error);
@@ -25,4 +25,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

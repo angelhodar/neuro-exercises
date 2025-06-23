@@ -6,7 +6,7 @@ import MediaCard from "@/components/ui/templates/media-card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
-import { useExerciseExecution } from "@/contexts/exercise-context";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { OddOneOutResults } from "./odd-one-out-results";
 import { ExerciseControls } from "@/components/exercises/exercise-controls";
 
@@ -42,11 +42,11 @@ export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseCli
     config.questions.map((q) => {
       const options = [
         ...q.patternMedias.map((m) => mediaMap[m.id]),
-        mediaMap[q.outlierMedia.id],
+        ...q.outlierMedia.map((m) => mediaMap[m.id]),
       ];
       return {
         options,
-        correctAnswerId: q.outlierMedia.id,
+        correctAnswerId: q.outlierMedia[0].id,
       };
     }),
     [config, mediaMap]
@@ -137,7 +137,6 @@ export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseCli
           </Button>
         )}
       </div>
-      <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
     </div>
   );
 } 

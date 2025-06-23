@@ -10,6 +10,9 @@ export async function POST(request: Request) {
     await saveExerciseResults(exerciseItemId, results);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: "Error guardando resultados" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error guardando resultados" },
+      { status: 500 }
+    );
   }
-} 
+}

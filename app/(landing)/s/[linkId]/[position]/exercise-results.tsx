@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useExerciseExecution } from "@/contexts/exercise-context";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 
 interface ExerciseResultsCollectorProps {
   exerciseItemId: number;

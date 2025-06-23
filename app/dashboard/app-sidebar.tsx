@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   Palette,
   Circle,
+  ScanSearch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,7 +27,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { UserDropdown } from "@/components/user-dropdown";
+import { UserDropdown } from "./user-dropdown";
 
 const data = {
   navMain: [
@@ -61,6 +62,11 @@ const data = {
       title: "Conteo de estímulos",
       url: "/dashboard/exercises/stimulus-count",
       icon: Circle,
+    },
+    {
+      title: "¿Cual te has dejado?",
+      url: "/dashboard/exercises/odd-one-out",
+      icon: ScanSearch,
     },
   ],
   management: [

@@ -19,19 +19,13 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { categories, categoryDisplayNames } from "@/lib/medias/generate";
 import { createMediaSchema, CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadMedia } from "@/app/actions/media";
+import { MediaTagsInput } from "@/components/ui/templates/media-tags";
 
 export default function CreateMediaButton() {
   const [open, setOpen] = useState(false);
@@ -43,7 +37,7 @@ export default function CreateMediaButton() {
       name: "",
       description: "",
       prompt: "",
-      category: categories[0],
+      tags: [],
       file: undefined,
     },
   });
@@ -100,7 +94,7 @@ export default function CreateMediaButton() {
                 <FormItem>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descripción (opcional)" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,34 +102,26 @@ export default function CreateMediaButton() {
             />
             <FormField
               control={form.control}
-              name="category"
+              name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categoría</FormLabel>
+                  <FormLabel>Etiquetas</FormLabel>
                   <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      defaultValue={categories[0]}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecciona una categoría" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {categoryDisplayNames[cat]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <MediaTagsInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      placeholder="Añadir etiqueta..."
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Selecciona las etiquetas para esta imagen
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Tabs defaultValue="generate" className="mb-4">
-              <TabsList className="w-full flex">
+            <Tabs defaultValue="generate">
+              <TabsList className="w-full flex mb-4">
                 <TabsTrigger value="generate" className="flex-1">
                   Generar con IA
                 </TabsTrigger>

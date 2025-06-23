@@ -1,14 +1,11 @@
 import { z } from "zod"
 import { baseExerciseConfigSchema, type ExercisePreset } from "@/lib/schemas/base-schemas"
-import { categoryDisplayNames } from "@/lib/medias/generate"
-
-export type ImageCategory = keyof typeof categoryDisplayNames;
 
 export type ImageData = {
   id: string
   name: string
   url: string
-  category: ImageCategory
+  tags: string[]
 }
 
 // Visual recognition specific configuration schema
@@ -23,9 +20,9 @@ export const visualRecognitionSpecificConfigSchema = z.object({
     .min(1, "Mínimo 1 imagen correcta")
     .max(6, "Máximo 6 imágenes correctas")
     .int("El número de imágenes correctas debe ser un número entero"),
-  categories: z
-    .array(z.enum(Object.keys(categoryDisplayNames) as [string, ...string[]]))
-    .min(2, "Selecciona al menos 2 categorías"),
+  tags: z
+    .array(z.string())
+    .min(2, "Selecciona al menos 2 etiquetas"),
   showImageNames: z.boolean(),
 })
 
@@ -43,13 +40,13 @@ export function visualRecognitionConfigRefinements(
     })
   }
 
-  const distractorCategoriesCount = data.categories.length - 1 // Exclude target category
+  const distractorTagsCount = data.tags.length - 1 // Exclude target tag
 
-  if (distractorCategoriesCount === 0) {
+  if (distractorTagsCount === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Se necesitan al menos 2 categorías para generar imágenes distractoras",
-      path: ["categories"],
+      message: "Se necesitan al menos 2 etiquetas para generar imágenes distractoras",
+      path: ["tags"],
     })
   }
 }
@@ -61,7 +58,7 @@ export const visualRecognitionConfigSchema = baseExerciseConfigSchema
 
 // Question result schema
 export const visualRecognitionQuestionResultSchema = z.object({
-  targetCategory: z.string(),
+  targetTag: z.string(),
   correctImages: z.array(z.string()), // Image IDs
   selectedImages: z.array(z.string()), // Image IDs
   timeSpent: z.number().min(0),
@@ -89,7 +86,7 @@ export type VisualRecognitionExerciseResults = z.infer<typeof visualRecognitionE
 export const defaultVisualRecognitionConfig: VisualRecognitionConfig = {
   imagesPerQuestion: 6,
   correctImagesCount: 2,
-  categories: ["animals", "food"],
+  tags: ["animal", "comida"],
   timeLimitPerQuestion: 20,
   showImageNames: true,
   totalQuestions: 10,
@@ -101,7 +98,7 @@ export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionC
     imagesPerQuestion: 4,
     correctImagesCount: 2,
     timeLimitPerQuestion: 20,
-    categories: ["animals", "food"],
+    tags: ["animal", "comida"],
     showImageNames: true,
     totalQuestions: 5,
   },
@@ -109,7 +106,7 @@ export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionC
     imagesPerQuestion: 6,
     correctImagesCount: 2,
     timeLimitPerQuestion: 10,
-    categories: ["animals", "food", "vehicles"],
+    tags: ["animal", "comida", "ropa"],
     showImageNames: true,
     totalQuestions: 10,
   },
@@ -117,7 +114,7 @@ export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionC
     imagesPerQuestion: 8,
     correctImagesCount: 3,
     timeLimitPerQuestion: 5,
-    categories: ["animals", "food", "vehicles", "furniture"],
+    tags: ["animal", "comida", "ropa"],
     showImageNames: false,
     totalQuestions: 15,
   },
@@ -125,7 +122,7 @@ export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionC
     imagesPerQuestion: 10,
     correctImagesCount: 4,
     timeLimitPerQuestion: 2,
-    categories: ["animals", "food", "vehicles", "furniture"],
+    tags: ["animal", "comida", "ropa", "mueble"],
     showImageNames: false,
     totalQuestions: 20,
   },

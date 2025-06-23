@@ -1,29 +1,47 @@
 import { notFound } from "next/navigation";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
-import { ExerciseProvider } from "@/contexts/exercise-context";
+import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import { ExerciseProvider } from "@/hooks/use-exercise-execution";
+import { ExerciseControls } from "@/components/exercises/exercise-controls";
+import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
+import { getExerciseBySlug } from "@/app/actions/exercises";
 
 interface PageProps {
-    params: Promise<{ slug: string }>;
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function Page({ params, searchParams }: PageProps) {
-    const { slug } = await params;
-    const { config: configString } = await searchParams;
+  const { slug } = await params;
+  const { config: configString } = await searchParams;
 
-    const exerciseDetails = getExerciseFromRegistry(slug);
+  const exerciseDetails = getExerciseFromServerRegistry(slug);
+  const clientEntry = getExerciseFromClientRegistry(slug);
 
-    if (!exerciseDetails) notFound();
+  if (!exerciseDetails || !clientEntry) notFound();
 
-    const { schema, ConfigFormComponent, ExerciseComponent } = exerciseDetails
+  const { schema, ExerciseComponent } = exerciseDetails;
+  const { ConfigFieldsComponent } = clientEntry;
 
-    const config = schema.safeParse(JSON.parse(configString as string || "{}"));
+  const exercise = await getExerciseBySlug(slug);
 
-    if (!config.success) return <ConfigFormComponent />;
+  if (!exercise) notFound();
 
-    const parsedConfig = config.data;
+  const config = schema.safeParse(JSON.parse((configString as string) || "{}"));
 
-    return (<ExerciseProvider totalQuestions={parsedConfig.totalQuestions}>
-        <ExerciseComponent config={config.data} />
-    </ExerciseProvider>)
-} 
+  if (!config.success)
+    return (
+      <ExerciseConfigForm slug={slug} title={exercise.displayName}>
+        <ConfigFieldsComponent />
+      </ExerciseConfigForm>
+    );
+
+  const parsedConfig = config.data;
+
+  return (
+    <ExerciseProvider totalQuestions={parsedConfig.totalQuestions}>
+      <ExerciseComponent config={parsedConfig} />
+      <ExerciseControls />
+    </ExerciseProvider>
+  );
+}

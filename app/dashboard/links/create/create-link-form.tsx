@@ -38,7 +38,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
@@ -46,11 +45,10 @@ import {
   type Exercise,
   type User,
 } from "@/lib/db/schema";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import {
   Stepper,
-  StepperDescription,
   StepperIndicator,
   StepperItem,
   StepperSeparator,
@@ -111,8 +109,8 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
       return;
     }
 
-    const exerciseMeta = getExerciseFromRegistry(exercise.slug);
-    const defaultConfig = exerciseMeta?.defaultConfig || {};
+    const exerciseMeta = getExerciseFromClientRegistry(exercise.slug);
+    const defaultConfig = exerciseMeta?.presets?.easy ?? {};
 
     append({
       exerciseId: exercise.id,
@@ -346,14 +344,11 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                             <h4 className="font-medium">
                               {exercise.displayName}
                             </h4>
-                            {exercise.description && (
+                            {exercise.tags && exercise.tags.length > 0 && (
                               <p className="text-sm text-muted-foreground">
-                                {exercise.description}
+                                {exercise.tags.join(", ")}
                               </p>
                             )}
-                            <Badge variant="secondary" className="mt-2">
-                              {exercise.category}
-                            </Badge>
                           </div>
                           <Button
                             type="button"
@@ -391,7 +386,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                         const exercise = getExerciseById(field.exerciseId);
                         if (!exercise) return null;
 
-                        const exerciseMeta = getExerciseFromRegistry(
+                        const exerciseMeta = getExerciseFromClientRegistry(
                           field.slug
                         );
                         const ConfigFields =
@@ -422,9 +417,6 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                                 <span className="text-lg font-medium">
                                   {exercise.displayName}
                                 </span>
-                                <Badge variant="outline">
-                                  {exercise.category}
-                                </Badge>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>

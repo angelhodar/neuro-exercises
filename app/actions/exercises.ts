@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
@@ -8,20 +9,15 @@ import type { Exercise } from "@/lib/db/schema";
 import {
   createExerciseSchema,
   CreateExerciseSchema,
-} from "@/lib/schemas/exercises";
-import { createExercisePR } from "@/app/actions/github";
+} from "@/lib/schemas/exercises"
+import { createExercisePR } from "./github";
 
-export async function getAvailableExercises(): Promise<Exercise[]> {
-  try {
-    const allExercises = await db.query.exercises.findMany({
-      orderBy: [exercises.category, exercises.displayName],
-    });
+export async function getExercises() {
+  const allExercises = await db.query.exercises.findMany({
+    orderBy: [exercises.displayName],
+  });
 
-    return allExercises;
-  } catch (error) {
-    console.error("Error getting available exercises:", error);
-    throw error;
-  }
+  return allExercises;
 }
 
 export async function getExerciseById(id: number): Promise<Exercise | null> {
@@ -80,6 +76,7 @@ export async function createExercise(
 
     if (created && prompt) await createExercisePR(created, prompt);
 
+    revalidatePath("/dashboard");
     return created || null;
   } catch (error) {
     console.error("Error al crear el ejercicio:", error);

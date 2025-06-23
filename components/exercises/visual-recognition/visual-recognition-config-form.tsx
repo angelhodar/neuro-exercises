@@ -1,18 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useForm, useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { useFormContext } from "react-hook-form";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -21,24 +10,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
-import { categoryDisplayNames } from "@/lib/medias/generate";
-import {
-  visualRecognitionConfigSchema,
-  defaultVisualRecognitionConfig,
-  visualRecognitionPresets,
-  type VisualRecognitionConfig,
-  type ImageCategory,
-} from "./visual-recognition-schema";
-
-interface VisualRecognitionConfigFormProps {
-  defaultConfig?: Partial<VisualRecognitionConfig>;
-  onSubmit?: (config: VisualRecognitionConfig) => void;
-}
+import MultiSelectTags from "@/components/ui/templates/multiselect-tags";
 
 interface VisualRecognitionConfigFieldsProps {
   basePath?: string;
@@ -50,10 +23,10 @@ export function VisualRecognitionConfigFields(
   const { basePath = "" } = props;
   const { control, watch } = useFormContext();
 
-  const imagesPerQuestionPath = `${basePath}imagesPerQuestion` as const;
-  const correctImagesCountPath = `${basePath}correctImagesCount` as const;
-  const showImageNamesPath = `${basePath}showImageNames` as const;
-  const categoriesPath = `${basePath}categories` as const;
+  const imagesPerQuestionPath = `${basePath}imagesPerQuestion`;
+  const correctImagesCountPath = `${basePath}correctImagesCount`;
+  const showImageNamesPath = `${basePath}showImageNames`;
+  const tagsPath = `${basePath}tags`;
 
   const showImageNames = watch(showImageNamesPath);
 
@@ -111,39 +84,20 @@ export function VisualRecognitionConfigFields(
 
       <FormField
         control={control}
-        name={categoriesPath}
+        name={tagsPath}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Categorías de imágenes</FormLabel>
-            <div className="grid grid-cols-2 gap-4">
-              {(Object.keys(categoryDisplayNames) as ImageCategory[]).map(
-                (category) => (
-                  <div
-                    key={category}
-                    className="flex flex-row items-start space-x-3 space-y-0"
-                  >
-                    <Checkbox
-                      checked={field.value?.includes(category)}
-                      onCheckedChange={(checked) => {
-                        const currentValue = field.value || [];
-                        return checked
-                          ? field.onChange([...currentValue, category])
-                          : field.onChange(
-                              currentValue.filter(
-                                (value: string) => value !== category
-                              )
-                            );
-                      }}
-                    />
-                    <div className="space-y-1 leading-none">
-                      <label className="text-sm font-normal">
-                        {categoryDisplayNames[category]}
-                      </label>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
+            <FormLabel>Etiquetas de las imágenes</FormLabel>
+            <FormControl>
+              <MultiSelectTags
+                value={field.value ?? []}
+                onChange={(tags: string[]) => field.onChange(tags)}
+              />
+            </FormControl>
+            <FormDescription>
+              Añade al menos 2 etiquetas para las imágenes que se usarán en el
+              ejercicio.
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -169,63 +123,5 @@ export function VisualRecognitionConfigFields(
         )}
       />
     </div>
-  );
-}
-
-export function VisualRecognitionConfigForm({
-  defaultConfig,
-  onSubmit,
-}: VisualRecognitionConfigFormProps) {
-  const router = useRouter();
-
-  const form = useForm({
-    resolver: zodResolver(visualRecognitionConfigSchema),
-    defaultValues: {
-      ...defaultVisualRecognitionConfig,
-      ...defaultConfig,
-    },
-  });
-
-  function handleSubmit(data: VisualRecognitionConfig) {
-    try {
-      const validatedData = visualRecognitionConfigSchema.parse(data);
-      if (onSubmit) {
-        onSubmit(validatedData);
-        return;
-      }
-      const params = new URLSearchParams();
-      params.set("config", JSON.stringify(validatedData));
-      router.push(`?${params.toString()}`);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>
-          Reconocimiento Visual
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
-            <ExerciseConfigPresetSelector presets={visualRecognitionPresets} />
-            <Separator />
-            <ExerciseBaseFields />
-            <Separator />
-            <VisualRecognitionConfigFields />
-            <Separator />
-            <div className="flex justify-end">
-              <Button type="submit">Comenzar Ejercicio</Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
   );
 }

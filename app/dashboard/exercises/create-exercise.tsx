@@ -22,16 +22,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+import { TagsInput, TagsInputInput, TagsInputItem, TagsInputList } from "@/components/ui/tags-input";
 import { createExerciseSchema, CreateExerciseSchema } from "@/lib/schemas/exercises";
 import { createExercise } from "@/app/actions/exercises";
-import { categories, categoryDisplayNames } from "@/lib/medias/generate";
 
 export default function CreateExerciseButton() {
   const [open, setOpen] = useState(false);
@@ -42,7 +35,7 @@ export default function CreateExerciseButton() {
     defaultValues: {
       slug: "",
       displayName: "",
-      category: categories[0],
+      tags: [],
       description: "",
       prompt: "",
       thumbnail: undefined,
@@ -105,27 +98,24 @@ export default function CreateExerciseButton() {
             />
             <FormField
               control={form.control}
-              name="category"
+              name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Categoría</FormLabel>
+                  <FormLabel>Etiquetas</FormLabel>
                   <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      defaultValue={categories[0]}
+                    <TagsInput
+                      value={field.value ?? []}
+                      onValueChange={(tags) => field.onChange(tags)}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecciona una categoría" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {categoryDisplayNames[cat]}
-                          </SelectItem>
+                      <TagsInputList>
+                        {(field.value ?? []).map((tag: string) => (
+                          <TagsInputItem key={tag} value={tag}>
+                            {tag}
+                          </TagsInputItem>
                         ))}
-                      </SelectContent>
-                    </Select>
+                        <TagsInputInput placeholder="Añade etiquetas..." />
+                      </TagsInputList>
+                    </TagsInput>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +128,7 @@ export default function CreateExerciseButton() {
                 <FormItem>
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descripción (opcional)" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -162,7 +152,7 @@ export default function CreateExerciseButton() {
               name="thumbnail"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Imagen en miniatura (opcional)</FormLabel>
+                  <FormLabel>Miniatura</FormLabel>
                   <FormControl>
                     <Input
                       type="file"

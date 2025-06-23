@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useExerciseExecution } from "@/contexts/exercise-context";
-import { ExerciseControls } from "@/components/exercises/exercise-controls";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { ColorSequenceResults } from "./color-sequence-results";
 import type {
   ColorSequenceConfig,
@@ -41,8 +40,6 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
     exerciseState,
     currentQuestionIndex,
     addQuestionResult,
-    startExercise,
-    resetExercise,
     results,
   } = useExerciseExecution();
 
@@ -166,9 +163,7 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
-      {exerciseState === "finished" ? (
-        <ColorSequenceResults results={results as ColorSequenceQuestionResult[]} onReset={resetExercise} />
-      ) : (
+      {exerciseState !== "finished" && (
         <>
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold mb-2">Secuencia de Colores</h2>
@@ -202,9 +197,10 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
               })}
             </div>
           )}
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
+      )}
+      {exerciseState === "finished" && (
+        <ColorSequenceResults results={results as ColorSequenceQuestionResult[]} />
       )}
     </div>
   );

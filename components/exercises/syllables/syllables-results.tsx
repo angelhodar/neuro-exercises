@@ -1,15 +1,11 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { SyllablesQuestionResult } from "./syllables-schema"
 
 interface SyllablesResultsProps {
   results: SyllablesQuestionResult[]
-  onReset?: () => void
 }
 
-export function SyllablesResults({ results, onReset }: SyllablesResultsProps) {
+export function SyllablesResults({ results }: SyllablesResultsProps) {
   // Helper function to check if a result is correct (inferred from syllables match)
   function isCorrect(result: SyllablesQuestionResult): boolean {
     return result.selectedSyllables.join("") === result.targetSyllables.join("")
@@ -100,8 +96,6 @@ export function SyllablesResults({ results, onReset }: SyllablesResultsProps) {
           </TableBody>
         </Table>
       </div>
-
-      {onReset && <Button onClick={onReset}>Intentar de Nuevo</Button>}
     </div>
   )
 }

@@ -10,8 +10,9 @@ import {
   uniqueIndex,
   foreignKey,
   boolean,
+  pgMaterializedView,
 } from "drizzle-orm/pg-core"
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from "drizzle-zod"
 import { BaseExerciseConfig } from "../schemas/base-schemas"
 
@@ -75,20 +76,22 @@ export const verifications = pgTable("verifications", {
   ...timestamps,
 })
 
-// Your existing tables with updated foreign key references
 export const exercises = pgTable(
   "exercises",
   {
     id: serial().primaryKey(),
     slug: varchar({ length: 100 }).notNull().unique(),
     displayName: varchar("display_name", { length: 255 }).notNull(),
-    category: varchar({ length: 100 }).notNull(),
+    tags: text("tags").array().notNull().default([]),
     description: text(),
     prNumber: integer("pr_number"),
     thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     ...timestamps,
   },
-  (table) => [uniqueIndex("exercises_slug_idx").on(table.slug), index("exercises_category_idx").on(table.category)],
+  (table) => [
+    uniqueIndex("exercises_slug_idx").on(table.slug), 
+    index("exercises_tags_idx").on(table.tags)
+  ],
 )
 
 export const exerciseLinks = pgTable(
@@ -171,7 +174,7 @@ export const medias = pgTable("medias", {
   id: serial().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  category: varchar("category", { length: 100 }).notNull(),
+  tags: text("tags").array().default([]),
   blobKey: varchar("blob_key", { length: 500 }).notNull(),
   authorId: text("creator_id").notNull(),
   ...timestamps
@@ -180,8 +183,14 @@ export const medias = pgTable("medias", {
     columns: [table.authorId],
     foreignColumns: [users.id],
     name: "medias_creator_fk"
-  })
+  }),
+  index("medias_tags_idx").on(table.tags)
 ])
+
+// Materialized view for distinct media tags
+export const mediaTagsView = pgMaterializedView("media_tags", {
+  tag: text("tag").primaryKey(),
+}).as(sql`SELECT DISTINCT unnest(${medias.tags}) AS tag FROM ${medias}`);
 
 // Relations
 export const userRelations = relations(users, ({ many }) => ({

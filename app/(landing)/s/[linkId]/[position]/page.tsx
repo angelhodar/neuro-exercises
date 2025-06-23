@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
-import { getExerciseFromRegistry } from "@/app/registry/exercises";
-import { ExerciseProvider } from "@/contexts/exercise-context";
+import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseResultsCollector } from "./exercise-results";
 
 interface PageProps {
@@ -21,11 +21,11 @@ export default async function ExercisePage({ params }: PageProps) {
 
   if (!item) notFound();
 
-  const {exercise, config } = item;
+  const { exercise, config } = item;
 
   if (!config) notFound();
 
-  const exerciseEntry = getExerciseFromRegistry(exercise.slug);
+  const exerciseEntry = getExerciseFromServerRegistry(exercise.slug);
 
   if (!exerciseEntry) notFound();
 
@@ -41,4 +41,4 @@ export default async function ExercisePage({ params }: PageProps) {
       </ExerciseProvider>
     </div>
   );
-} 
+}

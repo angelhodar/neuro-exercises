@@ -2,8 +2,7 @@
 
 import React from "react"
 import { useEffect, useRef, useState } from "react"
-import { useExerciseExecution } from "@/contexts/exercise-context"
-import { ExerciseControls } from "@/components/exercises/exercise-controls"
+import { useExerciseExecution } from "@/hooks/use-exercise-execution"
 import { StimulusCountResults } from "./stimulus-count-results"
 import type {
   StimulusCountConfig,
@@ -96,7 +95,7 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
   return (
     <div className="flex flex-col items-center gap-6 p-4">
       {exerciseState === "finished" ? (
-        <StimulusCountResults results={results as StimulusCountQuestionResult[]} onReset={resetExercise} />
+        <StimulusCountResults results={results as StimulusCountQuestionResult[]} />
       ) : (
         <>
           <div className="text-center mb-4">
@@ -118,8 +117,6 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
               />
             )}
           </div>
-
-          <ExerciseControls exerciseState={exerciseState} onStart={startExercise} onReset={resetExercise} />
         </>
       )}
     </div>

@@ -59,23 +59,25 @@ export function ColorSequenceConfigFields({
           </FormItem>
         )}
       />
-
-      <FormField
-        control={control}
-        name={highlightIntervalPath}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Intervalo de iluminación (ms)</FormLabel>
-            <FormControl>
-              <Input type="number" placeholder="1000" {...field} />
-            </FormControl>
-            <FormDescription>
-              Tiempo entre iluminaciones de cada celda
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      
+      <div className="col-span-full">
+        <FormField
+          control={control}
+          name={highlightIntervalPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Intervalo de iluminación (ms)</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="1000" {...field} />
+              </FormControl>
+              <FormDescription>
+                Tiempo entre iluminaciones de cada celda
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }

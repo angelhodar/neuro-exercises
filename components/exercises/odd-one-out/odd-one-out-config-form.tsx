@@ -10,7 +10,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import MediaSelector from "@/components/ui/templates/media-selector";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 interface OddOneOutConfigFieldsProps {
   basePath?: string;
@@ -46,49 +47,53 @@ export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsPr
   }, [totalQuestions, fields.length, append, remove]);
 
   return (
-    <div className="space-y-6">
+    <Accordion type="multiple" className="space-y-6">
       {fields.map((field, index) => (
-        <Card key={field.id} className="p-4 bg-gray-50/50 dark:bg-gray-900/50">
-          <CardHeader className="flex flex-row items-center justify-between p-2">
-            <CardTitle className="text-lg">Pregunta {index + 1}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 p-2">
-            <FormField
-              control={control}
-              name={`${basePath}questions.${index}.patternMedias`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Imágenes del patrón</FormLabel>
-                  <FormControl>
-                    <MediaSelector
-                      selectedMedias={field.value ?? []}
-                      onMediasChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name={`${basePath}questions.${index}.outlierMedia`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Imagen diferente</FormLabel>
-                  <FormControl>
-                    <MediaSelector
-                      selectedMedias={field.value ?? []}
-                      onMediasChange={field.onChange}
-                      selectionMode="single"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+        <AccordionItem key={field.id} value={`pregunta-${index}`} className="bg-gray-50/50 dark:bg-gray-900/50 rounded-md">
+          <AccordionTrigger className="px-4 text-lg">
+            Pregunta {index + 1}
+          </AccordionTrigger>
+          <AccordionContent>
+            <Card className="p-0 bg-transparent shadow-none border-none">
+              <CardContent className="space-y-4 p-2">
+                <FormField
+                  control={control}
+                  name={`${basePath}questions.${index}.patternMedias`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imágenes del patrón</FormLabel>
+                      <FormControl>
+                        <MediaSelector
+                          selectedMedias={field.value ?? []}
+                          onMediasChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name={`${basePath}questions.${index}.outlierMedia`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagen diferente</FormLabel>
+                      <FormControl>
+                        <MediaSelector
+                          selectedMedias={field.value ?? []}
+                          onMediasChange={field.onChange}
+                          selectionMode="single"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          </AccordionContent>
+        </AccordionItem>
       ))}
-    </div>
+    </Accordion>
   );
 }

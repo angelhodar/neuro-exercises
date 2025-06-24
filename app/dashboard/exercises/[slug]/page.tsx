@@ -4,7 +4,7 @@ import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseControls } from "@/components/exercises/exercise-controls";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
-import { getExerciseBySlug } from "@/app/actions/exercises";
+import { getExercises, getExerciseBySlug } from "@/app/actions/exercises";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -44,4 +44,9 @@ export default async function Page({ params, searchParams }: PageProps) {
       <ExerciseControls />
     </ExerciseProvider>
   );
+}
+
+export async function generateStaticParams() {
+  const exercises = await getExercises();
+  return exercises.map((exercise) => ({ slug: exercise.slug }));
 }

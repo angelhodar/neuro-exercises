@@ -3,6 +3,7 @@
 import { PropsWithChildren } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,12 +36,12 @@ export function ExerciseConfigForm({
 
   const { schema, presets } = exerciseDetails;
 
-  const form = useForm<any>({
+  const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: presets?.easy,
   });
 
-  function handleSubmit(data: any) {
+  function handleSubmit(data: z.infer<typeof schema>) {
     try {
       const validatedData = schema.parse(data);
       if (onSubmit) {

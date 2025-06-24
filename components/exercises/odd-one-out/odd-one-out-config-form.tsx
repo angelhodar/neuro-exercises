@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import MediaSelector from "@/components/ui/templates/media-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type OddOneOutConfig } from "./odd-one-out-schema";
 
 interface OddOneOutConfigFieldsProps {
   basePath?: string;
@@ -53,7 +52,7 @@ export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsPr
           <CardHeader className="flex flex-row items-center justify-between p-2">
             <CardTitle className="text-lg">Pregunta {index + 1}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 p-2">
             <FormField
               control={control}
               name={`${basePath}questions.${index}.patternMedias`}

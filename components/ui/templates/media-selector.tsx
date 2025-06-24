@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useMediaSearch } from "@/hooks/use-media-search"
 import { useDebounce } from "@/hooks/use-debounce"
-import { Search, Plus, Loader2 } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
 import MediaCard from "./media-card"
 import { SelectableMediaSchema } from "@/lib/schemas/medias"
+import FileMediaSelector from "../file-upload"
 
 interface MediaSelectorProps {
   selectedMedias: SelectableMediaSchema[]
@@ -29,7 +29,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
   const addMedia = (media: SelectableMediaSchema) => {
     if (selectionMode === "single") {
       onMediasChange([media])
-      setIsOpen(false) // Close dialog on selection
+      setIsOpen(false)
     } else {
       if (!selectedMedias.find((selected) => selected.id === media.id)) {
         onMediasChange([...selectedMedias, media])
@@ -46,14 +46,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
       <div className="flex items-center justify-between">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            {selectionMode === "single" && selectedMedias.length > 0 ? (
-              <MediaCard media={selectedMedias[0]} variant="preview" onRemove={() => removeMedia(selectedMedias[0].id)} />
-            ) : (
-              <Button variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                {selectionMode === "single" ? "Seleccionar imagen" : "Añadir imágenes"}
-              </Button>
-            )}
+            <FileMediaSelector medias={selectedMedias} removeFile={removeMedia} onAddMediaClick={() => setIsOpen(true)} />
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
@@ -119,29 +112,6 @@ export default function MediaSelector(props: MediaSelectorProps) {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* Preview de imágenes seleccionadas */}
-      {selectionMode === "multiple" && selectedMedias.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {selectedMedias.map((media) => (
-            <div key={media.id} className="group">
-              <MediaCard
-                media={media}
-                variant="preview"
-                onRemove={() => removeMedia(media.id)}
-                className="group-hover:opacity-100"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {selectionMode === "multiple" && selectedMedias.length === 0 && (
-        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-          <p className="text-muted-foreground">No hay imágenes seleccionadas</p>
-          <p className="text-sm text-muted-foreground mt-1">Haz clic en "Añadir imágenes" para comenzar</p>
-        </div>
-      )}
     </div>
   )
 }

@@ -13,9 +13,7 @@ import {
 import { createExercisePR } from "./github";
 
 export async function getExercises() {
-  const allExercises = await db.query.exercises.findMany({
-    orderBy: [exercises.displayName],
-  });
+  const allExercises = await db.query.exercises.findMany();
 
   return allExercises;
 }

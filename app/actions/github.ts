@@ -93,11 +93,11 @@ export async function createExercisePR(exercise: Exercise, prompt: string): Prom
     head: branchName,
     base: defaultBranch,
     title: exercise.displayName,
-    body: `## ${exercise.displayName}\n\n    Slug: ${exercise.slug}\n    Category: ${exercise.category}\n    ${exercise.description ? `Description: ${exercise.description}\n` : ""}\n\n    ## Prompt\n    ${prompt}\n    `,
+    body: `## ${exercise.displayName}\n\n    Slug: ${exercise.slug}\n    Tags: ${exercise.tags.join(", ")}\n    ${exercise.description ? `Description: ${exercise.description}\n` : ""}\n\n    ## Prompt\n    ${prompt}\n    `,
   });
 
   // Añadir etiqueta "new-exercise" para que la Action lo detecte
-  await octokit.issues.addLabels({ owner, repo, issue_number: pr.number, labels: ["new-exercise"] });
+  //await octokit.issues.addLabels({ owner, repo, issue_number: pr.number, labels: ["new-exercise"] });
 
   // Actualizar registro ejercicio con número de PR
   try {

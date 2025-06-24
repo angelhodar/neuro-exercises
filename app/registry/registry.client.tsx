@@ -31,7 +31,7 @@ import {
 } from "@/components/exercises/stimulus-count/stimulus-count-schema";
 import { StimulusCountConfigFields } from "@/components/exercises/stimulus-count/stimulus-count-config-form";
 
-import { oddOneOutConfigSchema } from "@/components/exercises/odd-one-out/odd-one-out-schema";
+import { oddOneOutConfigSchema, oddOneOutPresets } from "@/components/exercises/odd-one-out/odd-one-out-schema";
 import { OddOneOutConfigFields } from "@/components/exercises/odd-one-out/odd-one-out-config-form";
 
 export type ClientExerciseEntry = {
@@ -72,7 +72,7 @@ export const exerciseRegistryClient = {
   }),
   "odd-one-out": createEntry({
     schema: oddOneOutConfigSchema,
-    presets: {},
+    presets: oddOneOutPresets,
     ConfigFieldsComponent: OddOneOutConfigFields,
   }),
 };

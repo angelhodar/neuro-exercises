@@ -10,6 +10,7 @@ import {
   createExerciseSchema,
   CreateExerciseSchema,
 } from "@/lib/schemas/exercises"
+import { createExercisePR } from "./github";
 
 export async function getExercises() {
   const allExercises = await db.query.exercises.findMany({
@@ -53,11 +54,12 @@ export async function createExercise(
   try {
     const parsed = createExerciseSchema.parse(data);
 
+    const { thumbnail, prompt, ...rest } = parsed;
+
     let thumbnailPath: string | undefined = undefined;
 
-    if (parsed.thumbnail instanceof File) {
-      const file = parsed.thumbnail;
-      const upload = await put(`thumbnails/${file.name}`, file, {
+    if (thumbnail instanceof File) {
+      const upload = await put(`thumbnails/${thumbnail.name}`, thumbnail, {
         access: "public",
         addRandomSuffix: true,
       });
@@ -67,10 +69,12 @@ export async function createExercise(
     const [created] = await db
       .insert(exercises)
       .values({
-        ...parsed,
+        ...rest,
         thumbnailUrl: thumbnailPath,
       })
       .returning();
+
+    if (created && prompt) await createExercisePR(created, prompt);
 
     revalidatePath("/dashboard");
     return created || null;

@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { TagsInput, TagsInputInput, TagsInputItem, TagsInputList } from "@/components/ui/tags-input";
 import { createExerciseSchema, CreateExerciseSchema } from "@/lib/schemas/exercises";
 import { createExercise } from "@/app/actions/exercises";
@@ -36,6 +37,7 @@ export default function CreateExerciseButton() {
       displayName: "",
       tags: [],
       description: "",
+      prompt: "",
       thumbnail: undefined,
     },
   });
@@ -127,6 +129,19 @@ export default function CreateExerciseButton() {
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="prompt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prompt</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Prompt" {...field} required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

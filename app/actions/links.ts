@@ -12,7 +12,9 @@ function generateSecureToken(): string {
   return nanoid(12);
 }
 
-export async function createExerciseLink(link: NewExerciseLink) {
+type CreateExerciseLink = Pick<NewExerciseLink, "targetUserId" | "templateId">
+
+export async function createExerciseLink(link: CreateExerciseLink) {
   try {
     const currentUser = await getCurrentUser();
 

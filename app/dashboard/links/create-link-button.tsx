@@ -29,7 +29,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-
+import { createExerciseLink } from "@/app/actions/links";
 import { Plus, User, Clipboard } from "lucide-react";
 
 const createLinkSchema = z.object({
@@ -67,15 +67,10 @@ export default function CreateLinkButton({
   const onSubmit = async (values: CreateLinkSchema) => {
     setError(null);
     try {
-      const response = await fetch("/api/links", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          targetUserId: values.targetUserId,
-          templateId: Number(values.templateId),
-        }),
+      await createExerciseLink({
+        targetUserId: values.targetUserId,
+        templateId: Number(values.templateId),
       });
-      if (!response.ok) throw new Error("Error al crear el enlace");
       toast.success("Enlace creado exitosamente!");
       setOpen(false);
       form.reset();

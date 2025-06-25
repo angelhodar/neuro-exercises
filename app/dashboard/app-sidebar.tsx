@@ -101,7 +101,7 @@ const data = {
     },
     {
       title: "Crear enlaces",
-      url: "/dashboard/links/create",
+      url: "/dashboard/links?create-link=true",
       icon: Plus,
     },
   ],

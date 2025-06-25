@@ -1,14 +1,14 @@
 import Link from "next/link";
-import {
-  ExternalLink,
-  MoreHorizontal,
-  Target,
-  LinkIcon,
-} from "lucide-react";
+import { ExternalLink, MoreHorizontal, Target, LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { DashboardHeader, DashboardHeaderTitle, DashboardHeaderDescription, DashboardHeaderActions } from "@/components/dashboard-header";
+import {
+  DashboardHeader,
+  DashboardHeaderTitle,
+  DashboardHeaderDescription,
+  DashboardHeaderActions,
+} from "@/components/dashboard-header";
 import {
   Table,
   TableBody,
@@ -64,9 +64,7 @@ export default async function LinksPage() {
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
         <div>
-          <DashboardHeaderTitle>
-            Enlaces de ejercicios
-          </DashboardHeaderTitle>
+          <DashboardHeaderTitle>Enlaces de ejercicios</DashboardHeaderTitle>
           <DashboardHeaderDescription>
             Gestiona y comparte ejercicios con tus usuarios.
           </DashboardHeaderDescription>
@@ -92,7 +90,7 @@ export default async function LinksPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
-                <TableHead>Usuario Objetivo</TableHead>
+                <TableHead>Para</TableHead>
                 <TableHead>Ejercicios</TableHead>
                 <TableHead>Creado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -103,7 +101,9 @@ export default async function LinksPage() {
                 <TableRow key={link.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium leading-none">{link.template?.title}</p>
+                      <p className="font-medium leading-none">
+                        {link.template?.title}
+                      </p>
                       {link.template?.description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">
                           {link.template.description}
@@ -120,26 +120,9 @@ export default async function LinksPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {link.template?.exerciseTemplateItems?.length || 0} ejercicios
+                        {link.template?.exerciseTemplateItems?.length || 0}{" "}
+                        ejercicios
                       </Badge>
-                      {link.template?.exerciseTemplateItems && link.template.exerciseTemplateItems.length > 0 && (
-                        <div className="flex -space-x-1">
-                          {link.template.exerciseTemplateItems.slice(0, 3).map((item: any, index: number) => (
-                            <div
-                              key={item.id}
-                              className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary ring-2 ring-background"
-                              title={item.exercise?.displayName || "Ejercicio"}
-                            >
-                              {index + 1}
-                            </div>
-                          ))}
-                          {link.template.exerciseTemplateItems.length > 3 && (
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-background">
-                              +{link.template.exerciseTemplateItems.length - 3}
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>

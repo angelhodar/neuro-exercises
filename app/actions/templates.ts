@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "./users";
-import { exerciseTemplates, exerciseTemplateItems } from "@/lib/db/schema";
+import { exerciseTemplates, exerciseTemplateItems, NewExerciseTemplateItem, NewExerciseTemplate } from "@/lib/db/schema";
 
 export async function getExerciseTemplates() {
   const templates = await db.query.exerciseTemplates.findMany({
@@ -31,6 +31,7 @@ export async function getExerciseTemplates() {
     },
     orderBy: (template) => template.createdAt,
   });
+
   return templates;
 }
 
@@ -40,20 +41,24 @@ interface ExerciseTemplateItem {
   config: any
 }
 
-export async function createExerciseTemplate({ title, description, items }: { title: string; description?: string | null; items: Array<ExerciseTemplateItem> }) {
+type CreateExerciseTemplateItemProps = Omit<NewExerciseTemplateItem, "templateId">
+type CreateExerciseTemplateProps = Pick<NewExerciseTemplate, "title" | "description"> & { items: Array<CreateExerciseTemplateItemProps> }
+
+
+export async function createExerciseTemplate(newTemplate: CreateExerciseTemplateProps) {
   const user = await getCurrentUser();
 
   if (!user) throw new Error("No autenticado");
   
   const [template] = await db.insert(exerciseTemplates).values({
     creatorId: user.id,
-    title,
-    description: description || null,
+    title: newTemplate.title,
+    description: newTemplate.description || null,
   }).returning();
 
   if (!template) throw new Error("No se pudo crear la plantilla");
 
-  const itemsToInsert = items.map((item) => ({
+  const itemsToInsert = newTemplate.items.map((item) => ({
     templateId: template.id,
     exerciseId: item.exerciseId,
     config: item.config,

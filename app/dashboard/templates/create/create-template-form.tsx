@@ -2,28 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Card,
   CardContent,
@@ -31,45 +14,53 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
-import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import { Stepper } from "@/components/ui/stepper";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { AddExerciseButton } from "./add-exercise-button";
+import { ExerciseCard } from "./exercise-card";
 import { Exercise } from "@/lib/db/schema";
-import Tags from "@/components/tags";
-import { cn } from "@/lib/utils";
+import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import ConfigureExerciseButton from "./configure-exercise-button";
 import { createExerciseTemplate } from "@/app/actions/templates";
+import { Trash2 } from "lucide-react";
 
-const templateCreationSchema = z.object({
-  title: z.string().min(1, "El título es obligatorio"),
-  description: z.string().optional(),
+const templateSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
   exercises: z
     .array(
       z.object({
-        exerciseId: z.number(),
+        exerciseId: z.coerce.number(),
         slug: z.string(),
-        config: z.record(z.any()),
+        config: z.any(),
       })
     )
-    .min(1, "Debe incluir al menos un ejercicio"),
+    .min(1, "At least one exercise is required"),
 });
 
-type TemplateCreationForm = z.infer<typeof templateCreationSchema>;
+type TemplateFormData = z.infer<typeof templateSchema>;
 
 type CreateTemplateFormProps = {
   exercises: Array<Exercise>;
 };
 
-export default function CreateTemplateForm({
-  exercises,
-}: CreateTemplateFormProps) {
+export default function CreateTemplateForm(props: CreateTemplateFormProps) {
+  const { exercises } = props;
+
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1);
-  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<TemplateCreationForm>({
-    resolver: zodResolver(templateCreationSchema),
+  const form = useForm<TemplateFormData>({
+    resolver: zodResolver(templateSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -82,38 +73,36 @@ export default function CreateTemplateForm({
     name: "exercises",
   });
 
-  const addExercise = (exercise: Exercise) => {
-    if (fields.some((field) => field.exerciseId === exercise.id)) {
-      toast.error("Este ejercicio ya está agregado");
+  const addExercise = (selectedExercise: Exercise) => {
+    // Check if exercise is already added
+    const existingExercise = fields.find(
+      (field) => field.exerciseId === selectedExercise.id
+    );
+
+    if (existingExercise) {
+      toast.error("Este ejercicio ya está añadido");
       return;
     }
 
-    const exerciseMeta = getExerciseFromClientRegistry(exercise.slug);
+    const exerciseMeta = getExerciseFromClientRegistry(selectedExercise.slug);
     const defaultConfig = exerciseMeta?.presets?.easy ?? {};
-    
+
     append({
-      exerciseId: exercise.id,
-      slug: exercise.slug,
-      config: {
-        timerDuration: 60,
-        totalQuestions: 10,
-        ...defaultConfig,
-      },
+      exerciseId: selectedExercise.id,
+      slug: selectedExercise.slug,
+      config: defaultConfig,
     });
+    toast.success("Ejercicio añadido");
   };
 
   const removeExercise = (index: number) => {
     remove(index);
+    toast.success("Ejercicio eliminado");
   };
 
-  const getExerciseById = (id: number) => {
-    return exercises.find((ex) => ex.id === id);
-  };
-
-  const onSubmit = async (data: TemplateCreationForm) => {
+  const onSubmit = async (data: TemplateFormData) => {
     try {
       setIsSubmitting(true);
-      setError(null);
       await createExerciseTemplate({
         title: data.title,
         description: data.description || null,
@@ -123,226 +112,155 @@ export default function CreateTemplateForm({
           position: index,
         })),
       });
-      toast.success("Plantilla creada exitosamente!");
+      toast.success("Plantilla guardada!");
       router.push("/dashboard/templates");
-    } catch (error: any) {
-      setError(error.message || "Error al crear la plantilla");
+    } catch (error) {
+      toast.error("Error al guardar la plantilla");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const onSubmitError = (err: any) => {
-    setError("Revisa los campos obligatorios");
-    console.log(err);
+  const onSubmitError = (errors: any) => {
+    console.log("Form errors:", errors);
+    toast.error("Por favor, verifica los campos requeridos");
   };
 
-  const handleNextStep = async () => {
-    const valid = await form.trigger(["title", "description"]);
-    if (valid) setStep(2);
-  };
-
-  const handlePrevStep = () => setStep(1);
-
-  const steps = [
-    { step: 1, title: "Información general" },
-    { step: 2, title: "Ejercicios" },
-  ];
+  const selectableExercises = exercises.filter(
+    (exercise) => !fields.some((field) => field.exerciseId === exercise.id)
+  );
 
   return (
-    <div className="flex flex-col space-y-6 max-w-5xl justify-center items-center mt-6">
-      <Stepper steps={steps} currentStep={step} />
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
-          className="flex gap-6 w-full justify-center items-center"
-        >
-          {/* Paso 1: Información general */}
-          {step === 1 && (
-            <div className="flex flex-col space-y-4 w-full">
-              <h2 className="text-xl font-semibold mb-2">
-                Información de la plantilla
-              </h2>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Título</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ej: Plantilla de rehabilitación - Semana 1"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Un título descriptivo para la plantilla
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descripción (opcional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Descripción adicional sobre la plantilla..."
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Información adicional sobre el propósito de esta plantilla
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end gap-4 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push("/dashboard/templates")}
-                >
-                  Cancelar
-                </Button>
-                <Button type="button" onClick={handleNextStep}>
-                  Siguiente
-                </Button>
+    <div className="max-w-6xl p-6 space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Crear plantilla de ejercicio</CardTitle>
+          <CardDescription>
+            Crea una plantilla con múltiples ejercicios cognitivos y sus
+            configuraciones
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
+              className="space-y-6"
+            >
+              {/* Template Basic Info */}
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Título de la plantilla</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Título de la plantilla"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Un título descriptivo para tu plantilla
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descripción de la plantilla"
+                          className="min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Información adicional sobre la plantilla
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            </div>
-          )}
-          {/* Paso 2: Ejercicios */}
-          {step === 2 && (
-            <div className="flex flex-col gap-6 w-full">
-              <div className="grid gap-3 md:grid-cols-2">
-                {exercises.map((exercise) => {
-                  const isAdded = fields.some(
-                    (field) => field.exerciseId === exercise.id
-                  );
-                  return (
-                    <div
-                      key={exercise.id}
-                      className={cn(
-                        "flex rounded-lg border p-4 transition-colors relative",
-                        isAdded
-                          ? "border-primary bg-primary/5"
-                          : "hover:bg-muted/50"
-                      )}
-                    >
-                      <div className="flex flex-col items-start gap-2">
-                        <h4 className="font-medium">{exercise.displayName}</h4>
-                        <Tags tags={exercise.tags} maxVisible={1} />
+
+              {/* Exercises Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel className="text-lg font-semibold">
+                    Ejercicios
+                  </FormLabel>
+                  <AddExerciseButton
+                    exercises={selectableExercises}
+                    onAddExercise={addExercise}
+                  />
+                </div>
+
+                {fields.length === 0 ? (
+                  <Card className="border-dashed">
+                    <CardContent className="flex items-center justify-center py-8">
+                      <div className="text-center text-muted-foreground">
+                        <p>No has incluido ningún ejercicio aún</p>
+                        <p className="text-sm">
+                          Haz click en "Añadir ejercicio" para empezar
+                        </p>
                       </div>
-                      {!isAdded && (
-                        <Button
-                          type="button"
-                          variant={isAdded ? "secondary" : "outline"}
-                          size="icon"
-                          onClick={() => addExercise(exercise)}
-                          className="absolute top-2 right-2"
-                          disabled={isAdded}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {fields.map((field, index) => {
+                      const exercise = exercises.find(
+                        (e) => e.id === field.exerciseId
+                      );
+
+                      if (!exercise) return null;
+
+                      return (
+                        <ExerciseCard
+                          key={field.exerciseId}
+                          exercise={exercise}
                         >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {/* List of selected exercises */}
-              {fields.length > 0 && (
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>
-                      Ejercicios seleccionados ({fields.length})
-                    </CardTitle>
-                    <CardDescription>
-                      Configura cada ejercicio individualmente
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <Accordion type="single" collapsible className="w-full">
-                      {fields.map((field, index) => {
-                        const exercise = getExerciseById(field.exerciseId);
-                        if (!exercise) return null;
-
-                        const exerciseMeta = getExerciseFromClientRegistry(
-                          field.slug
-                        );
-
-                        const ConfigFields =
-                          exerciseMeta?.ConfigFieldsComponent;
-
-                        if (!ConfigFields) return null;
-
-                        return (
-                          <AccordionItem
-                            key={field.id}
-                            value={field.id}
-                            className="relative"
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeExercise(index)}
+                            className="absolute -top-2 right-1 z-10 text-destructive hover:text-destructive h-8 w-8 p-0"
                           >
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute top-3 right-6 text-destructive hover:text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeExercise(index);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                            <AccordionTrigger className="hover:no-underline">
-                              <div className="flex items-center gap-4 flex-1">
-                                <span className="text-lg font-medium">
-                                  {exercise.displayName}
-                                </span>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="p-1 pt-4 space-y-6 border-t">
-                                <ExerciseBaseFields
-                                  basePath={`exercises.${index}.config.`}
-                                />
-                                <Separator />
-                                <ConfigFields
-                                  basePath={`exercises.${index}.config.`}
-                                />
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                    </Accordion>
-                  </CardContent>
-                </Card>
-              )}
-              <div className="flex justify-between gap-4 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handlePrevStep}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || fields.length === 0}
-                  className="disabled:bg-opacity/50"
-                >
-                  {isSubmitting ? "Creando..." : "Crear plantilla"}
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                          <ConfigureExerciseButton
+                            slug={field.slug}
+                            index={index}
+                          />
+                        </ExerciseCard>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {form.formState.errors.exercises && (
+                  <p className="text-sm font-medium text-destructive">
+                    {form.formState.errors.exercises.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button type="submit" size="lg" disabled={isSubmitting}>
+                  {isSubmitting ? "Creando plantilla..." : "Crear plantilla"}
                 </Button>
               </div>
-            </div>
-          )}
-        </form>
-      </Form>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

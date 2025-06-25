@@ -1,22 +1,23 @@
-"use server"
+"use server";
 
-import { nanoid } from "nanoid"
-import { eq, desc, and } from "drizzle-orm"
-import { db } from "@/lib/db"
-import { exerciseLinks, exerciseResults } from "@/lib/db/schema"
-import type { NewExerciseLink, } from "@/lib/db/schema"
-import { getCurrentUser } from "./users"
+import { nanoid } from "nanoid";
+import { eq, desc, and } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { exerciseLinks, exerciseResults } from "@/lib/db/schema";
+import type { NewExerciseLink } from "@/lib/db/schema";
+import { getCurrentUser } from "./users";
+import { revalidatePath } from "next/cache";
 
 function generateSecureToken(): string {
-  return nanoid(12)
+  return nanoid(12);
 }
 
 export async function createExerciseLink(link: NewExerciseLink) {
   try {
-    const currentUser = await getCurrentUser()
+    const currentUser = await getCurrentUser();
 
     if (!currentUser) {
-      throw new Error("Usuario no autenticado")
+      throw new Error("Usuario no autenticado");
     }
 
     const [newLink] = await db
@@ -27,21 +28,23 @@ export async function createExerciseLink(link: NewExerciseLink) {
         templateId: link.templateId,
         publicId: generateSecureToken(),
       })
-      .returning()
+      .returning();
 
-    return newLink
+    revalidatePath("/dashboard/links");
+
+    return newLink;
   } catch (error) {
-    console.error("Error creating exercise link:", error)
-    throw error
+    console.error("Error creating exercise link:", error);
+    throw error;
   }
 }
 
 export async function getUserExerciseLinks() {
   try {
-    const currentUser = await getCurrentUser()
+    const currentUser = await getCurrentUser();
 
     if (!currentUser) {
-      throw new Error("Usuario no autenticado")
+      throw new Error("Usuario no autenticado");
     }
 
     const linksWithDetails = await db.query.exerciseLinks.findMany({
@@ -78,40 +81,44 @@ export async function getUserExerciseLinks() {
           },
         },
       },
-    })
+    });
 
-    return linksWithDetails
+    return linksWithDetails;
   } catch (error) {
-    console.error("Error getting user exercise links:", error)
-    throw error
+    console.error("Error getting user exercise links:", error);
+    throw error;
   }
 }
 
-
 export async function deleteExerciseLink(linkId: number) {
   try {
-    const currentUser = await getCurrentUser()
+    const currentUser = await getCurrentUser();
 
     if (!currentUser) {
-      throw new Error("Usuario no autenticado")
+      throw new Error("Usuario no autenticado");
     }
 
     const link = await db
       .select({ id: exerciseLinks.id })
       .from(exerciseLinks)
-      .where(and(eq(exerciseLinks.id, linkId), eq(exerciseLinks.creatorId, currentUser.id)))
-      .limit(1)
+      .where(
+        and(
+          eq(exerciseLinks.id, linkId),
+          eq(exerciseLinks.creatorId, currentUser.id)
+        )
+      )
+      .limit(1);
 
     if (!link.length) {
-      throw new Error("Enlace no encontrado")
+      throw new Error("Enlace no encontrado");
     }
 
-    await db.delete(exerciseLinks).where(eq(exerciseLinks.id, linkId))
+    await db.delete(exerciseLinks).where(eq(exerciseLinks.id, linkId));
 
-    return { success: true }
+    return { success: true };
   } catch (error) {
-    console.error("Error deleting exercise link:", error)
-    throw error
+    console.error("Error deleting exercise link:", error);
+    throw error;
   }
 }
 
@@ -127,22 +134,26 @@ export async function getExerciseLinkByPublicId(publicId: string) {
             exerciseTemplateItems: {
               with: {
                 exercise: true,
-                exerciseResults: true
+                exerciseResults: true,
               },
             },
           },
         },
       },
-    })
+    });
 
-    return linkWithDetails || null
+    return linkWithDetails || null;
   } catch (error) {
-    console.error("Error getting exercise link by public ID:", error)
-    return null
+    console.error("Error getting exercise link by public ID:", error);
+    return null;
   }
 }
 
-export async function saveExerciseResults(linkId: number, exerciseItemId: number, results: any) {
+export async function saveExerciseResults(
+  linkId: number,
+  exerciseItemId: number,
+  results: any
+) {
   try {
     await db.insert(exerciseResults).values({
       linkId: linkId,

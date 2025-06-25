@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,10 +22,15 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { z } from "zod";
-import { Plus } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { Plus, User, Clipboard } from "lucide-react";
 
 const createLinkSchema = z.object({
   targetUserId: z.string().min(1, "Selecciona un usuario"),
@@ -37,8 +44,14 @@ type CreateLinkButtonProps = {
   templates: { id: number; title: string }[];
 };
 
-export default function CreateLinkButton({ users, templates }: CreateLinkButtonProps) {
-  const [open, setOpen] = useQueryState("create-link", parseAsBoolean.withDefault(false));
+export default function CreateLinkButton({
+  users,
+  templates,
+}: CreateLinkButtonProps) {
+  const [open, setOpen] = useQueryState(
+    "create-link",
+    parseAsBoolean.withDefault(false)
+  );
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CreateLinkSchema>({
@@ -70,7 +83,7 @@ export default function CreateLinkButton({ users, templates }: CreateLinkButtonP
       setError(error.message || "Error al crear el enlace");
     }
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -84,13 +97,16 @@ export default function CreateLinkButton({ users, templates }: CreateLinkButtonP
           <DialogTitle>Nuevo enlace</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4 mt-2"
+          >
             <FormField
               control={form.control}
               name="targetUserId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Usuario objetivo</FormLabel>
+                  <FormLabel>Para</FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}
@@ -103,7 +119,10 @@ export default function CreateLinkButton({ users, templates }: CreateLinkButtonP
                       <SelectContent>
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
-                            {user.name || user.email}
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              {user.name || user.email}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -130,8 +149,14 @@ export default function CreateLinkButton({ users, templates }: CreateLinkButtonP
                       </SelectTrigger>
                       <SelectContent>
                         {templates.map((template) => (
-                          <SelectItem key={template.id} value={template.id.toString()}>
-                            {template.title}
+                          <SelectItem
+                            key={template.id}
+                            value={template.id.toString()}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Clipboard className="h-4 w-4" />
+                              {template.title}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

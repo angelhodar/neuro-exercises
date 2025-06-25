@@ -3,6 +3,7 @@ import { getExerciseLinkByPublicId } from "@/app/actions/links";
 import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseResultsCollector } from "./exercise-results";
+import { ExerciseControls } from "@/components/exercises/exercise-controls";
 
 interface PageProps {
   params: Promise<{ linkId: string; position: string }>;
@@ -37,6 +38,7 @@ export default async function ExercisePage({ params }: PageProps) {
       <p className="mb-6 text-gray-600">{exercise.description}</p>
       <ExerciseProvider totalQuestions={config.totalQuestions}>
         <ExerciseComponent config={config} />
+        <ExerciseControls />
         <ExerciseResultsCollector exerciseItemId={item.id} />
       </ExerciseProvider>
     </div>

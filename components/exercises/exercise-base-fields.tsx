@@ -22,11 +22,11 @@ export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
         name={totalQuestionsPath}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Número de preguntas</FormLabel>
+            <FormLabel>Número de ensayos</FormLabel>
             <FormControl>
               <Input type="number" placeholder="10" {...field} onChange={(e) => field.onChange(e.target.value)} />
             </FormControl>
-            <FormDescription>Total de preguntas del ejercicio</FormDescription>
+            <FormDescription>Total de ensayos del ejercicio</FormDescription>
             <FormMessage />
           </FormItem>
         )}

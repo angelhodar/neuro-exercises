@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { parseAsBoolean, useQueryState } from "nuqs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -28,7 +29,7 @@ import { uploadMedia } from "@/app/actions/media";
 import { MediaTagsInput } from "@/components/ui/templates/media-tags";
 
 export default function CreateMediaButton() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useQueryState("create-dialog", parseAsBoolean.withDefault(false));
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CreateMediaSchema>({

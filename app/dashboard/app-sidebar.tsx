@@ -5,6 +5,7 @@ import {
   Home,
   Users,
   FileImage,
+  FilePlus,
   Plus,
   Eye,
   Grid3x3,
@@ -78,6 +79,11 @@ const data = {
     {
       title: "Biblioteca multimedia",
       url: "/dashboard/media",
+      icon: FileImage,
+    },
+    {
+      title: "Generar imágenes con IA",
+      url: "/dashboard/media?create-dialog=true",
       icon: FileImage,
     },
   ],

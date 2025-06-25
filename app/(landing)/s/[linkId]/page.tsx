@@ -17,20 +17,20 @@ export default async function SharedLinkPage({
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-blue-900 mb-2">
-          {linkData.title}
+          {linkData.template.title}
         </h1>
-        <p className="text-gray-600 mb-4">{linkData.description}</p>
+        <p className="text-gray-600 mb-4">{linkData.template.description}</p>
         <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
           <span>Creado por: {linkData.creator.name}</span>
           <span>•</span>
           <span>
-            Tiempo estimado: {linkData.exerciseLinkItems.length} minutos
+            Tiempo estimado: {linkData.template.exerciseTemplateItems.length} minutos
           </span>
         </div>
       </div>
 
       <div className="space-y-4 mb-6">
-        {linkData.exerciseLinkItems.map((item, i) => {
+        {linkData.template.exerciseTemplateItems.map((item, i) => {
           return (
             <LinkExerciseCard
               key={i}

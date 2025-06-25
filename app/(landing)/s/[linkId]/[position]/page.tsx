@@ -18,7 +18,7 @@ export default async function ExercisePage({ params }: PageProps) {
 
   if (!linkData) notFound();
 
-  const item = linkData.exerciseLinkItems[pos];
+  const item = linkData.template.exerciseTemplateItems[pos];
 
   if (!item) notFound();
 

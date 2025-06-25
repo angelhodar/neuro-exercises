@@ -2,10 +2,13 @@
 
 import { createContext, PropsWithChildren, useContext, useState } from "react"
 import { BaseExerciseConfig } from "@/lib/schemas/base-schemas"
+import { Exercise } from "@/lib/db/schema"
 
 export type ExerciseState = "ready" | "executing" | "paused" | "finished"
 
 interface ExerciseExecutionContext {
+  exercise: Exercise
+  totalQuestions: number
   currentQuestionIndex: number
   exerciseState: ExerciseState
   results: Array<object>
@@ -20,9 +23,9 @@ interface ExerciseExecutionContext {
 
 const ExerciseContext = createContext<ExerciseExecutionContext | null>(null)
 
-type ExerciseProviderProps = BaseExerciseConfig & PropsWithChildren
+type ExerciseProviderProps = BaseExerciseConfig & PropsWithChildren & { exercise: Exercise }
 
-export function ExerciseProvider({ children, totalQuestions }: ExerciseProviderProps) {
+export function ExerciseProvider({ children, exercise, totalQuestions }: ExerciseProviderProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [exerciseState, setExerciseState] = useState<ExerciseState>("ready")
   const [results, setResults] = useState<Array<object>>([])
@@ -63,6 +66,8 @@ export function ExerciseProvider({ children, totalQuestions }: ExerciseProviderP
   }
 
   const contextValue: ExerciseExecutionContext = {
+    exercise,
+    totalQuestions,
     currentQuestionIndex,
     exerciseState,
     results,

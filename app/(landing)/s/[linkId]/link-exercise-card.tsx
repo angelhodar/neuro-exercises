@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, Eye, Brain, Play } from "lucide-react";
+import { CheckCircle, Eye, Brain, Play } from "lucide-react";
 import { Exercise } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
@@ -44,20 +44,9 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
               <p className="text-gray-600 text-sm mb-2">
                 {exercise.description}
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />5
-                </div>
-              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {completed && (
-              <div className="text-right mr-4">
-                <div className="text-sm font-medium text-green-600">5%</div>
-                <div className="text-xs text-gray-500">5s</div>
-              </div>
-            )}
             {completed ? (
               <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <Link href={`/s/${linkId}/${index}/results`}>

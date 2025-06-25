@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
-import { ExerciseControls } from "@/components/exercises/exercise-controls";
+import ExerciseExecutionLayout from "@/components/exercises/exercise-execution-layout";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
 import { getExercises, getExerciseBySlug } from "@/app/actions/exercises";
+
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -39,9 +40,13 @@ export default async function Page({ params, searchParams }: PageProps) {
   const parsedConfig = config.data;
 
   return (
-    <ExerciseProvider totalQuestions={parsedConfig.totalQuestions}>
-      <ExerciseComponent config={parsedConfig} />
-      <ExerciseControls />
+    <ExerciseProvider
+      totalQuestions={parsedConfig.totalQuestions}
+      exercise={exercise}
+    >
+      <ExerciseExecutionLayout>
+        <ExerciseComponent config={parsedConfig} />
+      </ExerciseExecutionLayout>
     </ExerciseProvider>
   );
 }

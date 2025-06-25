@@ -11,7 +11,7 @@ export default function LoadingSkeleton() {
         </div>
 
         <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div key={i} className="border rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">

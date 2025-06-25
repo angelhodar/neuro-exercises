@@ -1,19 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { useExerciseExecution } from "@/hooks/use-exercise-execution"
+import { PropsWithChildren } from "react";
 
-export function ExerciseControls() {
-  const { exerciseState, startExercise, resetExercise } = useExerciseExecution()
-
+export function ExerciseControls({ children }: PropsWithChildren) {
   return (
-    <div className="flex gap-4 mt-4 mx-auto">
-      {exerciseState === "ready" && <Button onClick={startExercise}>Comenzar Ejercicio</Button>}
-      {exerciseState === "executing" && (
-        <Button variant="outline" onClick={resetExercise}>
-          Reiniciar
-        </Button>
-      )}
+    <div className="flex flex-wrap gap-3 justify-center items-center flex-shrink-0 pt-6">
+      {children}
     </div>
   )
 }

@@ -16,13 +16,13 @@ export default async function ExerciseResultsPage({ params }: PageProps) {
 
   if (!linkData) notFound();
 
-  const item = linkData.exerciseLinkItems[pos];
+  const item = linkData.template.exerciseTemplateItems[pos];
 
   if (!item) notFound();
 
   const { exercise, config, exerciseResults } = item;
 
-  if (!exerciseResults || !exerciseResults.results) notFound();
+  if (!exerciseResults) notFound();
 
   const exerciseEntry = getExerciseFromServerRegistry(exercise.slug);
 
@@ -33,7 +33,7 @@ export default async function ExerciseResultsPage({ params }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-2xl font-bold mb-4">Resultados de {exercise.displayName}</h1>
-      <ResultsComponent results={exerciseResults.results} {...config} />
+      <ResultsComponent results={exerciseResults} {...config} />
       <div className="mt-6 flex justify-center">
         <Button asChild>
           <Link href={`/s/${linkId}`}>

@@ -1,30 +1,23 @@
 "use client";
 
-import { z } from "zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
-import { Plus, Trash2, UserIcon } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -39,59 +32,45 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import {
-  exerciseLinkInsertSchema,
-  type Exercise,
-  type User,
-} from "@/lib/db/schema";
 import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import {
-  Stepper,
-  StepperIndicator,
-  StepperItem,
-  StepperSeparator,
-  StepperTitle,
-  StepperTrigger,
-} from "@/components/ui/stepper";
+import { Stepper } from "@/components/ui/stepper";
+import { Exercise } from "@/lib/db/schema";
+import Tags from "@/components/tags";
+import { cn } from "@/lib/utils";
+import { createExerciseTemplate } from "@/app/actions/templates";
 
-const linkCreationSchema = exerciseLinkInsertSchema
-  .extend({
-    exercises: z
-      .array(
-        z.object({
-          exerciseId: z.number(),
-          slug: z.string(),
-          config: z.record(z.any()).default({}),
-        })
-      )
-      .min(1, "Debe incluir al menos un ejercicio"),
-  })
-  .omit({
-    id: true,
-    creatorId: true,
-    publicId: true,
-    createdAt: true,
-    updatedAt: true,
-  });
+const templateCreationSchema = z.object({
+  title: z.string().min(1, "El título es obligatorio"),
+  description: z.string().optional(),
+  exercises: z
+    .array(
+      z.object({
+        exerciseId: z.number(),
+        slug: z.string(),
+        config: z.record(z.any()),
+      })
+    )
+    .min(1, "Debe incluir al menos un ejercicio"),
+});
 
-type LinkCreationForm = z.infer<typeof linkCreationSchema>;
+type TemplateCreationForm = z.infer<typeof templateCreationSchema>;
 
-interface CreateLinkFormProps {
-  users: User[];
-  exercises: Exercise[];
-}
+type CreateTemplateFormProps = {
+  exercises: Array<Exercise>;
+};
 
-export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
+export default function CreateTemplateForm({
+  exercises,
+}: CreateTemplateFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm({
-    resolver: zodResolver(linkCreationSchema),
+  const form = useForm<TemplateCreationForm>({
+    resolver: zodResolver(templateCreationSchema),
     defaultValues: {
-      targetUserId: "",
       title: "",
       description: "",
       exercises: [],
@@ -111,7 +90,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
 
     const exerciseMeta = getExerciseFromClientRegistry(exercise.slug);
     const defaultConfig = exerciseMeta?.presets?.easy ?? {};
-
+    
     append({
       exerciseId: exercise.id,
       slug: exercise.slug,
@@ -131,136 +110,59 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
     return exercises.find((ex) => ex.id === id);
   };
 
-  const onSubmit = async (data: LinkCreationForm) => {
+  const onSubmit = async (data: TemplateCreationForm) => {
     try {
       setIsSubmitting(true);
-
-      const linkData = {
-        targetUserId: data.targetUserId,
+      setError(null);
+      await createExerciseTemplate({
         title: data.title,
         description: data.description || null,
-        items: data.exercises.map((exercise, index: number) => ({
+        items: data.exercises.map((exercise, index) => ({
           exerciseId: exercise.exerciseId,
           config: exercise.config,
           position: index,
         })),
-      };
-
-      const response = await fetch("/api/links", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(linkData),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Error al crear el enlace");
-      }
-
-      toast.success("Enlace creado exitosamente!");
-      router.push("/dashboard/links");
+      toast.success("Plantilla creada exitosamente!");
+      router.push("/dashboard/templates");
     } catch (error: any) {
-      console.error("Error:", error);
-      toast.error(error.message || "Error al crear el enlace");
+      setError(error.message || "Error al crear la plantilla");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const onSubmitError = (err: any) => {
+    setError("Revisa los campos obligatorios");
     console.log(err);
   };
 
-  // Validar el paso 1 antes de avanzar
   const handleNextStep = async () => {
-    const valid = await form.trigger(["targetUserId", "title", "description"]);
+    const valid = await form.trigger(["title", "description"]);
     if (valid) setStep(2);
   };
 
   const handlePrevStep = () => setStep(1);
 
   const steps = [
-    {
-      step: 1,
-      title: "Información general",
-    },
-    {
-      step: 2,
-      title: "Ejercicios",
-    },
+    { step: 1, title: "Información general" },
+    { step: 2, title: "Ejercicios" },
   ];
 
-  const handleStepperChange = (value: number) => setStep(value as 1 | 2);
-
   return (
-    <div className="space-y-6">
-      <Stepper
-        value={step}
-        onValueChange={handleStepperChange}
-        className="mb-8 w-full"
-      >
-        {steps.map(({ step: s, title }) => (
-          <StepperItem key={s} step={s} className="relative flex-1 flex-col!">
-            <StepperTrigger className="flex-col gap-3 rounded">
-              <StepperIndicator />
-              <div className="space-y-0.5 px-2">
-                <StepperTitle>{title}</StepperTitle>
-              </div>
-            </StepperTrigger>
-            {s < steps.length && (
-              <StepperSeparator className="absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] -order-1 m-0 -translate-y-1/2 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none" />
-            )}
-          </StepperItem>
-        ))}
-      </Stepper>
+    <div className="flex flex-col space-y-6 max-w-5xl justify-center items-center mt-6">
+      <Stepper steps={steps} currentStep={step} />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
-          className="space-y-6 max-w-4xl mx-auto"
+          className="flex gap-6 w-full justify-center items-center"
         >
           {/* Paso 1: Información general */}
           {step === 1 && (
-            <div className="space-y-4">
+            <div className="flex flex-col space-y-4 w-full">
               <h2 className="text-xl font-semibold mb-2">
-                Información del Enlace
+                Información de la plantilla
               </h2>
-              <FormField
-                control={form.control}
-                name="targetUserId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usuario destinatario</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona un usuario" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users.length === 0 ? (
-                          <div className="p-2 text-sm text-muted-foreground text-center">
-                            No hay usuarios disponibles
-                          </div>
-                        ) : (
-                          users.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              <div className="flex items-center gap-2">
-                                <UserIcon className="h-4 w-4" />
-                                <span>{user.name || user.email}</span>
-                              </div>
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="title"
@@ -269,18 +171,17 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                     <FormLabel>Título</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ej: Ejercicios de rehabilitación - Semana 1"
+                        placeholder="Ej: Plantilla de rehabilitación - Semana 1"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Un título descriptivo para el enlace
+                      Un título descriptivo para la plantilla
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="description"
@@ -290,13 +191,12 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Descripción adicional sobre los ejercicios..."
+                        placeholder="Descripción adicional sobre la plantilla..."
                         value={field.value || ""}
                       />
                     </FormControl>
                     <FormDescription>
-                      Información adicional sobre el propósito de estos
-                      ejercicios
+                      Información adicional sobre el propósito de esta plantilla
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -306,7 +206,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/dashboard/links")}
+                  onClick={() => router.push("/dashboard/templates")}
                 >
                   Cancelar
                 </Button>
@@ -316,65 +216,50 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
               </div>
             </div>
           )}
-
           {/* Paso 2: Ejercicios */}
           {step === 2 && (
-            <>
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold mb-2">
-                  Ejercicios Disponibles
-                </h2>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {exercises.map((exercise) => {
-                    const isAdded = fields.some(
-                      (field) => field.exerciseId === exercise.id
-                    );
-                    return (
-                      <div
-                        key={exercise.id}
-                        className={cn(
-                          "rounded-lg border p-4 transition-colors",
-                          isAdded
-                            ? "border-primary bg-primary/5"
-                            : "hover:bg-muted/50"
-                        )}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium">
-                              {exercise.displayName}
-                            </h4>
-                            {exercise.tags && exercise.tags.length > 0 && (
-                              <p className="text-sm text-muted-foreground">
-                                {exercise.tags.join(", ")}
-                              </p>
-                            )}
-                          </div>
-                          <Button
-                            type="button"
-                            variant={isAdded ? "secondary" : "outline"}
-                            size="icon"
-                            onClick={() => addExercise(exercise)}
-                            disabled={isAdded}
-                          >
-                            {isAdded ? (
-                              "Agregado"
-                            ) : (
-                              <Plus className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
+            <div className="flex flex-col gap-6 w-full">
+              <div className="grid gap-3 md:grid-cols-2">
+                {exercises.map((exercise) => {
+                  const isAdded = fields.some(
+                    (field) => field.exerciseId === exercise.id
+                  );
+                  return (
+                    <div
+                      key={exercise.id}
+                      className={cn(
+                        "flex rounded-lg border p-4 transition-colors relative",
+                        isAdded
+                          ? "border-primary bg-primary/5"
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      <div className="flex flex-col items-start gap-2">
+                        <h4 className="font-medium">{exercise.displayName}</h4>
+                        <Tags tags={exercise.tags} maxVisible={1} />
                       </div>
-                    );
-                  })}
-                </div>
+                      {!isAdded && (
+                        <Button
+                          type="button"
+                          variant={isAdded ? "secondary" : "outline"}
+                          size="icon"
+                          onClick={() => addExercise(exercise)}
+                          className="absolute top-2 right-2"
+                          disabled={isAdded}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-
+              {/* List of selected exercises */}
               {fields.length > 0 && (
                 <Card className="mt-6">
                   <CardHeader>
                     <CardTitle>
-                      Ejercicios Seleccionados ({fields.length})
+                      Ejercicios seleccionados ({fields.length})
                     </CardTitle>
                     <CardDescription>
                       Configura cada ejercicio individualmente
@@ -389,6 +274,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                         const exerciseMeta = getExerciseFromClientRegistry(
                           field.slug
                         );
+
                         const ConfigFields =
                           exerciseMeta?.ConfigFieldsComponent;
 
@@ -420,7 +306,7 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
-                              <div className="pt-4 pb-2 space-y-6 border-t">
+                              <div className="p-1 pt-4 space-y-6 border-t">
                                 <ExerciseBaseFields
                                   basePath={`exercises.${index}.config.`}
                                 />
@@ -437,7 +323,6 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                   </CardContent>
                 </Card>
               )}
-
               <div className="flex justify-between gap-4 pt-2">
                 <Button
                   type="button"
@@ -451,10 +336,10 @@ export function CreateLinkForm({ users, exercises }: CreateLinkFormProps) {
                   disabled={isSubmitting || fields.length === 0}
                   className="disabled:bg-opacity/50"
                 >
-                  {isSubmitting ? "Creando..." : "Crear Enlace"}
+                  {isSubmitting ? "Creando..." : "Crear plantilla"}
                 </Button>
               </div>
-            </>
+            </div>
           )}
         </form>
       </Form>

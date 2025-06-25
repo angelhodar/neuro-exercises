@@ -1,6 +1,6 @@
-import { z } from "zod"
+import { z } from "zod";
 
-// Base exercise configuration schema with Spanish validation messages
+// Base exercise configuration
 export const baseExerciseConfigSchema = z.object({
   totalQuestions: z.coerce
     .number()
@@ -10,11 +10,15 @@ export const baseExerciseConfigSchema = z.object({
   timeLimitPerQuestion: z.coerce
     .number()
     .min(0, "No puede ser un numero negativo")
-    .optional()
-})
+    .optional(),
+  timeIntervalBetweenQuestions: z.coerce
+    .number()
+    .min(0, "No puede ser un numero negativo")
+    .optional(),
+});
 
 // Exercise preset type
-export type ExercisePreset = "easy" | "medium" | "hard" | "expert"
+export type ExercisePreset = "easy" | "medium" | "hard" | "expert";
 
 // Inferred types
-export type BaseExerciseConfig = z.infer<typeof baseExerciseConfigSchema>
+export type BaseExerciseConfig = z.infer<typeof baseExerciseConfigSchema>;

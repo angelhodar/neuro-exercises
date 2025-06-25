@@ -37,7 +37,7 @@ export function ExerciseBaseFields(props: ExerciseBaseFieldsProps) {
           name={timerDurationPath}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Límite de tiempo por pregunta</FormLabel>
+              <FormLabel>Límite de tiempo por ensayo</FormLabel>
               <FormControl>
                 <Input
                   type="number"

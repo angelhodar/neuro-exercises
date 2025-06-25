@@ -3,15 +3,15 @@
 import { nanoid } from "nanoid"
 import { eq, desc, and } from "drizzle-orm"
 import { db } from "@/lib/db"
-import { exerciseLinks, exerciseLinkItems, exerciseResults } from "@/lib/db/schema"
-import type { NewExerciseLink, NewExerciseLinkItem } from "@/lib/db/schema"
+import { exerciseLinks, exerciseResults } from "@/lib/db/schema"
+import type { NewExerciseLink, } from "@/lib/db/schema"
 import { getCurrentUser } from "./users"
 
 function generateSecureToken(): string {
   return nanoid(12)
 }
 
-export async function createExerciseLink(link: NewExerciseLink, items: Array<NewExerciseLinkItem>) {
+export async function createExerciseLink(link: NewExerciseLink) {
   try {
     const currentUser = await getCurrentUser()
 
@@ -24,20 +24,12 @@ export async function createExerciseLink(link: NewExerciseLink, items: Array<New
       .values({
         creatorId: currentUser.id,
         targetUserId: link.targetUserId,
+        templateId: link.templateId,
         publicId: generateSecureToken(),
-        title: link.title,
-        description: link.description || null,
       })
       .returning()
 
-    const itemsToInsert = items.map((item) => ({
-      ...item,
-      linkId: newLink.id,
-    }))
-
-    const insertedItems = await db.insert(exerciseLinkItems).values(itemsToInsert).returning()
-
-    return { ...newLink, items: insertedItems }
+    return newLink
   } catch (error) {
     console.error("Error creating exercise link:", error)
     throw error
@@ -63,15 +55,25 @@ export async function getUserExerciseLinks() {
             name: true,
           },
         },
-        exerciseLinkItems: {
+        template: {
+          columns: {
+            id: true,
+            title: true,
+            description: true,
+          },
           with: {
-            exercise: {
-              columns: {
-                id: true,
-                slug: true,
-                displayName: true,
-                tags: true,
+            exerciseTemplateItems: {
+              with: {
+                exercise: {
+                  columns: {
+                    id: true,
+                    slug: true,
+                    displayName: true,
+                    tags: true,
+                  },
+                },
               },
+              orderBy: (item) => item.position,
             },
           },
         },
@@ -120,11 +122,14 @@ export async function getExerciseLinkByPublicId(publicId: string) {
       with: {
         targetUser: true,
         creator: true,
-        exerciseLinkItems: {
-          orderBy: exerciseLinkItems.position,
+        template: {
           with: {
-            exercise: true,
-            exerciseResults: true
+            exerciseTemplateItems: {
+              with: {
+                exercise: true,
+                exerciseResults: true
+              },
+            },
           },
         },
       },
@@ -137,10 +142,11 @@ export async function getExerciseLinkByPublicId(publicId: string) {
   }
 }
 
-export async function saveExerciseResults(exerciseItemId: number, results: any) {
+export async function saveExerciseResults(linkId: number, exerciseItemId: number, results: any) {
   try {
     await db.insert(exerciseResults).values({
-      linkItemId: exerciseItemId,
+      linkId: linkId,
+      templateItemId: exerciseItemId,
       results,
     });
     return { ok: true };

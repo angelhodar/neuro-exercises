@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  Plus,
   ExternalLink,
   MoreHorizontal,
   Target,
@@ -30,6 +29,9 @@ import {
 import { CopyLinkButton } from "./copy-link-button";
 import { LinkActionsDropdown } from "./link-actions-dropdown";
 import { getUserExerciseLinks } from "@/app/actions/links";
+import { getAvailableUsers } from "@/app/actions/users";
+import { getExerciseTemplates } from "@/app/actions/templates";
+import CreateLinkButton from "./create-link-button";
 
 // Forzar renderizado dinámico
 export const dynamic = "force-dynamic";
@@ -52,7 +54,11 @@ function TargetUserInfo({ name, email }: { name: string; email: string }) {
 }
 
 export default async function LinksPage() {
-  const links = await getUserExerciseLinks();
+  const [links, users, templates] = await Promise.all([
+    getUserExerciseLinks(),
+    getAvailableUsers(),
+    getExerciseTemplates(),
+  ]);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -66,29 +72,19 @@ export default async function LinksPage() {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <Link href="/dashboard/links/create">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Crear enlace
-            </Button>
-          </Link>
+          <CreateLinkButton users={users} templates={templates} />
         </DashboardHeaderActions>
       </DashboardHeader>
 
       {links.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
           <LinkIcon className="h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold">No hay enlaces creados</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Comienza creando tu primer enlace compartido para enviar ejercicios
             a tus usuarios.
           </p>
-          <Link href="/dashboard/links/create" className="mt-4">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Crear primer enlace
-            </Button>
-          </Link>
+          <CreateLinkButton users={users} templates={templates} />
         </div>
       ) : (
         <div className="rounded-md border">
@@ -103,14 +99,14 @@ export default async function LinksPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {links.map((link) => (
+              {links.map((link: any) => (
                 <TableRow key={link.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <p className="font-medium leading-none">{link.title}</p>
-                      {link.description && (
+                      <p className="font-medium leading-none">{link.template?.title}</p>
+                      {link.template?.description && (
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {link.description}
+                          {link.template.description}
                         </p>
                       )}
                     </div>
@@ -124,11 +120,11 @@ export default async function LinksPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {link.exerciseLinkItems?.length || 0} ejercicios
+                        {link.template?.exerciseTemplateItems?.length || 0} ejercicios
                       </Badge>
-                      {link.exerciseLinkItems && link.exerciseLinkItems.length > 0 && (
+                      {link.template?.exerciseTemplateItems && link.template.exerciseTemplateItems.length > 0 && (
                         <div className="flex -space-x-1">
-                          {link.exerciseLinkItems.slice(0, 3).map((item, index) => (
+                          {link.template.exerciseTemplateItems.slice(0, 3).map((item: any, index: number) => (
                             <div
                               key={item.id}
                               className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary ring-2 ring-background"
@@ -137,9 +133,9 @@ export default async function LinksPage() {
                               {index + 1}
                             </div>
                           ))}
-                          {link.exerciseLinkItems.length > 3 && (
+                          {link.template.exerciseTemplateItems.length > 3 && (
                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-background">
-                              +{link.exerciseLinkItems.length - 3}
+                              +{link.template.exerciseTemplateItems.length - 3}
                             </div>
                           )}
                         </div>

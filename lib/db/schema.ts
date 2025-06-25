@@ -94,32 +94,6 @@ export const exercises = pgTable(
   ],
 )
 
-export const exerciseLinks = pgTable(
-  "exercise_links",
-  {
-    id: serial().primaryKey(),
-    templateId: text("template_id").notNull(),
-    targetUserId: text("target_user_id").notNull(),
-    publicId: varchar("public_id", { length: 50 }).notNull().unique(),
-    ...timestamps,
-  },
-  (table) => [
-    uniqueIndex("exercise_links_public_id_idx").on(table.publicId),
-    index("exercise_links_template_idx").on(table.templateId),
-    index("exercise_links_target_user_idx").on(table.targetUserId),
-    foreignKey({
-      columns: [table.templateId],
-      foreignColumns: [users.id],
-      name: "exercise_links_template_fk",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.targetUserId],
-      foreignColumns: [users.id],
-      name: "exercise_links_target_user_fk",
-    }).onDelete("cascade"),
-  ],
-)
-
 export const exerciseTemplates = pgTable(
   "exercise_templates",
   {
@@ -134,8 +108,8 @@ export const exerciseTemplates = pgTable(
     foreignKey({
       columns: [table.creatorId],
       foreignColumns: [users.id],
-      name: "exercise_links_creator_fk",
-    }).onDelete("cascade")
+      name: "exercise_templates_creator_fk",
+    }).onDelete("cascade"),
   ],
 )
 
@@ -147,17 +121,17 @@ export const exerciseTemplateItems = pgTable(
     exerciseId: integer("exercise_id").notNull(),
     config: jsonb().$type<ConfigSchema>(),
     position: integer().notNull(),
-    ...timestamps,
+    createdAt: timestamps.createdAt,
   },
   (table) => [
-    index("exercise_template_items_link_idx").on(table.templateId),
+    index("exercise_template_items_template_idx").on(table.templateId),
     index("exercise_template_items_exercise_idx").on(table.exerciseId),
-    index("exercise_template_items_link_position_idx").on(table.templateId, table.position),
-    uniqueIndex("exercise_template_items_link_position_unique").on(table.templateId, table.position),
+    index("exercise_template_items_template_position_idx").on(table.templateId, table.position),
+    uniqueIndex("exercise_template_items_template_position_unique").on(table.templateId, table.position),
     foreignKey({
       columns: [table.templateId],
-      foreignColumns: [exerciseLinks.id],
-      name: "exercise_template_items_link_fk",
+      foreignColumns: [exerciseTemplates.id],
+      name: "exercise_template_items_template_fk",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.exerciseId],
@@ -167,12 +141,45 @@ export const exerciseTemplateItems = pgTable(
   ],
 )
 
+export const exerciseLinks = pgTable(
+  "exercise_links",
+  {
+    id: serial().primaryKey(),
+    creatorId: text("creator_id").notNull(),
+    templateId: integer("template_id").notNull(),
+    targetUserId: text("target_user_id").notNull(),
+    publicId: varchar("public_id", { length: 50 }).notNull().unique(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("exercise_links_public_id_idx").on(table.publicId),
+    index("exercise_links_creator_idx").on(table.creatorId),
+    index("exercise_links_template_idx").on(table.templateId),
+    index("exercise_links_target_user_idx").on(table.targetUserId),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "exercise_links_creator_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.templateId],
+      foreignColumns: [exerciseTemplates.id],
+      name: "exercise_links_template_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.targetUserId],
+      foreignColumns: [users.id],
+      name: "exercise_links_target_user_fk",
+    }).onDelete("cascade"),
+  ],
+)
+
 export const exerciseResults = pgTable(
   "exercise_results",
   {
     id: serial().primaryKey(),
     linkId: integer("link_id").notNull(),
-    linkTemplateItemId: integer("link_template_item_id").notNull(),
+    templateItemId: integer("template_item_id").notNull(),
     results: jsonb(),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }).defaultNow().notNull(),
@@ -180,9 +187,17 @@ export const exerciseResults = pgTable(
   },
   (table) => [
     index("exercise_results_link_idx").on(table.linkId),
-    index("exercise_results_template_item_idx").on(table.linkTemplateItemId),
+    index("exercise_results_template_item_idx").on(table.templateItemId),
+    index("exercise_results_completed_at_idx").on(table.completedAt), // For time-based queries
+    // Ensure one result per link+template_item combination
+    uniqueIndex("exercise_results_link_template_item_unique").on(table.linkId, table.templateItemId),
     foreignKey({
-      columns: [table.linkTemplateItemId],
+      columns: [table.linkId],
+      foreignColumns: [exerciseLinks.id],
+      name: "exercise_results_link_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.templateItemId],
       foreignColumns: [exerciseTemplateItems.id],
       name: "exercise_results_template_item_fk",
     }).onDelete("cascade"),
@@ -213,14 +228,16 @@ export const mediaTagsView = pgMaterializedView("media_tags", {
 
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
-  createdExerciseTemplates: many(exerciseTemplates, {
-    relationName: "createdExerciseTemplates",
+  createdExerciseTemplates: many(exerciseTemplates),
+  createdExerciseLinks: many(exerciseLinks, {
+    relationName: "createdExerciseLinks",
   }),
   targetedExerciseLinks: many(exerciseLinks, {
-    relationName: "targetedExerciseLinks",
+    relationName: "targetedExerciseLinks", 
   }),
   sessions: many(sessions),
   accounts: many(accounts),
+  medias: many(medias),
 }))
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -241,21 +258,16 @@ export const exercisesRelations = relations(exercises, ({ many }) => ({
   exerciseTemplateItems: many(exerciseTemplateItems),
 }))
 
-export const exerciseLinksRelations = relations(exerciseLinks, ({ one, many }) => ({
-  template: one(exerciseTemplates, {
-    fields: [exerciseLinks.templateId],
-    references: [exerciseTemplates.id],
-    relationName: "fromTemplate",
-  }),
-  targetUser: one(users, {
-    fields: [exerciseLinks.targetUserId],
+export const exerciseTemplatesRelations = relations(exerciseTemplates, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [exerciseTemplates.creatorId],
     references: [users.id],
-    relationName: "targetedExerciseLinks",
   }),
   exerciseTemplateItems: many(exerciseTemplateItems),
+  exerciseLinks: many(exerciseLinks),
 }))
 
-export const exerciseTemplateItemsRelations = relations(exerciseTemplateItems, ({ one }) => ({
+export const exerciseTemplateItemsRelations = relations(exerciseTemplateItems, ({ one, many }) => ({
   template: one(exerciseTemplates, {
     fields: [exerciseTemplateItems.templateId],
     references: [exerciseTemplates.id],
@@ -264,12 +276,34 @@ export const exerciseTemplateItemsRelations = relations(exerciseTemplateItems, (
     fields: [exerciseTemplateItems.exerciseId],
     references: [exercises.id],
   }),
-  exerciseResults: one(exerciseResults),
+  exerciseResults: many(exerciseResults),
+}))
+
+export const exerciseLinksRelations = relations(exerciseLinks, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [exerciseLinks.creatorId],
+    references: [users.id],
+    relationName: "createdExerciseLinks",
+  }),
+  template: one(exerciseTemplates, {
+    fields: [exerciseLinks.templateId],
+    references: [exerciseTemplates.id],
+  }),
+  targetUser: one(users, {
+    fields: [exerciseLinks.targetUserId],
+    references: [users.id],
+    relationName: "targetedExerciseLinks",
+  }),
+  exerciseResults: many(exerciseResults),
 }))
 
 export const exerciseResultsRelations = relations(exerciseResults, ({ one }) => ({
-  exerciseLinkItem: one(exerciseTemplateItems, {
-    fields: [exerciseResults.linkTemplateItemId],
+  exerciseLink: one(exerciseLinks, {
+    fields: [exerciseResults.linkId],
+    references: [exerciseLinks.id],
+  }),
+  templateItem: one(exerciseTemplateItems, {
+    fields: [exerciseResults.templateItemId],
     references: [exerciseTemplateItems.id],
   }),
 }))
@@ -281,17 +315,22 @@ export const mediasRelations = relations(medias, ({ one }) => ({
   }),
 }))
 
+// Schemas
 export const exerciseSelectSchema = createSelectSchema(exercises)
 export const exerciseInsertSchema = createInsertSchema(exercises)
 export const exerciseUpdateSchema = createUpdateSchema(exercises)
 
+export const exerciseTemplateSelectSchema = createSelectSchema(exerciseTemplates)
+export const exerciseTemplateInsertSchema = createInsertSchema(exerciseTemplates)
+export const exerciseTemplateUpdateSchema = createUpdateSchema(exerciseTemplates)
+
+export const exerciseTemplateItemSelectSchema = createSelectSchema(exerciseTemplateItems)
+export const exerciseTemplateItemInsertSchema = createInsertSchema(exerciseTemplateItems)
+export const exerciseTemplateItemUpdateSchema = createUpdateSchema(exerciseTemplateItems)
+
 export const exerciseLinkSelectSchema = createSelectSchema(exerciseLinks)
 export const exerciseLinkInsertSchema = createInsertSchema(exerciseLinks)
 export const exerciseLinkUpdateSchema = createUpdateSchema(exerciseLinks)
-
-export const exerciseTemplateItemselectSchema = createSelectSchema(exerciseTemplateItems)
-export const exerciseLinkItemInsertSchema = createInsertSchema(exerciseTemplateItems)
-export const exerciseLinkItemUpdateSchema = createUpdateSchema(exerciseTemplateItems)
 
 export const exerciseResultSelectSchema = createSelectSchema(exerciseResults)
 export const exerciseResultInsertSchema = createInsertSchema(exerciseResults)
@@ -313,11 +352,14 @@ export type NewVerification = typeof verifications.$inferInsert
 export type Exercise = typeof exercises.$inferSelect
 export type NewExercise = typeof exercises.$inferInsert
 
+export type ExerciseTemplate = typeof exerciseTemplates.$inferSelect
+export type NewExerciseTemplate = typeof exerciseTemplates.$inferInsert
+
+export type ExerciseTemplateItem = typeof exerciseTemplateItems.$inferSelect
+export type NewExerciseTemplateItem = typeof exerciseTemplateItems.$inferInsert
+
 export type ExerciseLink = typeof exerciseLinks.$inferSelect
 export type NewExerciseLink = typeof exerciseLinks.$inferInsert
-
-export type ExerciseLinkItem = typeof exerciseTemplateItems.$inferSelect
-export type NewExerciseLinkItem = typeof exerciseTemplateItems.$inferInsert
 
 export type ExerciseResult = typeof exerciseResults.$inferSelect
 export type NewExerciseResult = typeof exerciseResults.$inferInsert

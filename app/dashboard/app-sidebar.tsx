@@ -5,9 +5,10 @@ import {
   Home,
   Users,
   FileImage,
-  FilePlus,
+  Clipboard,
+  Link as LinkIcon,
   Plus,
-  Eye,
+  ImagePlus,
   Grid3x3,
   BookOpen,
   Image as ImageIcon,
@@ -84,19 +85,24 @@ const data = {
     {
       title: "Generar imágenes con IA",
       url: "/dashboard/media?create-dialog=true",
-      icon: FileImage,
+      icon: ImagePlus,
     },
   ],
   sharing: [
     {
-      title: "Crear enlaces",
-      url: "/dashboard/links/create",
-      icon: Plus,
+      title: "Plantillas",
+      url: "/dashboard/templates",
+      icon: Clipboard,
     },
     {
       title: "Mis enlaces",
       url: "/dashboard/links",
-      icon: Eye,
+      icon: LinkIcon,
+    },
+    {
+      title: "Crear enlaces",
+      url: "/dashboard/links/create",
+      icon: Plus,
     },
   ],
 };

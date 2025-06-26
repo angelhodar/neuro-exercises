@@ -14,7 +14,7 @@ export function Cell({ isTarget, isSelected, onClick, disabled }: CellProps) {
   return (
     <m.button
       className={cn(
-        "aspect-square w-full rounded-md transition-colors",
+        "aspect-square w-full h-full rounded-md transition-colors",
         isTarget
           ? "bg-green-500 hover:bg-green-600"
           : isSelected

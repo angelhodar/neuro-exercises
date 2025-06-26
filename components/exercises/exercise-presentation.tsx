@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { createMediaUrl } from "@/lib/utils";
 import { Play } from "lucide-react";
+import { useCountdown } from "./exercise-countdown";
 
 export function ExercisePresentation() {
-  const { exercise, startExercise } = useExerciseExecution();
+  const { exercise } = useExerciseExecution();
+  const { startCountdown } = useCountdown();
 
   return (
     <div className="text-center max-w-md mx-auto">
@@ -18,14 +20,16 @@ export function ExercisePresentation() {
         </div>
       )}
 
-      <h1 className="text-4xl font-bold text-gray-700 mb-4">{exercise.displayName}</h1>
+      <h1 className="text-4xl font-bold text-gray-700 mb-4">
+        {exercise.displayName}
+      </h1>
       <p className="text-lg text-gray-600 mb-8 leading-relaxed">
         {exercise.description}
       </p>
 
       <Button
         size="lg"
-        onClick={startExercise}
+        onClick={startCountdown}
         className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
       >
         <Play className="w-6 h-6 mr-3" />

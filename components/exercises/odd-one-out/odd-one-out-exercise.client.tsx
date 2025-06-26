@@ -15,7 +15,10 @@ interface OddOneOutExerciseClientProps {
   medias: SelectableMediaSchema[];
 }
 
-export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseClientProps) {
+export function OddOneOutExerciseClient({
+  config,
+  medias,
+}: OddOneOutExerciseClientProps) {
   const {
     exerciseState,
     currentQuestionIndex,
@@ -38,17 +41,18 @@ export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseCli
   }, [medias]);
 
   // Construir las preguntas a partir de la config y el array de medias
-  const questions = useMemo(() =>
-    config.questions.map((q) => {
-      const options = [
-        ...q.patternMedias.map((m) => mediaMap[m.id]),
-        ...q.outlierMedia.map((m) => mediaMap[m.id]),
-      ];
-      return {
-        options,
-        correctAnswerId: q.outlierMedia[0].id,
-      };
-    }),
+  const questions = useMemo(
+    () =>
+      config.questions.map((q) => {
+        const options = [
+          ...q.patternMedias.map((m) => mediaMap[m.id]),
+          ...q.outlierMedia.map((m) => mediaMap[m.id]),
+        ];
+        return {
+          options,
+          correctAnswerId: q.outlierMedia[0].id,
+        };
+      }),
     [config, mediaMap]
   );
 
@@ -75,58 +79,48 @@ export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseCli
 
   // Mostrar resultados si el ejercicio terminó
   if (exerciseState === "finished") {
-    return (
-      <OddOneOutResults results={results as OddOneOutResult[]} />
-    );
+    return <OddOneOutResults results={results as OddOneOutResult[]} />;
   }
 
   return (
-    <div className="flex flex-col h-full p-4 md:p-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Encuentra la imagen diferente</h2>
-        <div className="text-lg font-semibold bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-md">
-          Pregunta: {currentQuestionIndex + 1} / {config.totalQuestions}
-        </div>
-      </div>
-      <div className="flex-grow flex items-center justify-center">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {currentQuestion.options.map((media) => {
-            const isSelected = selectedAnswerId === media.id;
-            const isCorrect = currentQuestion.correctAnswerId === media.id;
+    <div className="flex flex-col h-full p-4 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
+        {currentQuestion.options.map((media) => {
+          const isSelected = selectedAnswerId === media.id;
+          const isCorrect = currentQuestion.correctAnswerId === media.id;
 
-            let overlay = null;
-            if (isAnswered && isSelected) {
-              overlay = isCorrect ? (
-                <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
-                  <CheckCircle className="w-16 h-16 text-white" />
-                </div>
-              ) : (
-                <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center">
-                  <XCircle className="w-16 h-16 text-white" />
-                </div>
-              );
-            } else if (isAnswered && isCorrect) {
-              overlay = (
-                <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
-                  <CheckCircle className="w-16 h-16 text-white" />
-                </div>
-              );
-            }
-
-            return (
-              <div key={media.id} className="relative">
-                <MediaCard
-                  media={media}
-                  variant="selectable"
-                  isSelected={isSelected}
-                  onSelect={() => handleSelectAnswer(media.id)}
-                  className={isAnswered && !isSelected ? "opacity-50" : ""}
-                />
-                {overlay}
+          let overlay = null;
+          if (isAnswered && isSelected) {
+            overlay = isCorrect ? (
+              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
+                <CheckCircle className="w-16 h-16 text-white" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center">
+                <XCircle className="w-16 h-16 text-white" />
               </div>
             );
-          })}
-        </div>
+          } else if (isAnswered && isCorrect) {
+            overlay = (
+              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
+                <CheckCircle className="w-16 h-16 text-white" />
+              </div>
+            );
+          }
+
+          return (
+            <div key={media.id} className="relative">
+              <MediaCard
+                media={media}
+                variant="selectable"
+                isSelected={isSelected}
+                onSelect={() => handleSelectAnswer(media.id)}
+                className={isAnswered && !isSelected ? "opacity-50" : ""}
+              />
+              {overlay}
+            </div>
+          );
+        })}
       </div>
       <div className="flex justify-end mt-4">
         {isAnswered && (
@@ -139,4 +133,4 @@ export function OddOneOutExerciseClient({ config, medias }: OddOneOutExerciseCli
       </div>
     </div>
   );
-} 
+}

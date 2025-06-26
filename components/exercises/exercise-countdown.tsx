@@ -12,7 +12,7 @@ import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 
 interface CountdownContextType {
   countdown: number;
-  startCountdown: (initial: number) => void;
+  startCountdown: () => void;
 }
 
 const CountdownContext = createContext<CountdownContextType | undefined>(
@@ -40,22 +40,31 @@ export function CountdownProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const startCountdown = (initial: number) => {
-    setCountdown(initial);
+  const startCountdown = () => {
+    setCountdown(3);
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
     intervalRef.current = setInterval(() => {
       setCountdown((prev) => {
-        if (prev === null || prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          startExercise();
-          return 0;
-        }
-        return prev - 1;
+        if (prev > 1) return prev - 1;
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        return 0;
       });
     }, 1000);
   };
+
+  useEffect(() => {
+    if (countdown === 0 && intervalRef.current === null) return;
+
+    if (countdown === 0) {
+      startExercise();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+  }, [countdown, startExercise]);
 
   return (
     <CountdownContext.Provider value={{ countdown, startCountdown }}>

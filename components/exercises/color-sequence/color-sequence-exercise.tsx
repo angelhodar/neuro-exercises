@@ -8,7 +8,6 @@ import type {
   ColorSequenceQuestionResult,
 } from "./color-sequence-schema";
 
-
 interface ColorSequenceExerciseProps {
   config: ColorSequenceConfig;
 }
@@ -20,7 +19,12 @@ interface CellProps {
   disabled: boolean;
 }
 
-function ColorCell({ colorClass, onClick, isHighlighted, disabled }: CellProps) {
+function ColorCell({
+  colorClass,
+  onClick,
+  isHighlighted,
+  disabled,
+}: CellProps) {
   return (
     <button
       type="button"
@@ -36,12 +40,8 @@ function ColorCell({ colorClass, onClick, isHighlighted, disabled }: CellProps) 
 export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
   const { numCells, sequenceLength, highlightInterval } = config;
 
-  const {
-    exerciseState,
-    currentQuestionIndex,
-    addQuestionResult,
-    results,
-  } = useExerciseExecution();
+  const { exerciseState, currentQuestionIndex, addQuestionResult, results } =
+    useExerciseExecution();
 
   // Colores disponibles (Tailwind)
   const availableColorClasses = [
@@ -59,7 +59,10 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
     "bg-pink-500",
   ];
 
-  const colors = useMemo(() => availableColorClasses.slice(0, numCells), [numCells]);
+  const colors = useMemo(
+    () => availableColorClasses.slice(0, numCells),
+    [numCells]
+  );
 
   // Estado interno
   const [targetSequence, setTargetSequence] = useState<number[] | null>(null);
@@ -92,13 +95,13 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
       newTimeouts.push(
         setTimeout(() => {
           setHighlightedIndex(cellIndex);
-        }, i * highlightInterval),
+        }, i * highlightInterval)
       );
       // Apagar la celda
       newTimeouts.push(
         setTimeout(() => {
           setHighlightedIndex(null);
-        }, i * highlightInterval + highlightDuration),
+        }, i * highlightInterval + highlightDuration)
       );
     });
 
@@ -106,7 +109,7 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
     newTimeouts.push(
       setTimeout(() => {
         setIsPlaying(false);
-      }, seq.length * highlightInterval),
+      }, seq.length * highlightInterval)
     );
 
     setTimeouts(newTimeouts);
@@ -161,47 +164,43 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
   // Calcular disposición de cuadrícula
   const columns = Math.ceil(Math.sqrt(numCells));
 
+  if (exerciseState === "finished") {
+    return (
+      <ColorSequenceResults
+        results={results as ColorSequenceQuestionResult[]}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
-      {exerciseState !== "finished" && (
-        <>
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold mb-2">Secuencia de Colores</h2>
-            {exerciseState === "executing" && (
-              <p className="text-sm mt-2">Pregunta {currentQuestionIndex + 1}</p>
-            )}
-          </div>
+    <div className="flex flex-col items-center gap-6 p-6 w-full">
+      {/* Cells grid */}
+      <div
+        className="grid w-full max-w-2xl gap-4"
+        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      >
+        {colors.map((colorClass, idx) => (
+          <ColorCell
+            key={idx}
+            colorClass={colorClass}
+            isHighlighted={idx === highlightedIndex}
+            onClick={() => handleCellClick(idx)}
+            disabled={isPlaying || isWaitingNext}
+          />
+        ))}
+      </div>
 
-          <div
-            className="grid w-full max-w-2xl gap-4"
-            style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
-          >
-            {colors.map((colorClass, idx) => (
-              <ColorCell
-                key={idx}
-                colorClass={colorClass}
-                isHighlighted={idx === highlightedIndex}
-                onClick={() => handleCellClick(idx)}
-                disabled={exerciseState !== "executing" || isPlaying || isWaitingNext}
-              />
-            ))}
-          </div>
-
-          {/* Feedback de selección del usuario */}
-          {exerciseState === "executing" && (
-            <div className="flex gap-2 mt-4">
-              {Array.from({ length: sequenceLength }).map((_, i) => {
-                const selectedIdx = userSequence[i];
-                const colorClass = selectedIdx !== undefined ? colors[selectedIdx] : "bg-gray-300 dark:bg-gray-700";
-                return <div key={i} className={`w-6 h-6 rounded-sm ${colorClass}`} />;
-              })}
-            </div>
-          )}
-        </>
-      )}
-      {exerciseState === "finished" && (
-        <ColorSequenceResults results={results as ColorSequenceQuestionResult[]} />
-      )}
+      {/* Feedback de selección del usuario */}
+      <div className="flex gap-2 mt-4">
+        {Array.from({ length: sequenceLength }).map((_, i) => {
+          const selectedIdx = userSequence[i];
+          const colorClass =
+            selectedIdx !== undefined
+              ? colors[selectedIdx]
+              : "bg-gray-300 dark:bg-gray-700";
+          return <div key={i} className={`w-8 h-8 rounded-sm ${colorClass}`} />;
+        })}
+      </div>
     </div>
   );
-} 
+}

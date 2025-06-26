@@ -13,18 +13,16 @@ export default function ExerciseExecutionLayout({
   children,
 }: PropsWithChildren) {
   return (
-    <div className="flex flex-col overflow-hidden h-full">
-      <div className="w-full container mx-auto max-w-7xl h-full flex flex-col">
-        <CountdownProvider>
-          <ExerciseProgress />
-          <ExerciseContainer>{children}</ExerciseContainer>
-          <ExerciseControls>
-            <ExerciseAudioButton />
-            <ExerciseFullscreenButton />
-            <ExerciseFlowButton />
-          </ExerciseControls>
-        </CountdownProvider>
-      </div>
+    <div className="flex flex-col overflow-hidden w-full h-full container mx-auto max-w-7xl">
+      <CountdownProvider>
+        <ExerciseProgress />
+        <ExerciseContainer>{children}</ExerciseContainer>
+        <ExerciseControls>
+          <ExerciseAudioButton />
+          <ExerciseFullscreenButton />
+          <ExerciseFlowButton />
+        </ExerciseControls>
+      </CountdownProvider>
     </div>
   );
 }

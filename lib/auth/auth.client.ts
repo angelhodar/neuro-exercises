@@ -1,7 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 
 const getBaseURL = () => {
-  if (!process.env.VERCEL) {
+  if (!process.env.NEXT_PUBLIC_VERCEL) {
     return "http://localhost:3000";
   }
 

@@ -34,6 +34,9 @@ import { StimulusCountConfigFields } from "@/components/exercises/stimulus-count
 import { oddOneOutConfigSchema, oddOneOutPresets } from "@/components/exercises/odd-one-out/odd-one-out-schema";
 import { OddOneOutConfigFields } from "@/components/exercises/odd-one-out/odd-one-out-config-form";
 
+import { stroopTestConfigSchema, stroopTestPresets } from "@/components/exercises/prueba-pr/prueba-pr-schema";
+import { PruebaPrConfigForm } from "@/components/exercises/prueba-pr/prueba-pr-config-form";
+
 export type ClientExerciseEntry = {
   schema: ZodTypeAny;
   presets?: Record<string, any>;
@@ -74,6 +77,11 @@ export const exerciseRegistryClient = {
     schema: oddOneOutConfigSchema,
     presets: oddOneOutPresets,
     ConfigFieldsComponent: OddOneOutConfigFields,
+  }),
+  "prueba-pr": createEntry({
+    schema: stroopTestConfigSchema,
+    presets: stroopTestPresets,
+    ConfigFieldsComponent: PruebaPrConfigForm,
   }),
 };
 

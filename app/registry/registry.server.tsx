@@ -27,6 +27,10 @@ import { OddOneOutExercise } from "@/components/exercises/odd-one-out/odd-one-ou
 import { OddOneOutResults } from "@/components/exercises/odd-one-out/odd-one-out-results";
 import { oddOneOutConfigSchema } from "@/components/exercises/odd-one-out/odd-one-out-schema";
 
+import { PruebaPrExercise } from "@/components/exercises/prueba-pr/prueba-pr-exercise";
+import { PruebaPrResults } from "@/components/exercises/prueba-pr/prueba-pr-results";
+import { stroopTestConfigSchema } from "@/components/exercises/prueba-pr/prueba-pr-schema";
+
 export type ServerExerciseEntry = {
   schema: ZodTypeAny;
   ExerciseComponent: ComponentType<{ config: any }>;
@@ -67,6 +71,11 @@ export const exerciseRegistryServer = {
     schema: oddOneOutConfigSchema,
     ExerciseComponent: OddOneOutExercise,
     ResultsComponent: OddOneOutResults,
+  }),
+  "prueba-pr": createEntry({
+    schema: stroopTestConfigSchema,
+    ExerciseComponent: PruebaPrExercise,
+    ResultsComponent: PruebaPrResults,
   }),
 };
 

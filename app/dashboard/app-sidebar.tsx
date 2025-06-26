@@ -100,7 +100,7 @@ const data = {
       icon: LinkIcon,
     },
     {
-      title: "Crear enlaces",
+      title: "Crear enlace",
       url: "/dashboard/links?create-link=true",
       icon: Plus,
     },
@@ -141,9 +141,8 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Ejercicios Interactivos */}
         <SidebarGroup>
-          <SidebarGroupLabel>Ejercicios Interactivos</SidebarGroupLabel>
+          <SidebarGroupLabel>Ejercicios</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.exercises.map((item) => (
@@ -160,7 +159,6 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Gestión */}
         <SidebarGroup>
           <SidebarGroupLabel>Gestión</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -179,9 +177,8 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Enlaces Compartidos */}
         <SidebarGroup>
-          <SidebarGroupLabel>Enlaces Compartidos</SidebarGroupLabel>
+          <SidebarGroupLabel>Enlaces</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.sharing.map((item) => (

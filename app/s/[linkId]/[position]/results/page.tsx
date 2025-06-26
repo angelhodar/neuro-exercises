@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-  import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
 import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 
@@ -31,16 +31,13 @@ export default async function ExerciseResultsPage({ params }: PageProps) {
   const { ResultsComponent } = exerciseEntry;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-4">Resultados de {exercise.displayName}</h1>
-      <ResultsComponent results={exerciseResults} {...config} />
+    <div className="flex flex-col container mx-auto items-center justify-center h-screen">
+      <ResultsComponent results={exerciseResults[0].results} {...config} />
       <div className="mt-6 flex justify-center">
         <Button asChild>
-          <Link href={`/s/${linkId}`}>
-            Volver a la lista de ejercicios
-          </Link>
+          <Link href={`/s/${linkId}`}>Volver a la lista de ejercicios</Link>
         </Button>
       </div>
     </div>
   );
-} 
+}

@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
 import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
-import { ExerciseResultsCollector } from "./exercise-results";
-import { ExerciseControls } from "@/components/exercises/exercise-controls";
+import { ExerciseResultsCollector } from "./exercise-results-collector";
+import ExerciseExecutionLayout from "@/components/exercises/exercise-execution-layout";
 
 interface PageProps {
   params: Promise<{ linkId: string; position: string }>;
@@ -33,13 +33,15 @@ export default async function ExercisePage({ params }: PageProps) {
   const { ExerciseComponent } = exerciseEntry;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-4">{exercise.displayName}</h1>
-      <p className="mb-6 text-gray-600">{exercise.description}</p>
-      <ExerciseProvider totalQuestions={config.totalQuestions}>
-        <ExerciseComponent config={config} />
-        <ExerciseControls />
-        <ExerciseResultsCollector exerciseItemId={item.id} />
+    <div className="flex flex-1 flex-col gap-4 p-4 h-screen">
+      <ExerciseProvider
+        totalQuestions={config.totalQuestions}
+        exercise={exercise}
+      >
+        <ExerciseExecutionLayout>
+          <ExerciseComponent config={config} />
+        </ExerciseExecutionLayout>
+        <ExerciseResultsCollector linkId={linkData.id} itemId={item.id} />
       </ExerciseProvider>
     </div>
   );

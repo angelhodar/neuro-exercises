@@ -1,16 +1,20 @@
 import { createAuthClient } from "better-auth/react";
 
-// NEXT_PUBLIC_VERCEL_URL
-// NEXT_PUBLIC_VERCEL_BRANCH_URL
+const getBaseURL = () => {
+  if (!process.env.VERCEL) {
+    return "http://localhost:3000";
+  }
 
-// TODO: Add a check for the environment to select the proper env var in case of preview deployments. For now, we're using the production URL.
+  const url =
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+      ? process.env.NEXT_PUBLIC_VERCEL_URL
+      : process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL;
 
-const baseURL = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
-  : "http://localhost:3000";
+  return `https://${url}`;
+};
 
 export const authClient = createAuthClient({
-  baseURL,
+  baseURL: getBaseURL(),
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

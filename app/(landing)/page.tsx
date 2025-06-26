@@ -1,16 +1,9 @@
+import Image from "next/image"; 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Brain,
-  Users,
-  Trophy,
-  Play,
-  CheckCircle,
-  ArrowRight,
-  MapPin,
-} from "lucide-react";
-import Image from "next/image";
+import { Brain, Users, Trophy, Play, CheckCircle, MapPin } from "lucide-react";
 
 export default function Home() {
   return (
@@ -35,9 +28,15 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  <Play className="mr-2 h-4 w-4" />
-                  Comenzar
+                <Button
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  asChild
+                >
+                  <Link href="/login">
+                    <Play className="mr-2 h-4 w-4" />
+                    Comenzar
+                  </Link>
                 </Button>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-600">

@@ -63,7 +63,6 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Buscar ejercicio</Label>
               <Input
                 id="search"
                 value={searchTerm}

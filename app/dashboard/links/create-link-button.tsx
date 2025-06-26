@@ -74,8 +74,9 @@ export default function CreateLinkButton({
       toast.success("Enlace creado exitosamente!");
       setOpen(false);
       form.reset();
-    } catch (error: any) {
-      setError(error.message || "Error al crear el enlace");
+    } catch (e) {
+      console.error(e);
+      setError("Error al crear el enlace");
     }
   };
 

@@ -31,7 +31,7 @@ function ColorCell({
       onClick={onClick}
       disabled={disabled}
       className={`relative w-full aspect-square rounded-md transition-transform active:scale-95 ${colorClass} ${
-        isHighlighted ? "ring-8 ring-yellow-300" : ""
+        isHighlighted ? "ring-0 outline outline-4 outline-black outline-offset-[-4px]" : ""
       }`}
     />
   );

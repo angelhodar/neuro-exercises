@@ -1,7 +1,40 @@
+import "dotenv/config";
+
 import { Octokit } from "@octokit/rest";
 import { z } from "zod";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
+import { writeFileSync } from "fs";
+import { format } from "prettier";
+import { execSync } from "child_process";
+
+const createPrompt = (promptText: string, slug: string) => {
+  const context = execSync(
+    'npx repomix --include "components/exercises/**/*" --ignore "components/exercises/exercise-*" --stdout',
+    { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
+  ).trim();
+
+  return `Eres un asistente que genera archivos de un ejercicio neurocognitivo para una aplicación basada en Next.js siguiendo estrictamente las directrices descritas.
+  
+  Las directrices para el ejercicio son:
+
+  <directrices>
+  ${promptText}
+  </directrices>
+  
+  Devuelve un array JSON donde cada elemento tiene:
+  
+  - path: ruta relativa (ej. components/mi-ejercicio.tsx)
+  - content: el código completo del archivo
+
+  Aquí tienes ejemplos de cómo debe ser el código con otros ejercicios ya completados. Fíjate en las rutas de los archivos para que sepas dónde poner el tuyo. En este caso, el slug del ejercicio es ${slug}:
+
+  <ejemplos>
+  ${context}
+  </ejemplos>
+
+  IMPORTANTE: El código en 'content' debe ser sintácticamente correcto y estar bien formateado, con saltos de línea entre sentencias (interfaces, funciones, constantes, etc.), como lo haría un desarrollador humano. No concatenes todo el código en una sola línea`;
+};
 
 async function run(): Promise<void> {
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -39,40 +72,47 @@ async function run(): Promise<void> {
   const promptMatch = pr.body.match(/## Prompt\s*([\s\S]*)/);
   const promptText = promptMatch ? promptMatch[1].trim() : pr.body;
 
+  const prompt = createPrompt(promptText, slug);
+
   console.log(`Solicitud de ejercicio leída: ${slug}`);
 
-  const generation = await generateObject({
-    model: google("gemini-2.5-pro-preview-05-06"),
+  const { object: generatedFiles } = await generateObject({
+    model: google("gemini-2.5-flash"),
     schema: z.array(
       z.object({
         path: z.string(),
         content: z.string(),
-      })
+      }),
     ),
-    prompt: `Eres un asistente que genera archivos de ejercicio para una aplicación basada en Next.js siguiendo estrictamente las directrices descritas.\n\nDirectrices:\n${promptText}\n\nDevuelve un array JSON donde cada elemento tiene:\n- path: ruta relativa (ej. components/mi-ejercicio.tsx)\n- content: el código completo del archivo\n\nNo incluyas ningún texto adicional.`,
+    prompt
   });
 
-  const generatedFiles = generation.object;
+  const prettifiedFiles = await Promise.all(
+    generatedFiles.map(async (file) => {
+      try {
+        // Prettier automatically finds .prettierrc.json and uses its rules.
+        const formattedContent = await format(file.content, {
+          filepath: file.path,
+        });
 
-  console.log(`Se generaron ${generatedFiles.length} archivos`);
+        return { ...file, content: formattedContent };
+      } catch (error) {
+        console.warn(`Could not format file ${file.path}. Error:`, error);
+        return file;
+      }
+    }),
+  );
 
-  const branchName = pr.head.ref;
+  console.log(`Se generaron ${prettifiedFiles.length} archivos`);
 
-  for (const file of generatedFiles) {
+  writeFileSync(
+    "generated-files.json",
+    JSON.stringify(prettifiedFiles, null, 2),
+  );
+
+  for (const file of prettifiedFiles) {
     // Asegurarse de que la ruta no empiece por '/'
     const filePath = file.path.replace(/^\/+/, "");
-
-    // Comprobamos si existe ya el archivo para determinar si incluimos sha
-    let sha: string | undefined;
-
-    const { data: existing } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: filePath,
-      ref: branchName,
-    });
-
-    if (!Array.isArray(existing)) sha = existing.sha;
 
     await octokit.repos.createOrUpdateFileContents({
       owner,
@@ -80,8 +120,7 @@ async function run(): Promise<void> {
       path: filePath,
       message: `feat(${slug}): añadir ${filePath}`,
       content: Buffer.from(file.content).toString("base64"),
-      branch: branchName,
-      sha,
+      branch: pr.head.ref
     });
   }
 

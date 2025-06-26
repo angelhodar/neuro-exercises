@@ -23,6 +23,6 @@ jobs:
 
       - name: Ejecutar script de generación
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: npx -y tsx ./scripts/generate-exercise.ts 
+        run: npx -y tsx ./scripts/generate-exercise.ts

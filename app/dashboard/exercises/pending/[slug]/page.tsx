@@ -1,8 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getExerciseBySlug } from "@/app/actions/exercises";
-import { getPRComments, addPRComment } from "@/app/actions/github";
-import { revalidatePath } from "next/cache";
+import { getPRComments } from "@/app/actions/github";
+import { PRChat } from "./pr-chat";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, ExternalLink, Eye } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -18,38 +20,55 @@ export default async function PendingExercisePage({ params }: PageProps) {
   const comments = await getPRComments(slug);
 
   return (
-    <div className="container mx-auto py-8 max-w-2xl">
-      <h1 className="text-3xl font-semibold mb-4">{exercise.displayName}</h1>
-      <p className="text-muted-foreground mb-6">
-        Este ejercicio aún está en proceso de generación. Sigue el progreso y
-        conversa en la Pull Request asociada.
-      </p>
-      <Link
-        href={`https://github.com/${process.env.GITHUB_REPOSITORY}/pulls`}
-        className="text-primary underline"
-      >
-        Ver Pull Requests
-      </Link>
-      <div className="border rounded-md p-4 space-y-4 mb-6 max-h-[60vh] overflow-y-auto bg-background/50">
-        {comments.map((c: any) => (
-          <div key={c.id} className="text-sm">
-            <p className="font-semibold">{c.user.login} <span className="text-muted-foreground text-xs">{new Date(c.created_at).toLocaleString()}</span></p>
-            <p className="whitespace-pre-wrap">{c.body}</p>
+    <div className="container w-full mx-auto p-2 flex flex-col gap-6 min-h-screen">
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-gray-800">
+                  {exercise.displayName}
+                </CardTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  Última actualización:{" "}
+                  {new Date(exercise.updatedAt).toLocaleString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {exercise.prNumber && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Ver Ejercicio
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Ver en GitHub
+              </Button>
+            </div>
           </div>
-        ))}
-        {comments.length === 0 && <p className="text-muted-foreground text-sm">Sin comentarios aún.</p>}
+        </CardHeader>
+      </Card>
+      <div className="flex-1">
+        <PRChat slug={slug} comments={comments} />
       </div>
-      <form action={async (formData: FormData) => {
-        "use server";
-        const body = formData.get("comment") as string;
-        if (body?.trim()) {
-          await addPRComment(slug, body);
-          revalidatePath(`/dashboard/exercises/pending/${slug}`);
-        }
-      }} className="space-y-2">
-        <textarea name="comment" className="w-full border rounded-md p-2 h-24" placeholder="Escribe un comentario..." />
-        <button type="submit" className="px-4 py-2 rounded-md bg-primary text-white">Enviar comentario</button>
-      </form>
     </div>
   );
 }

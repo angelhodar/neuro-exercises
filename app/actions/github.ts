@@ -4,6 +4,7 @@ import { Octokit } from "@octokit/rest";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import type { Exercise } from "@/lib/db/schema";
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
@@ -24,9 +25,12 @@ export async function getPRComments(slug: string) {
   if (!prNumber) return [];
 
   const [owner, repo] = GITHUB_REPOSITORY!.split("/");
-  const { data } = await octokit.issues.listComments({ owner, repo, issue_number: prNumber, per_page: 100 });
 
-  return data;
+  const { data: pr } = await octokit.pulls.get({ owner, repo, pull_number: prNumber });
+
+  const { data: comments } = await octokit.issues.listComments({ owner, repo, issue_number: prNumber, per_page: 100 });
+
+  return [pr, ...comments];
 }
 
 export async function addPRComment(slug: string, body: string) {
@@ -36,6 +40,8 @@ export async function addPRComment(slug: string, body: string) {
   const [owner, repo] = GITHUB_REPOSITORY!.split("/");
   
   await octokit.issues.createComment({ owner, repo, issue_number: prNumber, body });
+
+  revalidatePath(`/dashboard/exercises/pending/${slug}`);
 }
 
 export async function createExercisePR(exercise: Exercise, prompt: string): Promise<void> {

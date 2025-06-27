@@ -10,6 +10,7 @@
     "db:studio": "npx drizzle-kit studio",
     "db:migrate": "npx drizzle-kit migrate",
     "db:push": "npx drizzle-kit push",
+    "generate-exercise": "npx tsx scripts/generate-exercise.ts",
     "generate-media-metadata": "npx tsx scripts/populate-media-metadata.ts"
   },
   "dependencies": {

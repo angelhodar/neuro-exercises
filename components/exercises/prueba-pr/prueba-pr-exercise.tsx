@@ -116,7 +116,7 @@ export function PruebaPrExercise({ config }: PruebaPrExerciseProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-4">
+    <div className="flex flex-col items-center justify-center h-full p-4 bg-blue-50">
       <div className="flex-1 flex items-center justify-center w-full">
         <p className={`text-[10rem] font-bold ${COLORS[wordColor]}`}>
           {wordText.toUpperCase()}

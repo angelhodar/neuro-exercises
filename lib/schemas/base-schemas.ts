@@ -10,11 +10,14 @@ export const baseExerciseConfigSchema = z.object({
   timeLimitPerQuestion: z.coerce
     .number()
     .min(0, "No puede ser un numero negativo")
+    .default(0)
     .optional(),
   timeIntervalBetweenQuestions: z.coerce
     .number()
     .min(0, "No puede ser un numero negativo")
+    .default(0)
     .optional(),
+  automaticNextQuestion: z.boolean().default(true).optional(),
 });
 
 // Exercise preset type

@@ -50,7 +50,7 @@ export function ExerciseConfigForm({
       }
       const params = new URLSearchParams();
       params.set("config", JSON.stringify(validatedData));
-      router.push(`?${params.toString()}`);
+      router.push(`/exercises/${slug}?${params.toString()}`);
     } catch (error) {
       console.error("Error submitting form:", error);
     }

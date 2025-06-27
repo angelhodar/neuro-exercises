@@ -1,10 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { ReactionTimeQuestionResult } from "./reaction-time-grid-schema";
+import type { ReactionTimeQuestionResult, ReactionTimeGridConfig } from "./reaction-time-grid-schema";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface ExerciseResultsProps {
   results: ReactionTimeQuestionResult[];
-  gridSize: number;
+  config: ReactionTimeGridConfig;
 }
 
 function ReactionTimeHeatmap({ cellAverages, gridSize }: { cellAverages: Record<number, number>, gridSize: number }) {
@@ -53,7 +53,7 @@ function ReactionTimeHeatmap({ cellAverages, gridSize }: { cellAverages: Record<
   );
 }
 
-export function ExerciseResults({ results, gridSize }: ExerciseResultsProps) {
+export function ExerciseResults({ results, config }: ExerciseResultsProps) {
   // Helper function to check if a result is correct
   function calculateCorrectSelections(result: ReactionTimeQuestionResult): number {
     return result.selectedCells.filter((cell) => result.targetCells.includes(cell)).length
@@ -61,8 +61,8 @@ export function ExerciseResults({ results, gridSize }: ExerciseResultsProps) {
 
   // Helper function to convert index to [row, col] format for display
   function indexToCoordinates(index: number): string {
-    const row = Math.floor(index / gridSize)
-    const col = index % gridSize
+    const row = Math.floor(index / config.gridSize)
+    const col = index % config.gridSize
     return `[${row}, ${col}]`
   }
 
@@ -95,7 +95,7 @@ export function ExerciseResults({ results, gridSize }: ExerciseResultsProps) {
     });
   });
   const cellAverages: Record<number, number> = {};
-  for (let i = 0; i < gridSize * gridSize; i++) {
+  for (let i = 0; i < config.gridSize * config.gridSize; i++) {
     const arr = cellReactionTimes[i] || [];
     cellAverages[i] = arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : NaN;
   }
@@ -188,7 +188,7 @@ export function ExerciseResults({ results, gridSize }: ExerciseResultsProps) {
           </div>
         </TabsContent>
         <TabsContent value="heatmap">
-          <ReactionTimeHeatmap cellAverages={cellAverages} gridSize={gridSize} />
+          <ReactionTimeHeatmap cellAverages={cellAverages} gridSize={config.gridSize} />
         </TabsContent>
       </Tabs>
     </div>

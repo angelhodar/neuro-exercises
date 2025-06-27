@@ -7,6 +7,27 @@ import { google } from "@ai-sdk/google";
 import { format } from "prettier";
 import { execSync } from "child_process";
 
+const { GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER } = process.env;
+
+if (!GITHUB_TOKEN || !GITHUB_REPOSITORY || !PR_NUMBER) {
+  console.error("Faltan variables de entorno");
+  process.exit(1);
+}
+
+const [owner, repo] = GITHUB_REPOSITORY.split("/");
+const prNumber = Number(PR_NUMBER);
+
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+const generatedFileSchema = z.object({
+  path: z.string(),
+  content: z.string(),
+  action: z.enum(["create", "update", "delete"]).optional().default("create"),
+  sha: z.string().optional(),
+});
+
+type GeneratedFile = z.infer<typeof generatedFileSchema>;
+
 const includePaths = [
   "components/exercises/odd-one-out/**/*",
   "components/exercises/color-sequence/**/*",
@@ -15,76 +36,59 @@ const includePaths = [
   "components/exercises/exercise-config-form.tsx",
   "app/registry/**/*",
   "app/dashboard/exercises/[slug]/page.tsx",
-  "hooks/use-exercise-*"
+  "hooks/use-exercise-*",
 ];
 
-interface PRComment {
-  id: number;
-  body: string;
-  created_at: string;
-  user: {
-    login: string;
-  };
-}
-
-interface GeneratedFile {
-  path: string;
-  content: string;
-}
-
-const createPRCommentsContext = (comments: PRComment[]): string => {
-  if (comments.length === 0) {
-    return "";
-  }
+const createPRCommentContext = (comment: string | null): string => {
+  if (!comment) return "";
 
   return `
-  
-  Además, se han añadido los siguientes comentarios/instrucciones adicionales en la PR (ordenados cronológicamente):
+  Tu tarea se basará en hacer las modificaciones pertinentes en base a las siguientes instrucciones adicionales:
   
   <instrucciones-adicionales>
-  ${comments.map((comment, index) => `
-  ${index + 1}. [${comment.user.login} - ${new Date(comment.created_at).toLocaleString()}]:
-  ${comment.body}
-  `).join('\n')}
+  ${comment}
   </instrucciones-adicionales>
   
   IMPORTANTE: Debes aplicar estas instrucciones adicionales sobre el código inicial, modificando, añadiendo o eliminando archivos según sea necesario.`;
 };
 
 const createExistingFilesContext = (existingFiles: GeneratedFile[]): string => {
-  if (existingFiles.length === 0) {
-    return "";
-  }
+  if (existingFiles.length === 0) return "";
 
   return `
-  
   Los siguientes archivos ya han sido generados previamente para este ejercicio:
   
   <archivos-existentes>
-  ${existingFiles.map(file => `
-  Archivo: ${file.path}
-  Contenido:
-  \`\`\`
+  ${existingFiles
+    .map(
+      (file) => `
+  <archivo>
+  ${file.path}
+  </archivo>
+
+  <contenido> 
   ${file.content}
-  \`\`\`
-  `).join('\n')}
+  </contenido>
+  `,
+    )
+    .join("\n")}
   </archivos-existentes>
   
   Debes tener en cuenta estos archivos existentes y modificarlos según las nuevas instrucciones, o crear nuevos archivos si es necesario.`;
 };
 
 const createPrompt = (
-  promptText: string, 
-  slug: string, 
-  comments: PRComment[], 
-  existingFiles: GeneratedFile[]
+  promptText: string,
+  slug: string,
+  lastComment: string | null,
+  existingFiles: GeneratedFile[],
 ) => {
   const context = execSync(
     `npx repomix --include "${includePaths.join(",")}" --stdout`,
     { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
   ).trim();
 
-  const commentsSection = createPRCommentsContext(comments);
+  const commentsSection = createPRCommentContext(lastComment);
   const existingFilesSection = createExistingFilesContext(existingFiles);
 
   return `
@@ -142,20 +146,44 @@ const createPrompt = (
   `;
 };
 
+interface FoundFileContent {
+  path: string;
+  content: string;
+  sha: string;
+}
+
+const getFileData = async (
+  path: string,
+  ref: string,
+): Promise<FoundFileContent | null> => {
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref,
+    });
+
+    if ("content" in data && data.content && "sha" in data) {
+      return {
+        path,
+        content: Buffer.from(data.content, "base64").toString("utf8"),
+        sha: data.sha,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 const getExistingFiles = async (
-  octokit: Octokit,
-  owner: string,
-  repo: string,
   slug: string,
-  ref: string
+  ref: string,
 ): Promise<GeneratedFile[]> => {
   try {
-    // Buscar archivos que contengan el slug en rutas típicas de ejercicios
-    const searchPaths = [
-      `components/exercises/${slug}`,
-      `app/registry`
-    ];
-
+    const searchPaths = [`components/exercises/${slug}`, `app/registry`];
     const existingFiles: GeneratedFile[] = [];
 
     for (const searchPath of searchPaths) {
@@ -164,32 +192,33 @@ const getExistingFiles = async (
           owner,
           repo,
           path: searchPath,
-          ref
+          ref,
         });
 
         if (Array.isArray(data)) {
-          // Es un directorio, buscar archivos relacionados con el slug
           for (const item of data) {
-            if (item.type === 'file' && (
-              item.name.includes(slug) || 
-              searchPath.includes('registry')
-            )) {
-              const fileContent = await getFileContent(octokit, owner, repo, item.path, ref);
-              if (fileContent) {
+            if (
+              item.type === "file" &&
+              (item.name.includes(slug) || searchPath.includes("registry"))
+            ) {
+              const fileData = await getFileData(item.path, ref);
+
+              if (fileData) {
                 existingFiles.push({
                   path: item.path,
-                  content: fileContent
+                  content: fileData.content,
+                  action: "update",
+                  sha: fileData.sha,
                 });
               }
             }
           }
         }
       } catch (error) {
-        // El directorio no existe, continuar con el siguiente
+        // El directorio puede no existir, es normal en la primera ejecución
         continue;
       }
     }
-
     return existingFiles;
   } catch (error) {
     console.warn(`No se pudieron obtener archivos existentes: ${error}`);
@@ -197,209 +226,131 @@ const getExistingFiles = async (
   }
 };
 
-const getFileContent = async (
-  octokit: Octokit,
-  owner: string,
-  repo: string,
-  path: string,
-  ref: string
-): Promise<string | null> => {
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path,
-      ref
-    });
-
-    if ('content' in data && data.content) {
-      return Buffer.from(data.content, 'base64').toString('utf8');
-    }
-    return null;
-  } catch (error) {
-    return null;
-  }
-};
-
-async function getFileSha(
-  octokit: Octokit, 
-  owner: string, 
-  repo: string, 
-  path: string, 
-  ref: string
-): Promise<string> {
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path,
-      ref
-    });
-    
-    if ('sha' in data) {
-      return data.sha;
-    }
-    throw new Error("File not found");
-  } catch (error) {
-    throw new Error(`Could not get SHA for file ${path}: ${error}`);
-  }
-}
-
-async function run(): Promise<void> {
-  const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-  const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
-  const PR_NUMBER = process.env.PR_NUMBER;
-
-  if (!GITHUB_TOKEN || !GITHUB_REPOSITORY) {
-    console.error("Faltan variables de entorno para GitHub");
-    process.exit(1);
-  }
-
-  if (!PR_NUMBER) {
-    console.error("PR_NUMBER no proporcionado por la GitHub Action");
-    process.exit(1);
-  }
-
-  const [owner, repo] = GITHUB_REPOSITORY.split("/");
-  const octokit = new Octokit({ auth: GITHUB_TOKEN });
-
-  // Obtener datos de la PR
-  const { data: pr } = await octokit.pulls.get({
-    owner,
-    repo,
-    pull_number: Number(PR_NUMBER),
-  });
-
-  if (!pr.body) {
-    console.error("No se encontró el cuerpo de la PR");
-    process.exit(1);
-  }
-
-  const slugMatch = pr.body.match(/Slug:\s*(.+)/);
+function getPrMetadata(initialMessageBody: string) {
+  const slugMatch = initialMessageBody.match(/Slug:\s*(.+)/);
   const slug = slugMatch ? slugMatch[1].trim() : null;
 
-  if (!slug) {
-    console.error("No se encontró el slug en el cuerpo de la PR");
-    process.exit(1);
-  }
+  if (!slug) throw new Error("No se encontró el slug en el cuerpo de la PR.");
 
-  const promptMatch = pr.body.match(/## Prompt\s*([\s\S]*)/);
-  const promptText = promptMatch ? promptMatch[1].trim() : pr.body;
+  const promptMatch = initialMessageBody.match(/## Prompt\s*([\s\S]*)/);
+  const prompt = promptMatch ? promptMatch[1].trim() : initialMessageBody;
 
-  // Obtener comentarios de la PR
+  return { slug, prompt };
+}
+
+async function getLastPRComment(byAuthor: string): Promise<string | null> {
   const { data: comments } = await octokit.issues.listComments({
     owner,
     repo,
-    issue_number: Number(PR_NUMBER),
+    issue_number: prNumber,
   });
 
-  // Filtrar comentarios relevantes (no del sistema)
-  const relevantComments = comments.filter(comment => 
-    comment.body && comment.body.trim() !== "" &&
-    !comment.body.startsWith("<!-- ") // Ignorar comentarios de sistema
-  );
+  const comment = comments
+    .filter(
+      (comment) =>
+        !!comment.body?.trim() &&
+        !comment.body.startsWith("<!-- ") &&
+        comment.user?.login === byAuthor &&
+        !comment.user.login.toLowerCase().includes("bot"),
+    )
+    .map((comment) => comment.body)
+    .at(-1);
 
-  // Obtener archivos existentes del ejercicio desde la rama de la PR
-  const existingFiles = await getExistingFiles(octokit, owner, repo, slug, pr.head.ref);
+  return comment || null;
+}
 
-  // Determinar qué procesar según el estado
-  let shouldProcess = false;
-  let commentsToUse: PRComment[] = [];
+async function main(): Promise<void> {
+  const { data: pr } = await octokit.pulls.get({
+    owner,
+    repo,
+    pull_number: prNumber,
+  });
+
+  if (!pr.body) throw new Error("No se encontró el cuerpo de la PR.");
+  if (!pr.user) throw new Error("No se encontró el usuario de la PR.");
+
+  const { slug, prompt: initialPrompt } = getPrMetadata(pr.body!);
+
+  const [existingFiles, lastComment] = await Promise.all([
+    getExistingFiles(slug, pr.head.ref),
+    getLastPRComment(pr.user.login),
+  ]);
 
   if (existingFiles.length === 0) {
-    // Primera generación: usar prompt inicial
-    shouldProcess = true;
-    commentsToUse = [];
-  } else if (relevantComments.length > 0) {
-    // Modificación: usar solo el último comentario
-    shouldProcess = true;
-    commentsToUse = [relevantComments[relevantComments.length - 1] as PRComment];
-  }
-
-  if (!shouldProcess) {
-    console.log("No hay nada que procesar");
+    console.log(`Generación inicial para: ${slug}`);
+  } else if (lastComment) {
+    console.log(`Modificación para: ${slug} (basado en el último comentario)`);
+  } else {
+    console.log("No hay nada que procesar.");
     return;
   }
 
-  console.log(`Procesando ejercicio: ${slug}`);
-  console.log(`Tipo de operación: ${existingFiles.length === 0 ? 'Generación inicial' : 'Modificación'}`);
-  console.log(`Archivos existentes: ${existingFiles.length}`);
-
-  const prompt = createPrompt(promptText, slug, commentsToUse, existingFiles);
+  const prompt = createPrompt(initialPrompt, slug, lastComment, existingFiles);
 
   const { object: generatedFiles } = await generateObject({
     model: google("gemini-2.5-flash"),
-    schema: z.array(
-      z.object({
-        path: z.string(),
-        content: z.string(),
-        action: z.enum(["create", "update", "delete"]).optional().default("create"),
-      }),
-    ),
-    prompt
+    schema: z.array(generatedFileSchema),
+    prompt,
   });
 
-  const prettifiedFiles = await Promise.all(
-    generatedFiles
-      .filter(file => file.action !== "delete") // No formatear archivos que se van a eliminar
-      .map(async (file) => {
-        try {
-          const formattedContent = await format(file.content, {
-            filepath: file.path,
-          });
+  const existingFilesByPath = new Map(existingFiles.map((f) => [f.path, f]));
 
-          return { ...file, content: formattedContent };
-        } catch (error) {
-          console.warn(`Could not format file ${file.path}. Error:`, error);
-          return file;
-        }
-      }),
-  );
+  console.log(`Procesando ${generatedFiles.length} cambios en archivos...`);
 
-  console.log(`Se generaron ${prettifiedFiles.length} archivos`);
-
-  // Procesar archivos según su acción
   for (const file of generatedFiles) {
     const filePath = file.path.replace(/^\/+/, "");
 
-    if (file.action === "delete") {
-      try {
+    try {
+      const { sha } = existingFilesByPath.get(filePath) || {};
+
+      if (file.action === "delete") {
+        if (!sha) {
+          console.warn(`No se puso eliminar ${filePath}, omitiendo...`);
+          continue;
+        }
+
         await octokit.repos.deleteFile({
           owner,
           repo,
           path: filePath,
           message: `feat(${slug}): eliminar ${filePath}`,
           branch: pr.head.ref,
-          sha: await getFileSha(octokit, owner, repo, filePath, pr.head.ref)
+          sha,
         });
+
         console.log(`Archivo eliminado: ${filePath}`);
-      } catch (error) {
-        console.warn(`No se pudo eliminar el archivo ${filePath}:`, error);
-      }
-    } else {
-      // Crear o actualizar archivo
-      const prettifiedFile = prettifiedFiles.find(pf => pf.path === file.path);
-      if (prettifiedFile) {
-        const action = file.action === "update" ? "actualizar" : "añadir";
-        
+      } else {
+        if (file.action === "update" && !sha) {
+          console.warn(
+            `No se encontró SHA para actualizar ${filePath}. Se creará como un archivo nuevo.`,
+          );
+        }
+
+        const content = await format(file.content, { filepath: file.path });
+        const action = sha ? "actualizar" : "añadir";
+
         await octokit.repos.createOrUpdateFileContents({
           owner,
           repo,
           path: filePath,
           message: `feat(${slug}): ${action} ${filePath}`,
-          content: Buffer.from(prettifiedFile.content).toString("base64"),
-          branch: pr.head.ref
+          content: Buffer.from(content).toString("base64"),
+          branch: pr.head.ref,
+          sha,
         });
-        
-        console.log(`Archivo ${action === "actualizar" ? "actualizado" : "creado"}: ${filePath}`);
+        console.log(
+          `Archivo ${action === "actualizar" ? "actualizado" : "creado"}: ${filePath}`,
+        );
       }
+    } catch (error) {
+      console.error(`Error procesando el archivo ${filePath}:`, error);
     }
   }
 
-  console.log("Archivos añadidos/actualizados en la rama de la PR");
+  console.log("Proceso completado.");
 }
 
-run().catch((err: Error) => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

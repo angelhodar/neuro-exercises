@@ -118,7 +118,7 @@ export function PruebaPrExercise({ config }: PruebaPrExerciseProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full p-4">
       <div className="flex-1 flex items-center justify-center w-full">
-        <p className={`text-8xl font-bold ${COLORS[wordColor]}`}>
+        <p className={`text-[10rem] font-bold ${COLORS[wordColor]}`}>
           {wordText.toUpperCase()}
         </p>
       </div>
@@ -128,7 +128,7 @@ export function PruebaPrExercise({ config }: PruebaPrExerciseProps) {
           <Button
             key={colorName}
             onClick={() => handleAnswer(colorName)}
-            className="h-16 text-lg font-semibold"
+            className="h-24 text-3xl font-semibold"
             variant="outline"
           >
             {colorName}

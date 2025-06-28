@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { getExerciseLinkByPublicId } from "@/app/actions/links";
-import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseResultsCollector } from "./exercise-results-collector";
-import ExerciseExecutionLayout from "@/components/exercises/exercise-execution-layout";
+import { CountdownProvider } from "@/components/exercises/exercise-countdown";
+import { ExerciseContainer } from "@/components/exercises/exercise-container";
 
 interface PageProps {
   params: Promise<{ linkId: string; position: string }>;
@@ -26,11 +27,11 @@ export default async function ExercisePage({ params }: PageProps) {
 
   if (!config) notFound();
 
-  const exerciseEntry = getExerciseFromServerRegistry(exercise.slug);
+  const entry = getExerciseFromRegistry(exercise.slug);
 
-  if (!exerciseEntry) notFound();
+  if (!entry) notFound();
 
-  const { ExerciseComponent } = exerciseEntry;
+  const { ExerciseComponent } = entry;
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 h-screen">
@@ -38,9 +39,11 @@ export default async function ExercisePage({ params }: PageProps) {
         totalQuestions={config.totalQuestions}
         exercise={exercise}
       >
-        <ExerciseExecutionLayout>
-          <ExerciseComponent config={config} />
-        </ExerciseExecutionLayout>
+        <CountdownProvider>
+          <ExerciseContainer>
+            <ExerciseComponent config={config} />
+          </ExerciseContainer>
+        </CountdownProvider>
         <ExerciseResultsCollector linkId={linkData.id} itemId={item.id} />
       </ExerciseProvider>
     </div>

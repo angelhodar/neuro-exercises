@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExerciseControls } from "../exercise-controls";
-import { SyllablesResults } from "./syllables-results";
 import {
   spanishWordsDataset,
   type SyllablesConfig,
@@ -24,15 +22,8 @@ interface QuestionState {
 }
 
 export function SyllablesExercise({ config }: SyllablesExerciseProps) {
-  const { syllablesCount, totalQuestions } = config;
-  const {
-    exerciseState,
-    currentQuestionIndex,
-    addQuestionResult,
-    startExercise,
-    resetExercise,
-    results,
-  } = useExerciseExecution();
+  const { syllablesCount } = config;
+  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     currentWord: null,
@@ -64,8 +55,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
 
   // Setup new question
   function setupNewQuestion() {
-    if (exerciseState !== "executing") return;
-
     const word = selectRandomWord();
     const scrambled = scrambleSyllables(word.syllables);
 
@@ -78,7 +67,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
 
   // Handle syllable click
   function handleSyllableClick(syllable: string, index: number) {
-    if (exerciseState !== "executing" || !questionState.currentWord) return;
+    if (!questionState.currentWord) return;
 
     const updatedSelected = [...questionState.selectedSyllables, syllable];
     const updatedScrambled = questionState.scrambledSyllables.filter(
@@ -99,8 +88,6 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
 
   // Handle selected syllable click (to remove it)
   function handleSelectedSyllableClick(syllable: string, index: number) {
-    if (exerciseState !== "executing") return;
-
     const updatedSelected = questionState.selectedSyllables.filter(
       (_, i) => i !== index
     );
@@ -128,16 +115,10 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
     addQuestionResult(result);
   }
 
-  // Setup question when exercise starts or question changes
+  // Setup question when question changes
   useEffect(() => {
-    if (exerciseState === "executing") {
-      setupNewQuestion();
-    }
-  }, [currentQuestionIndex, exerciseState]);
-
-  if (exerciseState === "finished") {
-    return <SyllablesResults results={results as SyllablesQuestionResult[]} />;
-  }
+    setupNewQuestion();
+  }, [currentQuestionIndex]);
 
   return (
     <div className="flex flex-col items-center gap-6 p-4 max-w-6xl w-full">

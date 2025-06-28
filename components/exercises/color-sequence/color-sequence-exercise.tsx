@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { ColorSequenceResults } from "./color-sequence-results";
 import type {
   ColorSequenceConfig,
   ColorSequenceQuestionResult,
@@ -17,6 +18,15 @@ interface CellProps {
   onClick: () => void;
   isHighlighted: boolean;
   disabled: boolean;
+}
+
+interface QuestionState {
+  targetSequence: number[] | null;
+  isPlaying: boolean;
+  highlightedIndex: number | null;
+  userSequence: number[];
+  timeouts: NodeJS.Timeout[];
+  isWaitingNext: boolean;
 }
 
 function ColorCell({
@@ -40,8 +50,7 @@ function ColorCell({
 export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
   const { numCells, sequenceLength, highlightInterval } = config;
 
-  const { exerciseState, currentQuestionIndex, addQuestionResult, results } =
-    useExerciseExecution();
+  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
 
   // Colores disponibles (Tailwind)
   const availableColorClasses = [
@@ -59,18 +68,17 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
     "bg-pink-500",
   ];
 
-  const colors = useMemo(
-    () => availableColorClasses.slice(0, numCells),
-    [numCells]
-  );
+  const colors = availableColorClasses.slice(0, numCells);
 
-  // Estado interno
-  const [targetSequence, setTargetSequence] = useState<number[] | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
-  const [userSequence, setUserSequence] = useState<number[]>([]);
-  const [timeouts, setTimeouts] = useState<NodeJS.Timeout[]>([]);
-  const [isWaitingNext, setIsWaitingNext] = useState(false);
+  // Estado interno agrupado
+  const [questionState, setQuestionState] = useState<QuestionState>({
+    targetSequence: null,
+    isPlaying: false,
+    highlightedIndex: null,
+    userSequence: [],
+    timeouts: [],
+    isWaitingNext: false,
+  });
 
   // Genera una secuencia aleatoria
   function generateSequence(): number[] {
@@ -84,23 +92,23 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
   // Reproduce la secuencia
   function playSequence(seq: number[]) {
     // Limpiar cualquier timeout existente
-    timeouts.forEach((t) => clearTimeout(t));
+    questionState.timeouts.forEach((t) => clearTimeout(t));
 
     const newTimeouts: NodeJS.Timeout[] = [];
-    setIsPlaying(true);
+    setQuestionState(prev => ({ ...prev, isPlaying: true }));
     const highlightDuration = Math.max(200, highlightInterval / 2);
 
     seq.forEach((cellIndex, i) => {
       // Encender la celda
       newTimeouts.push(
         setTimeout(() => {
-          setHighlightedIndex(cellIndex);
+          setQuestionState(prev => ({ ...prev, highlightedIndex: cellIndex }));
         }, i * highlightInterval)
       );
       // Apagar la celda
       newTimeouts.push(
         setTimeout(() => {
-          setHighlightedIndex(null);
+          setQuestionState(prev => ({ ...prev, highlightedIndex: null }));
         }, i * highlightInterval + highlightDuration)
       );
     });
@@ -108,69 +116,68 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
     // Finalizar reproducción
     newTimeouts.push(
       setTimeout(() => {
-        setIsPlaying(false);
+        setQuestionState(prev => ({ ...prev, isPlaying: false }));
       }, seq.length * highlightInterval)
     );
 
-    setTimeouts(newTimeouts);
+    setQuestionState(prev => ({ ...prev, timeouts: newTimeouts }));
   }
 
   // Prepara la pregunta actual
   function setupQuestion() {
     const seq = generateSequence();
-    setTargetSequence(seq);
-    setUserSequence([]);
+    setQuestionState(prev => ({
+      ...prev,
+      targetSequence: seq,
+      userSequence: [],
+    }));
     playSequence(seq);
   }
 
   // Maneja el clic del usuario
   function handleCellClick(index: number) {
-    if (exerciseState !== "executing" || isPlaying || !targetSequence) return;
+    if (questionState.isPlaying || !questionState.targetSequence) return;
 
-    const newSeq = [...userSequence, index];
-    setUserSequence(newSeq);
+    const newSeq = [...questionState.userSequence, index];
+    setQuestionState(prev => ({ ...prev, userSequence: newSeq }));
 
     if (newSeq.length >= sequenceLength) {
-      const isCorrect = newSeq.every((val, i) => val === targetSequence[i]);
+      const isCorrect = newSeq.every((val, i) => val === questionState.targetSequence![i]);
       const result: ColorSequenceQuestionResult = {
-        targetSequence,
+        targetSequence: questionState.targetSequence,
         userSequence: newSeq,
         isCorrect,
       };
 
       // Dar un pequeño tiempo antes de la siguiente pregunta
-      setIsWaitingNext(true);
+      setQuestionState(prev => ({ ...prev, isWaitingNext: true }));
       setTimeout(() => {
         addQuestionResult(result);
-        setIsWaitingNext(false);
+        setQuestionState(prev => ({ ...prev, isWaitingNext: false }));
       }, 300);
     }
   }
 
-  // Efecto para iniciar pregunta al empezar ejercicio o al cambiar de pregunta
+  // Resetea la respuesta actual del usuario
+  function resetCurrentAnswer() {
+    if (questionState.isPlaying || questionState.isWaitingNext) return;
+    setQuestionState(prev => ({ ...prev, userSequence: [] }));
+  }
+
+  // Efecto para iniciar pregunta al cambiar de pregunta
   useEffect(() => {
-    if (exerciseState === "executing") {
-      setupQuestion();
-    }
+    setupQuestion();
 
     return () => {
       // Limpiar timeouts
-      timeouts.forEach((t) => clearTimeout(t));
-      setTimeouts([]);
+      questionState.timeouts.forEach((t) => clearTimeout(t));
+      setQuestionState(prev => ({ ...prev, timeouts: [] }));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exerciseState, currentQuestionIndex]);
+  }, [currentQuestionIndex]);
 
   // Calcular disposición de cuadrícula
   const columns = Math.ceil(Math.sqrt(numCells));
-
-  if (exerciseState === "finished") {
-    return (
-      <ColorSequenceResults
-        results={results as ColorSequenceQuestionResult[]}
-      />
-    );
-  }
 
   return (
     <div className="flex flex-col items-center gap-6 p-6 w-full">
@@ -183,23 +190,39 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
           <ColorCell
             key={idx}
             colorClass={colorClass}
-            isHighlighted={idx === highlightedIndex}
+            isHighlighted={idx === questionState.highlightedIndex}
             onClick={() => handleCellClick(idx)}
-            disabled={isPlaying || isWaitingNext}
+            disabled={questionState.isPlaying || questionState.isWaitingNext}
           />
         ))}
       </div>
 
       {/* Feedback de selección del usuario */}
-      <div className="flex gap-2 mt-4">
-        {Array.from({ length: sequenceLength }).map((_, i) => {
-          const selectedIdx = userSequence[i];
-          const colorClass =
-            selectedIdx !== undefined
-              ? colors[selectedIdx]
-              : "bg-gray-300 dark:bg-gray-700";
-          return <div key={i} className={`w-8 h-8 rounded-sm ${colorClass}`} />;
-        })}
+      <div className="flex items-center gap-3 mt-4">
+        <div className="flex gap-2">
+          {Array.from({ length: sequenceLength }).map((_, i) => {
+            const selectedIdx = questionState.userSequence[i];
+            const colorClass =
+              selectedIdx !== undefined
+                ? colors[selectedIdx]
+                : "bg-gray-300 dark:bg-gray-700";
+            return <div key={i} className={`w-8 h-8 rounded-sm ${colorClass}`} />;
+          })}
+        </div>
+        
+        {/* Botón para resetear respuesta actual */}
+        {questionState.userSequence.length > 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={resetCurrentAnswer}
+            disabled={questionState.isPlaying || questionState.isWaitingNext}
+            className="w-8 h-8 rounded-sm"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -3,7 +3,6 @@
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { StimulusCountResults } from "./stimulus-count-results";
 import type {
   StimulusCountConfig,
   StimulusCountQuestionResult,
@@ -15,6 +14,12 @@ import { NumericPad } from "./numeric-pad";
 
 interface StimulusCountExerciseProps {
   config: StimulusCountConfig;
+}
+
+interface QuestionState {
+  stimuli: Stimulus[];
+  userAnswer: string;
+  questionStart: number | null;
 }
 
 const shapes: Shape[] = ["star", "circle", "square", "triangle"];
@@ -33,18 +38,13 @@ const colors = [
 export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
   const { minStimuli, maxStimuli, allowOverlap } = config;
 
-  const {
-    exerciseState,
-    currentQuestionIndex,
-    addQuestionResult,
-    startExercise,
-    resetExercise,
-    results,
-  } = useExerciseExecution();
+  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
 
-  const [stimuli, setStimuli] = useState<Stimulus[]>([]);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [questionStart, setQuestionStart] = useState<number | null>(null);
+  const [questionState, setQuestionState] = useState<QuestionState>({
+    stimuli: [],
+    userAnswer: "",
+    questionStart: null,
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,34 +57,33 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
         color: colors[Math.floor(Math.random() * colors.length)],
       })
     );
-    setStimuli(newStimuli);
-    setUserAnswer("");
-    setQuestionStart(Date.now());
+    
+    setQuestionState({
+      stimuli: newStimuli,
+      userAnswer: "",
+      questionStart: Date.now(),
+    });
   }
 
   useEffect(() => {
-    if (exerciseState === "executing") {
-      setupQuestion();
-    }
-  }, [exerciseState, currentQuestionIndex]);
+    setupQuestion();
+  }, [currentQuestionIndex]);
 
   useEffect(() => {
-    if (exerciseState === "executing") {
-      inputRef.current?.focus();
-    }
-  }, [stimuli, exerciseState]);
+    inputRef.current?.focus();
+  }, [questionState.stimuli]);
 
   function handleSubmit() {
-    if (!questionStart) return;
+    if (!questionState.questionStart) return;
 
-    const numericAnswer = parseInt(userAnswer, 10);
+    const numericAnswer = parseInt(questionState.userAnswer, 10);
     if (isNaN(numericAnswer)) return;
 
-    const timeSpent = Date.now() - questionStart;
-    const isCorrect = numericAnswer === stimuli.length;
+    const timeSpent = Date.now() - questionState.questionStart;
+    const isCorrect = numericAnswer === questionState.stimuli.length;
 
     const result: StimulusCountQuestionResult = {
-      shownStimuli: stimuli.length,
+      shownStimuli: questionState.stimuli.length,
       userAnswer: numericAnswer,
       isCorrect,
       timeSpent,
@@ -93,27 +92,17 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
     addQuestionResult(result);
   }
 
-  if (exerciseState === "finished") {
-    return (
-      <StimulusCountResults
-        results={results as StimulusCountQuestionResult[]}
-      />
-    );
-  }
-
   return (
     <div className="flex flex-col items-center gap-6 p-4 w-full">
       <div className="flex flex-col md:flex-row gap-6 w-full items-start justify-center">
-        <StimulusGrid stimuli={stimuli} allowOverlap={allowOverlap} />
+        <StimulusGrid stimuli={questionState.stimuli} allowOverlap={allowOverlap} />
 
-        {exerciseState === "executing" && (
-          <NumericPad
-            value={userAnswer}
-            onChange={setUserAnswer}
-            onSubmit={handleSubmit}
-            inputRef={inputRef}
-          />
-        )}
+        <NumericPad
+          value={questionState.userAnswer}
+          onChange={(value) => setQuestionState(prev => ({ ...prev, userAnswer: value }))}
+          onSubmit={handleSubmit}
+          inputRef={inputRef}
+        />
       </div>
     </div>
   );

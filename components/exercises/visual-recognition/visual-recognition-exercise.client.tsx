@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { VisualRecognitionResults } from "./visual-recognition-results";
 import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
@@ -32,13 +29,7 @@ export function VisualRecognitionExerciseClient({
   const { imagesPerQuestion, correctImagesCount, tags, showImageNames } =
     config;
 
-  const {
-    exerciseState,
-    currentQuestionIndex,
-    addQuestionResult,
-    resetExercise,
-    results,
-  } = useExerciseExecution();
+  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     targetTag: null,
@@ -60,7 +51,7 @@ export function VisualRecognitionExerciseClient({
     if (targetImages.length < correctImagesCount) return null;
 
     const shuffledTargetImages = [...targetImages].sort(
-      () => 0.5 - Math.random()
+      () => 0.5 - Math.random(),
     );
     const correctImages = shuffledTargetImages.slice(0, correctImagesCount);
 
@@ -70,21 +61,21 @@ export function VisualRecognitionExerciseClient({
     const potentialDistractors = images.filter(
       (img) =>
         !img.tags.includes(targetTag) &&
-        img.tags.some((t) => distractorTags.includes(t))
+        img.tags.some((t) => distractorTags.includes(t)),
     );
 
     if (potentialDistractors.length < distractorImagesNeeded) return null;
 
     const shuffledDistractors = [...potentialDistractors].sort(
-      () => 0.5 - Math.random()
+      () => 0.5 - Math.random(),
     );
     const distractorImages = shuffledDistractors.slice(
       0,
-      distractorImagesNeeded
+      distractorImagesNeeded,
     );
 
     const allImages = [...correctImages, ...distractorImages].sort(
-      () => 0.5 - Math.random()
+      () => 0.5 - Math.random(),
     );
 
     return {
@@ -97,11 +88,9 @@ export function VisualRecognitionExerciseClient({
   function setupNewQuestion() {
     const questionData = selectImagesForQuestion();
     if (!questionData) {
-      // Handle error - maybe show a message and stop the exercise
       console.error(
-        "No se pudieron generar las preguntas. Verifica la configuración y las imágenes disponibles."
+        "No se pudieron generar las preguntas. Verifica la configuración y las imágenes disponibles.",
       );
-      // For now, we just won't set a new question.
       setQuestionState({
         targetTag: "Error",
         displayedImages: [],
@@ -114,13 +103,28 @@ export function VisualRecognitionExerciseClient({
   }
 
   function handleImageClick(imageId: string) {
-    if (exerciseState !== "executing") return;
     setQuestionState((prev) => {
       const isSelected = prev.selectedImageIds.includes(imageId);
       const updatedSelected = isSelected
         ? prev.selectedImageIds.filter((id) => id !== imageId)
         : [...prev.selectedImageIds, imageId];
-      return { ...prev, selectedImageIds: updatedSelected };
+      
+      const newState = { ...prev, selectedImageIds: updatedSelected };
+      
+      // Si se alcanza el número correcto de imágenes seleccionadas, enviar resultado automáticamente
+      if (updatedSelected.length === correctImagesCount) {
+        setTimeout(() => {
+          addQuestionResult({
+            targetTag: prev.targetTag!,
+            correctImages: prev.correctImageIds,
+            selectedImages: updatedSelected,
+            timeSpent: 0,
+            timeExpired: false,
+          } as VisualRecognitionQuestionResult);
+        }, 100); // Pequeño delay para que se vea la selección
+      }
+      
+      return newState;
     });
   }
 
@@ -136,10 +140,8 @@ export function VisualRecognitionExerciseClient({
   }
 
   useEffect(() => {
-    if (exerciseState === "executing") {
-      setupNewQuestion();
-    }
-  }, [currentQuestionIndex, exerciseState]);
+    setupNewQuestion();
+  }, [currentQuestionIndex]);
 
   if (questionState.targetTag === "Error") {
     return (
@@ -152,18 +154,7 @@ export function VisualRecognitionExerciseClient({
         <p className="text-muted-foreground mt-2">
           Asegúrate de tener suficientes imágenes correctas y distractoras.
         </p>
-        <Button onClick={resetExercise} className="mt-4">
-          Reiniciar Ejercicio
-        </Button>
       </div>
-    );
-  }
-
-  if (exerciseState === "finished") {
-    return (
-      <VisualRecognitionResults
-        results={results as VisualRecognitionQuestionResult[]}
-      />
     );
   }
 
@@ -183,7 +174,7 @@ export function VisualRecognitionExerciseClient({
                 "relative cursor-pointer rounded-lg border-2 transition-all duration-200 bg-white",
                 isSelected
                   ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg"
-                  : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:shadow-md"
+                  : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:shadow-md",
               )}
               onClick={() => handleImageClick(image.id)}
             >
@@ -208,16 +199,6 @@ export function VisualRecognitionExerciseClient({
             </div>
           );
         })}
-      </div>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={submitAnswer}
-          size="lg"
-          disabled={questionState.selectedImageIds.length === 0}
-        >
-          Confirmar selección
-        </Button>
       </div>
     </div>
   );

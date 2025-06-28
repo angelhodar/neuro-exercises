@@ -20,6 +20,10 @@ export const reactionTimeSpecificConfigSchema = z.object({
     .number()
     .min(1, "Debe tener al menos 1 celda objetivo")
     .int("El número de celdas debe ser un número entero"),
+  cellDisplayDuration: z.coerce
+    .number()
+    .min(500, "La duración de visualización debe ser al menos 500ms")
+    .max(10000, "La duración de visualización debe ser como máximo 10 segundos"),
 })
 
 // Update the reusable refinement function with Spanish error messages
@@ -84,6 +88,7 @@ export const defaultReactionTimeConfig: ReactionTimeGridConfig = {
   delayMin: 1000,
   delayMax: 3000,
   cells: 1,
+  cellDisplayDuration: 2000,
   totalQuestions: 10,
 }
 
@@ -94,6 +99,7 @@ export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig>
     delayMin: 2000,
     delayMax: 4000,
     cells: 1,
+    cellDisplayDuration: 3000,
     totalQuestions: 5,
   },
   medium: {
@@ -101,6 +107,7 @@ export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig>
     delayMin: 1000,
     delayMax: 3000,
     cells: 1,
+    cellDisplayDuration: 2000,
     totalQuestions: 10,
   },
   hard: {
@@ -108,6 +115,7 @@ export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig>
     delayMin: 500,
     delayMax: 1500,
     cells: 2,
+    cellDisplayDuration: 1500,
     totalQuestions: 15,
   },
   expert: {
@@ -115,6 +123,7 @@ export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig>
     delayMin: 300,
     delayMax: 1000,
     cells: 3,
+    cellDisplayDuration: 1000,
     totalQuestions: 20,
   },
 }

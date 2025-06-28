@@ -23,6 +23,7 @@ export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
   const cellsPath = `${basePath}cells`;
   const delayMinPath = `${basePath}delayMin`;
   const delayMaxPath = `${basePath}delayMax`;
+  const cellDisplayDurationPath = `${basePath}cellDisplayDuration`;
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -88,6 +89,23 @@ export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
             </FormControl>
             <FormDescription>
               Tiempo máximo antes de que aparezca el objetivo
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
+        name={cellDisplayDurationPath}
+        render={({ field }) => (
+          <FormItem className="col-span-2">
+            <FormLabel>Duración de visualización (ms)</FormLabel>
+            <FormControl>
+              <Input type="number" placeholder="2000" {...field} />
+            </FormControl>
+            <FormDescription>
+              Tiempo que las celdas objetivo permanecen iluminadas antes de pasar automáticamente a la siguiente pregunta
             </FormDescription>
             <FormMessage />
           </FormItem>

@@ -3,7 +3,7 @@ import type { SearchParams } from "nuqs/server";
 import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseContainer } from "@/components/exercises/exercise-container";
-import { CountdownProvider } from "@/components/exercises/exercise-countdown"
+import { CountdownProvider } from "@/components/exercises/exercise-countdown";
 import { getExercises, getExerciseBySlug } from "@/app/actions/exercises";
 import { parseConfigFromSearchParams } from "./parsers";
 

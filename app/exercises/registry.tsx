@@ -54,13 +54,13 @@ const SyllablesResults = dynamic(() =>
 );
 
 const ReactionTimeGrid = dynamic(() =>
-  import("@/components/exercises/reaction-time-grid/reaction-time-grid").then(
+  import("@/components/exercises/reaction-time-grid/reaction-time-grid-exercise").then(
     (mod) => mod.ReactionTimeGrid,
   ),
 );
 
 const ReactionTimeGridResults = dynamic(() =>
-  import("@/components/exercises/reaction-time-grid/exercise-results").then(
+  import("@/components/exercises/reaction-time-grid/reaction-time-grid-results").then(
     (mod) => mod.ExerciseResults,
   ),
 );
@@ -116,7 +116,7 @@ const SyllablesConfigFields = dynamic(() =>
 
 const ReactionTimeConfigFields = dynamic(() =>
   import(
-    "@/components/exercises/reaction-time-grid/reaction-time-config-form"
+    "@/components/exercises/reaction-time-grid/reaction-time-grid-config-fields"
   ).then((mod) => mod.ReactionTimeConfigFields),
 );
 

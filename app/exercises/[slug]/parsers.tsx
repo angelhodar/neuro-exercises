@@ -1,5 +1,5 @@
 import type { SearchParams } from "nuqs/server";
-import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 
 export function parseConfigFromSearchParams(
   slug: string,
@@ -9,11 +9,11 @@ export function parseConfigFromSearchParams(
 
   if (!configString || Array.isArray(configString)) return null;
 
-  const exerciseDetails = getExerciseFromServerRegistry(slug);
+  const entry = getExerciseFromRegistry(slug);
 
-  if (!exerciseDetails) return null;
+  if (!entry) return null;
 
-  const { schema } = exerciseDetails;
+  const { schema } = entry;
 
   let parsedJson: unknown;
   try {

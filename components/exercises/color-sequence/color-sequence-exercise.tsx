@@ -143,7 +143,7 @@ export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
       setTimeout(() => {
         addQuestionResult(result);
         setIsWaitingNext(false);
-      }, 1000);
+      }, 300);
     }
   }
 

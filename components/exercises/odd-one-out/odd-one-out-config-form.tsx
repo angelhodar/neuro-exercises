@@ -47,7 +47,7 @@ export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsPr
   }, [totalQuestions, fields.length, append, remove]);
 
   return (
-    <Accordion type="multiple" className="space-y-6">
+    <Accordion type="multiple" className="space-y-6 overflow-y-auto h-96">
       {fields.map((field, index) => (
         <AccordionItem key={field.id} value={`pregunta-${index}`} className="bg-gray-50/50 dark:bg-gray-900/50 rounded-md">
           <AccordionTrigger className="px-4 text-lg">

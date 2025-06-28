@@ -1,9 +1,12 @@
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
+import Providers from "@/app/dashboard/providers";
 
 export default function ExerciseLayout({ children }: PropsWithChildren) {
   return (
-    <div className="flex flex-col min-h-screen bg-blue-50">
-      <main className="flex-1">{children}</main>
-    </div>
+    <Providers>
+      <div className="flex flex-col h-screen w-full bg-blue-50 p-4 overflow-hidden">
+        {children}
+      </div>
+    </Providers>
   );
 }

@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AddExerciseButton } from "./add-exercise-button";
 import { ExerciseCard } from "./exercise-card";
 import { Exercise } from "@/lib/db/schema";
-import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import ConfigureExerciseButton from "./configure-exercise-button";
 import { createExerciseTemplate } from "@/app/actions/templates";
 import { Trash2 } from "lucide-react";
@@ -84,8 +84,8 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
       return;
     }
 
-    const exerciseMeta = getExerciseFromClientRegistry(selectedExercise.slug);
-    const defaultConfig = exerciseMeta?.presets?.easy ?? {};
+    const entry = getExerciseFromRegistry(selectedExercise.slug);
+    const defaultConfig = entry?.presets?.easy ?? {};
 
     append({
       exerciseId: selectedExercise.id,

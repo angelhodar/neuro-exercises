@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { Pencil } from "lucide-react";
 
 interface ConfigureExerciseButtonProps {
@@ -24,11 +24,11 @@ export default function ConfigureExerciseButton(
   const { slug, index } = props;
   const [open, setOpen] = useState(false);
 
-  const registryExercise = getExerciseFromClientRegistry(slug);
+  const entry = getExerciseFromRegistry(slug);
 
-  if (!registryExercise) return null;
+  if (!entry) return null;
 
-  const { ConfigFieldsComponent } = registryExercise;
+  const { ConfigFieldsComponent } = entry;
 
   return (
     <Fragment>

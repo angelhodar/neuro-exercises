@@ -46,6 +46,7 @@ export function ExerciseProvider({
   }
 
   function addQuestionResult(result: object) {
+    console.log({ result, automaticNextQuestion: config.automaticNextQuestion });
     setResults((prev) => [...prev, result]);
     if (config.automaticNextQuestion) nextQuestion();
     else setWaitingForNextQuestionTrigger(true);

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
-import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 
 interface PageProps {
@@ -14,15 +14,17 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
 
   if (!exercise) notFound();
 
-  const exerciseClientEntry = getExerciseFromClientRegistry(slug);
+  const entry = getExerciseFromRegistry(slug);
 
-  if (!exerciseClientEntry) notFound();
+  if (!entry) notFound();
 
-  const { ConfigFieldsComponent } = exerciseClientEntry;
+  const { ConfigFieldsComponent } = entry;
 
   return (
-    <ExerciseConfigForm slug={slug} title={exercise.displayName}>
-      <ConfigFieldsComponent />
-    </ExerciseConfigForm>
+    <div className="flex flex-1 container justify-center items-center mx-auto">
+      <ExerciseConfigForm slug={slug} title={exercise.displayName}>
+        <ConfigFieldsComponent />
+      </ExerciseConfigForm>
+    </div>
   );
 }

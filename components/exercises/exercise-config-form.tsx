@@ -11,7 +11,7 @@ import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
-import { getExerciseFromClientRegistry } from "@/app/registry/registry.client";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
@@ -27,14 +27,14 @@ export function ExerciseConfigForm({
 }: ExerciseConfigFormProps) {
   const router = useRouter();
 
-  const exerciseDetails = getExerciseFromClientRegistry(slug);
+  const entry = getExerciseFromRegistry(slug);
 
-  if (!exerciseDetails) {
+  if (!entry) {
     console.error(`No se encontró el ejercicio con slug '${slug}' en el registro.`);
     return null;
   }
 
-  const { schema, presets } = exerciseDetails;
+  const { schema, presets } = entry;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),

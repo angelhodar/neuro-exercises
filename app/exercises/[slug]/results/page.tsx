@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
-import { getExerciseFromServerRegistry } from "@/app/registry/registry.server";
+import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import { parseConfigFromSearchParams, parseResultsFromSearchParams } from "../parsers";
 
@@ -17,14 +17,16 @@ export default async function ExerciseResultsPage({ params, searchParams }: Page
 
   if (!exercise) notFound();
 
-  const exerciseServerEntry = getExerciseFromServerRegistry(slug);
+  const entry = getExerciseFromRegistry(slug);
 
-  if (!exerciseServerEntry) notFound();
+  if (!entry) notFound();
 
-  const { ResultsComponent } = exerciseServerEntry;
+  const { ResultsComponent } = entry;
 
   const results = parseResultsFromSearchParams(slug, resolvedSearchParams);
   const config = parseConfigFromSearchParams(slug, resolvedSearchParams);
+
+  if (!results) notFound();
 
   return <ResultsComponent results={results} config={config} />
 }

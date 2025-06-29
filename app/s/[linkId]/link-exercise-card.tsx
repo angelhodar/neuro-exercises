@@ -10,10 +10,11 @@ interface LinkExerciseCardProps {
   completed: boolean;
   linkId: string;
   index: number;
+  itemId: number;
 }
 
 export function LinkExerciseCard(props: LinkExerciseCardProps) {
-  const { exercise, completed, linkId, index } = props;
+  const { exercise, completed, linkId, index, itemId } = props;
 
   return (
     <Card
@@ -49,7 +50,7 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
           <div className="flex items-center gap-2">
             {completed ? (
               <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                <Link href={`/s/${linkId}/${index}/results`}>
+                <Link href={`/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`}>
                   <Eye className="mr-2 h-4 w-4" />
                   Ver Resultados
                 </Link>
@@ -59,7 +60,7 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
                 className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                 asChild
               >
-                <Link href={`/s/${linkId}/${index}`}>
+                <Link href={`/exercises/${exercise.slug}?linkId=${linkId}&itemId=${itemId}`}>
                   <Play className="mr-2 h-4 w-4" />
                   Comenzar
                 </Link>

@@ -37,6 +37,7 @@ export default async function SharedLinkPage({
               exercise={item.exercise}
               index={i}
               linkId={linkId}
+              itemId={item.id}
               completed={!!item.exerciseResults[0]}
             />
           );

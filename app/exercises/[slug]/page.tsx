@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
 import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
@@ -18,12 +18,12 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   const validationResult = exerciseParamsSchema.safeParse(resolvedSearchParams);
 
-  if (!validationResult.success) notFound();
-
   const exercise = await getExerciseBySlug(slug);
   const entry = getExerciseFromRegistry(slug);
 
   if (!exercise || !entry) notFound();
+
+  if (!validationResult.success) redirect(`/exercises/${slug}/config`);
 
   const { schema } = entry;
 
@@ -33,7 +33,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     ? await parseConfigFromUrl(parsedParams.config, schema)
     : await getExerciseConfigFromLink(parsedParams.linkId, parsedParams.itemId);
 
-  if (!config) notFound();
+  if (!config) redirect(`/exercises/${slug}/config`);
 
   const { ExerciseComponent } = entry;
 

@@ -11,7 +11,6 @@ export function VisualRecognitionResults({ results }: VisualRecognitionResultsPr
   function calculateAccuracy(result: VisualRecognitionQuestionResult): number {
     const correctSelections = result.selectedImages.filter((id) => result.correctImages.includes(id)).length
     const incorrectSelections = result.selectedImages.filter((id) => !result.correctImages.includes(id)).length
-    const missedCorrect = result.correctImages.filter((id) => !result.selectedImages.includes(id)).length
 
     const totalPossiblePoints = result.correctImages.length
     const earnedPoints = Math.max(0, correctSelections - incorrectSelections)
@@ -61,7 +60,7 @@ export function VisualRecognitionResults({ results }: VisualRecognitionResultsPr
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden mb-6">
+      <div className="border rounded-md overflow-y-auto h-96 mb-6">
         <Table>
           <TableHeader>
             <TableRow>

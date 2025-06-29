@@ -20,6 +20,7 @@ interface QuestionState {
   displayedImages: ImageData[];
   correctImageIds: string[];
   selectedImageIds: string[];
+  isAnswerSubmitted: boolean;
 }
 
 export function VisualRecognitionExerciseClient({
@@ -36,6 +37,7 @@ export function VisualRecognitionExerciseClient({
     displayedImages: [],
     correctImageIds: [],
     selectedImageIds: [],
+    isAnswerSubmitted: false,
   });
 
   function selectImagesForQuestion(): {
@@ -96,13 +98,16 @@ export function VisualRecognitionExerciseClient({
         displayedImages: [],
         correctImageIds: [],
         selectedImageIds: [],
+        isAnswerSubmitted: false,
       });
       return;
     }
-    setQuestionState({ ...questionData, selectedImageIds: [] });
+    setQuestionState({ ...questionData, selectedImageIds: [], isAnswerSubmitted: false });
   }
 
   function handleImageClick(imageId: string) {
+    if (questionState.isAnswerSubmitted) return;
+    
     setQuestionState((prev) => {
       const isSelected = prev.selectedImageIds.includes(imageId);
       const updatedSelected = isSelected
@@ -111,8 +116,9 @@ export function VisualRecognitionExerciseClient({
       
       const newState = { ...prev, selectedImageIds: updatedSelected };
       
-      // Si se alcanza el número correcto de imágenes seleccionadas, enviar resultado automáticamente
-      if (updatedSelected.length === correctImagesCount) {
+      if (updatedSelected.length === correctImagesCount && !prev.isAnswerSubmitted) {
+        newState.isAnswerSubmitted = true;
+        
         setTimeout(() => {
           addQuestionResult({
             targetTag: prev.targetTag!,
@@ -121,22 +127,11 @@ export function VisualRecognitionExerciseClient({
             timeSpent: 0,
             timeExpired: false,
           } as VisualRecognitionQuestionResult);
-        }, 100); // Pequeño delay para que se vea la selección
+        }, 100);
       }
       
       return newState;
     });
-  }
-
-  function submitAnswer() {
-    if (!questionState.targetTag) return;
-    addQuestionResult({
-      targetTag: questionState.targetTag,
-      correctImages: questionState.correctImageIds,
-      selectedImages: questionState.selectedImageIds,
-      timeSpent: 0,
-      timeExpired: false,
-    } as VisualRecognitionQuestionResult);
   }
 
   useEffect(() => {
@@ -172,6 +167,7 @@ export function VisualRecognitionExerciseClient({
               key={image.id}
               className={cn(
                 "relative cursor-pointer rounded-lg border-2 transition-all duration-200 bg-white",
+                questionState.isAnswerSubmitted && "pointer-events-none opacity-75",
                 isSelected
                   ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg"
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:shadow-md",

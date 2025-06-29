@@ -6,26 +6,32 @@ import dynamic from "next/dynamic";
 import {
   visualRecognitionConfigSchema,
   visualRecognitionPresets,
+  visualRecognitionQuestionResultSchema,
 } from "@/components/exercises/visual-recognition/visual-recognition-schema";
 import {
   syllablesConfigSchema,
   syllablesPresets,
+  syllablesQuestionResultSchema,
 } from "@/components/exercises/syllables/syllables-schema";
 import {
   reactionTimeGridConfigSchema,
   reactionTimePresets,
+  reactionTimeQuestionResultSchema,
 } from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema";
 import {
   colorSequenceConfigSchema,
   colorSequencePresets,
+  colorSequenceQuestionResultSchema,
 } from "@/components/exercises/color-sequence/color-sequence-schema";
 import {
   stimulusCountConfigSchema,
   stimulusCountPresets,
+  stimulusCountQuestionResultSchema,
 } from "@/components/exercises/stimulus-count/stimulus-count-schema";
 import {
   oddOneOutConfigSchema,
   oddOneOutPresets,
+  oddOneOutResultSchema,
 } from "@/components/exercises/odd-one-out/odd-one-out-schema";
 
 // Componentes dinámicos del servidor (async server components)
@@ -141,6 +147,7 @@ const OddOneOutConfigFields = dynamic(() =>
 export type ExerciseEntry = {
   schema: ZodTypeAny;
   presets?: Record<string, any>;
+  resultsSchema: ZodTypeAny;
   ExerciseComponent: ComponentType<{ config: any }>;
   ResultsComponent: ComponentType<any>;
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
@@ -150,6 +157,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   "visual-recognition": {
     schema: visualRecognitionConfigSchema,
     presets: visualRecognitionPresets,
+    resultsSchema: visualRecognitionQuestionResultSchema,
     ExerciseComponent: VisualRecognitionExercise,
     ResultsComponent: VisualRecognitionResults,
     ConfigFieldsComponent: VisualRecognitionConfigFields,
@@ -157,6 +165,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   syllables: {
     schema: syllablesConfigSchema,
     presets: syllablesPresets,
+    resultsSchema: syllablesQuestionResultSchema,
     ExerciseComponent: SyllablesExercise,
     ResultsComponent: SyllablesResults,
     ConfigFieldsComponent: SyllablesConfigFields,
@@ -164,6 +173,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   "reaction-grid": {
     schema: reactionTimeGridConfigSchema,
     presets: reactionTimePresets,
+    resultsSchema: reactionTimeQuestionResultSchema,
     ExerciseComponent: ReactionTimeGrid,
     ResultsComponent: ReactionTimeGridResults,
     ConfigFieldsComponent: ReactionTimeConfigFields,
@@ -171,6 +181,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   "color-sequence": {
     schema: colorSequenceConfigSchema,
     presets: colorSequencePresets,
+    resultsSchema: colorSequenceQuestionResultSchema,
     ExerciseComponent: ColorSequenceExercise,
     ResultsComponent: ColorSequenceResults,
     ConfigFieldsComponent: ColorSequenceConfigFields,
@@ -178,6 +189,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   "stimulus-count": {
     schema: stimulusCountConfigSchema,
     presets: stimulusCountPresets,
+    resultsSchema: stimulusCountQuestionResultSchema,
     ExerciseComponent: StimulusCountExercise,
     ResultsComponent: StimulusCountResults,
     ConfigFieldsComponent: StimulusCountConfigFields,
@@ -185,6 +197,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
   "odd-one-out": {
     schema: oddOneOutConfigSchema,
     presets: oddOneOutPresets,
+    resultsSchema: oddOneOutResultSchema,
     ExerciseComponent: OddOneOutExercise,
     ResultsComponent: OddOneOutResults,
     ConfigFieldsComponent: OddOneOutConfigFields,

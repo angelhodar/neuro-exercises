@@ -4,23 +4,27 @@ import { Button } from "@/components/ui/button";
 import type { SearchParams } from "nuqs/server";
 import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { getExerciseBySlug } from "@/app/actions/exercises";
-import { 
-  parseConfigFromUrl, 
-  parseResultsFromUrl, 
-  exerciseResultsParamsSchema, 
-  getExerciseResultsFromLink 
+import {
+  parseConfigFromUrl,
+  parseResultsFromUrl,
+  exerciseResultsParamsSchema,
 } from "../parsers";
+import { getResultsById } from "@/app/actions/results";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
 }
 
-export default async function ExerciseResultsPage({ params, searchParams }: PageProps) {
+export default async function ExerciseResultsPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const validationResult = exerciseResultsParamsSchema.safeParse(resolvedSearchParams);
+  const validationResult =
+    exerciseResultsParamsSchema.safeParse(resolvedSearchParams);
 
   if (!validationResult.success) notFound();
 
@@ -29,27 +33,26 @@ export default async function ExerciseResultsPage({ params, searchParams }: Page
 
   if (!exercise || !entry) notFound();
 
-  const { schema } = entry;
+  const { schema, resultsSchema } = entry;
+  const parsedParams = validationResult.data;
 
-  const { config: configString, results: resultsString, linkId, itemId } = validationResult.data;
-
-  let config, results, isFromLink = false, backUrl = "";
-
-  if (configString && resultsString) {
-    // Caso 1: config + results en URL
-    config = await parseConfigFromUrl(configString, schema);
-    results = await parseResultsFromUrl(resultsString);
-    isFromLink = false;
+  let config,
+    results,
     backUrl = `/exercises/${slug}`;
+
+  if (parsedParams.type === "config") {
+    // Caso 1: config + results en URL
+    config = parseConfigFromUrl(parsedParams.config, schema);
+    results = parseResultsFromUrl(parsedParams.results, resultsSchema);
   } else {
-    // Caso 2: linkId + itemId
-    const linkData = await getExerciseResultsFromLink(linkId!, itemId!);
-    if (!linkData) notFound();
-    
-    config = linkData.config;
-    results = linkData.results;
-    isFromLink = true;
-    backUrl = linkData.backUrl;
+    // Caso 2: rid (result ID)
+    const resultData = await getResultsById(parsedParams.rid);
+
+    if (!resultData) notFound();
+
+    config = resultData.config;
+    results = resultData.results;
+    backUrl = resultData.backUrl;
   }
 
   if (!config || !results) notFound();
@@ -59,7 +62,7 @@ export default async function ExerciseResultsPage({ params, searchParams }: Page
   return (
     <div className="flex flex-col container mx-auto items-center justify-center h-screen">
       <ResultsComponent results={results} config={config} />
-      {isFromLink && (
+      {parsedParams.type === "result" && (
         <div className="mt-6 flex justify-center">
           <Button asChild>
             <Link href={backUrl}>Volver a la lista de ejercicios</Link>

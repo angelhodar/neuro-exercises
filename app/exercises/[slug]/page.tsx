@@ -27,11 +27,11 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   const { schema } = entry;
 
-  const { config: configString, linkId, itemId } = validationResult.data;
+  const parsedParams = validationResult.data;
 
-  const config = configString
-    ? await parseConfigFromUrl(configString, schema)
-    : await getExerciseConfigFromLink(linkId!, itemId!);
+  const config = parsedParams.type === 'config'
+    ? await parseConfigFromUrl(parsedParams.config, schema)
+    : await getExerciseConfigFromLink(parsedParams.linkId, parsedParams.itemId);
 
   if (!config) notFound();
 

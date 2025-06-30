@@ -33,6 +33,11 @@ import {
   oddOneOutPresets,
   oddOneOutResultSchema,
 } from "@/components/exercises/odd-one-out/odd-one-out-schema";
+import {
+  stroopColorInterferenceConfigSchema,
+  stroopColorInterferencePresets,
+  stroopColorInterferenceQuestionResultSchema,
+} from "@/components/exercises/stroop-color-interference/stroop-color-interference-schema";
 
 // Componentes dinámicos del servidor (async server components)
 const VisualRecognitionExercise = dynamic(() =>
@@ -60,15 +65,15 @@ const SyllablesResults = dynamic(() =>
 );
 
 const ReactionTimeGrid = dynamic(() =>
-  import("@/components/exercises/reaction-time-grid/reaction-time-grid-exercise").then(
-    (mod) => mod.ReactionTimeGrid,
-  ),
+  import(
+    "@/components/exercises/reaction-time-grid/reaction-time-grid-exercise"
+  ).then((mod) => mod.ReactionTimeGrid),
 );
 
 const ReactionTimeGridResults = dynamic(() =>
-  import("@/components/exercises/reaction-time-grid/reaction-time-grid-results").then(
-    (mod) => mod.ExerciseResults,
-  ),
+  import(
+    "@/components/exercises/reaction-time-grid/reaction-time-grid-results"
+  ).then((mod) => mod.ExerciseResults),
 );
 
 const ColorSequenceExercise = dynamic(() =>
@@ -105,6 +110,18 @@ const OddOneOutResults = dynamic(() =>
   import("@/components/exercises/odd-one-out/odd-one-out-results").then(
     (mod) => mod.OddOneOutResults,
   ),
+);
+
+const StroopColorInterferenceExercise = dynamic(() =>
+  import(
+    "@/components/exercises/stroop-color-interference/stroop-color-interference-exercise"
+  ).then((mod) => mod.StroopColorInterferenceExercise),
+);
+
+const StroopColorInterferenceResults = dynamic(() =>
+  import(
+    "@/components/exercises/stroop-color-interference/stroop-color-interference-results"
+  ).then((mod) => mod.StroopColorInterferenceResults),
 );
 
 // Componentes dinámicos del cliente (client components)
@@ -144,6 +161,12 @@ const OddOneOutConfigFields = dynamic(() =>
   ),
 );
 
+const StroopColorInterferenceConfigFields = dynamic(() =>
+  import(
+    "@/components/exercises/stroop-color-interference/stroop-color-interference-config-form"
+  ).then((mod) => mod.StroopColorInterferenceConfigFields),
+);
+
 export type ExerciseEntry = {
   schema: ZodTypeAny;
   presets?: Record<string, any>;
@@ -170,7 +193,7 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
     ResultsComponent: SyllablesResults,
     ConfigFieldsComponent: SyllablesConfigFields,
   },
-  "reaction-grid": {
+  "reaction-time-grid": {
     schema: reactionTimeGridConfigSchema,
     presets: reactionTimePresets,
     resultsSchema: reactionTimeQuestionResultSchema,
@@ -201,6 +224,14 @@ export const exerciseRegistry: Record<string, ExerciseEntry> = {
     ExerciseComponent: OddOneOutExercise,
     ResultsComponent: OddOneOutResults,
     ConfigFieldsComponent: OddOneOutConfigFields,
+  },
+  "stroop-color-interference": {
+    schema: stroopColorInterferenceConfigSchema,
+    presets: stroopColorInterferencePresets,
+    resultsSchema: stroopColorInterferenceQuestionResultSchema,
+    ExerciseComponent: StroopColorInterferenceExercise,
+    ResultsComponent: StroopColorInterferenceResults,
+    ConfigFieldsComponent: StroopColorInterferenceConfigFields,
   },
 };
 

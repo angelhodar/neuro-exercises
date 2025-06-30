@@ -2,20 +2,21 @@ import { z } from "zod";
 import { tool } from "ai";
 import { format } from "prettier";
 import { execSync } from "child_process";
-import { 
-  octokit, 
-  owner, 
-  repo, 
-  prNumber, 
-  includePaths, 
-  generatedFileSchema, 
+import {
+  octokit,
+  owner,
+  repo,
+  prNumber,
+  includePaths,
+  generatedFileSchema,
   getFileData,
-  type GeneratedFile 
+  type GeneratedFile,
 } from "./context";
 
 // Herramienta para obtener el contexto de otros ejercicios y componentes
 export const getCodeContext = tool({
-  description: "Obtiene el contexto de otros ejercicios, hooks y componentes existentes para usar como referencia",
+  description:
+    "Obtiene el contexto de otros ejercicios, hooks y componentes existentes para usar como referencia",
   parameters: z.object({}),
   execute: async () => {
     console.log("Obteniendo contexto de otros ejercicios y componentes");
@@ -24,7 +25,7 @@ export const getCodeContext = tool({
         `npx -y repomix --include "${includePaths.join(",")}" --stdout`,
         { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
       ).trim();
-      
+
       return context;
     } catch (error) {
       console.error("Error obteniendo contexto:", error);
@@ -35,7 +36,8 @@ export const getCodeContext = tool({
 
 // Herramienta para leer archivos existentes
 export const readFiles = tool({
-  description: "Lee los archivos existentes para un ejercicio específico desde el repositorio. Si todavía no se han creado los archivos, devuelve un array vacío.",
+  description:
+    "Lee los archivos existentes para un ejercicio específico desde el repositorio. Si todavía no se han creado los archivos, devuelve un array vacío.",
   parameters: z.object({
     slug: z.string().describe("El slug del ejercicio"),
     ref: z.string().describe("La referencia del branch (ej: pr.head.ref)"),
@@ -43,7 +45,10 @@ export const readFiles = tool({
   execute: async ({ slug, ref }) => {
     console.log("Leyendo archivos existentes para el ejercicio", slug, ref);
     try {
-      const searchPaths = [`components/exercises/${slug}`, `app/exercises/registry.tsx`];
+      const searchPaths = [
+        `components/exercises/${slug}`,
+        `app/exercises/registry.tsx`,
+      ];
       const existingFiles: GeneratedFile[] = [];
 
       for (const searchPath of searchPaths) {
@@ -57,22 +62,27 @@ export const readFiles = tool({
 
           if (Array.isArray(data)) {
             for (const item of data) {
-              if (
-                item.type === "file" &&
-                (item.name.includes(slug) || searchPath.includes("registry"))
-              ) {
-                const fileData = await getFileData(item.path, ref);
+              if (item.type !== "file") continue;
 
-                if (fileData) {
-                  existingFiles.push({
-                    path: item.path,
-                    content: fileData.content,
-                    action: "update",
-                    sha: fileData.sha,
-                  });
-                }
+              const fileData = await getFileData(item.path, ref);
+
+              if (fileData) {
+                existingFiles.push({
+                  path: item.path,
+                  content: fileData.content,
+                  action: "update",
+                  sha: fileData.sha,
+                });
               }
             }
+          }
+          else if (data.type === "file") {
+            existingFiles.push({
+              path: data.path,
+              content: data.content,
+              action: "update",
+              sha: data.sha,
+            });
           }
         } catch (error) {
           // El directorio puede no existir, es normal en la primera ejecución
@@ -91,7 +101,9 @@ export const readFiles = tool({
 export const writeFiles = tool({
   description: "Escribe, actualiza o elimina archivos en el branch del PR",
   parameters: z.object({
-    files: z.array(generatedFileSchema).describe("Array de archivos a procesar"),
+    files: z
+      .array(generatedFileSchema)
+      .describe("Array de archivos a procesar"),
     slug: z.string().describe("El slug del ejercicio"),
     branch: z.string().describe("El branch donde escribir los archivos"),
   }),
@@ -106,7 +118,11 @@ export const writeFiles = tool({
         if (file.action === "delete") {
           if (!file.sha) {
             console.warn(`No se pudo eliminar ${filePath}, falta SHA`);
-            results.push({ path: filePath, status: "error", message: "SHA faltante para eliminación" });
+            results.push({
+              path: filePath,
+              status: "error",
+              message: "SHA faltante para eliminación",
+            });
             continue;
           }
 
@@ -135,18 +151,20 @@ export const writeFiles = tool({
             sha: file.sha,
           });
 
-          console.log(`Archivo ${action === "actualizar" ? "actualizado" : "creado"}: ${filePath}`);
-          results.push({ 
-            path: filePath, 
-            status: action === "actualizar" ? "updated" : "created" 
+          console.log(
+            `Archivo ${action === "actualizar" ? "actualizado" : "creado"}: ${filePath}`,
+          );
+          results.push({
+            path: filePath,
+            status: action === "actualizar" ? "updated" : "created",
           });
         }
       } catch (error) {
         console.error(`Error procesando el archivo ${filePath}:`, error);
-        results.push({ 
-          path: filePath, 
-          status: "error", 
-          message: error instanceof Error ? error.message : String(error) 
+        results.push({
+          path: filePath,
+          status: "error",
+          message: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -157,7 +175,8 @@ export const writeFiles = tool({
 
 // Herramienta para obtener los últimos requerimientos del usuario
 export const getLastRequirements = tool({
-  description: "Obtiene el último comentario con requerimientos del autor del PR",
+  description:
+    "Obtiene el último comentario con requerimientos del autor del PR",
   parameters: z.object({
     authorLogin: z.string().describe("El login del autor del PR"),
   }),
@@ -180,8 +199,10 @@ export const getLastRequirements = tool({
       .map((comment) => comment.body)
       .at(-1);
 
-    const lastComment = comment || "Sigue las directrices iniciales del prompt para generar el ejercicio";
+    const lastComment =
+      comment ||
+      "Sigue las directrices iniciales del prompt para generar el ejercicio";
 
     return lastComment;
   },
-}); 
+});

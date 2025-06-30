@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import {
@@ -38,30 +38,30 @@ export function StroopColorInterferenceExercise({
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
 
-  const setupQuestion = useCallback(() => {
-    let word, color;
-
-    // Asegurarse de que la palabra y el color no sean el mismo
-    do {
-      word = shuffle([...STROOP_COLORS])[0];
-      color = shuffle([...STROOP_COLORS])[0];
-    } while (word.name === color.name);
-
-    const correctAnswer = color.name;
-    const otherOptions = STROOP_COLORS.map((c) => c.name).filter(
-      (name) => name !== correctAnswer,
-    );
-
-    const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
-    const finalOptions = shuffle([...shuffledOptions, correctAnswer]);
-
-    setQuestion({ word, color, options: finalOptions });
-    setStartTime(Date.now());
-  }, [numOptions]);
-
   useEffect(() => {
+    const setupQuestion = () => {
+      let word, color;
+
+      // Asegurarse de que la palabra y el color no sean el mismo
+      do {
+        word = shuffle([...STROOP_COLORS])[0];
+        color = shuffle([...STROOP_COLORS])[0];
+      } while (word.name === color.name);
+
+      const correctAnswer = color.name;
+      const otherOptions = STROOP_COLORS.map((c) => c.name).filter(
+        (name) => name !== correctAnswer,
+      );
+
+      const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
+      const finalOptions = shuffle([...shuffledOptions, correctAnswer]);
+
+      setQuestion({ word, color, options: finalOptions });
+      setStartTime(Date.now());
+    };
+
     setupQuestion();
-  }, [currentQuestionIndex, setupQuestion]);
+  }, [currentQuestionIndex, numOptions]);
 
   const handleAnswer = (selectedAnswer: string) => {
     if (!question) return;
@@ -98,13 +98,14 @@ export function StroopColorInterferenceExercise({
           {question.word.name}
         </h1>
       </div>
-      <div className="flex-shrink-0 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+      <div className="flex-shrink-0 flex flex-wrap justify-center items-center gap-4 w-full max-w-4xl">
         {question.options.map((option) => (
           <Button
             key={option}
             onClick={() => handleAnswer(option)}
-            className="text-xl py-6"
+            className="text-2xl md:text-3xl py-8 px-6 h-auto"
             variant="outline"
+            size="lg"
           >
             {option}
           </Button>

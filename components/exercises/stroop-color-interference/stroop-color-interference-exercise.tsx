@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import {
@@ -8,7 +8,6 @@ import {
   type StroopColorInterferenceQuestionResult,
   STROOP_COLORS,
 } from "./stroop-color-interference-schema";
-import { shuffle } from "@/lib/utils";
 
 interface StroopColorInterferenceExerciseProps {
   config: StroopColorInterferenceConfig;
@@ -20,6 +19,16 @@ interface CurrentQuestion {
   options: string[];
 }
 
+// Fisher-Yates shuffle algorithm
+function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
 export function StroopColorInterferenceExercise({
   config,
 }: StroopColorInterferenceExerciseProps) {
@@ -29,29 +38,26 @@ export function StroopColorInterferenceExercise({
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
 
-  const setupQuestion = useMemo(
-    () => () => {
-      let word, color;
+  const setupQuestion = useCallback(() => {
+    let word, color;
 
-      // Asegurarse de que la palabra y el color no sean el mismo
-      do {
-        word = shuffle([...STROOP_COLORS])[0];
-        color = shuffle([...STROOP_COLORS])[0];
-      } while (word.name === color.name);
+    // Asegurarse de que la palabra y el color no sean el mismo
+    do {
+      word = shuffle([...STROOP_COLORS])[0];
+      color = shuffle([...STROOP_COLORS])[0];
+    } while (word.name === color.name);
 
-      const correctAnswer = color.name;
-      const otherOptions = STROOP_COLORS.map((c) => c.name).filter(
-        (name) => name !== correctAnswer,
-      );
+    const correctAnswer = color.name;
+    const otherOptions = STROOP_COLORS.map((c) => c.name).filter(
+      (name) => name !== correctAnswer,
+    );
 
-      const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
-      const finalOptions = shuffle([...shuffledOptions, correctAnswer]);
+    const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
+    const finalOptions = shuffle([...shuffledOptions, correctAnswer]);
 
-      setQuestion({ word, color, options: finalOptions });
-      setStartTime(Date.now());
-    },
-    [numOptions],
-  );
+    setQuestion({ word, color, options: finalOptions });
+    setStartTime(Date.now());
+  }, [numOptions]);
 
   useEffect(() => {
     setupQuestion();

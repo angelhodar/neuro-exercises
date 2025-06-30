@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import {
@@ -8,7 +8,6 @@ import {
   type StroopColorInterferenceQuestionResult,
   STROOP_COLORS,
 } from "./stroop-color-interference-schema";
-import { shuffle } from "@/lib/utils";
 
 interface StroopColorInterferenceExerciseProps {
   config: StroopColorInterferenceConfig;
@@ -20,6 +19,16 @@ interface CurrentQuestion {
   options: string[];
 }
 
+// Fisher-Yates shuffle algorithm
+function shuffle<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
 export function StroopColorInterferenceExercise({
   config,
 }: StroopColorInterferenceExerciseProps) {
@@ -29,8 +38,8 @@ export function StroopColorInterferenceExercise({
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
 
-  const setupQuestion = useMemo(
-    () => () => {
+  useEffect(() => {
+    const setupQuestion = () => {
       let word, color;
 
       // Asegurarse de que la palabra y el color no sean el mismo
@@ -49,13 +58,10 @@ export function StroopColorInterferenceExercise({
 
       setQuestion({ word, color, options: finalOptions });
       setStartTime(Date.now());
-    },
-    [numOptions],
-  );
+    };
 
-  useEffect(() => {
     setupQuestion();
-  }, [currentQuestionIndex, setupQuestion]);
+  }, [currentQuestionIndex, numOptions]);
 
   const handleAnswer = (selectedAnswer: string) => {
     if (!question) return;
@@ -92,13 +98,14 @@ export function StroopColorInterferenceExercise({
           {question.word.name}
         </h1>
       </div>
-      <div className="flex-shrink-0 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+      <div className="flex-shrink-0 flex flex-wrap justify-center items-center gap-4 w-full max-w-4xl">
         {question.options.map((option) => (
           <Button
             key={option}
             onClick={() => handleAnswer(option)}
-            className="text-xl py-6"
+            className="text-2xl md:text-3xl py-8 px-6 h-auto"
             variant="outline"
+            size="lg"
           >
             {option}
           </Button>

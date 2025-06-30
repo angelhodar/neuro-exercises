@@ -49,7 +49,7 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
   return result;
 }
 
-async function generateMediaFromPrompt(prompt: string) {
+export async function generateMediaFromPrompt(prompt: string) {
   const { images } = await generateImage({
     model: togetherai.image(MODEL),
     prompt: `Generate an image of ${prompt.toLowerCase()}, clear and simple, centered, suitable for cognitive exercises, white background`,

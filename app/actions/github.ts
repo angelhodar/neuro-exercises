@@ -92,6 +92,13 @@ export async function createExercisePR(exercise: Exercise, prompt: string): Prom
   // Mover la referencia de la rama al nuevo commit vacío
   await octokit.git.updateRef({ owner, repo, ref: `heads/${branchName}`, sha: emptyCommit.data.sha });
 
+  const metadata = {
+    slug: exercise.slug,
+    displayName: exercise.displayName,
+    tags: exercise.tags,
+    description: exercise.description || null
+  }
+
   // Crear la Pull Request
   const { data: pr } = await octokit.pulls.create({
     owner,
@@ -99,10 +106,12 @@ export async function createExercisePR(exercise: Exercise, prompt: string): Prom
     head: branchName,
     base: defaultBranch,
     title: exercise.displayName,
-    body: `## ${exercise.displayName}\n\n    Slug: ${exercise.slug}\n    Tags: ${exercise.tags.join(", ")}\n    ${exercise.description ? `Description: ${exercise.description}\n` : ""}\n\n    ## Prompt\n    ${prompt}\n    `,
+    body: `<metadata>${JSON.stringify(metadata)}</metadata>
+    
+    <prompt>${prompt}</prompt>`,
   });
 
-  // Añadir etiqueta "new-exercise" para que la Action lo detecte
+  // Añadir etiqueta "new-exercise" para que la action lo detecte
   //await octokit.issues.addLabels({ owner, repo, issue_number: pr.number, labels: ["new-exercise"] });
 
   // Actualizar registro ejercicio con número de PR

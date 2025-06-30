@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { put } from "@vercel/blob";
+import { generateObject } from "ai";
+import { google } from "@ai-sdk/google";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -9,8 +11,39 @@ import type { Exercise } from "@/lib/db/schema";
 import {
   createExerciseSchema,
   CreateExerciseSchema,
-} from "@/lib/schemas/exercises"
+  generatedExerciseSchema,
+} from "@/lib/schemas/exercises";
 import { createExercisePR } from "./github";
+import { generateMediaFromPrompt } from "./media";
+
+// Función para generar thumbnail
+async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise<string | undefined> {
+  try {
+    const imageBuffer = await generateMediaFromPrompt(thumbnailPrompt);
+    
+    const fileName = `thumbnails/${slug}.png`;
+    const blob = await put(fileName, imageBuffer, {
+      access: "public",
+      addRandomSuffix: true,
+    });
+    
+    return blob.pathname;
+  } catch (error) {
+    console.error("Error generando thumbnail:", error);
+    return undefined;
+  }
+}
+
+async function generateExerciseData(prompt: string) {
+  const { object } = await generateObject({
+    model: google("gemini-2.5-flash"),
+    schema: generatedExerciseSchema,
+    system: "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
+    prompt,
+  });
+
+  return object;
+}
 
 export async function getExercises() {
   const allExercises = await db.query.exercises.findMany();
@@ -51,28 +84,22 @@ export async function createExercise(
 ): Promise<Exercise | null> {
   try {
     const parsed = createExerciseSchema.parse(data);
+    const { prompt } = parsed;
 
-    const { thumbnail, prompt, ...rest } = parsed;
+    const generatedData = await generateExerciseData(prompt);
 
-    let thumbnailPath: string | undefined = undefined;
-
-    if (thumbnail instanceof File) {
-      const upload = await put(`thumbnails/${thumbnail.name}`, thumbnail, {
-        access: "public",
-        addRandomSuffix: true,
-      });
-      thumbnailPath = upload.pathname;
-    }
+    // Generar thumbnail usando el thumbnailPrompt generado por la AI
+    const thumbnailUrl = await generateThumbnail(generatedData.thumbnailPrompt, generatedData.slug);
 
     const [created] = await db
       .insert(exercises)
       .values({
-        ...rest,
-        thumbnailUrl: thumbnailPath,
+        ...generatedData,
+        thumbnailUrl,
       })
       .returning();
 
-    if (created && prompt) await createExercisePR(created, prompt);
+    if (created) await createExercisePR(created, prompt);
 
     revalidatePath("/dashboard");
     return created || null;

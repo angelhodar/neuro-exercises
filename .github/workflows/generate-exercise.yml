@@ -3,11 +3,15 @@ name: Generar ejercicio con LLM
 on:
   pull_request:
     types: [labeled]
+  issue_comment:
+    types: [created]
 
 jobs:
   generate-exercise:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'new-exercise')
+    if: |
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'new-exercise')) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.author_association == 'OWNER' && contains(github.event.issue.labels.*.name, 'new-exercise'))
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -24,5 +28,5 @@ jobs:
       - name: Ejecutar script de generación
         env:
           GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: npm run generate-exercise
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: npm run agent:generate-exercise

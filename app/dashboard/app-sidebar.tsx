@@ -42,32 +42,32 @@ const data = {
   exercises: [
     {
       title: "Cuadrícula",
-      url: "/dashboard/exercises/reaction-grid",
+      url: "/exercises/reaction-grid",
       icon: Grid3x3,
     },
     {
       title: "Sílabas",
-      url: "/dashboard/exercises/syllables",
+      url: "/exercises/syllables",
       icon: BookOpen,
     },
     {
       title: "Reconocimiento visual",
-      url: "/dashboard/exercises/visual-recognition",
+      url: "/exercises/visual-recognition",
       icon: ImageIcon,
     },
     {
       title: "Secuencia de colores",
-      url: "/dashboard/exercises/color-sequence",
+      url: "/exercises/color-sequence",
       icon: Palette,
     },
     {
       title: "Conteo de estímulos",
-      url: "/dashboard/exercises/stimulus-count",
+      url: "/exercises/stimulus-count",
       icon: Circle,
     },
     {
       title: "¿Cual te has dejado?",
-      url: "/dashboard/exercises/odd-one-out",
+      url: "/exercises/odd-one-out",
       icon: ScanSearch,
     },
   ],

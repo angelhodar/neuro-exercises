@@ -20,9 +20,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { TagsInput, TagsInputInput, TagsInputItem, TagsInputList } from "@/components/ui/tags-input";
 import { createExerciseSchema, CreateExerciseSchema } from "@/lib/schemas/exercises";
 import { createExercise } from "@/app/actions/exercises";
 
@@ -33,12 +31,7 @@ export default function CreateExerciseButton() {
   const form = useForm<CreateExerciseSchema>({
     resolver: zodResolver(createExerciseSchema),
     defaultValues: {
-      slug: "",
-      displayName: "",
-      tags: [],
-      description: "",
       prompt: "",
-      thumbnail: undefined,
     },
   });
 
@@ -61,9 +54,13 @@ export default function CreateExerciseButton() {
       <DialogTrigger asChild>
         <Button>Crear nuevo ejercicio</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Nuevo ejercicio</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Describe el ejercicio que quieres crear y la IA generará automáticamente 
+            todos los detalles necesarios, incluyendo la imagen.
+          </p>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -72,92 +69,16 @@ export default function CreateExerciseButton() {
           >
             <FormField
               control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Identificador (slug)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="visual-recognition" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="displayName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nombre del ejercicio" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Etiquetas</FormLabel>
-                  <FormControl>
-                    <TagsInput
-                      value={field.value ?? []}
-                      onValueChange={(tags) => field.onChange(tags)}
-                    >
-                      <TagsInputList>
-                        {(field.value ?? []).map((tag: string) => (
-                          <TagsInputItem key={tag} value={tag}>
-                            {tag}
-                          </TagsInputItem>
-                        ))}
-                        <TagsInputInput placeholder="Añade etiquetas..." />
-                      </TagsInputList>
-                    </TagsInput>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="prompt"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prompt</FormLabel>
+                  <FormLabel>Descripción del ejercicio</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Prompt" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="thumbnail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Miniatura</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => field.onChange(e.target.files?.[0])}
+                    <Textarea 
+                      placeholder="Describe el ejercicio neurocognitivo que quieres crear. Por ejemplo: 'Un ejercicio de memoria visual donde el usuario debe recordar la secuencia de colores mostrada...'"
+                      className="min-h-32"
+                      {...field} 
+                      required 
                     />
                   </FormControl>
                   <FormMessage />
@@ -167,7 +88,7 @@ export default function CreateExerciseButton() {
             {error && <div className="text-red-500 text-sm">{error}</div>}
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Guardando..." : "Guardar"}
+                {isSubmitting ? "Creando ejercicio..." : "Crear ejercicio"}
               </Button>
             </DialogFooter>
           </form>

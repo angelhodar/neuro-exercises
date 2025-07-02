@@ -1,70 +1,70 @@
 export const createMainPrompt = (mainPrompt: string, slug: string) => {
   return `
-  Eres un asistente que genera archivos de un ejercicio neurocognitivo para una aplicación basada en Next.js siguiendo estrictamente las directrices descritas.
+  You are an assistant that generates files for a neurocognitive exercise for a Next.js-based application, strictly following the described guidelines.
   
-  Las directrices iniciales para el ejercicio son:
+  The initial guidelines for the exercise are:
 
-  <directrices-iniciales>
+  <initial-guidelines>
   ${mainPrompt}
-  </directrices-iniciales>
+  </initial-guidelines>
 
-  El slug del ejercicio es: ${slug}
+  The exercise slug is: ${slug}
 
-  INSTRUCCIONES:
-  1. Primero usa la herramienta 'getCodeContext' para obtener ejemplos de otros ejercicios y componentes
-  2. Luego usa la herramienta 'getLastRequirements' para obtener requerimientos adicionales del usuario
-  3. Después usa la herramienta 'readFiles' para revisar archivos existentes del ejercicio
-  4. Basado en toda la información anterior, crea o modifica los archivos necesarios
-  5. Finalmente usa la herramienta 'writeFiles' para escribir todos los cambios
+  INSTRUCTIONS:
+  1. First use the 'getCodeContext' tool to get examples from other exercises and components
+  2. Then use the 'getLastRequirements' tool to get additional user requirements
+  3. Next use the 'readFiles' tool to review existing exercise files
+  4. Based on all the above information, create or modify the necessary files
+  5. Finally use the 'writeFiles' tool to write all changes
 
-  FORMATO PARA writeFiles:
-  Cuando llames a writeFiles, debes pasar un array de objetos en el parámetro 'files'. Cada objeto debe tener:
-  - path: string (ruta del archivo, ej: "components/exercises/mi-ejercicio/index.tsx")
-  - content: string (contenido completo del archivo)
-  - action: "create" | "update" | "delete" (opcional, default "create")
-  - sha: string (opcional, solo necesario para actualizar archivos existentes)
+  FORMAT FOR writeFiles:
+  When calling writeFiles, you must pass an array of objects in the 'files' parameter. Each object must have:
+  - path: string (file path, e.g., "components/exercises/my-exercise/index.tsx")
+  - content: string (complete file content)
+  - action: "create" | "update" | "delete" (optional, default "create")
+  - sha: string (optional, only needed to update existing files)
 
-  Ejemplo de llamada a writeFiles:
+  Example writeFiles call:
   {
     "files": [
       {
         "path": "components/exercises/${slug}/index.tsx",
-        "content": "import React from 'react';\n\nexport default function MyExercise() {\n  return <div>Mi ejercicio</div>;\n}",
+        "content": "import React from 'react';\n\nexport default function MyExercise() {\n  return <div>My exercise</div>;\n}",
         "action": "create"
       }
     ],
     "slug": "${slug}",
-    "branch": "nombre-del-branch"
+    "branch": "branch-name"
   }
 
-  IMPORTANTE: 
-  - Si hay requerimientos adicionales, aplícalos sobre el código inicial
-  - Toma en cuenta archivos existentes y modifícalos según las nuevas instrucciones
-  - El código debe ser sintácticamente correcto y bien formateado
-  - Usa saltos de línea entre sentencias como lo haría un desarrollador humano
-  - Usa los ejemplos de otros ejercicios como referencia para la estructura y patrones
-  - SIEMPRE incluye el parámetro 'files' con el array de archivos cuando llames a writeFiles
+  IMPORTANT: 
+  - If there are additional requirements, apply them over the initial code
+  - Take existing files into account and modify them according to new instructions
+  - Code must be syntactically correct and well formatted
+  - Use line breaks between statements as a human developer would
+  - Use examples from other exercises as reference for structure and patterns
+  - ALWAYS include the 'files' parameter with the array of files when calling writeFiles
 
-  Dispones de los siguientes componentes de shadcn/ui: 
+  You have access to the following shadcn/ui components: 
   accordion, alert-dialog, alert, avatar, badge, button, card, checkbox, collapsible, dialog, dropdown-menu, form, input, label, select, separator, sheet, popover, slider, switch, tabs, table, textarea, toast, tooltip
   `;
 };
 
 export const createSystemPrompt = (userLogin: string, slug: string, branch: string) => {
   return `
-  Eres un asistente que procesa ejercicios neurocognitivos. Tu flujo de trabajo es:
+  You are an assistant that processes neurocognitive exercises. Your workflow is:
   
-  1. Llama a getCodeContext para obtener ejemplos de otros ejercicios y entorno de ejecución de los ejercicios.
-  2. Llama a getLastRequirements con el login "${userLogin}" para obtener requerimientos adicionales
-  3. Llama a readFiles con slug "${slug}" y ref "${branch}" para ver archivos existentes  
-  4. Genera los archivos necesarios basándote en los ejemplos, directrices y requerimientos
-  5. Llama a writeFiles con:
-     - files: array de objetos con {path, content, action?, sha?}
+  1. Call getCodeContext to get examples from other exercises and exercise execution environment.
+  2. Call getLastRequirements with login "${userLogin}" to get additional requirements
+  3. Call readFiles with slug "${slug}" and ref "${branch}" to see existing files  
+  4. Generate the necessary files based on examples, guidelines and requirements
+  5. Call writeFiles with:
+     - files: array of objects with {path, content, action?, sha?}
      - slug: "${slug}"
      - branch: "${branch}"
   
-  CRÍTICO: Siempre incluye el parámetro 'files' como un array de objetos cuando llames a writeFiles.
+  CRITICAL: Always include the 'files' parameter as an array of objects when calling writeFiles.
   
-  Al final, resume brevemente las acciones realizadas.
+  At the end, briefly summarize the actions performed.
   `;
 }; 

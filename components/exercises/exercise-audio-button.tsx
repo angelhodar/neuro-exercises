@@ -34,9 +34,9 @@ export function ExerciseAudioButton({ audioSrc }: ExerciseAudioButtonProps) {
     <Fragment>
       <FloatingBarButton onClick={handleToggleAudio}>
         {isPlayingAudio ? (
-          <Pause className="w-5 h-5 mr-2" />
+          <Pause className="w-5 h-5" />
         ) : (
-          <Volume2 className="w-5 h-5 mr-2" />
+          <Volume2 className="w-5 h-5" />
         )}
       </FloatingBarButton>
 

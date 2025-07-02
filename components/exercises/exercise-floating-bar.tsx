@@ -15,7 +15,7 @@ import { ExerciseAudioButton } from "./exercise-audio-button";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Progress } from "../ui/progress";
-
+import { createMediaUrl } from "@/lib/utils";
 
 export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => {
@@ -33,7 +33,7 @@ export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </Button>
     );
-  }
+  },
 );
 
 FloatingBarButton.displayName = "FloatingBarButton";
@@ -121,12 +121,16 @@ export default function FloatingBottomBar() {
 
                 <Separator orientation="vertical" />
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <ExerciseAudioButton /*{}*/ />
-                  </TooltipTrigger>
-                  <TooltipContent>Escuchar instrucciones</TooltipContent>
-                </Tooltip>
+                {exercise.audioInstructions && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ExerciseAudioButton
+                        audioSrc={createMediaUrl(exercise.audioInstructions)}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Escuchar instrucciones</TooltipContent>
+                  </Tooltip>
+                )}
 
                 <Separator orientation="vertical" />
 

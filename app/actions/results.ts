@@ -11,7 +11,7 @@ export async function getResultsById(resultId: number) {
       with: {
         exerciseLink: {
           columns: {
-            publicId: true,
+            token: true,
           },
         },
         templateItem: {
@@ -40,7 +40,7 @@ export async function getResultsById(resultId: number) {
       exerciseDisplayName: result.templateItem.exercise.displayName,
       completedAt: result.completedAt,
       startedAt: result.startedAt,
-      backUrl: `/s/${result.exerciseLink.publicId}`,
+      backUrl: `/s/${result.exerciseLink.token}`,
     };
   } catch (error) {
     console.error("Error fetching result by ID:", error);

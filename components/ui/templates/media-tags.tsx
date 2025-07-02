@@ -19,7 +19,7 @@ export const MediaTagsInput = forwardRef<
 >(({ 
   value = [], 
   onChange, 
-  placeholder = "Agregar etiqueta...", 
+  placeholder = "Escribe una etiqueta y presiona Enter", 
   disabled = false,
   className 
 }, ref) => {

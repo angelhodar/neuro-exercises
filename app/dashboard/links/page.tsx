@@ -137,14 +137,14 @@ export default async function LinksPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <CopyLinkButton publicId={link.publicId} />
+                      <CopyLinkButton token={link.token} />
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
                         asChild
                       >
-                        <Link href={`/s/${link.publicId}`} target="_blank">
+                        <Link href={`/s/${link.token}`} target="_blank">
                           <ExternalLink className="h-4 w-4" />
                           <span className="sr-only">Abrir enlace</span>
                         </Link>
@@ -159,7 +159,7 @@ export default async function LinksPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                           <DropdownMenuItem asChild>
-                            <Link href={`/s/${link.publicId}`} target="_blank">
+                            <Link href={`/s/${link.token}`} target="_blank">
                               <ExternalLink className="mr-2 h-4 w-4" />
                               Abrir enlace
                             </Link>

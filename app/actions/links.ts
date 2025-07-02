@@ -28,7 +28,7 @@ export async function createExerciseLink(link: CreateExerciseLink) {
         creatorId: currentUser.id,
         targetUserId: link.targetUserId,
         templateId: link.templateId,
-        publicId: generateSecureToken(),
+        token: generateSecureToken(),
       })
       .returning();
 
@@ -124,10 +124,10 @@ export async function deleteExerciseLink(linkId: number) {
   }
 }
 
-export async function getExerciseLinkByPublicId(publicId: string) {
+export async function getExerciseLinkByToken(token: string) {
   try {
     const linkWithDetails = await db.query.exerciseLinks.findFirst({
-      where: eq(exerciseLinks.publicId, publicId),
+      where: eq(exerciseLinks.token, token),
       with: {
         targetUser: true,
         creator: true,
@@ -146,7 +146,7 @@ export async function getExerciseLinkByPublicId(publicId: string) {
 
     return linkWithDetails || null;
   } catch (error) {
-    console.error("Error getting exercise link by public ID:", error);
+    console.error("Error getting exercise link by token:", error);
     return null;
   }
 }

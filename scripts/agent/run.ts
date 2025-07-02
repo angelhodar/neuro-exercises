@@ -17,11 +17,11 @@ async function main(): Promise<void> {
     pull_number: prNumber,
   });
 
-  if (!pr.body || !pr.user) throw new Error("Error en los datos de la PR");
+  if (!pr.body || !pr.user) throw new Error("Error in PR data");
 
   const { slug, prompt: initialPrompt } = getPrMetadata(pr.body!);
 
-  console.log(`Procesando ejercicio: ${slug}`);
+  console.log(`Processing exercise: ${slug}`);
 
   const prompt = createMainPrompt(initialPrompt, slug);
   const systemPrompt = createSystemPrompt(pr.user.login, slug, pr.head.ref);
@@ -38,13 +38,12 @@ async function main(): Promise<void> {
     system: systemPrompt,
     maxSteps: 10,
     onStepFinish: (data) => {
-      console.log(data.stepType)
       console.log(data.text)
     },
   });
 
-  console.log("Resultado:", result);
-  console.log("Proceso completado");
+  console.log("Result:", result);
+  console.log("Process completed");
 }
 
 main().catch((err) => {

@@ -13,13 +13,13 @@ import {
   type GeneratedFile,
 } from "./context";
 
-// Herramienta para obtener el contexto de otros ejercicios y componentes
+// Tool to get context from other exercises and components
 export const getCodeContext = tool({
   description:
-    "Obtiene el contexto de otros ejercicios, hooks y componentes existentes para usar como referencia",
+    "Gets context from other existing exercises, hooks and components to use as reference",
   parameters: z.object({}),
   execute: async () => {
-    console.log("Obteniendo contexto de otros ejercicios y componentes");
+    console.log("Getting context from other exercises and components");
     try {
       const context = execSync(
         `npx -y repomix --include "${includePaths.join(",")}" --stdout`,
@@ -28,22 +28,22 @@ export const getCodeContext = tool({
 
       return context;
     } catch (error) {
-      console.error("Error obteniendo contexto:", error);
-      return "No se pudo obtener el contexto de otros ejercicios.";
+      console.error("Error getting context:", error);
+      return "Could not get context from other exercises.";
     }
   },
 });
 
-// Herramienta para leer archivos existentes
+// Tool to read existing files
 export const readFiles = tool({
   description:
-    "Lee los archivos existentes para un ejercicio específico desde el repositorio. Si todavía no se han creado los archivos, devuelve un array vacío.",
+    "Reads existing files for a specific exercise from the repository. If files haven't been created yet, returns an empty array.",
   parameters: z.object({
-    slug: z.string().describe("El slug del ejercicio"),
-    ref: z.string().describe("La referencia del branch (ej: pr.head.ref)"),
+    slug: z.string().describe("The exercise slug"),
+    ref: z.string().describe("The branch reference (e.g. pr.head.ref)"),
   }),
   execute: async ({ slug, ref }) => {
-    console.log("Leyendo archivos existentes para el ejercicio", slug, ref);
+    console.log("Reading existing files for exercise", slug, ref);
     try {
       const searchPaths = [
         `components/exercises/${slug}`,
@@ -85,43 +85,43 @@ export const readFiles = tool({
             });
           }
         } catch (error) {
-          // El directorio puede no existir, es normal en la primera ejecución
+          // Directory might not exist, this is normal on first run
           continue;
         }
       }
       return existingFiles;
     } catch (error) {
-      console.warn(`No se pudieron obtener archivos existentes: ${error}`);
+      console.warn(`Could not get existing files: ${error}`);
       return [];
     }
   },
 });
 
-// Herramienta para escribir archivos al PR
+// Tool to write files to PR
 export const writeFiles = tool({
-  description: "Escribe, actualiza o elimina archivos en el branch del PR",
+  description: "Writes, updates or deletes files in the PR branch",
   parameters: z.object({
     files: z
       .array(generatedFileSchema)
-      .describe("Array de archivos a procesar"),
-    slug: z.string().describe("El slug del ejercicio"),
-    branch: z.string().describe("El branch donde escribir los archivos"),
+      .describe("Array of files to process. Don't include files you don't need to update"),
+    slug: z.string().describe("The exercise slug"),
+    branch: z.string().describe("The branch where to write the files"),
   }),
   execute: async ({ files, slug, branch }) => {
-    console.log(`Procesando ${files.length} cambios en archivos...`);
+    console.log(`Processing ${files.length} file changes...`);
     const results = [];
 
-    for (const file of files) {
+    for (const file of files.filter((file) => file.content)) {
       const filePath = file.path.replace(/^\/+/, "");
 
       try {
         if (file.action === "delete") {
           if (!file.sha) {
-            console.warn(`No se pudo eliminar ${filePath}, falta SHA`);
+            console.warn(`Could not delete ${filePath}, missing SHA`);
             results.push({
               path: filePath,
               status: "error",
-              message: "SHA faltante para eliminación",
+              message: "Missing SHA for deletion",
             });
             continue;
           }
@@ -130,16 +130,16 @@ export const writeFiles = tool({
             owner,
             repo,
             path: filePath,
-            message: `feat(${slug}): eliminar ${filePath}`,
+            message: `feat(${slug}): delete ${filePath}`,
             branch,
             sha: file.sha,
           });
 
-          console.log(`Archivo eliminado: ${filePath}`);
+          console.log(`File deleted: ${filePath}`);
           results.push({ path: filePath, status: "deleted" });
         } else {
           const content = await format(file.content, { filepath: file.path });
-          const action = file.sha ? "actualizar" : "añadir";
+          const action = file.sha ? "update" : "add";
 
           await octokit.repos.createOrUpdateFileContents({
             owner,
@@ -152,15 +152,15 @@ export const writeFiles = tool({
           });
 
           console.log(
-            `Archivo ${action === "actualizar" ? "actualizado" : "creado"}: ${filePath}`,
+            `File ${action === "update" ? "updated" : "created"}: ${filePath}`,
           );
           results.push({
             path: filePath,
-            status: action === "actualizar" ? "updated" : "created",
+            status: action === "update" ? "updated" : "created",
           });
         }
       } catch (error) {
-        console.error(`Error procesando el archivo ${filePath}:`, error);
+        console.error(`Error processing file ${filePath}:`, error);
         results.push({
           path: filePath,
           status: "error",
@@ -173,15 +173,15 @@ export const writeFiles = tool({
   },
 });
 
-// Herramienta para obtener los últimos requerimientos del usuario
+// Tool to get the latest user requirements
 export const getLastRequirements = tool({
   description:
-    "Obtiene el último comentario con requerimientos del autor del PR",
+    "Gets the latest comment with requirements from the PR author",
   parameters: z.object({
-    authorLogin: z.string().describe("El login del autor del PR"),
+    authorLogin: z.string().describe("The PR author's login"),
   }),
   execute: async ({ authorLogin }) => {
-    console.log("Obteniendo últimos requerimientos del usuario", authorLogin);
+    console.log("Getting latest user requirements", authorLogin);
     const { data: comments } = await octokit.issues.listComments({
       owner,
       repo,
@@ -201,7 +201,7 @@ export const getLastRequirements = tool({
 
     const lastComment =
       comment ||
-      "Sigue las directrices iniciales del prompt para generar el ejercicio";
+      "Follow the initial prompt guidelines to generate the exercise";
 
     return lastComment;
   },

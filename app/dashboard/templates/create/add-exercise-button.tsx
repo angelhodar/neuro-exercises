@@ -54,7 +54,7 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
       </Button>
 
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-6xl overflow-hidden">
+        <DialogContent className="lg:max-w-5xl">
           <DialogHeader>
             <DialogTitle>Añadir ejercicio</DialogTitle>
             <DialogDescription>
@@ -62,7 +62,7 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 mt-4">
               <Input
                 id="search"
                 value={searchTerm}

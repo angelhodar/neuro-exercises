@@ -1,5 +1,5 @@
 import { z, ZodTypeAny } from "zod";
-import { getExerciseLinkByPublicId } from "@/app/actions/links";
+import { getExerciseLinkByToken } from "@/app/actions/links";
 
 // Esquemas más específicos que permiten discriminated unions
 const configOnlySchema = z.object({
@@ -92,7 +92,7 @@ export async function getExerciseConfigFromLink(
   linkId: string,
   itemId: string
 ) {
-  const linkData = await getExerciseLinkByPublicId(linkId);
+  const linkData = await getExerciseLinkByToken(linkId);
   
   if (!linkData) return null;
 

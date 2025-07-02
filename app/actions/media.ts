@@ -4,22 +4,39 @@ import { Buffer } from "buffer";
 import { db } from "@/lib/db";
 import { medias, type Media } from "@/lib/db/schema";
 import { eq, desc, ilike, arrayOverlaps } from "drizzle-orm";
-import { put, del } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { togetherai } from "@ai-sdk/togetherai";
 import { experimental_generateImage as generateImage } from "ai";
 import { getCurrentUser } from "@/app/actions/users";
 import type { CreateMediaSchema } from "@/lib/schemas/medias";
+import { uploadBlob, deleteBlobs } from "@/lib/storage";
 
 const MODEL = "black-forest-labs/FLUX.1-schnell-Free";
 
-export async function getMedias(searchTerm?: string, limit?: number) {
+export async function getMedias(
+  searchTerm?: string,
+  tags?: string[],
+  limit?: number,
+) {
   const result = await db.query.medias.findMany({
     where: (fields) => {
+      const conditions = [];
+
       if (searchTerm && searchTerm.trim()) {
-        return ilike(fields.name, `%${searchTerm.trim()}%`);
+        conditions.push(ilike(fields.name, `%${searchTerm.trim()}%`));
       }
-      return undefined;
+
+      if (tags && tags.length > 0) {
+        conditions.push(arrayOverlaps(fields.tags, tags));
+      }
+
+      if (conditions.length === 0) return undefined;
+      else if (conditions.length === 1) return conditions[0];
+      else {
+        return conditions.reduce((acc, condition) => {
+          return acc ? acc && condition : condition;
+        });
+      }
     },
     with: {
       author: {
@@ -70,18 +87,15 @@ export async function uploadMedia(data: CreateMediaSchema) {
 
     if (!user) throw new Error("No hay usuario autenticado");
 
-    const data = file
+    const mediaData = file
       ? await file.arrayBuffer()
       : await generateMediaFromPrompt(prompt!);
-      
+
     const fileName = `media/${
       file ? file.name.replaceAll(" ", "-") : prompt!.replaceAll(" ", "-")
     }.png`;
 
-    const blob = await put(fileName, data, {
-      access: "public",
-      addRandomSuffix: true,
-    });
+    const blob = await uploadBlob(fileName, mediaData);
 
     await db.insert(medias).values({
       name: name,
@@ -103,7 +117,7 @@ export async function uploadMedia(data: CreateMediaSchema) {
 export async function deleteMedia(id: number, blobPathname: string) {
   try {
     await Promise.all([
-      del(blobPathname),
+      deleteBlobs(blobPathname),
       db.delete(medias).where(eq(medias.id, id)),
     ]);
     revalidatePath("/dashboard/medias");

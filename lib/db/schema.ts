@@ -86,6 +86,7 @@ export const exercises = pgTable(
     description: text(),
     prNumber: integer("pr_number"),
     thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
+    audioInstructions: varchar("audio_instructions", { length: 500 }),
     ...timestamps,
   },
   (table) => [
@@ -148,11 +149,11 @@ export const exerciseLinks = pgTable(
     creatorId: text("creator_id").notNull(),
     templateId: integer("template_id").notNull(),
     targetUserId: text("target_user_id").notNull(),
-    publicId: varchar("public_id", { length: 50 }).notNull().unique(),
+    token: varchar("token", { length: 50 }).notNull().unique(),
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("exercise_links_public_id_idx").on(table.publicId),
+    uniqueIndex("exercise_links_token_idx").on(table.token),
     index("exercise_links_creator_idx").on(table.creatorId),
     index("exercise_links_template_idx").on(table.templateId),
     index("exercise_links_target_user_idx").on(table.targetUserId),

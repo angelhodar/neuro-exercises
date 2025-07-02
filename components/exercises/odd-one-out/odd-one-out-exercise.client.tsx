@@ -2,10 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { OddOneOutConfig, OddOneOutResult } from "./odd-one-out-schema";
-import MediaCard from "@/components/ui/templates/media-card";
+import {
+  MediaCard,
+  MediaCardImage,
+  MediaCardContent,
+  MediaCardTitle,
+} from "@/components/ui/templates/media-card";
 import { CheckCircle, XCircle } from "lucide-react";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
+import { createMediaUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface OddOneOutExerciseClientProps {
   config: OddOneOutConfig;
@@ -93,17 +100,17 @@ export function OddOneOutExerciseClient({
           let overlay = null;
           if (questionState.isAnswered && isSelected) {
             overlay = isCorrect ? (
-              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
+              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center rounded-lg">
                 <CheckCircle className="w-16 h-16 text-white" />
               </div>
             ) : (
-              <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center">
+              <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center rounded-lg">
                 <XCircle className="w-16 h-16 text-white" />
               </div>
             );
           } else if (questionState.isAnswered && isCorrect) {
             overlay = (
-              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center">
+              <div className="absolute inset-0 bg-green-500/80 flex items-center justify-center rounded-lg">
                 <CheckCircle className="w-16 h-16 text-white" />
               </div>
             );
@@ -112,12 +119,25 @@ export function OddOneOutExerciseClient({
           return (
             <div key={media.id} className="relative">
               <MediaCard
-                media={media}
-                variant="selectable"
-                isSelected={isSelected}
-                onSelect={() => handleSelectAnswer(media.id)}
-                className={questionState.isAnswered && !isSelected ? "opacity-50" : ""}
-              />
+                className={cn(
+                  "cursor-pointer transition-all duration-200 hover:scale-105",
+                  isSelected && "ring-2 ring-blue-500",
+                  questionState.isAnswered && !isSelected && "opacity-50"
+                )}
+                onClick={() => handleSelectAnswer(media.id)}
+              >
+                <MediaCardImage
+                  src={createMediaUrl(media.blobKey)}
+                  alt={media.name}
+                  width={200}
+                  height={200}
+                />
+                <MediaCardContent padding="sm">
+                  <MediaCardTitle className="text-sm text-center">
+                    {media.name}
+                  </MediaCardTitle>
+                </MediaCardContent>
+              </MediaCard>
               {overlay}
             </div>
           );

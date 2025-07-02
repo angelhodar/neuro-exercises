@@ -1,80 +1,235 @@
 "use client";
 
-import Image from "next/image";
-import { createMediaUrl } from "@/lib/utils";
-import { SelectableMediaSchema } from "@/lib/schemas/medias";
+import type React from "react";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import Tags from "@/components/tags";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import Image, { ImageProps } from "next/image";
 
-interface MediaCardProps {
-  media: SelectableMediaSchema;
-  variant?: "default" | "selectable" | "preview";
-  isSelected?: boolean;
-  onSelect?: () => void;
-  onRemove?: () => void;
-  showTags?: boolean;
-  className?: string;
+// Main MediaCard container
+interface MediaCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
 }
 
-export default function MediaCard({ 
-  media, 
-  variant = "default",
-  isSelected = false,
-  onSelect,
-  onRemove,
-  showTags = true,
-  className = ""
-}: MediaCardProps) {
-  const baseClasses = "relative border rounded-lg shadow p-4 flex flex-col items-center bg-white";
-  const selectableClasses = isSelected ? "ring-2 ring-primary bg-primary/5" : "";
-  const finalClasses = `${baseClasses} ${selectableClasses} ${className}`;
+export function MediaCard({ children, className, ...props }: MediaCardProps) {
+  return (
+    <Card className={cn("overflow-hidden", className)} {...props}>
+      <CardContent className="p-0">{children}</CardContent>
+    </Card>
+  );
+}
 
-  const handleClick = () => {
-    if (variant === "selectable" && onSelect) {
-      onSelect();
-    }
+export function MediaCardImage({ className, ...props }: ImageProps) {
+  return (
+    <Image
+      className={cn(
+        "h-full w-full object-cover transition-transform hover:scale-105",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function ExpandableMediaCardImage({
+  className,
+  width,
+  height,
+  ...props
+}: ImageProps) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <MediaCardImage
+          className={cn(
+            "transition-all group-hover:brightness-90 cursor-pointer group",
+            className,
+          )}
+          width={width}
+          height={height}
+          {...props}
+        />
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl p-4">
+        <DialogTitle>{props.alt}</DialogTitle>
+        <div className="relative w-full h-full h-[60vh]">
+          <Image {...props} fill className="object-contain" />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// MediaCard Title component
+interface MediaCardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  children: React.ReactNode;
+  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+}
+
+export function MediaCardTitle({
+  children,
+  as: Component = "h3",
+  className,
+  ...props
+}: MediaCardTitleProps) {
+  return (
+    <Component
+      className={cn("font-semibold leading-tight tracking-tight", className)}
+      {...props}
+    >
+      {children}
+    </Component>
+  );
+}
+
+// MediaCard Description component
+interface MediaCardDescriptionProps
+  extends React.HTMLAttributes<HTMLParagraphElement> {
+  children: React.ReactNode;
+  lines?: number;
+}
+
+export function MediaCardDescription({
+  children,
+  lines,
+  className,
+  ...props
+}: MediaCardDescriptionProps) {
+  const lineClampClass = lines ? `line-clamp-${lines}` : "";
+
+  return (
+    <p
+      className={cn("text-sm text-muted-foreground", lineClampClass, className)}
+      {...props}
+    >
+      {children}
+    </p>
+  );
+}
+
+// MediaCard Tags component
+interface MediaCardTagsProps extends React.HTMLAttributes<HTMLDivElement> {
+  tags: string[];
+  variant?: "default" | "secondary" | "outline";
+  size?: "default" | "sm";
+}
+
+export function MediaCardTags({
+  tags,
+  variant = "secondary",
+  size = "sm",
+  className,
+  ...props
+}: MediaCardTagsProps) {
+  return (
+    <div className={cn("flex flex-wrap gap-1", className)} {...props}>
+      {tags.map((tag, index) => (
+        <Badge
+          key={index}
+          variant={variant}
+          className={size === "sm" ? "text-xs" : ""}
+        >
+          {tag}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+// MediaCard Actions component
+interface MediaCardActionsProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  align?: "left" | "center" | "right" | "between";
+}
+
+export function MediaCardActions({
+  children,
+  align = "left",
+  className,
+  ...props
+}: MediaCardActionsProps) {
+  const alignmentClasses = {
+    left: "justify-start",
+    center: "justify-center",
+    right: "justify-end",
+    between: "justify-between",
   };
 
   return (
-    <Card 
-      className={`${finalClasses} ${variant === "selectable" ? "cursor-pointer hover:shadow-md transition-all" : ""}`}
-      onClick={handleClick}
-    >     
-      {/* Botón de eliminar para preview */}
-      {variant === "preview" && onRemove && (
-        <button
-          className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove();
-          }}
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+    <div
+      className={cn(
+        "flex items-center gap-2",
+        alignmentClasses[align],
+        className,
       )}
-
-      {/* Imagen */}
-      <Image 
-        src={createMediaUrl(media.blobKey)} 
-        alt={media.name} 
-        width={variant === "preview" ? 200 : 300} 
-        height={variant === "preview" ? 200 : 300} 
-        className="object-cover rounded mb-2" 
-      />
-      
-      {/* Nombre */}
-      <h4 className="font-medium text-sm mb-2 text-center">{media.name}</h4>
-
-      {/* Tags en la parte inferior para selectable y preview */}
-      {showTags && media.tags && media.tags.length > 0 && variant === "default" && <Tags tags={media.tags} />}
-
-      {/* Indicador de seleccionado */}
-      {variant === "selectable" && isSelected && (
-        <div className="mt-2 text-xs text-primary font-medium">✓ Seleccionada</div>
-      )}
-    </Card>
+      {...props}
+    >
+      {children}
+    </div>
   );
-} 
+}
+
+// MediaCard Label component
+interface MediaCardLabelProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  variant?: "default" | "secondary" | "destructive" | "outline";
+}
+
+export function MediaCardLabel({
+  children,
+  position = "top-right",
+  variant = "default",
+  className,
+  ...props
+}: MediaCardLabelProps) {
+  const positionClasses = {
+    "top-left": "top-2 left-2",
+    "top-right": "top-2 right-2",
+    "bottom-left": "bottom-2 left-2",
+    "bottom-right": "bottom-2 right-2",
+  };
+
+  return (
+    <div className={cn("absolute z-10", positionClasses[position])}>
+      <Badge variant={variant} className={className} {...props}>
+        {children}
+      </Badge>
+    </div>
+  );
+}
+
+// Content wrapper for text content
+interface MediaCardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  padding?: "none" | "sm" | "md" | "lg";
+}
+
+export function MediaCardContent({
+  children,
+  padding = "md",
+  className,
+  ...props
+}: MediaCardContentProps) {
+  const paddingClasses = {
+    none: "p-0",
+    sm: "p-3",
+    md: "p-4",
+    lg: "p-6",
+  };
+
+  return (
+    <div
+      className={cn("space-y-3", paddingClasses[padding], className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}

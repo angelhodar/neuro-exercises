@@ -4,7 +4,7 @@ export const selectableMediaSchema = z.object({
   id: z.number(),
   name: z.string(),
   blobKey: z.string(),
-  tags: z.array(z.string())
+  tags: z.array(z.string()).nullable()
 });
 
 export type SelectableMediaSchema = z.infer<typeof selectableMediaSchema>;

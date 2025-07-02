@@ -6,7 +6,7 @@ import { z } from "zod";
 const { GITHUB_TOKEN, GITHUB_REPOSITORY, PR_NUMBER } = process.env;
 
 if (!GITHUB_TOKEN || !GITHUB_REPOSITORY || !PR_NUMBER) {
-  console.error("Faltan variables de entorno");
+  console.error("Missing environment variables");
   process.exit(1);
 }
 
@@ -68,7 +68,7 @@ function parseMetadata(content: string) {
 
   if (!match) {
     throw new Error(
-      "No se encontraron tags <metadata> válidos en el cuerpo de la PR",
+      "No valid <metadata> tags found in PR body",
     );
   }
 
@@ -80,7 +80,7 @@ function parseMetadata(content: string) {
 
     return { metadata, body: bodyContent };
   } catch (error) {
-    throw new Error(`Error parseando JSON de metadata: ${error}`);
+    throw new Error(`Error parsing metadata JSON: ${error}`);
   }
 }
 
@@ -89,7 +89,7 @@ function parsePrompt(content: string) {
   const match = content.match(promptRegex);
 
   if (!match) {
-    throw new Error("No se encontraron tags <prompt> válidos en el cuerpo de la PR");
+    throw new Error("No valid <prompt> tags found in PR body");
   }
 
   const [, promptContent] = match;
@@ -101,7 +101,7 @@ export function getPrMetadata(initialMessageBody: string) {
 
   const slug = metadata.slug;
   
-  if (!slug) throw new Error("No se encontró el slug en los metadata");
+  if (!slug) throw new Error("Slug not found in metadata");
 
   const prompt = parsePrompt(initialMessageBody);
 

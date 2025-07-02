@@ -1,7 +1,7 @@
 import { getMedias } from "@/app/actions/media";
 import DashboardMediaCard from "./media-card";
 import CreateMediaButton from "./create-media-button";
-import MediaSearchInput from "./media-search-input";
+import MediaFilters from "./media-filters";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
@@ -10,13 +10,15 @@ import {
 } from "@/components/dashboard-header";
 
 interface Props {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; tags?: string | string[] }>;
 }
 
 export default async function MediasPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const { q, tags } = await searchParams;
 
-  const medias = await getMedias(q);
+  const tagsArray = Array.isArray(tags) ? tags : tags ? [tags] : [];
+
+  const medias = await getMedias(q, tagsArray);
 
   return (
     <div className="p-6">
@@ -28,7 +30,7 @@ export default async function MediasPage({ searchParams }: Props) {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <MediaSearchInput />
+        <MediaFilters />
           <CreateMediaButton />
         </DashboardHeaderActions>
       </DashboardHeader>

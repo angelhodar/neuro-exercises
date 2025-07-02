@@ -59,7 +59,7 @@ export default function CreateExerciseButton() {
           <DialogTitle>Nuevo ejercicio</DialogTitle>
           <p className="text-sm text-muted-foreground">
             Describe el ejercicio que quieres crear y la IA generará automáticamente 
-            todos los detalles necesarios, incluyendo la imagen.
+            todos los detalles necesarios, incluyendo la imagen y las instrucciones de audio.
           </p>
         </DialogHeader>
         <Form {...form}>

@@ -1,8 +1,6 @@
-"use client"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImageIcon, Tags, Edit3 } from "lucide-react"
-import { section as MotionSection, div as MotionDiv } from "motion/react-m"
+import * as motion from "motion/react-client"
 
 const features = [
   {
@@ -33,7 +31,7 @@ const features = [
 
 export default function MultimediaFeaturesSection() {
   return (
-    <MotionSection
+    <motion.section
       id="funcionalidades"
       className="px-6 lg:px-8 py-20 bg-white"
       initial={{ opacity: 0, y: 60 }}
@@ -42,7 +40,7 @@ export default function MultimediaFeaturesSection() {
       viewport={{ once: true, margin: "-100px" }}
     >
       <div className="max-w-7xl mx-auto">
-        <MotionDiv
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -54,11 +52,11 @@ export default function MultimediaFeaturesSection() {
             Genera, clasifica y edita contenido multimedia personalizado para crear ejercicios únicos adaptados a cada
             paciente.
           </p>
-        </MotionDiv>
+        </motion.div>
 
         <div className="grid gap-8 md:grid-cols-3 md:items-stretch">
           {features.map((item, index) => (
-            <MotionDiv
+            <motion.div
               key={index}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -78,10 +76,10 @@ export default function MultimediaFeaturesSection() {
                   <div className="flex-grow"></div>
                 </CardContent>
               </Card>
-            </MotionDiv>
+            </motion.div>
           ))}
         </div>
       </div>
-    </MotionSection>
+    </motion.section>
   )
 }

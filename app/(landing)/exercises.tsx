@@ -1,11 +1,8 @@
-
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Play, Zap, Target, Puzzle } from "lucide-react"
-import { section as MotionSection, div as MotionDiv } from "motion/react-m"
+import * as motion from "motion/react-client"
 
 const exercises = [
   {
@@ -36,7 +33,7 @@ const exercises = [
 
 export default function ExercisesSection() {
   return (
-    <MotionSection
+    <motion.section
       id="ejercicios"
       className="px-6 lg:px-8 py-20 bg-gradient-to-br from-blue-50 to-indigo-50"
       initial={{ opacity: 0, y: 60 }}
@@ -45,7 +42,7 @@ export default function ExercisesSection() {
       viewport={{ once: true, margin: "-100px" }}
     >
       <div className="max-w-7xl mx-auto">
-        <MotionDiv
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -56,11 +53,11 @@ export default function ExercisesSection() {
           <p className="text-xl text-blue-700 max-w-3xl mx-auto">
             Prueba nuestros ejercicios neurológicos diseñados por especialistas para diferentes áreas cognitivas.
           </p>
-        </MotionDiv>
+        </motion.div>
 
         <div className="grid gap-8 md:grid-cols-3 md:items-stretch">
           {exercises.map((exercise, index) => (
-            <MotionDiv
+            <motion.div
               key={index}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -93,10 +90,10 @@ export default function ExercisesSection() {
                   </Button>
                 </CardContent>
               </Card>
-            </MotionDiv>
+            </motion.div>
           ))}
         </div>
       </div>
-    </MotionSection>
+    </motion.section>
   )
 }

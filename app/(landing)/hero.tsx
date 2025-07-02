@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Brain } from "lucide-react"
 import { div as MotionDiv, h1 as MotionH1, p as MotionP} from "motion/react-m"

@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImageIcon, Tags, Edit3 } from "lucide-react"
 import { section as MotionSection, div as MotionDiv } from "motion/react-m"

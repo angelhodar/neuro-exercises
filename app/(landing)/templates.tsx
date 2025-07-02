@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import * as motion from "motion/react-m"
 import { Brain, Share2, Target } from "lucide-react"
+import { section as MotionSection, div as MotionDiv } from "motion/react-m"
 
 const features = [
   {
@@ -30,7 +30,7 @@ const features = [
 
 export default function TemplatesSection() {
   return (
-    <motion.section
+    <MotionSection
       id="plantillas"
       className="px-6 lg:px-8 py-20 bg-white"
       initial={{ opacity: 0, y: 60 }}
@@ -45,7 +45,7 @@ export default function TemplatesSection() {
               mediante un enlace único.
             </p>
         <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-          <motion.div
+          <MotionDiv
             className="space-y-8 text-center"
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -54,7 +54,7 @@ export default function TemplatesSection() {
           >
             <div className="space-y-6">
               {features.map((feature, index) => (
-                <motion.div
+                <MotionDiv
                   key={index}
                   className="flex items-start text-start space-x-4"
                   initial={{ opacity: 0, x: -30 }}
@@ -69,10 +69,10 @@ export default function TemplatesSection() {
                     <h3 className="text-xl font-semibold text-blue-900 mb-2">{feature.title}</h3>
                     <p className="text-lg text-blue-700">{feature.description}</p>
                   </div>
-                </motion.div>
+                </MotionDiv>
               ))}
             </div>
-            <motion.div
+            <MotionDiv
               className="flex justify-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -82,10 +82,10 @@ export default function TemplatesSection() {
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 h-auto">
                 Crear Primera Plantilla
               </Button>
-            </motion.div>
-          </motion.div>
+            </MotionDiv>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             className="bg-gradient-to-br from-blue-100 to-indigo-100 p-8 rounded-2xl"
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -122,9 +122,9 @@ export default function TemplatesSection() {
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">Ver Detalles</Button>
               </div>
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
-    </motion.section>
+    </MotionSection>
   )
 }

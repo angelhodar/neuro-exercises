@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Brain } from "lucide-react"
-import * as motion from "motion/react-m"
+import { div as MotionDiv, h1 as MotionH1, p as MotionP} from "motion/react-m"
 
 export default function HeroSection() {
   return (
@@ -8,14 +8,14 @@ export default function HeroSection() {
       <div className="max-w-7xl mx-auto">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center min-h-[600px]">
           {/* Content Side */}
-          <motion.div
+          <MotionDiv
             className="space-y-8"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
             <div className="space-y-6">
-              <motion.h1
+              <MotionH1
                 className="text-4xl lg:text-6xl xl:text-7xl font-bold text-blue-900 leading-tight"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -23,9 +23,9 @@ export default function HeroSection() {
               >
                 <span className="whitespace-nowrap">Ejercicios Cognitivos</span>
                 <span className="block text-blue-600 mt-2">Personalizados</span>
-              </motion.h1>
+              </MotionH1>
 
-              <motion.p
+              <MotionP
                 className="text-xl lg:text-2xl text-blue-700 leading-relaxed"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -33,10 +33,10 @@ export default function HeroSection() {
               >
                 Plataforma especializada en rehabilitación neurológica con ejercicios adaptativos y contenido multimedia
                 generado por IA para maximizar la recuperación cognitiva.
-              </motion.p>
+              </MotionP>
             </div>
 
-            <motion.div
+            <MotionDiv
               className="flex flex-col sm:flex-row gap-4 pt-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -55,18 +55,18 @@ export default function HeroSection() {
               >
                 Ver Demo
               </Button>
-            </motion.div>
-          </motion.div>
+            </MotionDiv>
+          </MotionDiv>
 
           {/* Brain Animation Side */}
-          <motion.div
+          <MotionDiv
             className="flex justify-center lg:justify-center"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           >
             <div className="relative">
-              <motion.div
+              <MotionDiv
                 className="relative inline-block"
                 animate={{
                   scale: [1, 1.05, 1],
@@ -81,7 +81,7 @@ export default function HeroSection() {
                 <Brain className="h-72 w-72 lg:h-96 lg:w-96 text-blue-500 drop-shadow-2xl" />
 
                 {/* Glow Effect */}
-                <motion.div
+                <MotionDiv
                   className="absolute inset-0 rounded-full"
                   style={{
                     background:
@@ -99,7 +99,7 @@ export default function HeroSection() {
                 />
 
                 {/* Neural Connection Lines */}
-                <motion.div
+                <MotionDiv
                   className="absolute top-1/4 left-1/4 w-16 h-0.5 bg-gradient-to-r from-blue-400 to-transparent origin-left"
                   animate={{
                     scaleX: [0, 1, 0],
@@ -112,7 +112,7 @@ export default function HeroSection() {
                     delay: 0.5,
                   }}
                 />
-                <motion.div
+                <MotionDiv
                   className="absolute bottom-1/3 right-1/4 w-12 h-0.5 bg-gradient-to-l from-cyan-400 to-transparent origin-right"
                   animate={{
                     scaleX: [0, 1, 0],
@@ -127,7 +127,7 @@ export default function HeroSection() {
                 />
 
                 {/* Pulse Dots */}
-                <motion.div
+                <MotionDiv
                   className="absolute top-1/4 left-1/4 w-4 h-4 bg-blue-400 rounded-full shadow-lg"
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -145,7 +145,7 @@ export default function HeroSection() {
                     delay: 0,
                   }}
                 />
-                <motion.div
+                <MotionDiv
                   className="absolute top-1/3 right-1/4 w-3 h-3 bg-indigo-400 rounded-full shadow-lg"
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -163,7 +163,7 @@ export default function HeroSection() {
                     delay: 0.5,
                   }}
                 />
-                <motion.div
+                <MotionDiv
                   className="absolute bottom-1/3 left-1/3 w-5 h-5 bg-cyan-400 rounded-full shadow-lg"
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -181,7 +181,7 @@ export default function HeroSection() {
                     delay: 1,
                   }}
                 />
-                <motion.div
+                <MotionDiv
                   className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-blue-300 rounded-full shadow-lg"
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -201,7 +201,7 @@ export default function HeroSection() {
                 />
 
                 {/* Floating Elements */}
-                <motion.div
+                <MotionDiv
                   className="absolute -top-4 -right-4 w-8 h-8 bg-blue-200 rounded-full opacity-60"
                   animate={{
                     y: [-10, 10, -10],
@@ -213,7 +213,7 @@ export default function HeroSection() {
                     ease: "easeInOut",
                   }}
                 />
-                <motion.div
+                <MotionDiv
                   className="absolute -bottom-6 -left-6 w-6 h-6 bg-indigo-200 rounded-full opacity-60"
                   animate={{
                     y: [10, -10, 10],
@@ -226,9 +226,9 @@ export default function HeroSection() {
                     delay: 1,
                   }}
                 />
-              </motion.div>
+              </MotionDiv>
             </div>
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
     </section>

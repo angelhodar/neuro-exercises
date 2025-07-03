@@ -1,37 +1,50 @@
+import * as motion from "motion/react-client"
+import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Play, Zap, Target, Puzzle } from "lucide-react"
-import * as motion from "motion/react-client"
+import { Play, Grid3x3, Volume2, Palette } from "lucide-react"
+import { unstable_cache } from "next/cache"
+import { getExercises } from "@/app/actions/exercises"
+import type { Exercise } from "@/lib/db/schema"
+import { createMediaUrl } from "@/lib/utils"
 
-const exercises = [
-  {
-    icon: Zap,
-    title: "Atención Sostenida",
-    description: "Ejercicios diseñados para mejorar la capacidad de mantener la atención durante períodos prolongados.",
-    badges: ["Concentración", "Atención", "Foco"],
-    bgGradient: "from-blue-200 to-blue-300",
-    iconColor: "text-blue-600",
+const specificExercisesMapping = {
+  "reaction-time-grid": {
+    icon: Grid3x3,
+    bgGradient: "from-green-200 to-green-300",
+    iconColor: "text-green-600",
   },
-  {
-    icon: Target,
-    title: "Memoria de Trabajo",
-    description: "Fortalece la capacidad de retener y manipular información temporalmente en la mente.",
-    badges: ["Memoria", "Retención", "Procesamiento"],
-    bgGradient: "from-indigo-200 to-indigo-300",
-    iconColor: "text-indigo-600",
+  "syllables": {
+    icon: Volume2,
+    bgGradient: "from-purple-200 to-purple-300",
+    iconColor: "text-purple-600",
   },
-  {
-    icon: Puzzle,
-    title: "Función Ejecutiva",
-    description: "Desarrolla habilidades de planificación, toma de decisiones y control inhibitorio.",
-    badges: ["Planificación", "Flexibilidad", "Control"],
-    bgGradient: "from-cyan-200 to-cyan-300",
-    iconColor: "text-cyan-600",
+  "color-sequence": {
+    icon: Palette,
+    bgGradient: "from-pink-200 to-pink-300",
+    iconColor: "text-pink-600",
   },
-]
+} as const
 
-export default function ExercisesSection() {
+// Función para obtener el tema específico de un ejercicio
+function getExerciseTheme(exercise: Exercise) {
+  return specificExercisesMapping[exercise.slug as keyof typeof specificExercisesMapping]
+}
+
+const getCachedExercises = unstable_cache(
+  async () => {
+    const targetSlugs = ["reaction-time-grid", "syllables", "color-sequence"]
+    const exercises = await getExercises(targetSlugs)
+    return exercises.filter(exercise => exercise && exercise.id)
+  },
+  ['landing-exercises']
+)
+
+export default async function ExercisesSection() {
+  const exercises = await getCachedExercises()
+
   return (
     <motion.section
       id="ejercicios"
@@ -56,42 +69,48 @@ export default function ExercisesSection() {
         </motion.div>
 
         <div className="grid gap-8 md:grid-cols-3 md:items-stretch">
-          {exercises.map((exercise, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5 }}
-              className="h-full"
-            >
-              <Card className="border-blue-200 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-                <CardHeader className="flex-grow">
-                  <div
-                    className={`w-full h-48 bg-gradient-to-br ${exercise.bgGradient} rounded-lg mb-4 flex items-center justify-center`}
-                  >
-                    <exercise.icon className={`h-16 w-16 ${exercise.iconColor}`} />
-                  </div>
-                  <CardTitle className="text-2xl text-blue-900">{exercise.title}</CardTitle>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {exercise.badges.map((badge, badgeIndex) => (
-                      <Badge key={badgeIndex} variant="secondary" className="bg-blue-100 text-blue-700">
-                        {badge}
-                      </Badge>
-                    ))}
-                  </div>
-                  <CardDescription className="text-lg text-blue-700 mt-4">{exercise.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 mt-auto">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-3">
-                    <Play className="mr-2 h-5 w-5" />
-                    Probar Ejercicio
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+          {exercises.map((exercise, index) => {
+            const theme = getExerciseTheme(exercise)
+
+            return (
+              <motion.div
+                key={exercise.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+                className="h-full"
+              >
+                <Card className="border-blue-200 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                  <CardHeader className="flex-grow gap-2">
+                    <div className="relative w-full h-[300px]">
+                      <Image src={createMediaUrl(exercise.thumbnailUrl || "")} fill className="object-cover rounded-lg" alt={exercise.displayName} />
+                    </div>
+                    <CardTitle className="text-2xl text-blue-900">{exercise.displayName}</CardTitle>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {exercise.tags.slice(0, 2).map((tag, tagIndex) => (
+                        <Badge key={tagIndex} variant="outline" className="border-blue-200 text-blue-600 capitalize">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <CardDescription className="text-lg text-blue-700 mt-4">
+                      {exercise.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 mt-auto">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-3" asChild>
+                      <Link href={`/exercises/${exercise.slug}`}>
+                        <Play className="mr-2 h-5 w-5" />
+                        Probar
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
     </motion.section>

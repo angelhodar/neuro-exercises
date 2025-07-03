@@ -38,11 +38,11 @@ export default function TemplatesSection() {
       viewport={{ once: true, margin: "-100px" }}
     >
       <div className="max-w-7xl mx-auto">
-      <h2 className="text-4xl lg:text-5xl font-bold text-blue-900">Plantillas Personalizadas</h2>
-            <p className="mt-8 text-xl text-blue-700 leading-relaxed">
-              Crea conjuntos de ejercicios con configuraciones específicas y compártelos fácilmente con tus pacientes
-              mediante un enlace único.
-            </p>
+        <h2 className="text-4xl lg:text-5xl font-bold text-blue-900">Plantillas Personalizadas</h2>
+        <p className="mt-8 text-xl text-blue-700 leading-relaxed">
+          Crea conjuntos de ejercicios con configuraciones específicas y compártelos fácilmente con tus pacientes
+          mediante un enlace único.
+        </p>
         <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
           <motion.div
             className="space-y-8 text-center"
@@ -84,44 +84,52 @@ export default function TemplatesSection() {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            className="bg-gradient-to-br from-blue-100 to-indigo-100 p-8 rounded-2xl"
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <div className="bg-white rounded-xl p-6 shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-xl font-semibold text-blue-900">Plantilla: Rehabilitación Básica</h4>
-                <Badge className="bg-green-100 text-green-700">Activa</Badge>
-              </div>
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-lg">
-                  <span className="text-blue-700">Ejercicios:</span>
-                  <span className="font-semibold text-blue-900">8</span>
+          <div className="w-full max-w-md lg:max-w-xl mx-auto px-4">
+            <motion.div
+              className="bg-gradient-to-br from-blue-100 to-indigo-100 p-4 sm:p-6 md:p-8 rounded-2xl w-full"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg w-full">
+                <div className="flex items-start justify-between mb-4 gap-2">
+                  <h4 className="text-lg sm:text-xl font-semibold text-blue-900 leading-tight flex-1 min-w-0">
+                    Plantilla: Rehabilitación Básica
+                  </h4>
+                  <Badge className="bg-green-100 text-green-700 shrink-0 text-xs sm:text-sm">Activa</Badge>
                 </div>
-                <div className="flex justify-between text-lg">
-                  <span className="text-blue-700">Duración:</span>
-                  <span className="font-semibold text-blue-900">30 min</span>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between text-base sm:text-lg">
+                    <span className="text-blue-700">Ejercicios:</span>
+                    <span className="font-semibold text-blue-900">8</span>
+                  </div>
+                  <div className="flex justify-between text-base sm:text-lg">
+                    <span className="text-blue-700">Duración:</span>
+                    <span className="font-semibold text-blue-900">30 min</span>
+                  </div>
+                  <div className="flex justify-between text-base sm:text-lg">
+                    <span className="text-blue-700">Pacientes:</span>
+                    <span className="font-semibold text-blue-900">12</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-lg">
-                  <span className="text-blue-700">Pacientes:</span>
-                  <span className="font-semibold text-blue-900">12</span>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:space-x-0">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 bg-transparent text-sm sm:text-base"
+                  >
+                    <Share2 className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">Compartir</span>
+                  </Button>
+                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base">
+                    <span className="truncate">Ver Detalles</span>
+                  </Button>
                 </div>
               </div>
-              <div className="flex space-x-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50 bg-transparent"
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Compartir
-                </Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">Ver Detalles</Button>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </motion.section>

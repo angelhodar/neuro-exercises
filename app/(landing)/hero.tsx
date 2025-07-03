@@ -16,12 +16,12 @@ export default function HeroSection() {
           >
             <div className="space-y-6">
               <motion.h1
-                className="text-4xl lg:text-6xl xl:text-7xl font-bold text-blue-900 leading-tight"
+                className="text-3xl lg:text-6xl xl:text-7xl font-bold text-blue-900 leading-tight"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
               >
-                <span className="whitespace-nowrap">Ejercicios Cognitivos</span>
+                <span className="md:whitespace-nowrap">Ejercicios Cognitivos</span>
                 <span className="block text-blue-600 mt-2">Personalizados</span>
               </motion.h1>
 

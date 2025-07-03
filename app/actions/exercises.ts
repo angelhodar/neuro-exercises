@@ -53,9 +53,16 @@ async function generateAudioInstructions(audioPrompt: string, slug: string): Pro
   }
 }
 
-export async function getExercises() {
-  const allExercises = await db.query.exercises.findMany();
+export async function getExercises(slugs?: string[]) {
+  if (slugs && slugs.length > 0) {
+    const filteredExercises = await db.query.exercises.findMany({
+      where: (exercises, { inArray }) => inArray(exercises.slug, slugs),
+    });
 
+    return filteredExercises;
+  }
+  
+  const allExercises = await db.query.exercises.findMany();
   return allExercises;
 }
 

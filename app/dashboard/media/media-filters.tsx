@@ -78,7 +78,7 @@ export default function MediaFilters() {
         </PopoverTrigger>
         <PopoverContent className="max-w-xl p-4" align="end">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => e.key === 'Enter' && form.handleSubmit(onSubmit)()} className="space-y-4">
               <FormField
                 control={form.control}
                 name="search"

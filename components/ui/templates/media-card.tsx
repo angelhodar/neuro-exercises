@@ -58,7 +58,7 @@ export function ExpandableMediaCardImage({
       </DialogTrigger>
       <DialogContent className="max-w-4xl p-4">
         <DialogTitle>{props.alt}</DialogTitle>
-        <div className="relative w-full h-full h-[60vh]">
+        <div className="relative w-full h-[60vh]">
           <Image {...props} fill className="object-contain" />
         </div>
       </DialogContent>

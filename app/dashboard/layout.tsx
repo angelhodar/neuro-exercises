@@ -16,11 +16,15 @@ export default function DashboardLayout({
     <Providers>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 w-full">{children}</div>
+        <SidebarInset className="h-screen">
+          <div className="flex flex-col h-full">
+            <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+              <SidebarTrigger className="-ml-1" />
+            </header>
+            <div className="flex flex-1 flex-col gap-4 p-4 w-full min-h-0">
+              {children}
+            </div>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </Providers>

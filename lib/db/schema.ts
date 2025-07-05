@@ -11,6 +11,7 @@ import {
   foreignKey,
   boolean,
   pgMaterializedView,
+  pgEnum,
 } from "drizzle-orm/pg-core"
 import { relations, sql } from "drizzle-orm"
 import { createSelectSchema, createInsertSchema, createUpdateSchema } from "drizzle-zod"
@@ -19,6 +20,9 @@ import { BaseExerciseConfig } from "../schemas/base-schemas"
 interface ConfigSchema extends BaseExerciseConfig {
   [x: string]: any
 }
+
+// Enums
+export const generationStatusEnum = pgEnum("generation_status", ["GENERATING", "COMPLETED", "ERROR"])
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -222,6 +226,37 @@ export const medias = pgTable("medias", {
   index("medias_tags_idx").on(table.tags)
 ])
 
+export const exerciseChatGeneration = pgTable(
+  "exercise_chat_generation",
+  {
+    id: serial().primaryKey(),
+    exerciseId: integer("exercise_id").notNull(),
+    userId: text("user_id").notNull(),
+    status: generationStatusEnum("status").notNull(),
+    codeBlobKey: varchar("code_blob_key", { length: 500 }),
+    sandboxId: varchar("sandbox_id", { length: 255 }),
+    summary: text("summary"),
+    prompt: text("prompt").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("exercise_chat_generation_exercise_idx").on(table.exerciseId),
+    index("exercise_chat_generation_user_idx").on(table.userId),
+    index("exercise_chat_generation_status_idx").on(table.status),
+    index("exercise_chat_generation_sandbox_idx").on(table.sandboxId),
+    foreignKey({
+      columns: [table.exerciseId],
+      foreignColumns: [exercises.id],
+      name: "exercise_chat_generation_exercise_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "exercise_chat_generation_user_fk",
+    }).onDelete("cascade"),
+  ],
+)
+
 // Materialized view for distinct media tags
 export const mediaTagsView = pgMaterializedView("media_tags", {
   tag: text("tag").primaryKey(),
@@ -239,6 +274,7 @@ export const userRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
   medias: many(medias),
+  exerciseChatGenerations: many(exerciseChatGeneration),
 }))
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -257,6 +293,7 @@ export const accountRelations = relations(accounts, ({ one }) => ({
 
 export const exercisesRelations = relations(exercises, ({ many }) => ({
   exerciseTemplateItems: many(exerciseTemplateItems),
+  exerciseChatGenerations: many(exerciseChatGeneration),
 }))
 
 export const exerciseTemplatesRelations = relations(exerciseTemplates, ({ one, many }) => ({
@@ -316,6 +353,17 @@ export const mediasRelations = relations(medias, ({ one }) => ({
   }),
 }))
 
+export const exerciseChatGenerationRelations = relations(exerciseChatGeneration, ({ one }) => ({
+  exercise: one(exercises, {
+    fields: [exerciseChatGeneration.exerciseId],
+    references: [exercises.id],
+  }),
+  user: one(users, {
+    fields: [exerciseChatGeneration.userId],
+    references: [users.id],
+  }),
+}))
+
 // Schemas
 export const exerciseSelectSchema = createSelectSchema(exercises)
 export const exerciseInsertSchema = createInsertSchema(exercises)
@@ -336,6 +384,10 @@ export const exerciseLinkUpdateSchema = createUpdateSchema(exerciseLinks)
 export const exerciseResultSelectSchema = createSelectSchema(exerciseResults)
 export const exerciseResultInsertSchema = createInsertSchema(exerciseResults)
 export const exerciseResultUpdateSchema = createUpdateSchema(exerciseResults)
+
+export const exerciseChatGenerationSelectSchema = createSelectSchema(exerciseChatGeneration)
+export const exerciseChatGenerationInsertSchema = createInsertSchema(exerciseChatGeneration)
+export const exerciseChatGenerationUpdateSchema = createUpdateSchema(exerciseChatGeneration)
 
 // Types
 export type User = typeof users.$inferSelect
@@ -367,3 +419,6 @@ export type NewExerciseResult = typeof exerciseResults.$inferInsert
 
 export type Media = typeof medias.$inferSelect
 export type NewMedia = typeof medias.$inferInsert
+
+export type ExerciseChatGeneration = typeof exerciseChatGeneration.$inferSelect
+export type NewExerciseChatGeneration = typeof exerciseChatGeneration.$inferInsert

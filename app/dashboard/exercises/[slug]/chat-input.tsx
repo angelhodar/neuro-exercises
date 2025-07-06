@@ -1,23 +1,35 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { ImagePlus, Send, X } from "lucide-react";
+import { ImagePlus, Send, X, Square } from "lucide-react";
+import { ChatRequestOptions } from "ai";
 
 interface ChatInputProps {
   disabled?: boolean;
+  input: string;
+  onInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  onSubmit: (event?: { preventDefault?: () => void } | undefined, chatRequestOptions?: ChatRequestOptions | undefined) => void;
+  isLoading: boolean;
+  onStop?: () => void;
 }
 
-export function ChatInput({ disabled = false }: ChatInputProps) {
-  const [input, setInput] = useState("");
+export function ChatInput({ 
+  disabled = false, 
+  input, 
+  onInputChange, 
+  onSubmit, 
+  isLoading,
+  onStop 
+}: ChatInputProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (input.trim() || uploadedImages.length > 0) {
-      setInput("");
+      onSubmit(e);
       setUploadedImages([]);
     }
   };
@@ -69,10 +81,10 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
         <div className="relative">
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={onInputChange}
             placeholder="Ask about this exercise... (Markdown supported)"
             className="w-full h-24 resize-none pr-20 pb-12 bg-white/80 border border-gray-200 focus:border-blue-200 focus:ring-blue-100 rounded-xl shadow-sm px-3 py-3 focus:outline-none focus:ring-2"
-            disabled={disabled}
+            disabled={disabled || isLoading}
           />
           <input
             ref={fileInputRef}
@@ -89,20 +101,34 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
+              disabled={isLoading}
             >
               <ImagePlus className="h-5 w-5 text-gray-500" />
             </Button>
-            <Button
-              type="submit"
-              disabled={
-                disabled || (!input.trim() && uploadedImages.length === 0)
-              }
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
-            >
-              <Send className="h-5 w-5 text-gray-500" />
-            </Button>
+            
+            {isLoading && onStop ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onStop}
+                className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
+              >
+                <Square className="h-5 w-5 text-gray-500" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                disabled={
+                  disabled || isLoading || (!input.trim() && uploadedImages.length === 0)
+                }
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
+              >
+                <Send className="h-5 w-5 text-gray-500" />
+              </Button>
+            )}
           </div>
         </div>
       </form>

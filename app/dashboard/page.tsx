@@ -1,14 +1,14 @@
 import Link from "next/link";
 import ExerciseCard from "@/components/exercises/exercise-card";
 import { getExercises } from "@/app/actions/exercises";
-import CreateExerciseButton from "./exercises/create-exercise";
 import EditExerciseButton from "./exercises/edit-exercise";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
   DashboardHeaderActions,
-} from "@/components/dashboard-header";
+} from "@/app/dashboard/dashboard-header";
 import { getExerciseFromRegistry } from "../exercises/registry";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,11 @@ export default async function DashboardPage() {
       <DashboardHeader>
         <DashboardHeaderTitle>Ejercicios</DashboardHeaderTitle>
         <DashboardHeaderActions>
-          <CreateExerciseButton />
+          <Button asChild>
+            <Link href="/dashboard/exercises/create">
+              Crear nuevo ejercicio
+            </Link>
+          </Button>
         </DashboardHeaderActions>
       </DashboardHeader>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
@@ -30,7 +34,7 @@ export default async function DashboardPage() {
               href={
                 !!getExerciseFromRegistry(exercise.slug)
                   ? `/exercises/${exercise.slug}`
-                  : `/dashboard/exercises/pending/${exercise.slug}`
+                  : `/dashboard/exercises/${exercise.slug}`
               }
               className="block group focus:outline-none h-full"
             >

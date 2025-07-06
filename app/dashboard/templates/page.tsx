@@ -3,7 +3,7 @@ import { Plus, Users } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { DashboardHeader, DashboardHeaderTitle, DashboardHeaderDescription, DashboardHeaderActions } from "@/components/dashboard-header";
+import { DashboardHeader, DashboardHeaderTitle, DashboardHeaderDescription, DashboardHeaderActions } from "@/app/dashboard/dashboard-header";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getExerciseTemplates } from "@/app/actions/templates";

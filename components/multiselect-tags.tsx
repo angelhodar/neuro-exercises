@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery } from "@tanstack/react-query";
-import { MultiAsyncSelect } from "@/components/ui/multi-async-select";
+import { MultiAsyncSelect } from "@/components/multi-async-select";
 
 // Async fetcher for tags
 async function fetchTags(query: string): Promise<string[]> {

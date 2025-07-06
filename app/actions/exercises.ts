@@ -14,10 +14,10 @@ import {
   UpdateExerciseSchema,
   generatedExerciseSchema,
 } from "@/lib/schemas/exercises";
-import { createExercisePR } from "./github";
 import { generateAudio } from "@/lib/ai/audio";
 import { generateMediaFromPrompt } from "./media";
 import { uploadBlobPathname } from "@/lib/storage";
+import { createExerciseGeneration } from "./generations";
 
 // Función para generar thumbnail
 async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise<string | null> {
@@ -128,7 +128,13 @@ export async function createExercise(
       })
       .returning();
 
-    if (created) await createExercisePR(created, prompt);
+    // Create the first generation with the original prompt
+    if (created) {
+      await createExerciseGeneration({
+        exerciseId: created.id,
+        prompt: prompt,
+      });
+    }
 
     revalidatePath("/dashboard");
     return created || null;

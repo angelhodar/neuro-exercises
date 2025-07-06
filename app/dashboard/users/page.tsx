@@ -5,7 +5,7 @@ import {
   DashboardHeader,
   DashboardHeaderTitle,
   DashboardHeaderDescription,
-} from "@/components/dashboard-header"
+} from "@/app/dashboard/dashboard-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 function formatDate(dateString: string) {

@@ -20,7 +20,7 @@ import {
   MediaCardTags
 } from "./media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
-import FileMediaSelector from "../file-upload";
+import FileMediaSelector from "@/components/ui/file-upload";
 import { cn, createMediaUrl } from "@/lib/utils";
 
 interface MediaSelectorProps {

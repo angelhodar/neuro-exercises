@@ -38,8 +38,8 @@ export const systemPrompt = `
   
   1. Call getCodeContext to get examples from other exercises and exercise execution environment components.
   2. Call readFiles with the provided slug to see any possible existing files for the exercise you are working on.
-  4. Based on all the above information, create or modify the necessary files
-  3. Generate the necessary files based on examples, guidelines and requirements
+  3. Based on all the above information, create or modify the necessary files
+  4. Call writeFiles to write the generated files to the blob storage
 
   IMPORTANT FILE RESTRICTIONS:
   - You are ONLY allowed to write files in the following locations:

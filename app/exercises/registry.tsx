@@ -2,168 +2,163 @@ import type { ComponentType } from "react";
 import type { ZodTypeAny } from "zod";
 import dynamic from "next/dynamic";
 
-// Schemas - importaciones estáticas
 import {
   visualRecognitionConfigSchema,
   visualRecognitionPresets,
   visualRecognitionQuestionResultSchema,
-} from "@/components/exercises/visual-recognition/visual-recognition-schema";
+} from "./visual-recognition/visual-recognition-schema";
 import {
   syllablesConfigSchema,
   syllablesPresets,
   syllablesQuestionResultSchema,
-} from "@/components/exercises/syllables/syllables-schema";
+} from "./syllables/syllables-schema";
 import {
   reactionTimeGridConfigSchema,
   reactionTimePresets,
   reactionTimeQuestionResultSchema,
-} from "@/components/exercises/reaction-time-grid/reaction-time-grid-schema";
+} from "./reaction-time-grid/reaction-time-grid-schema";
 import {
   colorSequenceConfigSchema,
   colorSequencePresets,
   colorSequenceQuestionResultSchema,
-} from "@/components/exercises/color-sequence/color-sequence-schema";
+} from "./color-sequence/color-sequence-schema";
 import {
   stimulusCountConfigSchema,
   stimulusCountPresets,
   stimulusCountQuestionResultSchema,
-} from "@/components/exercises/stimulus-count/stimulus-count-schema";
+} from "./stimulus-count/stimulus-count-schema";
 import {
   oddOneOutConfigSchema,
   oddOneOutPresets,
   oddOneOutResultSchema,
-} from "@/components/exercises/odd-one-out/odd-one-out-schema";
+} from "./odd-one-out/odd-one-out-schema";
 import {
   stroopColorInterferenceConfigSchema,
   stroopColorInterferencePresets,
   stroopColorInterferenceQuestionResultSchema,
-} from "@/components/exercises/stroop-color-interference/stroop-color-interference-schema";
+} from "./stroop-color-interference/stroop-color-interference-schema";
 
-// Componentes dinámicos del servidor (async server components)
+// Server components
 const VisualRecognitionExercise = dynamic(() =>
-  import(
-    "@/components/exercises/visual-recognition/visual-recognition-exercise"
-  ).then((mod) => mod.VisualRecognitionExercise),
+  import("./visual-recognition/visual-recognition-exercise").then(
+    (mod) => mod.VisualRecognitionExercise,
+  ),
 );
 
 const VisualRecognitionResults = dynamic(() =>
-  import(
-    "@/components/exercises/visual-recognition/visual-recognition-results"
-  ).then((mod) => mod.VisualRecognitionResults),
+  import("./visual-recognition/visual-recognition-results").then(
+    (mod) => mod.VisualRecognitionResults,
+  ),
 );
 
 const SyllablesExercise = dynamic(() =>
-  import("@/components/exercises/syllables/syllables-exercise").then(
-    (mod) => mod.SyllablesExercise,
-  ),
+  import("./syllables/syllables-exercise").then((mod) => mod.SyllablesExercise),
 );
 
 const SyllablesResults = dynamic(() =>
-  import("@/components/exercises/syllables/syllables-results").then(
-    (mod) => mod.SyllablesResults,
-  ),
+  import("./syllables/syllables-results").then((mod) => mod.SyllablesResults),
 );
 
 const ReactionTimeGrid = dynamic(() =>
-  import(
-    "@/components/exercises/reaction-time-grid/reaction-time-grid-exercise"
-  ).then((mod) => mod.ReactionTimeGrid),
+  import("./reaction-time-grid/reaction-time-grid-exercise").then(
+    (mod) => mod.ReactionTimeGrid,
+  ),
 );
 
 const ReactionTimeGridResults = dynamic(() =>
-  import(
-    "@/components/exercises/reaction-time-grid/reaction-time-grid-results"
-  ).then((mod) => mod.ExerciseResults),
+  import("./reaction-time-grid/reaction-time-grid-results").then(
+    (mod) => mod.ExerciseResults,
+  ),
 );
 
 const ColorSequenceExercise = dynamic(() =>
-  import("@/components/exercises/color-sequence/color-sequence-exercise").then(
+  import("./color-sequence/color-sequence-exercise").then(
     (mod) => mod.ColorSequenceExercise,
   ),
 );
 
 const ColorSequenceResults = dynamic(() =>
-  import("@/components/exercises/color-sequence/color-sequence-results").then(
+  import("./color-sequence/color-sequence-results").then(
     (mod) => mod.ColorSequenceResults,
   ),
 );
 
 const StimulusCountExercise = dynamic(() =>
-  import("@/components/exercises/stimulus-count/stimulus-count-exercise").then(
+  import("./stimulus-count/stimulus-count-exercise").then(
     (mod) => mod.StimulusCountExercise,
   ),
 );
 
 const StimulusCountResults = dynamic(() =>
-  import("@/components/exercises/stimulus-count/stimulus-count-results").then(
+  import("./stimulus-count/stimulus-count-results").then(
     (mod) => mod.StimulusCountResults,
   ),
 );
 
 const OddOneOutExercise = dynamic(() =>
-  import("@/components/exercises/odd-one-out/odd-one-out-exercise").then(
+  import("./odd-one-out/odd-one-out-exercise").then(
     (mod) => mod.OddOneOutExercise,
   ),
 );
 
 const OddOneOutResults = dynamic(() =>
-  import("@/components/exercises/odd-one-out/odd-one-out-results").then(
+  import("./odd-one-out/odd-one-out-results").then(
     (mod) => mod.OddOneOutResults,
   ),
 );
 
 const StroopColorInterferenceExercise = dynamic(() =>
-  import(
-    "@/components/exercises/stroop-color-interference/stroop-color-interference-exercise"
-  ).then((mod) => mod.StroopColorInterferenceExercise),
+  import("./stroop-color-interference/stroop-color-interference-exercise").then(
+    (mod) => mod.StroopColorInterferenceExercise,
+  ),
 );
 
 const StroopColorInterferenceResults = dynamic(() =>
-  import(
-    "@/components/exercises/stroop-color-interference/stroop-color-interference-results"
-  ).then((mod) => mod.StroopColorInterferenceResults),
+  import("./stroop-color-interference/stroop-color-interference-results").then(
+    (mod) => mod.StroopColorInterferenceResults,
+  ),
 );
 
-// Componentes dinámicos del cliente (client components)
+// Client components
 const VisualRecognitionConfigFields = dynamic(() =>
-  import(
-    "@/components/exercises/visual-recognition/visual-recognition-config-form"
-  ).then((mod) => mod.VisualRecognitionConfigFields),
+  import("./visual-recognition/visual-recognition-config-form").then(
+    (mod) => mod.VisualRecognitionConfigFields,
+  ),
 );
 
 const SyllablesConfigFields = dynamic(() =>
-  import("@/components/exercises/syllables/syllables-config-form").then(
+  import("./syllables/syllables-config-form").then(
     (mod) => mod.SyllablesConfigFields,
   ),
 );
 
 const ReactionTimeConfigFields = dynamic(() =>
-  import(
-    "@/components/exercises/reaction-time-grid/reaction-time-grid-config-fields"
-  ).then((mod) => mod.ReactionTimeConfigFields),
+  import("./reaction-time-grid/reaction-time-grid-config-fields").then(
+    (mod) => mod.ReactionTimeConfigFields,
+  ),
 );
 
 const ColorSequenceConfigFields = dynamic(() =>
-  import(
-    "@/components/exercises/color-sequence/color-sequence-config-form"
-  ).then((mod) => mod.ColorSequenceConfigFields),
+  import("./color-sequence/color-sequence-config-form").then(
+    (mod) => mod.ColorSequenceConfigFields,
+  ),
 );
 
 const StimulusCountConfigFields = dynamic(() =>
-  import(
-    "@/components/exercises/stimulus-count/stimulus-count-config-form"
-  ).then((mod) => mod.StimulusCountConfigFields),
+  import("./stimulus-count/stimulus-count-config-form").then(
+    (mod) => mod.StimulusCountConfigFields,
+  ),
 );
 
 const OddOneOutConfigFields = dynamic(() =>
-  import("@/components/exercises/odd-one-out/odd-one-out-config-form").then(
+  import("./odd-one-out/odd-one-out-config-form").then(
     (mod) => mod.OddOneOutConfigFields,
   ),
 );
 
 const StroopColorInterferenceConfigFields = dynamic(() =>
   import(
-    "@/components/exercises/stroop-color-interference/stroop-color-interference-config-form"
+    "./stroop-color-interference/stroop-color-interference-config-form"
   ).then((mod) => mod.StroopColorInterferenceConfigFields),
 );
 

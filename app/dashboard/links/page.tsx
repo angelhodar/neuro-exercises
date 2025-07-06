@@ -8,7 +8,7 @@ import {
   DashboardHeaderTitle,
   DashboardHeaderDescription,
   DashboardHeaderActions,
-} from "@/components/dashboard-header";
+} from "@/app/dashboard/dashboard-header";
 import {
   Table,
   TableBody,

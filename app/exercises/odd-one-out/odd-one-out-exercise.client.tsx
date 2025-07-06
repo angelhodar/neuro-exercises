@@ -7,7 +7,7 @@ import {
   MediaCardImage,
   MediaCardContent,
   MediaCardTitle,
-} from "@/components/ui/templates/media-card";
+} from "@/components//media-card";
 import { CheckCircle, XCircle } from "lucide-react";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";

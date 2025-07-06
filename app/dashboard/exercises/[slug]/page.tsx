@@ -1,92 +1,117 @@
 import { notFound } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatMessage } from "./chat-message";
-import { ChatInput } from "./chat-input";
 import { getExerciseBySlug } from "@/app/actions/exercises";
-import { getPRComments } from "@/app/actions/github";
+import { getExerciseGenerations } from "@/app/actions/generations";
 import { PreviewIframe } from "./preview-iframe";
-import { ExerciseHeader } from "./header";
+import { createMediaUrl } from "@/lib/utils";
+import EditExerciseButton from "../edit-exercise";
+import { Chat } from "./chat";
+import { SandboxProvider } from "@/contexts/sandbox-provider";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { MessageSquare } from "lucide-react";
+import type { ExerciseChatGeneration } from "@/lib/db/schema";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-// Empty state component
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-6">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <MessageSquare className="w-8 h-8 text-gray-400" />
-      </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">No messages yet</h3>
-      <p className="text-gray-500 text-sm max-w-sm">
-        Start a conversation about this exercise. Ask questions, share thoughts, or request help.
-      </p>
-    </div>
-  );
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: Date;
 }
 
-export default async function PendingExercisePage({ params }: PageProps) {
+function convertGenerationsToMessages(
+  generations: ExerciseChatGeneration[],
+): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+
+  for (const generation of generations) {
+    // Add user message (prompt)
+    messages.push({
+      id: `${generation.id}-user`,
+      role: "user",
+      content: generation.prompt,
+      createdAt: generation.createdAt,
+    });
+
+    // Add assistant message (summary) if available
+    if (generation.summary) {
+      messages.push({
+        id: `${generation.id}-assistant`,
+        role: "assistant",
+        content: generation.summary,
+        createdAt: generation.createdAt,
+      });
+    }
+  }
+
+  return messages;
+}
+
+export default async function ExerciseChatPage({ params }: PageProps) {
   const { slug } = await params;
 
   const exercise = await getExerciseBySlug(slug);
 
   if (!exercise) return notFound();
 
-  const comments: any[] = []//await getPRComments(slug);
-
-  const previewUrl = "https://neurogranada.com/exercises/color-sequence";
+  const generations = await getExerciseGenerations(exercise.id);
+  const messages = convertGenerationsToMessages(generations);
 
   return (
-    <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        {/* Chat Panel - Left Side */}
-        <ResizablePanel defaultSize={20} minSize={20} maxSize={50}>
-          <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm border-r border-gray-200/50">
-            {/* Exercise Header */}
-            <ExerciseHeader exercise={exercise} />
-
-            {/* Messages Area */}
-            <ScrollArea className="flex-1 p-6">
-              {comments.length === 0 ? (
-                <EmptyState />
-              ) : (
-                <div className="space-y-6">
-                  {comments.map((comment) => (
-                    <ChatMessage
-                      key={comment.id}
-                      role="user"
-                      content={comment.body || ""}
-                    />
-                  ))}
+    <SandboxProvider slug={slug}>
+      <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          <ResizablePanel defaultSize={20} minSize={20} maxSize={50}>
+            <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm border-r border-gray-200/50">
+              <div className="flex-shrink-0">
+                <div className="p-6 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative">
+                        <img
+                          src={
+                            createMediaUrl(exercise.thumbnailUrl || "") ||
+                            "/placeholder.svg"
+                          }
+                          alt={exercise.displayName}
+                          className="w-14 h-14 rounded-xl object-cover shadow-sm ring-1 ring-gray-200"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h2 className="font-semibold text-gray-900 text-lg">
+                          {exercise.displayName}
+                        </h2>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <EditExerciseButton exercise={exercise} />
+                    </div>
+                  </div>
                 </div>
-              )}
-            </ScrollArea>
+              </div>
+              <div className="flex-1 min-h-0">
+                <Chat messages={messages} slug={slug} />
+              </div>
+            </div>
+          </ResizablePanel>
 
-            {/* Chat Input - Fixed at Bottom */}
-            <ChatInput />
-          </div>
-        </ResizablePanel>
+          <ResizableHandle
+            withHandle
+            className="w-1 bg-gray-200/70 hover:bg-gray-300"
+          />
 
-        {/* Resize Handle */}
-        <ResizableHandle
-          withHandle
-          className="w-1 bg-gray-200/70 hover:bg-gray-300"
-        />
-
-        {/* Preview Panel - Right Side */}
-        <ResizablePanel defaultSize={80} minSize={50} maxSize={80}>
-          <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm relative">
-            <PreviewIframe previewUrl={previewUrl} isGenerating={false} />
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+          <ResizablePanel defaultSize={80} minSize={50} maxSize={80}>
+            <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm relative">
+              <PreviewIframe />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </SandboxProvider>
   );
 }

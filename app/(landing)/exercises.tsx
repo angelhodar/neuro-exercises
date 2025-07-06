@@ -47,7 +47,7 @@ export default async function ExercisesSection() {
 
   return (
     <motion.section
-      id="ejercicios"
+      id="landing-exercises"
       className="px-6 lg:px-8 py-20 bg-gradient-to-br from-blue-50 to-indigo-50"
       initial={{ opacity: 0, y: 60 }}
       whileInView={{ opacity: 1, y: 0 }}

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
-import MultiSelectTags from "@/components/ui/templates/multiselect-tags"
+import MultiSelectTags from "@/components//multiselect-tags"
 import { useRouter, useSearchParams } from "next/navigation"
 
 const filterSchema = z.object({

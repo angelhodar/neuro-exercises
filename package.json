@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.19",
+    "@ai-sdk/react": "^1.2.12",
     "@ai-sdk/togetherai": "^0.2.14",
     "@ai-sdk/vercel": "^0.0.1",
     "@diceui/tags-input": "^0.7.2",
+    "@e2b/code-interpreter": "^1.5.1",
     "@hookform/resolvers": "^5.1.1",
     "@neondatabase/serverless": "^1.0.1",
     "@octokit/rest": "^20.1.2",

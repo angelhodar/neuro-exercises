@@ -12,7 +12,7 @@ import {
   MediaCardTitle,
   MediaCardTags,
  ExpandableMediaCardImage,
-} from "@/components/ui/templates/media-card";
+} from "@/components//media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createMediaUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Brain } from "lucide-react"
+import Link from "next/link"
 import * as motion from "motion/react-client"
+import { ScrollToElementButton } from "../../components/scroll-to-element-button"
 
 export default function HeroSection() {
   return (
@@ -45,16 +47,20 @@ export default function HeroSection() {
               <Button
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                asChild
               >
-                Comenzar Ahora
+                <Link href="/login">
+                  Comenzar
+                </Link>
               </Button>
-              <Button
+              <ScrollToElementButton
+                elementId="landing-exercises"
                 variant="outline"
                 size="lg"
                 className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 h-auto bg-transparent hover:border-blue-700 transition-all duration-300"
               >
-                Ver Demo
-              </Button>
+                Probar
+              </ScrollToElementButton>
             </motion.div>
           </motion.div>
 

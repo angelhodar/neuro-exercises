@@ -14,7 +14,7 @@ import {
  ExpandableMediaCardImage,
 } from "@/components//media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface DashboardMediaCardProps {
@@ -41,7 +41,7 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
     <div className="relative">
       <MediaCard className="h-full">
         <ExpandableMediaCardImage
-          src={createMediaUrl(media.blobKey)}
+          src={createBlobUrl(media.blobKey)}
           alt={media.name}
           width={200}
           height={200}

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { useSandbox } from "@/hooks/use-sandbox";
 
-export function PreviewIframe() {
+export function PreviewIframe({ slug }: { slug: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { sandboxUrl, isLoading, error, initializeSandbox } = useSandbox();
 
@@ -124,7 +124,7 @@ export function PreviewIframe() {
           {sandboxUrl && (
             <iframe
               ref={iframeRef}
-              src={sandboxUrl}
+              src={`https://${sandboxUrl}`}
               className="w-full h-full rounded-md border-0"
               title="Preview"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"

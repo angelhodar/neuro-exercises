@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 import { Play } from "lucide-react";
 import { useCountdown } from "./exercise-countdown";
 
@@ -15,7 +15,7 @@ export function ExercisePresentation() {
       {exercise.thumbnailUrl && (
         <div className="w-24 h-24 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
           <img
-            src={createMediaUrl(exercise.thumbnailUrl) || "/placeholder.svg"}
+            src={createBlobUrl(exercise.thumbnailUrl) || "/placeholder.svg"}
             alt={exercise.displayName}
             className="w-16 h-16 object-cover rounded-full"
           />

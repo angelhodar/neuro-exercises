@@ -3,6 +3,7 @@ import { tool } from "ai";
 import { extractFiles, createZipBuffer } from "@/lib/zip";
 import { generatedFileSchema, getFilesContext } from "./context";
 import { uploadBlob } from "@/lib/storage";
+import { updateExerciseGeneration } from "@/app/actions/generations";
 
 export const getCurrentGeneratedFiles = tool({
   description:
@@ -42,7 +43,7 @@ export const readFiles = (codeBlobKey: string | null) =>
     },
   });
 
-export const writeFiles = tool({
+export const writeFiles = (generationId: number) => tool({
   description: "Writes files to the blob storage",
   parameters: z.object({
     files: z
@@ -64,8 +65,11 @@ export const writeFiles = tool({
       zipBuffer,
     );
 
-    console.log("Blob key:")
-    console.log(blobKey);
+    console.log(`Generated blob key: ${blobKey.pathname}`)
+
+    await updateExerciseGeneration(generationId, {
+      codeBlobKey: blobKey.pathname,
+    });
 
     return blobKey.pathname;
   },

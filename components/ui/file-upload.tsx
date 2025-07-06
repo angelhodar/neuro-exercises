@@ -3,7 +3,7 @@
 import { PlusIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 
 const MediaFile = ({
   media,
@@ -15,7 +15,7 @@ const MediaFile = ({
   return (
     <div key={media.id} className="bg-accent relative aspect-square rounded-md">
       <img
-        src={createMediaUrl(media.blobKey)}
+        src={createBlobUrl(media.blobKey)}
         alt={media.name}
         className="size-full rounded-[inherit] object-cover"
       />

@@ -8,7 +8,7 @@ import { Play, Grid3x3, Volume2, Palette } from "lucide-react"
 import { unstable_cache } from "next/cache"
 import { getExercises } from "@/app/actions/exercises"
 import type { Exercise } from "@/lib/db/schema"
-import { createMediaUrl } from "@/lib/utils"
+import { createBlobUrl } from "@/lib/utils"
 
 const specificExercisesMapping = {
   "reaction-time-grid": {
@@ -85,7 +85,7 @@ export default async function ExercisesSection() {
                 <Card className="border-blue-200 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
                   <CardHeader className="flex-grow gap-2">
                     <div className="relative w-full h-[300px]">
-                      <Image src={createMediaUrl(exercise.thumbnailUrl || "")} fill className="object-cover rounded-lg" alt={exercise.displayName} />
+                      <Image src={createBlobUrl(exercise.thumbnailUrl || "")} fill className="object-cover rounded-lg" alt={exercise.displayName} />
                     </div>
                     <CardTitle className="text-2xl text-blue-900">{exercise.displayName}</CardTitle>
                     <div className="flex flex-wrap gap-2 mt-3">

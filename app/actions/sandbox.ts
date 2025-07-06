@@ -3,6 +3,7 @@
 import { getLastCompletedGeneration, updateExerciseGeneration } from "@/app/actions/generations";
 import { Sandbox } from "@e2b/code-interpreter";
 import { extractFiles } from "@/lib/zip";
+import { createBlobUrl } from "@/lib/utils";
 
 // E2B Template ID - replace with your actual template ID
 const TEMPLATE_ID = process.env.E2B_TEMPLATE_ID || "uwjrc97qg8qfno0643qu";
@@ -39,7 +40,7 @@ export async function createOrConnectToSandbox(exerciseId: number) {
     };
   }
 
-  const zipResponse = await fetch(lastGeneration.codeBlobKey);
+  const zipResponse = await fetch(createBlobUrl(lastGeneration.codeBlobKey));
 
   if (!zipResponse.ok) {
     throw new Error(`Failed to download code ZIP: ${zipResponse.statusText}`);
@@ -95,7 +96,7 @@ export async function stopSandbox(exerciseId: number) {
   await sandbox.kill();
 
   await updateExerciseGeneration(lastGeneration.id, {
-    sandboxId: sandbox.sandboxId,
+    sandboxId: null,
   });
 
   return sandbox.sandboxId;

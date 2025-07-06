@@ -15,7 +15,7 @@ import { ExerciseAudioButton } from "./exercise-audio-button";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Progress } from "../ui/progress";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 
 export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => {
@@ -125,7 +125,7 @@ export default function FloatingBottomBar() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <ExerciseAudioButton
-                        audioSrc={createMediaUrl(exercise.audioInstructions)}
+                        audioSrc={createBlobUrl(exercise.audioInstructions)}
                       />
                     </TooltipTrigger>
                     <TooltipContent>Escuchar instrucciones</TooltipContent>

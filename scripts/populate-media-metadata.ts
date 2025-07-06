@@ -9,7 +9,7 @@ import { medias } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 
 // 1. Define the Zod schema for a single media item's metadata
 const mediaMetadataSchema = z.object({
@@ -63,7 +63,7 @@ async function main() {
   // 5. Build the structured prompt with all images
   const imageContents = mediaToUpdate.map((media) => ({
     type: "image" as const,
-    image: new URL(createMediaUrl(media.blobKey)),
+    image: new URL(createBlobUrl(media.blobKey)),
   }));
 
   const promptMessages = [

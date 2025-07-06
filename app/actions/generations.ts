@@ -54,7 +54,7 @@ export async function updateExerciseGeneration(
     status?: "GENERATING" | "COMPLETED" | "ERROR";
     summary?: string;
     codeBlobKey?: string;
-    sandboxId?: string;
+    sandboxId?: string | null;
   },
 ): Promise<ExerciseChatGeneration | null> {
   try {

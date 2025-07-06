@@ -8,7 +8,7 @@ import {
   type VisualRecognitionQuestionResult,
   type ImageData,
 } from "./visual-recognition-schema";
-import { cn, createMediaUrl } from "@/lib/utils";
+import { cn, createBlobUrl } from "@/lib/utils";
 
 interface VisualRecognitionExerciseClientProps {
   config: VisualRecognitionConfig;
@@ -175,7 +175,7 @@ export function VisualRecognitionExerciseClient({
               onClick={() => handleImageClick(image.id)}
             >
               <img
-                src={createMediaUrl(image.url) || "/placeholder.svg"}
+                src={createBlobUrl(image.url) || "/placeholder.svg"}
                 alt={showImageNames ? image.name : "Imagen del ejercicio"}
                 className="w-full h-48 md:h-56 lg:h-64 object-cover p-1 rounded-lg"
                 crossOrigin="anonymous"

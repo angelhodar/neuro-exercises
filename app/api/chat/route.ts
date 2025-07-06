@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     tools: {
       getCurrentGeneratedFiles,
       readFiles: readFiles(lastCodeBlobKey),
-      writeFiles,
+      writeFiles: writeFiles(newGeneration.id),
     },
     prompt: createGenerationPrompt(mainGuidelinesPrompt, lastUserPrompt, slug),
     system: systemPrompt,
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     onFinish: async (data) => {
       console.log("Stream finished, updating generation...");
 
-      let codeBlobKey: string | null = null;
+      /*let codeBlobKey: string | null = null;
 
       if (data.toolResults) {
         for (const toolResult of data.toolResults) {
@@ -71,12 +71,11 @@ export async function POST(req: Request) {
         }
       }
 
-      console.log(data.toolResults)
+      console.log(data.toolResults)*/
 
       await updateExerciseGeneration(newGeneration.id, {
         status: "COMPLETED",
         summary: data.text,
-        codeBlobKey: codeBlobKey || undefined,
       });
     },
     providerOptions: {
@@ -91,17 +90,17 @@ export async function POST(req: Request) {
   return stream.toDataStreamResponse({
     getErrorMessage: (error) => {
       if (error == null) {
-        return 'unknown error';
+        return "unknown error";
       }
-    
-      if (typeof error === 'string') {
+
+      if (typeof error === "string") {
         return error;
       }
-    
+
       if (error instanceof Error) {
         return error.message;
       }
-    
+
       return JSON.stringify(error);
     },
   });

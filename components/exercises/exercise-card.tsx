@@ -2,7 +2,7 @@ import { Play } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Exercise } from "@/lib/db/schema";
-import { createMediaUrl, cn } from "@/lib/utils";
+import { createBlobUrl, cn } from "@/lib/utils";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -35,7 +35,7 @@ export default function ExerciseCard({ exercise }: ExerciseCardProps) {
         {thumbnailUrl ? (
           <div className="aspect-video overflow-hidden rounded-md bg-white flex items-center justify-center">
             <img
-              src={createMediaUrl(thumbnailUrl) || "/placeholder.svg"}
+              src={createBlobUrl(thumbnailUrl) || "/placeholder.svg"}
               alt={`Thumbnail de ${displayName}`}
               className="h-full w-full object-cover"
             />

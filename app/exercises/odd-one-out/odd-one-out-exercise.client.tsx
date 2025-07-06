@@ -11,7 +11,7 @@ import {
 import { CheckCircle, XCircle } from "lucide-react";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface OddOneOutExerciseClientProps {
@@ -127,7 +127,7 @@ export function OddOneOutExerciseClient({
                 onClick={() => handleSelectAnswer(media.id)}
               >
                 <MediaCardImage
-                  src={createMediaUrl(media.blobKey)}
+                  src={createBlobUrl(media.blobKey)}
                   alt={media.name}
                   width={200}
                   height={200}

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import { getExerciseGenerations } from "@/app/actions/generations";
 import { PreviewIframe } from "./preview-iframe";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 import EditExerciseButton from "../edit-exercise";
 import { Chat } from "./chat";
 import { SandboxProvider } from "@/hooks/use-sandbox";
@@ -75,7 +75,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
                       <div className="relative">
                         <img
                           src={
-                            createMediaUrl(exercise.thumbnailUrl || "") ||
+                            createBlobUrl(exercise.thumbnailUrl || "") ||
                             "/placeholder.svg"
                           }
                           alt={exercise.displayName}
@@ -107,7 +107,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
 
           <ResizablePanel defaultSize={80} minSize={50} maxSize={80}>
             <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm relative">
-              <PreviewIframe />
+              <PreviewIframe slug={exercise.slug} />
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>

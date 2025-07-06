@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Exercise } from "@/lib/db/schema";
-import { createMediaUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 import EditExerciseButton from "../edit-exercise";
 
 interface ExerciseHeaderProps {
@@ -18,7 +18,7 @@ export function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <img
-              src={createMediaUrl(thumbnailUrl || "") || "/placeholder.svg"}
+              src={createBlobUrl(thumbnailUrl || "") || "/placeholder.svg"}
               alt={displayName}
               className="w-14 h-14 rounded-xl object-cover shadow-sm ring-1 ring-gray-200"
             />

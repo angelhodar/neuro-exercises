@@ -21,7 +21,7 @@ import {
 } from "./media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import FileMediaSelector from "@/components/ui/file-upload";
-import { cn, createMediaUrl } from "@/lib/utils";
+import { cn, createBlobUrl } from "@/lib/utils";
 
 interface MediaSelectorProps {
   selectedMedias: SelectableMediaSchema[];
@@ -124,7 +124,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
                         )}
                       >
                         <MediaCardImage
-                          src={createMediaUrl(media.blobKey)}
+                          src={createBlobUrl(media.blobKey)}
                           alt={media.name}
                           width={200}
                           height={200}

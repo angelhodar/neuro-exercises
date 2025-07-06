@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { exerciseChatGeneration, exercises } from "@/lib/db/schema";
-import { eq, asc, desc, and } from "drizzle-orm";
+import { exerciseChatGeneration } from "@/lib/db/schema";
+import { eq, asc } from "drizzle-orm";
 import type { ExerciseChatGeneration } from "@/lib/db/schema";
 import { getCurrentUser } from "./users";
 
@@ -75,41 +75,19 @@ export async function updateExerciseGeneration(
 }
 
 export async function getLastCompletedGeneration(
-  slug: string,
+  exerciseId: number,
 ): Promise<ExerciseChatGeneration | null> {
   try {
     const generation = await db.query.exerciseChatGeneration.findFirst({
-      where: (generation, { eq }) => eq(generation.status, "COMPLETED"),
-      with: {
-        exercise: true,
-      },
+      where: (generation, { eq, and }) => 
+        and(
+          eq(generation.status, "COMPLETED"),
+          eq(generation.exerciseId, exerciseId)
+        ),
       orderBy: (generation, { desc }) => desc(generation.createdAt),
     });
 
-    // Filter by slug since we can't directly query by exercise slug
-    if (generation && generation.exercise.slug === slug) {
-      return generation;
-    }
-
-    // If no generation found or slug doesn't match, try alternative approach
-    const generationWithJoin = await db
-      .select()
-      .from(exerciseChatGeneration)
-      .innerJoin(exercises, eq(exerciseChatGeneration.exerciseId, exercises.id))
-      .where(
-        and(
-          eq(exerciseChatGeneration.status, "COMPLETED"),
-          eq(exercises.slug, slug),
-        ),
-      )
-      .orderBy(desc(exerciseChatGeneration.createdAt))
-      .limit(1);
-
-    if (generationWithJoin.length > 0) {
-      return generationWithJoin[0].exercise_chat_generation;
-    }
-
-    return null;
+    return generation || null;
   } catch (error) {
     console.error("Error getting last completed generation:", error);
     return null;

@@ -1,12 +1,12 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
+import { useChat } from "@ai-sdk/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { MessageSquare, Settings, FileText, Code, Loader2 } from "lucide-react";
-import { useSandbox } from "@/contexts/sandbox-provider";
+import { useSandbox } from "@/hooks/use-sandbox";
 
 interface Message {
   id: string;
@@ -80,11 +80,14 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm font-medium">AI is working...</span>
         </div>
-        
+
         {data?.toolInvocations && data.toolInvocations.length > 0 && (
           <div className="space-y-1">
             {data.toolInvocations.map((invocation: any, index: number) => (
-              <div key={index} className="flex items-center space-x-2 text-sm text-gray-600">
+              <div
+                key={index}
+                className="flex items-center space-x-2 text-sm text-gray-600"
+              >
                 {getToolIcon(invocation.toolName)}
                 <span>{getToolDisplayName(invocation.toolName)}</span>
                 {invocation.state === "result" && (
@@ -102,19 +105,19 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
 }
 
 export function Chat({ messages: initialMessages, slug }: ChatProps) {
+  const { initializeSandbox } = useSandbox();
   const hasAutoExecuted = useRef(false);
-  const { refreshSandbox } = useSandbox();
-  
-  const { 
-    messages, 
-    input, 
-    handleInputChange, 
-    handleSubmit, 
-    status, 
-    error, 
-    stop, 
-    reload, 
-    data 
+
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    error,
+    stop,
+    reload,
+    data,
   } = useChat({
     api: "/api/chat",
     initialMessages: initialMessages.map((msg) => ({
@@ -124,28 +127,19 @@ export function Chat({ messages: initialMessages, slug }: ChatProps) {
     })),
     credentials: "include",
     body: { slug },
-    onFinish: () => {
-      // Refresh sandbox when chat finishes
-      refreshSandbox();
-    },
+    onFinish: initializeSandbox,
   });
 
-  // Auto-execute when chat has exactly 1 message (the initial prompt)
   useEffect(() => {
-    if (
-      messages.length === 1 && 
-      messages[0].role === "user" && 
-      status === "ready" && 
-      !hasAutoExecuted.current
-    ) {
+    if (messages.length === 1 && !hasAutoExecuted.current) {
       hasAutoExecuted.current = true;
-      handleSubmit();
+      reload();
     }
-  }, [messages, status]);
+  }, [messages.length, reload]);
 
   // Filter messages to only include user and assistant roles
-  const filteredMessages = messages.filter((msg) => 
-    msg.role === "user" || msg.role === "assistant"
+  const filteredMessages = messages.filter(
+    (msg) => msg.role === "user" || msg.role === "assistant",
   ) as Array<{ id: string; role: "user" | "assistant"; content: string }>;
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -165,16 +159,18 @@ export function Chat({ messages: initialMessages, slug }: ChatProps) {
                 ))}
               </>
             )}
-            
+
             {/* Show streaming status */}
             <StreamingStatus status={status} data={data} />
-            
+
             {/* Show error if any */}
             {error && (
               <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-red-600">Error: {error.message}</span>
-                  <button 
+                  <span className="text-sm text-red-600">
+                    Error: {error.message}
+                  </span>
+                  <button
                     onClick={() => reload()}
                     className="text-red-600 hover:text-red-700 text-sm underline"
                   >
@@ -186,10 +182,10 @@ export function Chat({ messages: initialMessages, slug }: ChatProps) {
           </div>
         </ScrollArea>
       </div>
-      
+
       {/* Chat input always visible at bottom */}
       <div className="flex-shrink-0">
-        <ChatInput 
+        <ChatInput
           input={input}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}

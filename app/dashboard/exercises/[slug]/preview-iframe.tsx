@@ -4,21 +4,25 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
-import { useSandbox } from "@/contexts/sandbox-provider";
+import { useSandbox } from "@/hooks/use-sandbox";
 
 export function PreviewIframe() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { sandboxStatus, isLoading, hasCompletedGeneration, error } = useSandbox();
+  const { sandboxUrl, isLoading, error, initializeSandbox } = useSandbox();
 
   const handleRefresh = () => {
-    if (!iframeRef.current || sandboxStatus?.status !== "running") return;
+    if (!iframeRef.current || !sandboxUrl) return;
     const currentSrc = iframeRef.current.src;
     iframeRef.current.src = "";
     iframeRef.current.src = currentSrc;
   };
 
-  // Show message if no completed generation
-  if (!hasCompletedGeneration) {
+  const handleRetry = () => {
+    initializeSandbox();
+  };
+
+  // Show message if no sandbox URL available
+  if (!sandboxUrl && !isLoading && !error) {
     return (
       <div className="flex-1 relative px-2">
         <Card className="h-full shadow-sm border border-gray-200/50 relative overflow-hidden">
@@ -43,7 +47,7 @@ export function PreviewIframe() {
   return (
     <>
       {/* Absolute Refresh Button */}
-      {sandboxStatus?.status === "running" && (
+      {sandboxUrl && (
         <Button
           onClick={handleRefresh}
           variant="outline"
@@ -101,17 +105,26 @@ export function PreviewIframe() {
                 <h3 className="text-lg font-semibold text-red-900 mb-2">
                   Error en el sandbox
                 </h3>
-                <p className="text-sm text-red-600 max-w-sm">
+                <p className="text-sm text-red-600 max-w-sm mb-4">
                   {error}
                 </p>
+                <Button
+                  onClick={handleRetry}
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoading}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reintentar
+                </Button>
               </div>
             </div>
           )}
           
-          {sandboxStatus?.status === "running" && (
+          {sandboxUrl && (
             <iframe
               ref={iframeRef}
-              src={sandboxStatus.sandboxUrl}
+              src={sandboxUrl}
               className="w-full h-full rounded-md border-0"
               title="Preview"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"

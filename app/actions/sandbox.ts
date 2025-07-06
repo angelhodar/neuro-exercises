@@ -1,6 +1,5 @@
 "use server";
 
-import { getExerciseBySlug } from "@/app/actions/exercises";
 import { getLastCompletedGeneration, updateExerciseGeneration } from "@/app/actions/generations";
 import { Sandbox } from "@e2b/code-interpreter";
 import { extractFiles } from "@/lib/zip";
@@ -8,40 +7,24 @@ import { extractFiles } from "@/lib/zip";
 // E2B Template ID - replace with your actual template ID
 const TEMPLATE_ID = process.env.E2B_TEMPLATE_ID || "uwjrc97qg8qfno0643qu";
 
-export type SandboxResult = 
-  | {
-      sandboxId: string;
-      status: "running";
-      sandboxUrl: string;
-    }
-  | {
-      sandboxId: string;
-      status: "paused";
-    }
-  | {
-      sandboxId: string;
-      status: null;
-    };
-
-async function getRunningExerciseSandbox(slug: string) {
+async function getRunningExerciseSandbox(exerciseId: number) {
   const sandboxes = await Sandbox.list();
-  const existingSandbox = sandboxes.find(sb => sb.metadata?.slug === slug);
+  const existingSandbox = sandboxes.find(sb => sb.metadata?.exerciseId === exerciseId.toString());
   return existingSandbox;
 }
 
-export async function createOrConnectToSandbox(slug: string): Promise<SandboxResult> {
-  const existingSandbox = await getRunningExerciseSandbox(slug);
+export async function createOrConnectToSandbox(exerciseId: number) {
+  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
 
   if (existingSandbox) {
     const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
     return {
       sandboxId: existingSandbox.sandboxId,
-      status: "running",
       sandboxUrl: sandbox.getHost(3000)
     };
   }
 
-  const lastGeneration = await getLastCompletedGeneration(slug);
+  const lastGeneration = await getLastCompletedGeneration(exerciseId);
 
   if (!lastGeneration || !lastGeneration.codeBlobKey) {
     throw new Error("No completed generation found with code blob key");
@@ -52,7 +35,6 @@ export async function createOrConnectToSandbox(slug: string): Promise<SandboxRes
     const sandbox = await Sandbox.connect(lastGeneration.sandboxId);
     return {
       sandboxId: lastGeneration.sandboxId,
-      status: "running",
       sandboxUrl: sandbox.getHost(3000)
     };
   }
@@ -75,7 +57,7 @@ export async function createOrConnectToSandbox(slug: string): Promise<SandboxRes
       BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET!,
       NEXT_PUBLIC_BLOB_URL: process.env.NEXT_PUBLIC_BLOB_URL!,
     },
-    metadata: { slug }
+    metadata: { exerciseId: exerciseId.toString() }
   });
 
   // Get the host URL for the sandbox
@@ -95,17 +77,26 @@ export async function createOrConnectToSandbox(slug: string): Promise<SandboxRes
   });
 
   return {
-    sandboxId: sandbox.sandboxId,
-    status: "running",
+    sandboxId: sandbox.sandboxId, 
     sandboxUrl: host
   };
 }
 
-export async function stopSandbox(slug: string): Promise<void> {
-  const existingSandbox = await getRunningExerciseSandbox(slug);
+export async function stopSandbox(exerciseId: number) {
+  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
 
-  if (!existingSandbox) throw new Error(`No sandbox found for the exercise ${slug}`);
+  if (!existingSandbox) throw new Error(`No sandbox found for the exercise ${exerciseId}`);
+
+  const lastGeneration = await getLastCompletedGeneration(exerciseId);
+
+  if (!lastGeneration) throw new Error(`No completed generation found for the exercise ${exerciseId}`);
 
   const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
   await sandbox.kill();
+
+  await updateExerciseGeneration(lastGeneration.id, {
+    sandboxId: sandbox.sandboxId,
+  });
+
+  return sandbox.sandboxId;
 } 

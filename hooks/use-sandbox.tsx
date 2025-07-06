@@ -1,61 +1,87 @@
-import { useState, useTransition } from "react";
+"use client";
+
 import {
-  createOrConnectToSandbox as createOrConnectToSandboxAction,
-  checkSandboxStatus as checkSandboxStatusAction,
-  stopSandbox as stopSandboxAction,
-  type SandboxResult,
-} from "@/app/actions/sandbox";
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  PropsWithChildren,
+} from "react";
+import { createOrConnectToSandbox, stopSandbox } from "@/app/actions/sandbox";
 
-type SandboxStatus = SandboxResult;
-
-interface UseSandboxReturn {
-  isCreating: boolean;
-  isChecking: boolean;
-  isStopping: boolean;
-  sandboxStatus: SandboxStatus | null;
-  createOrConnectToSandbox: (slug: string) => Promise<void>;
-  checkSandboxStatus: (slug: string) => Promise<void>;
-  stopSandbox: (slug: string) => Promise<void>;
+interface SandboxContextType {
+  sandboxUrl: string | null;
+  isLoading: boolean;
+  error: string | null;
+  initializeSandbox: () => Promise<void>;
 }
 
-export function useSandbox(): UseSandboxReturn {
-  const [isCreating, startCreateTransition] = useTransition();
-  const [isChecking, startCheckTransition] = useTransition();
-  const [isStopping, startStopTransition] = useTransition();
-  const [sandboxStatus, setSandboxStatus] = useState<SandboxStatus | null>(
-    null,
+const SandboxContext = createContext<SandboxContextType | undefined>(undefined);
+
+export function useSandbox() {
+  const context = useContext(SandboxContext);
+
+  if (!context) {
+    throw new Error("useSandbox must be used within a SandboxProvider");
+  }
+
+  return context;
+}
+
+interface SandboxProviderProps extends PropsWithChildren {
+  children: React.ReactNode;
+  exerciseId: number;
+}
+
+export function SandboxProvider({
+  children,
+  exerciseId,
+}: SandboxProviderProps) {
+  const [sandboxUrl, setSandboxUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize or connect to sandbox
+  const initializeSandbox = useCallback(async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await createOrConnectToSandbox(exerciseId);
+      setSandboxUrl(result.sandboxUrl);
+    } catch (error) {
+      console.error("Error initializing sandbox:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to initialize sandbox",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [exerciseId, isLoading]);
+
+  // Initialize on mount
+  useEffect(() => {
+    initializeSandbox();
+
+    return () => {
+      // Stop sandbox when component unmounts
+      if (sandboxUrl) {
+        stopSandbox(exerciseId).catch(console.error);
+      }
+    };
+  }, []);
+
+  const value: SandboxContextType = {
+    sandboxUrl,
+    isLoading,
+    error,
+    initializeSandbox,
+  };
+
+  return (
+    <SandboxContext.Provider value={value}>{children}</SandboxContext.Provider>
   );
-
-  const createOrConnectToSandbox = async (slug: string) => {
-    startCreateTransition(async () => {
-      const result = await createOrConnectToSandboxAction(slug);
-      setSandboxStatus(result);
-    });
-  };
-
-  const checkSandboxStatus = async (slug: string) => {
-    startCheckTransition(async () => {
-      const result = await checkSandboxStatusAction(slug);
-      setSandboxStatus(result);
-    });
-  };
-
-  const stopSandbox = async () => {
-    if (!sandboxStatus?.sandboxId) return;
-
-    startStopTransition(async () => {
-      const result = await stopSandboxAction(sandboxStatus.sandboxId);
-      setSandboxStatus(result);
-    });
-  };
-
-  return {
-    isCreating,
-    isChecking,
-    isStopping,
-    sandboxStatus,
-    createOrConnectToSandbox,
-    checkSandboxStatus,
-    stopSandbox,
-  };
 }

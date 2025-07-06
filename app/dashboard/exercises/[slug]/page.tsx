@@ -5,7 +5,7 @@ import { PreviewIframe } from "./preview-iframe";
 import { createMediaUrl } from "@/lib/utils";
 import EditExerciseButton from "../edit-exercise";
 import { Chat } from "./chat";
-import { SandboxProvider } from "@/contexts/sandbox-provider";
+import { SandboxProvider } from "@/hooks/use-sandbox";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -63,7 +63,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
   const messages = convertGenerationsToMessages(generations);
 
   return (
-    <SandboxProvider slug={slug}>
+    <SandboxProvider exerciseId={exercise.id}>
       <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           <ResizablePanel defaultSize={20} minSize={20} maxSize={50}>
@@ -95,7 +95,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
                 </div>
               </div>
               <div className="flex-1 min-h-0">
-                <Chat messages={messages} slug={slug} />
+                <Chat messages={messages} slug={exercise.slug} />
               </div>
             </div>
           </ResizablePanel>

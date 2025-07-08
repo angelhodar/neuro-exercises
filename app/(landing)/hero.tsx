@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Brain } from "lucide-react"
 import Link from "next/link"
@@ -39,7 +40,7 @@ export default function HeroSection() {
             </div>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 pt-4"
+              className="flex flex-col sm:flex-row gap-4 pt-4 items-start"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
@@ -62,6 +63,13 @@ export default function HeroSection() {
                 Probar
               </ScrollToElementButton>
             </motion.div>
+            
+            <Image
+              src="/alzheimer.webp"
+              alt="Alzheimer awareness"
+              width={150}
+              height={150}
+            />
           </motion.div>
 
           {/* Brain Animation Side */}

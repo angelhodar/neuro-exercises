@@ -15,7 +15,7 @@ export function ExerciseConfigPresetSelector({
 
   function handlePresetSelect(presetKey: ExercisePreset) {
     const preset = presets[presetKey];
-    if (preset) reset(preset);
+    if (preset) reset({ automaticNextQuestion: true, ...preset });
   }
 
   return (

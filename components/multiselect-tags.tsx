@@ -46,7 +46,7 @@ export default function MultiSelectTags(props: MultiSelectTagsProps) {
       loading={isLoading}
       error={error}
       options={options}
-      defaultValue={value}
+      value={value}
       onValueChange={(values) => onChange?.(values)}
       onSearch={handleSearch}
       searchPlaceholder="Buscar etiquetas..."

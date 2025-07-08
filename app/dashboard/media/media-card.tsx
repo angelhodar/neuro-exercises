@@ -7,12 +7,11 @@ import { deleteMedia } from "@/app/actions/media";
 import { Trash2 } from "lucide-react";
 import {
   MediaCard,
-  MediaCardImage,
   MediaCardContent,
   MediaCardTitle,
-  MediaCardTags,
- ExpandableMediaCardImage,
-} from "@/components//media-card";
+  ExpandableMediaCardImage,
+  ClickableMediaTags,
+} from "@/components/media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createBlobUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,7 +50,7 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
             {media.name}
           </MediaCardTitle>
           {media.tags && media.tags.length > 0 && (
-            <MediaCardTags
+            <ClickableMediaTags
               tags={media.tags}
               variant="secondary"
               size="sm"

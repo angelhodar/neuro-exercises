@@ -37,7 +37,7 @@ export function SyllablesConfigFields(props: SyllablesConfigFieldsProps) {
             <FormLabel>Número de Sílabas</FormLabel>
             <Select
               onValueChange={(value) => field.onChange(Number.parseInt(value))}
-              defaultValue={field.value?.toString()}
+              value={field.value?.toString()}
             >
               <FormControl>
                 <SelectTrigger>

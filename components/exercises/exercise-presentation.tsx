@@ -16,8 +16,6 @@ export function ExercisePresentation() {
   const { exercise } = useExerciseExecution();
   const { startCountdown } = useCountdown();
 
-  exercise.audioInstructions = "https://file-examples.com/storage/fe9a194958686838db9645f/2017/11/file_example_MP3_700KB.mp3";
-
   return (
     <div className="text-center max-w-md mx-auto">
       {exercise.thumbnailUrl && (

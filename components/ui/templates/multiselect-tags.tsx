@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery } from "@tanstack/react-query";
 import { MultiAsyncSelect } from "@/components/ui/multi-async-select";
@@ -46,7 +46,7 @@ export default function MultiSelectTags(props: MultiSelectTagsProps) {
       loading={isLoading}
       error={error}
       options={options}
-      defaultValue={value}
+      value={value}
       onValueChange={(values) => onChange?.(values)}
       onSearch={handleSearch}
       searchPlaceholder="Buscar etiquetas..."

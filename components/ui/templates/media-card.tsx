@@ -1,7 +1,8 @@
 "use client";
 
 import type React from "react";
-import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image, { ImageProps } from "next/image";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -10,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import Image, { ImageProps } from "next/image";
+import { cn } from "@/lib/utils";
 
 // Main MediaCard container
 interface MediaCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -134,6 +135,47 @@ export function MediaCardTags({
           key={index}
           variant={variant}
           className={size === "sm" ? "text-xs" : ""}
+        >
+          {tag}
+        </Badge>
+      ))}
+    </div>
+  );
+}
+
+export function ClickableMediaTags({
+  tags,
+  variant = "secondary",
+  size = "sm",
+  className,
+  ...props
+}: MediaCardTagsProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleTagClick = (tag: string) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    const currentTags = currentParams.getAll("tags");
+
+    // Add the tag if it's not already present
+    if (!currentTags.includes(tag)) {
+      currentParams.append("tags", tag);
+    }
+
+    router.push(`?${currentParams.toString()}`);
+  };
+
+  return (
+    <div className={cn("flex flex-wrap gap-1", className)} {...props}>
+      {tags.map((tag, index) => (
+        <Badge
+          key={index}
+          variant={variant}
+          className={cn(
+            size === "sm" ? "text-xs" : "",
+            "cursor-pointer hover:opacity-80 transition-opacity",
+          )}
+          onClick={() => handleTagClick(tag)}
         >
           {tag}
         </Badge>

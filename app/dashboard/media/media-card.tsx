@@ -12,6 +12,7 @@ import {
   MediaCardTitle,
   MediaCardTags,
  ExpandableMediaCardImage,
+ ClickableMediaTags,
 } from "@/components/ui/templates/media-card";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createMediaUrl } from "@/lib/utils";
@@ -51,7 +52,7 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
             {media.name}
           </MediaCardTitle>
           {media.tags && media.tags.length > 0 && (
-            <MediaCardTags
+            <ClickableMediaTags
               tags={media.tags}
               variant="secondary"
               size="sm"

@@ -42,7 +42,7 @@ const data = {
   exercises: [
     {
       title: "Cuadrícula",
-      url: "/exercises/reaction-grid",
+      url: "/exercises/reaction-time-grid",
       icon: Grid3x3,
     },
     {

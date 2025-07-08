@@ -15,9 +15,7 @@ interface Props {
 
 export default async function MediasPage({ searchParams }: Props) {
   const { q, tags } = await searchParams;
-
   const tagsArray = Array.isArray(tags) ? tags : tags ? [tags] : [];
-
   const medias = await getMedias(q, tagsArray);
 
   return (
@@ -30,7 +28,7 @@ export default async function MediasPage({ searchParams }: Props) {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-        <MediaFilters />
+        <MediaFilters key={tagsArray.join(",")} />
           <CreateMediaButton />
         </DashboardHeaderActions>
       </DashboardHeader>

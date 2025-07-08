@@ -38,7 +38,7 @@ export function ExerciseConfigForm({
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: presets?.easy,
+    defaultValues: { automaticNextQuestion: true, ...presets?.easy },
   });
 
   function handleSubmit(data: z.infer<typeof schema>) {

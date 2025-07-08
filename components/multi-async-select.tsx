@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 import { ChevronDown, XIcon, CheckIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -49,6 +49,9 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
    * Optional, defaults to null. Works only when async is true.
    */
   error?: Error | null;
+
+  /** The controlled selected values. */
+  value?: string[];
 
   /** The default selected values when the component mounts. */
   defaultValue?: string[];
@@ -115,6 +118,7 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
       options,
       onValueChange,
       onSearch,
+      value,
       defaultValue = [],
       placeholder = "Seleccionar opciones...",
       searchPlaceholder = "Buscar...",
@@ -131,22 +135,57 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
     ref
   ) => {
     const [selectedValues, setSelectedValues] =
-      React.useState<string[]>(defaultValue);
+      React.useState<string[]>(value || defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-    const optionsRef = useRef<Record<string, Option>>({});
+
+    // Use controlled value if provided, otherwise use internal state
+    const currentValues = value !== undefined ? value : selectedValues;
+
+    // Use useMemo to compute optionsRef instead of useEffect
+    const optionsRef = useMemo(() => {
+      const temp = options.reduce((acc, option) => {
+        acc[option.value] = option;
+        return acc;
+      }, {} as Record<string, Option>);
+      
+      if (async) {
+        const temp2 = currentValues.reduce((acc, value) => {
+          const option = temp[value];
+          if (option) {
+            acc[option.value] = option;
+          }
+          return acc;
+        }, {} as Record<string, Option>);
+        
+        return {
+          ...temp,
+          ...temp2,
+        };
+      }
+      
+      return temp;
+    }, [async, options, currentValues]);
 
     const toggleOption = (option: string) => {
-      const isAddon = selectedValues.includes(option);
+      const isAddon = currentValues.includes(option);
       const newSelectedValues = isAddon
-        ? selectedValues.filter((value) => value !== option)
-        : [...selectedValues, option];
-      setSelectedValues(newSelectedValues);
+        ? currentValues.filter((value) => value !== option)
+        : [...currentValues, option];
+      
+      // Only update internal state if not controlled
+      if (value === undefined) {
+        setSelectedValues(newSelectedValues);
+      }
       onValueChange(newSelectedValues);
     };
 
     const handleClear = () => {
-      setSelectedValues([]);
-      onValueChange([]);
+      const newSelectedValues: string[] = [];
+      // Only update internal state if not controlled
+      if (value === undefined) {
+        setSelectedValues(newSelectedValues);
+      }
+      onValueChange(newSelectedValues);
     };
 
     const handleTogglePopover = () => {
@@ -154,40 +193,28 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
     };
 
     const clearExtraOptions = () => {
-      const newSelectedValues = selectedValues.slice(0, maxCount);
-      setSelectedValues(newSelectedValues);
+      const newSelectedValues = currentValues.slice(0, maxCount);
+      // Only update internal state if not controlled
+      if (value === undefined) {
+        setSelectedValues(newSelectedValues);
+      }
       onValueChange(newSelectedValues);
     };
 
     const toggleAll = () => {
-      if (selectedValues.length === options.length) {
+      if (currentValues.length === options.length) {
         handleClear();
       } else {
         const allValues = options.map((option) => option.value);
-        setSelectedValues(allValues);
+        // Only update internal state if not controlled
+        if (value === undefined) {
+          setSelectedValues(allValues);
+        }
         onValueChange(allValues);
       }
     };
 
-    useEffect(() => {
-      const temp = options.reduce((acc, option) => {
-        acc[option.value] = option;
-        return acc;
-      }, {} as Record<string, Option>);
-      if (async) {
-        const temp2 = selectedValues.reduce((acc, value) => {
-          const option = optionsRef.current[value];
-          if (option) {
-            acc[option.value] = option;
-          }
-          return acc;
-        }, {} as Record<string, Option>);
-        optionsRef.current = {
-          ...temp,
-          ...temp2,
-        };
-      }
-    }, [async, options, selectedValues]);
+    console.log(currentValues)
 
     return (
       <Popover
@@ -205,13 +232,13 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
               className
             )}
           >
-            {selectedValues.length > 0 ? (
+            {currentValues.length > 0 ? (
               <div className="flex justify-between items-center w-full">
                 <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
-                  {selectedValues.slice(0, maxCount).map((value) => {
+                  {currentValues.slice(0, maxCount).map((value) => {
                     let option: Option | undefined;
                     if (async) {
-                      option = optionsRef.current[value];
+                      option = optionsRef[value];
                     } else {
                       option = options.find((option) => option.value === value);
                     }
@@ -230,9 +257,9 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                       </Badge>
                     );
                   })}
-                  {selectedValues.length > maxCount && (
+                  {currentValues.length > maxCount && (
                     <Badge>
-                      <span>{`+ ${selectedValues.length - maxCount}`}</span>
+                      <span>{`+ ${currentValues.length - maxCount}`}</span>
 
                       <div
                         className="ml-2 size-4 cursor-pointer"
@@ -319,7 +346,7 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                     <div
                       className={cn(
                         "mr-1 size-4 text-center rounded-[4px] border border-primary shadow-xs transition-shadow outline-none",
-                        selectedValues.length === options.length
+                        currentValues.length === options.length
                           ? "bg-primary text-primary-foreground border-primary"
                           : "opacity-50 [&_svg]:invisible"
                       )}
@@ -330,7 +357,7 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                   </CommandItem>
                 )}
                 {options.map((option) => {
-                  const isSelected = selectedValues.includes(option.value);
+                  const isSelected = currentValues.includes(option.value);
                   return (
                     <CommandItem
                       key={option.value}

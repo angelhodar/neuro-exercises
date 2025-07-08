@@ -5,10 +5,18 @@ import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { createBlobUrl } from "@/lib/utils";
 import { Play } from "lucide-react";
 import { useCountdown } from "./exercise-countdown";
+import { ExerciseAudioButton } from "./exercise-audio-button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function ExercisePresentation() {
   const { exercise } = useExerciseExecution();
   const { startCountdown } = useCountdown();
+
+  exercise.audioInstructions = "https://file-examples.com/storage/fe9a194958686838db9645f/2017/11/file_example_MP3_700KB.mp3";
 
   return (
     <div className="text-center max-w-md mx-auto">
@@ -29,14 +37,27 @@ export function ExercisePresentation() {
         {exercise.description}
       </p>
 
-      <Button
-        size="lg"
-        onClick={startCountdown}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-      >
-        <Play className="w-6 h-6 mr-3" />
-        Empezar
-      </Button>
+      <div className="flex items-center justify-center gap-4">
+        <Button
+          size="lg"
+          onClick={startCountdown}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+        >
+          <Play className="w-6 h-6 mr-2" />
+          Empezar
+        </Button>
+
+        {exercise.audioInstructions && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <ExerciseAudioButton
+                audioSrc={createBlobUrl(exercise.audioInstructions)}
+              />
+            </TooltipTrigger>
+            <TooltipContent>Escuchar instrucciones</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
     </div>
   );
 }

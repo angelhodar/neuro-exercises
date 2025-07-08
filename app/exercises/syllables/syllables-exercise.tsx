@@ -5,11 +5,13 @@ import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  spanishWordsDataset,
   type SyllablesConfig,
   type SyllablesQuestionResult,
-  type SpanishWord,
 } from "./syllables-schema";
+import {
+  getWordsBySyllableCount,
+  type SpanishWord,
+} from "./spanish-words-dataset";
 
 interface SyllablesExerciseProps {
   config: SyllablesConfig;
@@ -32,9 +34,7 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
   });
 
   // Get available words for the selected syllable count
-  const availableWords =
-    spanishWordsDataset[syllablesCount as keyof typeof spanishWordsDataset] ||
-    [];
+  const availableWords = getWordsBySyllableCount(syllablesCount as 3 | 4 | 5 | 6);
 
   // Select a random word
   function selectRandomWord(): SpanishWord {

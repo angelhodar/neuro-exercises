@@ -10,8 +10,12 @@ RUN npm ci
 
 COPY . .
 
-# Replace the original page.tsx with the sandbox version to avoid database calls
+# Replace sandbox versions of pages with the regular ones to avoid database calls
 RUN cp app/\(landing\)/page.sandbox.tsx app/\(landing\)/page.tsx
+RUN cp app/exercises/\[slug\]/config/page.sandbox.tsx app/exercises/\[slug\]/config/page.tsx
+RUN cp app/exercises/\[slug\]/results/page.sandbox.tsx app/exercises/\[slug\]/results/page.tsx
+RUN cp app/exercises/\[slug\]/page.sandbox.tsx app/exercises/\[slug\]/page.tsx
+RUN cp lib/db/index.sandbox.ts lib/db/index.ts
 
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1

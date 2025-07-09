@@ -20,6 +20,7 @@
     "@ai-sdk/vercel": "^0.0.1",
     "@diceui/tags-input": "^0.7.2",
     "@e2b/code-interpreter": "^1.5.1",
+    "@electric-sql/pglite": "^0.3.4",
     "@hookform/resolvers": "^5.1.1",
     "@neondatabase/serverless": "^1.0.1",
     "@octokit/rest": "^20.1.2",

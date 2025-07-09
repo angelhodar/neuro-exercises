@@ -14,7 +14,6 @@ import { ExerciseFullscreenButton } from "./exercise-fullscreen-button";
 import { cn } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import { Progress } from "../ui/progress";
-import { createBlobUrl } from "@/lib/utils";
 
 export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, ...props }, ref) => {

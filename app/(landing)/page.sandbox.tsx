@@ -6,8 +6,9 @@ export default function Home() {
           Welcome to Neuro Exercises
         </h1>
         <p className="text-lg text-gray-600 mb-8">
-          This is a sandbox environment for testing and development purposes. 
-          The full application with database functionality is available in the production environment.
+          This is a sandbox environment for testing and development purposes.
+          The full application with database functionality is available in the
+          production environment.
         </p>
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -23,7 +24,8 @@ export default function Home() {
         <div className="text-sm text-gray-500">
           Environment: Development Sandbox
         </div>
+        <pre>{JSON.stringify(process.env, null, 2)}</pre>
       </div>
     </div>
   );
-} 
+}

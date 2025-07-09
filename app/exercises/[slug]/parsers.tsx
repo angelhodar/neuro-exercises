@@ -1,5 +1,6 @@
 import { z, ZodTypeAny } from "zod";
 import { getExerciseLinkByToken } from "@/app/actions/links";
+import { Exercise } from "@/lib/db/schema";
 
 // Esquemas más específicos que permiten discriminated unions
 const configOnlySchema = z.object({
@@ -87,7 +88,6 @@ export function parseResultsFromUrl(resultsString: string, resultsSchema: ZodTyp
   return results.data;
 }
 
-// Función específica para obtener configuración del ejercicio desde un link
 export async function getExerciseConfigFromLink(
   linkId: string,
   itemId: string
@@ -104,4 +104,7 @@ export async function getExerciseConfigFromLink(
   return item.config;
 }
 
+export function getExerciseFromSandboxEnv() {
+  return JSON.parse(process.env.SANDBOX_EXERCISE!) as Exercise;
+}
 

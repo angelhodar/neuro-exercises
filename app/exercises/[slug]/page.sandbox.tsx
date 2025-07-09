@@ -4,8 +4,7 @@ import { getExerciseFromRegistry } from "@/app/exercises/registry";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseContainer } from "@/components/exercises/exercise-container";
 import { CountdownProvider } from "@/components/exercises/exercise-countdown";
-import { getExerciseBySlug, getExercises } from "@/app/actions/exercises";
-import { parseConfigFromUrl, exerciseParamsSchema, getExerciseConfigFromLink } from "./parsers";
+import { parseConfigFromUrl, exerciseParamsSchema, getExerciseFromSandboxEnv } from "./parsers";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -18,7 +17,7 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   const validationResult = exerciseParamsSchema.safeParse(resolvedSearchParams);
 
-  const exercise = await getExerciseBySlug(slug);
+  const exercise = getExerciseFromSandboxEnv();
   const entry = getExerciseFromRegistry(slug);
 
   if (!exercise || !entry) notFound();
@@ -29,9 +28,9 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   const parsedParams = validationResult.data;
 
-  const config = parsedParams.type === 'config'
-    ? parseConfigFromUrl(parsedParams.config, schema)
-    : await getExerciseConfigFromLink(parsedParams.linkId, parsedParams.itemId);
+  if (parsedParams.type !== "config") redirect(`/exercises/${slug}/config`);
+
+  const config = parseConfigFromUrl(parsedParams.config, schema)
 
   if (!config) redirect(`/exercises/${slug}/config`);
 
@@ -46,9 +45,4 @@ export default async function Page({ params, searchParams }: PageProps) {
       </CountdownProvider>
     </ExerciseProvider>
   );
-}
-
-export async function generateStaticParams() {
-  const exercises = await getExercises();
-  return exercises.map((exercise) => ({ slug: exercise.slug }));
 }

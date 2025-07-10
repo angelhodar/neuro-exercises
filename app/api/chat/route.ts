@@ -30,16 +30,26 @@ export async function POST(req: Request) {
     return new Response("Exercise not found", { status: 404 });
   }
 
-  const newGeneration = await createExerciseGeneration({
-    exerciseId: exercise.id,
-    prompt: lastMessage.content,
-  });
+  const generations = await getExerciseGenerations(exercise.id);
 
-  if (!newGeneration) {
-    return new Response("Failed to create generation", { status: 500 });
+  if (generations.at(-1)?.status === "COMPLETED") {
+    const newGeneration = await createExerciseGeneration({
+      exerciseId: exercise.id,
+      prompt: lastMessage.content,
+    });
+
+    if (!newGeneration) {
+      return new Response("Failed to create generation", { status: 500 });
+    }
+
+    generations.push(newGeneration);
   }
 
-  const generations = await getExerciseGenerations(exercise.id);
+  const lastGeneration = generations.at(-1);
+
+  if (!lastGeneration) {
+    return new Response("Failed to create generation", { status: 500 });
+  }
 
   const { mainGuidelinesPrompt, lastCodeBlobKey, lastUserPrompt } =
     extractGenerationData(generations);
@@ -49,7 +59,7 @@ export async function POST(req: Request) {
     tools: {
       getCurrentGeneratedFiles,
       readFiles: readFiles(lastCodeBlobKey),
-      writeFiles: writeFiles(newGeneration.id),
+      writeFiles: writeFiles(lastGeneration.id),
     },
     prompt: createGenerationPrompt(mainGuidelinesPrompt, lastUserPrompt, slug),
     system: systemPrompt,
@@ -59,21 +69,7 @@ export async function POST(req: Request) {
     },
     onFinish: async (data) => {
       console.log("Stream finished, updating generation...");
-
-      /*let codeBlobKey: string | null = null;
-
-      if (data.toolResults) {
-        for (const toolResult of data.toolResults) {
-          if (toolResult.toolName === "writeFiles" && toolResult.result) {
-            codeBlobKey = toolResult.result;
-            break;
-          }
-        }
-      }
-
-      console.log(data.toolResults)*/
-
-      await updateExerciseGeneration(newGeneration.id, {
+      await updateExerciseGeneration(lastGeneration.id, {
         status: "COMPLETED",
         summary: data.text,
       });

@@ -62,6 +62,8 @@ export default async function ExerciseChatPage({ params }: PageProps) {
   const generations = await getExerciseGenerations(exercise.id);
   const messages = convertGenerationsToMessages(generations);
 
+  const autoStart = generations.length === 1 && generations[0].status === "GENERATING";
+
   return (
     <SandboxProvider exerciseId={exercise.id}>
       <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
@@ -95,7 +97,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
                 </div>
               </div>
               <div className="flex-1 min-h-0">
-                <Chat messages={messages} slug={exercise.slug} />
+                <Chat messages={messages} slug={exercise.slug} autoStart={autoStart} />
               </div>
             </div>
           </ResizablePanel>

@@ -4,6 +4,7 @@ import { extractFiles, createZipBuffer } from "@/lib/zip";
 import { generatedFileSchema, getFilesContext } from "./context";
 import { uploadBlob } from "@/lib/storage";
 import { updateExerciseGeneration } from "@/app/actions/generations";
+import { createBlobUrl } from "@/lib/utils";
 
 export const getCurrentGeneratedFiles = tool({
   description:
@@ -33,7 +34,7 @@ export const readFiles = (codeBlobKey: string | null) =>
 
       if (!codeBlobKey) return [];
 
-      const buffer = await fetch(codeBlobKey).then((res) => res.arrayBuffer());
+      const buffer = await fetch(createBlobUrl(codeBlobKey)).then((res) => res.arrayBuffer());
       const files = await extractFiles(Buffer.from(buffer));
 
       console.log("Files read:")
@@ -43,7 +44,7 @@ export const readFiles = (codeBlobKey: string | null) =>
     },
   });
 
-export const writeFiles = (generationId: number) => tool({
+export const writeFiles = (generationId: number, previousCodeBlobKey: string | null = null) => tool({
   description: "Writes files to the blob storage",
   parameters: z.object({
     files: z
@@ -58,7 +59,19 @@ export const writeFiles = (generationId: number) => tool({
     console.log("Files to write:")
     console.log(files.map((f) => f.path));
 
-    const zipBuffer = await createZipBuffer(files);
+    let filesToSave = files;
+
+    if (previousCodeBlobKey) {
+      const buffer = await fetch(createBlobUrl(previousCodeBlobKey)).then((res) => res.arrayBuffer());
+      const previousFiles = await extractFiles(Buffer.from(buffer));
+
+      const currentFilePaths = new Set(files.map(f => f.path));
+      const missingFiles = previousFiles.filter(f => !currentFilePaths.has(f.path));
+      
+      filesToSave = [...files, ...missingFiles];
+    }
+
+    const zipBuffer = await createZipBuffer(filesToSave);
 
     const blobKey = await uploadBlob(
       `generations/${crypto.randomUUID()}.zip`,

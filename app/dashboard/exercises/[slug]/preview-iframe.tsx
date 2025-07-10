@@ -24,7 +24,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
   // Show message if no sandbox URL available
   if (!sandboxUrl && !isLoading && !error) {
     return (
-      <div className="flex-1 relative px-2">
+      <div className="flex-1 relative px-2 pb-2">
         <Card className="h-full shadow-sm border border-gray-200/50 relative overflow-hidden">
           <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center z-20">
             <div className="flex flex-col items-center justify-center text-center">
@@ -75,7 +75,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Iniciando sandbox
+                    Iniciando ejercicio
                   </h3>
                   <p className="text-sm text-gray-600">
                     Preparando el entorno de ejecución...
@@ -103,7 +103,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
                   <RefreshCw className="w-8 h-8 text-red-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-red-900 mb-2">
-                  Error en el sandbox
+                  Error en el entorno de ejecución
                 </h3>
                 <p className="text-sm text-red-600 max-w-sm mb-4">
                   {error}
@@ -124,7 +124,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
           {sandboxUrl && (
             <iframe
               ref={iframeRef}
-              src={`https://${sandboxUrl}`}
+              src={`https://${sandboxUrl}/exercises/${slug}`}
               className="w-full h-full rounded-md border-0"
               title="Preview"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"

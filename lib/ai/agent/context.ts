@@ -26,8 +26,8 @@ export interface FoundFileContent {
 }
 
 export const contextPaths = [
-  "components/exercises/odd-one-out",
-  "components/exercises/color-sequence/",
+  "app/exercises/odd-one-out",
+  "app/exercises/color-sequence",
   "app/exercises/[slug]/page.tsx",
   "app/exercises/registry.tsx",
   "hooks/use-exercise-execution.ts"

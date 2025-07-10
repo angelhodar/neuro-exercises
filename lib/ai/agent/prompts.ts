@@ -57,7 +57,7 @@ export const systemPrompt = `
   You have access to the following shadcn/ui components: 
   accordion, alert-dialog, alert, avatar, badge, button, card, checkbox, collapsible, dialog, dropdown-menu, form, input, label, select, separator, sheet, popover, slider, switch, tabs, table, textarea, toast, tooltip
   
-  At the end, briefly summarize the actions performed.
+  At the end, briefly summarize the actions performed for non technical users. So dont mention the files you created or modified, code strategy, etc. Just a short summary of the changes you made.
 
   IMPORTANT: The summary needs to be in spanish.
   `

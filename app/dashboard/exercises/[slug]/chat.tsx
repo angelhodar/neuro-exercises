@@ -18,6 +18,7 @@ interface Message {
 interface ChatProps {
   messages: Message[];
   slug: string;
+  autoStart: boolean;
 }
 
 function EmptyState() {
@@ -104,9 +105,9 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
   return null;
 }
 
-export function Chat({ messages: initialMessages, slug }: ChatProps) {
+export function Chat({ messages: initialMessages, slug, autoStart }: ChatProps) {
   const { initializeSandbox } = useSandbox();
-  const hasAutoExecuted = useRef(false);
+  const hasAutoStarted = useRef(false);
 
   const {
     messages,
@@ -131,11 +132,17 @@ export function Chat({ messages: initialMessages, slug }: ChatProps) {
   });
 
   useEffect(() => {
-    if (messages.length === 1 && !hasAutoExecuted.current) {
-      hasAutoExecuted.current = true;
+    if (autoStart && !hasAutoStarted.current) {
+      hasAutoStarted.current = true;
       reload();
     }
-  }, [messages.length, reload]);
+  }, [autoStart]);
+
+  useEffect(() => {
+    if (status === "streaming") {
+      hasAutoStarted.current = true;
+    }
+  }, [status]);
 
   // Filter messages to only include user and assistant roles
   const filteredMessages = messages.filter(

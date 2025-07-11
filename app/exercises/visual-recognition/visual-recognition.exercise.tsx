@@ -1,6 +1,6 @@
 import { getMediasByTags } from "@/app/actions/media";
 import { VisualRecognitionExerciseClient } from "./visual-recognition-exercise.client";
-import { type VisualRecognitionConfig, type ImageData } from "./visual-recognition-schema";
+import { type VisualRecognitionConfig, type ImageData } from "./visual-recognition.schema";
 
 interface VisualRecognitionExerciseProps {
   config: VisualRecognitionConfig;
@@ -17,7 +17,7 @@ async function getImagesForExercise(tags: string[]): Promise<ImageData[]> {
   }));
 }
 
-export async function VisualRecognitionExercise({ config }: VisualRecognitionExerciseProps) {
+export async function Exercise({ config }: VisualRecognitionExerciseProps) {
   const images = await getImagesForExercise(config.tags);
   return <VisualRecognitionExerciseClient config={config} images={images} />;
-}
+} 

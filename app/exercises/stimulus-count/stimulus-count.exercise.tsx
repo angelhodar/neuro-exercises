@@ -8,7 +8,7 @@ import type {
   StimulusCountQuestionResult,
   Shape,
   Stimulus,
-} from "./stimulus-count-schema";
+} from "./stimulus-count.schema";
 import { StimulusGrid } from "./stimulus-grid";
 import { NumericPad } from "./numeric-pad";
 
@@ -35,7 +35,7 @@ const colors = [
   "text-pink-500",
 ];
 
-export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
+export function Exercise({ config }: StimulusCountExerciseProps) {
   const { minStimuli, maxStimuli, allowOverlap } = config;
 
   const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
@@ -106,4 +106,4 @@ export function StimulusCountExercise({ config }: StimulusCountExerciseProps) {
       </div>
     </div>
   );
-}
+} 

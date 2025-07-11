@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { ColorSequenceQuestionResult } from "./color-sequence-schema";
+import type { ColorSequenceQuestionResult } from "./color-sequence.schema";
 
 interface ColorSequenceResultsProps {
   results: ColorSequenceQuestionResult[];
 }
 
-export function ColorSequenceResults({ results }: ColorSequenceResultsProps) {
+export function Results({ results }: ColorSequenceResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length;
   const accuracy = (totalCorrect / results.length) * 100;
 
@@ -41,14 +41,14 @@ export function ColorSequenceResults({ results }: ColorSequenceResultsProps) {
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
-                  {result.targetSequence.map((c, i) => (
+                  {result.targetSequence.map((c: number, i: number) => (
                     <span key={i} className="inline-block mr-1">
                       {c}
                     </span>
                   ))}
                 </TableCell>
                 <TableCell>
-                  {result.userSequence.map((c, i) => (
+                  {result.userSequence.map((c: number, i: number) => (
                     <span
                       key={i}
                       className={`inline-block mr-1 ${

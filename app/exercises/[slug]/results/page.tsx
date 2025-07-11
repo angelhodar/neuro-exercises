@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { SearchParams } from "nuqs/server";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import { loadExerciseAssets } from "@/app/exercises/loader";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import {
   parseConfigFromUrl,
@@ -29,11 +29,11 @@ export default async function ExerciseResultsPage({
   if (!validationResult.success) notFound();
 
   const exercise = await getExerciseBySlug(slug);
-  const entry = getExerciseFromRegistry(slug);
+  const assets = await loadExerciseAssets(slug);
 
-  if (!exercise || !entry) notFound();
+  if (!exercise || !assets) notFound();
 
-  const { schema, resultsSchema } = entry;
+  const { configSchema, resultSchema } = assets;
   const parsedParams = validationResult.data;
 
   let config,
@@ -42,8 +42,8 @@ export default async function ExerciseResultsPage({
 
   if (parsedParams.type === "config") {
     // Caso 1: config + results en URL
-    config = parseConfigFromUrl(parsedParams.config, schema);
-    results = parseResultsFromUrl(parsedParams.results, resultsSchema);
+    config = parseConfigFromUrl(parsedParams.config, configSchema);
+    results = parseResultsFromUrl(parsedParams.results, resultSchema);
   } else {
     // Caso 2: rid (result ID)
     const resultData = await getResultsById(parsedParams.rid);
@@ -57,7 +57,7 @@ export default async function ExerciseResultsPage({
 
   if (!config || !results) notFound();
 
-  const { ResultsComponent } = entry;
+  const { ResultsComponent } = assets;
 
   return (
     <div className="flex flex-col container mx-auto items-center justify-center h-screen">

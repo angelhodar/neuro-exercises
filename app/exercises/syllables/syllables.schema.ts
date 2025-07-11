@@ -33,13 +33,13 @@ export function syllablesConfigRefinements(data: z.infer<typeof syllablesSpecifi
   }
 }
 
-// Complete syllables configuration schema
-export const syllablesConfigSchema = baseExerciseConfigSchema
+// Complete syllables configuration schema - exported as configSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(syllablesSpecificConfigSchema)
   .superRefine(syllablesConfigRefinements)
 
-// Updated question result schema - removed isCorrect and renamed reactionTime to timeSpent
-export const syllablesQuestionResultSchema = z.object({
+// Updated question result schema - exported as resultSchema
+export const resultSchema = z.object({
   targetWord: z.string(),
   targetSyllables: z.array(z.string()),
   selectedSyllables: z.array(z.string()),
@@ -49,8 +49,8 @@ export const syllablesQuestionResultSchema = z.object({
 
 // Exercise results schema
 export const syllablesExerciseResultsSchema = z.object({
-  results: z.array(syllablesQuestionResultSchema),
-  config: syllablesConfigSchema,
+  results: z.array(resultSchema),
+  config: configSchema,
   completedAt: z.date(),
   totalCorrect: z.number().int().min(0),
   totalQuestions: z.number().int().min(0),
@@ -60,8 +60,8 @@ export const syllablesExerciseResultsSchema = z.object({
 
 // Inferred types
 export type SyllablesSpecificConfig = z.infer<typeof syllablesSpecificConfigSchema>
-export type SyllablesConfig = z.infer<typeof syllablesConfigSchema>
-export type SyllablesQuestionResult = z.infer<typeof syllablesQuestionResultSchema>
+export type SyllablesConfig = z.infer<typeof configSchema>
+export type SyllablesQuestionResult = z.infer<typeof resultSchema>
 export type SyllablesExerciseResults = z.infer<typeof syllablesExerciseResultsSchema>
 
 // Default configuration
@@ -70,8 +70,8 @@ export const defaultSyllablesConfig: SyllablesConfig = {
   totalQuestions: 10,
 }
 
-// Preset configurations (in Spanish)
-export const syllablesPresets: Record<ExercisePreset, SyllablesConfig> = {
+// Preset configurations - exported as presets
+export const presets: Record<ExercisePreset, SyllablesConfig> = {
   easy: {
     syllablesCount: 3,
     totalQuestions: 5,
@@ -88,4 +88,4 @@ export const syllablesPresets: Record<ExercisePreset, SyllablesConfig> = {
     syllablesCount: 6,
     totalQuestions: 20,
   },
-}
+} 

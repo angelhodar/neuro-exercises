@@ -51,13 +51,13 @@ export function visualRecognitionConfigRefinements(
   }
 }
 
-// Complete visual recognition configuration schema
-export const visualRecognitionConfigSchema = baseExerciseConfigSchema
+// Complete visual recognition configuration schema - exported as configSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(visualRecognitionSpecificConfigSchema)
   .superRefine(visualRecognitionConfigRefinements)
 
-// Question result schema
-export const visualRecognitionQuestionResultSchema = z.object({
+// Question result schema - exported as resultSchema
+export const resultSchema = z.object({
   targetTag: z.string(),
   correctImages: z.array(z.string()), // Image IDs
   selectedImages: z.array(z.string()), // Image IDs
@@ -67,8 +67,8 @@ export const visualRecognitionQuestionResultSchema = z.object({
 
 // Exercise results schema
 export const visualRecognitionExerciseResultsSchema = z.object({
-  results: z.array(visualRecognitionQuestionResultSchema),
-  config: visualRecognitionConfigSchema,
+  results: z.array(resultSchema),
+  config: configSchema,
   completedAt: z.date(),
   totalCorrect: z.number().int().min(0),
   totalQuestions: z.number().int().min(0),
@@ -78,8 +78,8 @@ export const visualRecognitionExerciseResultsSchema = z.object({
 
 // Inferred types
 export type VisualRecognitionSpecificConfig = z.infer<typeof visualRecognitionSpecificConfigSchema>
-export type VisualRecognitionConfig = z.infer<typeof visualRecognitionConfigSchema>
-export type VisualRecognitionQuestionResult = z.infer<typeof visualRecognitionQuestionResultSchema>
+export type VisualRecognitionConfig = z.infer<typeof configSchema>
+export type VisualRecognitionQuestionResult = z.infer<typeof resultSchema>
 export type VisualRecognitionExerciseResults = z.infer<typeof visualRecognitionExerciseResultsSchema>
 
 // Default configuration
@@ -92,8 +92,8 @@ export const defaultVisualRecognitionConfig: VisualRecognitionConfig = {
   totalQuestions: 10,
 }
 
-// Preset configurations
-export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionConfig> = {
+// Preset configurations - exported as presets
+export const presets: Record<ExercisePreset, VisualRecognitionConfig> = {
   easy: {
     imagesPerQuestion: 4,
     correctImagesCount: 2,
@@ -126,4 +126,4 @@ export const visualRecognitionPresets: Record<ExercisePreset, VisualRecognitionC
     showImageNames: false,
     totalQuestions: 20,
   },
-}
+} 

@@ -17,7 +17,7 @@ interface VisualRecognitionConfigFieldsProps {
   basePath?: string;
 }
 
-export function VisualRecognitionConfigFields(
+export function ConfigFields(
   props: VisualRecognitionConfigFieldsProps
 ) {
   const { basePath = "" } = props;
@@ -124,4 +124,4 @@ export function VisualRecognitionConfigFields(
       />
     </div>
   );
-}
+} 

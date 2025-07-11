@@ -11,7 +11,11 @@ import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import {
+  useExerciseAssetsLoader,
+  type ClientAssets,
+} from "@/hooks/use-exercise-assets-loader";
+import { Loader2 } from "lucide-react";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
@@ -19,31 +23,29 @@ interface ExerciseConfigFormProps extends PropsWithChildren {
   onSubmit?: (config: any) => void;
 }
 
-export function ExerciseConfigForm({
+interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
+  assets: ClientAssets;
+}
+
+// Content component that only renders when assets are loaded
+function ExerciseConfigFormContent({
   slug,
   title,
+  assets,
   onSubmit,
   children,
-}: ExerciseConfigFormProps) {
+}: ExerciseConfigFormContentProps) {
   const router = useRouter();
+  const { configSchema, presets, ConfigFieldsComponent } = assets;
 
-  const entry = getExerciseFromRegistry(slug);
-
-  if (!entry) {
-    console.error(`No se encontró el ejercicio con slug '${slug}' en el registro.`);
-    return null;
-  }
-
-  const { schema, presets } = entry;
-
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<z.infer<typeof configSchema>>({
+    resolver: zodResolver(configSchema),
     defaultValues: { automaticNextQuestion: true, ...presets?.easy },
   });
 
-  function handleSubmit(data: z.infer<typeof schema>) {
+  function handleSubmit(data: z.infer<typeof configSchema>) {
     try {
-      const validatedData = schema.parse(data);
+      const validatedData = configSchema.parse(data);
       if (onSubmit) {
         onSubmit(validatedData);
         return;
@@ -63,7 +65,10 @@ export function ExerciseConfigForm({
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {presets && (
               <>
                 {/* Selector de presets */}
@@ -77,7 +82,7 @@ export function ExerciseConfigForm({
             <Separator />
 
             {/* Campos específicos del ejercicio */}
-            {children}
+            {children || <ConfigFieldsComponent />}
             <Separator />
 
             {/* Acciones */}
@@ -89,4 +94,49 @@ export function ExerciseConfigForm({
       </CardContent>
     </Card>
   );
-} 
+}
+
+// Main wrapper component that handles loading states
+export function ExerciseConfigForm({
+  slug,
+  children,
+  ...rest
+}: ExerciseConfigFormProps) {
+  const { assets, isLoading, error } = useExerciseAssetsLoader(slug);
+
+  if (error) {
+    console.error(`Error loading assets for ${slug}:`, error);
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            Error loading exercise configuration
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="p-6">
+          <div className="text-center">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+            <div className="text-gray-600">
+              Loading exercise configuration...
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!assets) return null;
+
+  return (
+    <ExerciseConfigFormContent {...rest} slug={slug} assets={assets}>
+      {children}
+    </ExerciseConfigFormContent>
+  );
+}

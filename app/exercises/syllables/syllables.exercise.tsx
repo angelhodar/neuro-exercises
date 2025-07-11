@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   type SyllablesConfig,
   type SyllablesQuestionResult,
-} from "./syllables-schema";
+} from "./syllables.schema";
 import {
   getWordsBySyllableCount,
   type SpanishWord,
@@ -23,7 +23,7 @@ interface QuestionState {
   selectedSyllables: string[];
 }
 
-export function SyllablesExercise({ config }: SyllablesExerciseProps) {
+export function Exercise({ config }: SyllablesExerciseProps) {
   const { syllablesCount } = config;
   const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
 
@@ -161,4 +161,4 @@ export function SyllablesExercise({ config }: SyllablesExerciseProps) {
       </Card>
     </div>
   );
-}
+} 

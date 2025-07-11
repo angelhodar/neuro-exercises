@@ -7,7 +7,7 @@ import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import type {
   ColorSequenceConfig,
   ColorSequenceQuestionResult,
-} from "./color-sequence-schema";
+} from "./color-sequence.schema";
 
 interface ColorSequenceExerciseProps {
   config: ColorSequenceConfig;
@@ -47,7 +47,7 @@ function ColorCell({
   );
 }
 
-export function ColorSequenceExercise({ config }: ColorSequenceExerciseProps) {
+export function Exercise({ config }: ColorSequenceExerciseProps) {
   const { numCells, sequenceLength, highlightInterval } = config;
 
   const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();

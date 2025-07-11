@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { SearchParams } from "nuqs/server";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import { loadExerciseAssets } from "@/app/exercises/loader";
 import {
   parseConfigFromUrl,
   parseResultsFromUrl,
@@ -28,17 +28,17 @@ export default async function ExerciseResultsPage({
   if (!validationResult.success) notFound();
 
   const exercise = getExerciseFromSandboxEnv();
-  const entry = getExerciseFromRegistry(slug);
+  const entry = await loadExerciseAssets(slug);
 
   if (!exercise || !entry) notFound();
 
-  const { schema, resultsSchema } = entry;
+  const { configSchema, resultSchema } = entry;
   const parsedParams = validationResult.data;
 
   if (parsedParams.type !== "config") notFound();
 
-  const config = parseConfigFromUrl(parsedParams.config, schema);
-  const results = parseResultsFromUrl(parsedParams.results, resultsSchema);
+  const config = parseConfigFromUrl(parsedParams.config, configSchema);
+  const results = parseResultsFromUrl(parsedParams.results, resultSchema);
 
   const { ResultsComponent } = entry;
 

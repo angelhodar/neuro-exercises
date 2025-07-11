@@ -7,13 +7,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CheckCircle, XCircle } from "lucide-react";
-import type { StroopColorInterferenceQuestionResult } from "./stroop-color-interference-schema";
+import type { StroopColorInterferenceQuestionResult } from "./stroop-color-interference.schema";
 
 interface StroopColorInterferenceResultsProps {
   results: StroopColorInterferenceQuestionResult[];
 }
 
-export function StroopColorInterferenceResults({
+export function Results({
   results,
 }: StroopColorInterferenceResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length;

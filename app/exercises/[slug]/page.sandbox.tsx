@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import { loadExerciseAssets } from "@/app/exercises/loader";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseContainer } from "@/components/exercises/exercise-container";
 import { CountdownProvider } from "@/components/exercises/exercise-countdown";
@@ -18,19 +18,19 @@ export default async function Page({ params, searchParams }: PageProps) {
   const validationResult = exerciseParamsSchema.safeParse(resolvedSearchParams);
 
   const exercise = getExerciseFromSandboxEnv();
-  const entry = getExerciseFromRegistry(slug);
+  const entry = await loadExerciseAssets(slug);
 
   if (!exercise || !entry) notFound();
 
   if (!validationResult.success) redirect(`/exercises/${slug}/config`);
 
-  const { schema } = entry;
+  const { configSchema } = entry;
 
   const parsedParams = validationResult.data;
 
   if (parsedParams.type !== "config") redirect(`/exercises/${slug}/config`);
 
-  const config = parseConfigFromUrl(parsedParams.config, schema)
+  const config = parseConfigFromUrl(parsedParams.config, configSchema);
 
   if (!config) redirect(`/exercises/${slug}/config`);
 

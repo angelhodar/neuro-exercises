@@ -1,4 +1,4 @@
-import { OddOneOutConfig } from "./odd-one-out-schema";
+import { OddOneOutConfig } from "./odd-one-out.schema";
 import { OddOneOutExerciseClient } from "./odd-one-out-exercise.client";
 import { db } from "@/lib/db";
 import { medias } from "@/lib/db/schema";
@@ -9,7 +9,7 @@ interface OddOneOutExerciseProps {
   config: OddOneOutConfig;
 }
 
-export async function OddOneOutExercise({ config }: OddOneOutExerciseProps) {
+export async function Exercise({ config }: OddOneOutExerciseProps) {
   const allMediaIds = Array.from(
     new Set(
       config.questions.flatMap((q) => [

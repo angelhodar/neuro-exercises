@@ -76,4 +76,9 @@ export const stimulusCountPresets: Record<ExercisePreset, StimulusCountConfig> =
   medium: { minStimuli: 5, maxStimuli: 10, allowOverlap: false, totalQuestions: 10 },
   hard: { minStimuli: 10, maxStimuli: 20, allowOverlap: true, totalQuestions: 15 },
   expert: { minStimuli: 15, maxStimuli: 30, allowOverlap: true, totalQuestions: 20 },
-} 
+}
+
+// Exports required by the loader
+export const configSchema = stimulusCountConfigSchema;
+export const resultSchema = stimulusCountExerciseResultsSchema;
+export const presets = stimulusCountPresets; 

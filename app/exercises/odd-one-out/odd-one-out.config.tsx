@@ -17,7 +17,7 @@ interface OddOneOutConfigFieldsProps {
   basePath?: string;
 }
 
-export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
+export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
   const { control, watch } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
@@ -96,4 +96,4 @@ export function OddOneOutConfigFields({ basePath = "" }: OddOneOutConfigFieldsPr
       ))}
     </Accordion>
   );
-}
+} 

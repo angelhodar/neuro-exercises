@@ -7,7 +7,7 @@ import {
   type StroopColorInterferenceConfig,
   type StroopColorInterferenceQuestionResult,
   STROOP_COLORS,
-} from "./stroop-color-interference-schema";
+} from "./stroop-color-interference.schema";
 
 interface StroopColorInterferenceExerciseProps {
   config: StroopColorInterferenceConfig;
@@ -29,7 +29,7 @@ function shuffle<T>(array: T[]): T[] {
   return newArray;
 }
 
-export function StroopColorInterferenceExercise({
+export function Exercise({
   config,
 }: StroopColorInterferenceExerciseProps) {
   const { numOptions } = config;

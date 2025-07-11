@@ -73,4 +73,9 @@ export const oddOneOutPresets: Record<ExercisePreset, OddOneOutConfig> = {
   medium: defaultOddOneOutConfig,
   hard: defaultOddOneOutConfig,
   expert: defaultOddOneOutConfig,
-} 
+}
+
+// Exports required by the loader
+export const configSchema = oddOneOutConfigSchema;
+export const resultSchema = oddOneOutResultSchema;
+export const presets = oddOneOutPresets; 

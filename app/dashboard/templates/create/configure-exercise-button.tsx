@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
-import { Pencil } from "lucide-react";
+import { useExerciseAssetsLoader } from "@/hooks/use-exercise-assets-loader";
+import { Pencil, Loader2 } from "lucide-react";
 
 interface ConfigureExerciseButtonProps {
   slug: string;
@@ -24,16 +24,30 @@ export default function ConfigureExerciseButton(
   const { slug, index } = props;
   const [open, setOpen] = useState(false);
 
-  const entry = getExerciseFromRegistry(slug);
+  const { assets, isLoading, error } = useExerciseAssetsLoader(slug);
 
-  if (!entry) return null;
+  if (error) {
+    console.error(`Error loading assets for ${slug}:`, error);
+    return null;
+  }
 
-  const { ConfigFieldsComponent } = entry;
+  if (!assets) return null;
+
+  const { ConfigFieldsComponent } = assets;
 
   return (
     <Fragment>
-      <Button type="button" onClick={() => setOpen(true)} className="w-full">
-        <Pencil className="w-4 h-4 mr-2" />
+      <Button 
+        type="button" 
+        onClick={() => setOpen(true)} 
+        className="w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        ) : (
+          <Pencil className="w-4 h-4 mr-2" />
+        )}
         Configurar
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

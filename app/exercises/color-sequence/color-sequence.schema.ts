@@ -33,21 +33,21 @@ export function colorSequenceConfigRefinements(
   }
 }
 
-// 3. Esquema completo de configuración
-export const colorSequenceConfigSchema = baseExerciseConfigSchema
+// 3. Esquema completo de configuración - exported as configSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(colorSequenceSpecificConfigSchema)
   .superRefine(colorSequenceConfigRefinements)
 
-// 4. Resultados
-export const colorSequenceQuestionResultSchema = z.object({
+// 4. Resultados - exported as resultSchema
+export const resultSchema = z.object({
   targetSequence: z.array(z.number().int()),
   userSequence: z.array(z.number().int()),
   isCorrect: z.boolean(),
 })
 
 export const colorSequenceExerciseResultsSchema = z.object({
-  results: z.array(colorSequenceQuestionResultSchema),
-  config: colorSequenceConfigSchema,
+  results: z.array(resultSchema),
+  config: configSchema,
   completedAt: z.date(),
   totalCorrect: z.number().int().min(0),
   accuracy: z.number().min(0).max(100),
@@ -55,12 +55,12 @@ export const colorSequenceExerciseResultsSchema = z.object({
 
 // 5. Tipos derivados
 export type ColorSequenceSpecificConfig = z.infer<typeof colorSequenceSpecificConfigSchema>
-export type ColorSequenceConfig = z.infer<typeof colorSequenceConfigSchema>
-export type ColorSequenceQuestionResult = z.infer<typeof colorSequenceQuestionResultSchema>
+export type ColorSequenceConfig = z.infer<typeof configSchema>
+export type ColorSequenceQuestionResult = z.infer<typeof resultSchema>
 export type ColorSequenceExerciseResults = z.infer<typeof colorSequenceExerciseResultsSchema>
 export type { BaseExerciseConfig, ExercisePreset }
 
-// 6. Configuración por defecto y presets
+// 6. Configuración por defecto y presets - exported as presets
 export const defaultColorSequenceConfig: ColorSequenceConfig = {
   numCells: 6,
   sequenceLength: 3,
@@ -68,7 +68,7 @@ export const defaultColorSequenceConfig: ColorSequenceConfig = {
   totalQuestions: 10,
 }
 
-export const colorSequencePresets: Record<ExercisePreset, ColorSequenceConfig> = {
+export const presets: Record<ExercisePreset, ColorSequenceConfig> = {
   easy: {
     numCells: 4,
     sequenceLength: 2,

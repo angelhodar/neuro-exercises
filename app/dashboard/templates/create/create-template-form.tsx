@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AddExerciseButton } from "./add-exercise-button";
 import { ExerciseCard } from "./exercise-card";
 import { Exercise } from "@/lib/db/schema";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import { loadClientAssets } from "@/app/exercises/loader";
 import ConfigureExerciseButton from "./configure-exercise-button";
 import { createExerciseTemplate } from "@/app/actions/templates";
 import { Trash2 } from "lucide-react";
@@ -73,7 +73,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
     name: "exercises",
   });
 
-  const addExercise = (selectedExercise: Exercise) => {
+  const addExercise = async (selectedExercise: Exercise) => {
     // Check if exercise is already added
     const existingExercise = fields.find(
       (field) => field.exerciseId === selectedExercise.id
@@ -84,15 +84,26 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
       return;
     }
 
-    const entry = getExerciseFromRegistry(selectedExercise.slug);
-    const defaultConfig = entry?.presets?.easy ?? {};
+    try {
+      const assets = await loadClientAssets(selectedExercise.slug);
+      const defaultConfig = assets?.presets?.easy ?? {};
 
-    append({
-      exerciseId: selectedExercise.id,
-      slug: selectedExercise.slug,
-      config: defaultConfig,
-    });
-    toast.success("Ejercicio añadido");
+      append({
+        exerciseId: selectedExercise.id,
+        slug: selectedExercise.slug,
+        config: defaultConfig,
+      });
+      toast.success("Ejercicio añadido");
+    } catch (error) {
+      console.error("Error loading exercise presets:", error);
+      // Fallback to empty config if loading fails
+      append({
+        exerciseId: selectedExercise.id,
+        slug: selectedExercise.slug,
+        config: {},
+      });
+      toast.success("Ejercicio añadido (sin configuración por defecto)");
+    }
   };
 
   const removeExercise = (index: number) => {

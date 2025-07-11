@@ -1,12 +1,12 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import type { VisualRecognitionQuestionResult } from "./visual-recognition-schema"
+import type { VisualRecognitionQuestionResult } from "./visual-recognition.schema"
 
 interface VisualRecognitionResultsProps {
   results: VisualRecognitionQuestionResult[]
 }
 
-export function VisualRecognitionResults({ results }: VisualRecognitionResultsProps) {
+export function Results({ results }: VisualRecognitionResultsProps) {
   // Helper function to calculate accuracy for a result
   function calculateAccuracy(result: VisualRecognitionQuestionResult): number {
     const correctSelections = result.selectedImages.filter((id) => result.correctImages.includes(id)).length
@@ -127,4 +127,4 @@ export function VisualRecognitionResults({ results }: VisualRecognitionResultsPr
       </div>
     </div>
   )
-}
+} 

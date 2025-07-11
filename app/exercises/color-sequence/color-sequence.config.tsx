@@ -15,7 +15,7 @@ interface ColorSequenceConfigFieldsProps {
   basePath?: string;
 }
 
-export function ColorSequenceConfigFields({
+export function ConfigFields({
   basePath = "",
 }: ColorSequenceConfigFieldsProps) {
   const { control } = useFormContext();
@@ -80,4 +80,4 @@ export function ColorSequenceConfigFields({
       </div>
     </div>
   );
-}
+} 

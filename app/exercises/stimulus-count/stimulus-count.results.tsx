@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { StimulusCountQuestionResult } from "./stimulus-count-schema"
+import type { StimulusCountQuestionResult } from "./stimulus-count.schema"
 
 interface StimulusCountResultsProps {
   results: StimulusCountQuestionResult[]
 }
 
-export function StimulusCountResults({ results }: StimulusCountResultsProps) {
+export function Results({ results }: StimulusCountResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length
   const accuracy = results.length > 0 ? (totalCorrect / results.length) * 100 : 0
 
@@ -66,4 +66,4 @@ export function StimulusCountResults({ results }: StimulusCountResultsProps) {
       </div>
     </div>
   )
-} 
+}

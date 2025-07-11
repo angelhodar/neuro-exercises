@@ -50,13 +50,13 @@ export function reactionTimeConfigRefinements(
   }
 }
 
-// Complete reaction time grid configuration schema with refinements
-export const reactionTimeGridConfigSchema = baseExerciseConfigSchema
+// Complete reaction time grid configuration schema - exported as configSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(reactionTimeSpecificConfigSchema)
   .superRefine(reactionTimeConfigRefinements)
 
-// Question result schema
-export const reactionTimeQuestionResultSchema = z.object({
+// Question result schema - exported as resultSchema
+export const resultSchema = z.object({
   targetCells: z.array(z.number().int().min(0)),
   selectedCells: z.array(z.number().int().min(0)),
   reactionTimes: z.array(z.number().min(0)),
@@ -64,8 +64,8 @@ export const reactionTimeQuestionResultSchema = z.object({
 
 // Exercise results schema
 export const reactionTimeExerciseResultsSchema = z.object({
-  results: z.array(reactionTimeQuestionResultSchema),
-  config: reactionTimeGridConfigSchema,
+  results: z.array(resultSchema),
+  config: configSchema,
   completedAt: z.date(),
   totalCorrectSelections: z.number().int().min(0),
   totalTargets: z.number().int().min(0),
@@ -75,8 +75,8 @@ export const reactionTimeExerciseResultsSchema = z.object({
 
 // Inferred types
 export type ReactionTimeSpecificConfig = z.infer<typeof reactionTimeSpecificConfigSchema>
-export type ReactionTimeGridConfig = z.infer<typeof reactionTimeGridConfigSchema>
-export type ReactionTimeQuestionResult = z.infer<typeof reactionTimeQuestionResultSchema>
+export type ReactionTimeGridConfig = z.infer<typeof configSchema>
+export type ReactionTimeQuestionResult = z.infer<typeof resultSchema>
 export type ReactionTimeExerciseResults = z.infer<typeof reactionTimeExerciseResultsSchema>
 
 // Re-export base types for convenience
@@ -92,8 +92,8 @@ export const defaultReactionTimeConfig: ReactionTimeGridConfig = {
   totalQuestions: 10,
 }
 
-// Preset configurations with proper typing
-export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig> = {
+// Preset configurations - exported as presets
+export const presets: Record<ExercisePreset, ReactionTimeGridConfig> = {
   easy: {
     gridSize: 6,
     delayMin: 2000,
@@ -126,4 +126,4 @@ export const reactionTimePresets: Record<ExercisePreset, ReactionTimeGridConfig>
     cellDisplayDuration: 1000,
     totalQuestions: 20,
   },
-}
+} 

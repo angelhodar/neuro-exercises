@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { SyllablesQuestionResult } from "./syllables-schema"
+import type { SyllablesQuestionResult } from "./syllables.schema"
 
 interface SyllablesResultsProps {
   results: SyllablesQuestionResult[]
 }
 
-export function SyllablesResults({ results }: SyllablesResultsProps) {
+export function Results({ results }: SyllablesResultsProps) {
   // Helper function to check if a result is correct (inferred from syllables match)
   function isCorrect(result: SyllablesQuestionResult): boolean {
     return result.selectedSyllables.join("") === result.targetSyllables.join("")
@@ -98,4 +98,4 @@ export function SyllablesResults({ results }: SyllablesResultsProps) {
       </div>
     </div>
   )
-}
+} 

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useRef } from "react"
 import { Star, Circle, Square, Triangle } from "lucide-react"
-import type { Shape, Stimulus } from "./stimulus-count-schema"
+import type { Shape, Stimulus } from "./stimulus-count.schema"
 
 interface StimulusGridProps {
   stimuli: Stimulus[]

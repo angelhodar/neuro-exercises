@@ -6,13 +6,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, XCircle } from "lucide-react";
-import { OddOneOutResult } from "./odd-one-out-schema";
+import { OddOneOutResult } from "./odd-one-out.schema";
 
 interface OddOneOutResultsProps {
   results: OddOneOutResult[];
 }
 
-export function OddOneOutResults({ results }: OddOneOutResultsProps) {
+export function Results({ results }: OddOneOutResultsProps) {
   const totalQuestions = results.length;
   const correctAnswers = results.filter((r) => r.isCorrect).length;
   const accuracy = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;

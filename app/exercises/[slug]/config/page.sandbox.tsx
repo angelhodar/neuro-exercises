@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
-import { getExerciseFromRegistry } from "@/app/exercises/registry";
+import { loadExerciseAssets } from "@/app/exercises/loader";
 import { getExerciseFromSandboxEnv } from "../parsers";
 
 interface PageProps {
@@ -11,11 +11,11 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
   const { slug } = await params;
 
   const exercise = getExerciseFromSandboxEnv();
-  const entry = getExerciseFromRegistry(slug);
+  const assets = await loadExerciseAssets(slug);
 
-  if (!entry || !exercise) notFound();
+  if (!assets || !exercise) notFound();
 
-  const { ConfigFieldsComponent } = entry;
+  const { ConfigFieldsComponent } = assets;
 
   return (
     <div className="flex flex-1 container justify-center items-center py-8 mx-auto min-h-full">

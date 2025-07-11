@@ -16,7 +16,7 @@ interface StimulusCountConfigFieldsProps {
   basePath?: string
 }
 
-export function StimulusCountConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) {
+export function ConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) {
   const { control } = useFormContext()
 
   const minStimuliPath = `${basePath}minStimuli`

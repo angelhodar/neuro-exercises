@@ -7,13 +7,18 @@ import {
   DashboardHeaderTitle,
   DashboardHeaderActions,
 } from "@/app/dashboard/dashboard-header";
-import { getExerciseFromRegistry } from "../exercises/registry";
+import { exerciseHasAssets } from "@/app/exercises/loader";
 import { Button } from "@/components/ui/button";
-
-export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const exercises = await getExercises();
+
+  const exerciseAssetChecks = await Promise.all(
+    exercises.map(async (exercise) => ({
+      ...exercise,
+      hasAssets: await exerciseHasAssets(exercise.slug),
+    })),
+  );
 
   return (
     <>
@@ -28,11 +33,11 @@ export default async function DashboardPage() {
         </DashboardHeaderActions>
       </DashboardHeader>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-        {exercises.map((exercise) => (
+        {exerciseAssetChecks.map((exercise) => (
           <div key={exercise.id} className="relative h-full">
             <Link
               href={
-                !!getExerciseFromRegistry(exercise.slug)
+                exercise.hasAssets
                   ? `/exercises/${exercise.slug}`
                   : `/dashboard/exercises/${exercise.slug}`
               }

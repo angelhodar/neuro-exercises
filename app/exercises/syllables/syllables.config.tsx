@@ -21,7 +21,7 @@ interface SyllablesConfigFieldsProps {
   basePath?: string;
 }
 
-export function SyllablesConfigFields(props: SyllablesConfigFieldsProps) {
+export function ConfigFields(props: SyllablesConfigFieldsProps) {
   const { basePath = "" } = props;
   const { control } = useFormContext();
 
@@ -60,4 +60,4 @@ export function SyllablesConfigFields(props: SyllablesConfigFieldsProps) {
       />
     </div>
   );
-}
+} 

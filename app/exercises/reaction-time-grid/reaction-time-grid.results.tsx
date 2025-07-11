@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { ReactionTimeQuestionResult, ReactionTimeGridConfig } from "./reaction-time-grid-schema";
+import type { ReactionTimeQuestionResult, ReactionTimeGridConfig } from "./reaction-time-grid.schema";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface ExerciseResultsProps {
@@ -53,7 +53,7 @@ function ReactionTimeHeatmap({ cellAverages, gridSize }: { cellAverages: Record<
   );
 }
 
-export function ExerciseResults({ results, config }: ExerciseResultsProps) {
+export function Results({ results, config }: ExerciseResultsProps) {
   // Helper function to check if a result is correct
   function calculateCorrectSelections(result: ReactionTimeQuestionResult): number {
     return result.selectedCells.filter((cell) => result.targetCells.includes(cell)).length
@@ -193,4 +193,4 @@ export function ExerciseResults({ results, config }: ExerciseResultsProps) {
       </Tabs>
     </div>
   )
-}
+} 

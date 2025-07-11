@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { OddOneOutConfig, OddOneOutResult } from "./odd-one-out-schema";
+import { OddOneOutConfig, OddOneOutResult } from "./odd-one-out.schema";
 import {
   MediaCard,
   MediaCardImage,

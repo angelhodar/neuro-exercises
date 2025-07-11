@@ -15,7 +15,7 @@ interface StroopColorInterferenceConfigFieldsProps {
   basePath?: string;
 }
 
-export function StroopColorInterferenceConfigFields({
+export function ConfigFields({
   basePath = "",
 }: StroopColorInterferenceConfigFieldsProps) {
   const { control } = useFormContext();

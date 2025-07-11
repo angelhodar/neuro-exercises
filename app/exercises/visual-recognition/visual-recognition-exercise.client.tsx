@@ -7,7 +7,7 @@ import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
   type ImageData,
-} from "./visual-recognition-schema";
+} from "./visual-recognition.schema";
 import { cn, createBlobUrl } from "@/lib/utils";
 
 interface VisualRecognitionExerciseClientProps {

@@ -15,7 +15,7 @@ interface ReactionTimeConfigFieldsProps {
   basePath?: string;
 }
 
-export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
+export function ConfigFields(props: ReactionTimeConfigFieldsProps) {
   const { basePath = "" } = props;
   const { control } = useFormContext();
 
@@ -113,4 +113,4 @@ export function ReactionTimeConfigFields(props: ReactionTimeConfigFieldsProps) {
       />
     </div>
   );
-}
+} 

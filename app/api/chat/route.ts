@@ -1,6 +1,7 @@
 import { streamText } from "ai";
 
 import { google, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
+import { vercel } from "@ai-sdk/vercel";
 import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
 import {
   getCurrentGeneratedFiles,
@@ -32,7 +33,11 @@ export async function POST(req: Request) {
 
   const generations = await getExerciseGenerations(exercise.id);
 
-  if (generations.at(-1)?.status === "COMPLETED") {
+  if (generations.length === 0 || generations.every((g) => g.status === "COMPLETED")) {
+    return new Response("No generation to process", { status: 400 });
+  }
+
+  if (generations.at(-1)!.status === "COMPLETED") {
     const newGeneration = await createExerciseGeneration({
       exerciseId: exercise.id,
       prompt: lastMessage.content,

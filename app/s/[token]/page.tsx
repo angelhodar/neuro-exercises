@@ -35,8 +35,7 @@ export default async function SharedLinkPage({
             <LinkExerciseCard
               key={i}
               exercise={item.exercise}
-              index={i}
-              linkId={linkId}
+              linkId={linkData.id}
               itemId={item.id}
               completed={!!item.exerciseResults[0]}
             />

@@ -8,13 +8,12 @@ import { cn } from "@/lib/utils";
 interface LinkExerciseCardProps {
   exercise: Exercise;
   completed: boolean;
-  linkId: string;
-  index: number;
+  linkId: number;
   itemId: number;
 }
 
 export function LinkExerciseCard(props: LinkExerciseCardProps) {
-  const { exercise, completed, linkId, index, itemId } = props;
+  const { exercise, completed, linkId, itemId } = props;
 
   return (
     <Card

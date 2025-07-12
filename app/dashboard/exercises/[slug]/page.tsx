@@ -53,7 +53,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
     return m;
   });
 
-  const autoStart = generations.length === 1 && generations[0].status === "GENERATING";
+  const autoStart = generations.length === 1 && generations[0].status === "PENDING";
 
   return (
     <SandboxProvider exerciseId={exercise.id}>

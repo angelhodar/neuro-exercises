@@ -36,7 +36,7 @@ export async function createExerciseGeneration(data: {
       .values({
         exerciseId: data.exerciseId,
         userId: user.id,
-        status: "GENERATING",
+        status: "PENDING",
         prompt: data.prompt,
       })
       .returning();
@@ -51,7 +51,7 @@ export async function createExerciseGeneration(data: {
 export async function updateExerciseGeneration(
   id: number,
   updates: {
-    status?: "GENERATING" | "COMPLETED" | "ERROR";
+    status?: "PENDING" | "GENERATING" | "COMPLETED" | "ERROR";
     summary?: string;
     codeBlobKey?: string;
     sandboxId?: string | null;

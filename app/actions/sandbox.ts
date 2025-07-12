@@ -26,24 +26,8 @@ function createSandboxEnvVars(exercise: Exercise) {
   return stringifiedVars;
 }
 
-export async function createOrConnectToSandbox(exerciseId: number) {
-  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
-
-  if (existingSandbox) {
-    const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
-    return {
-      sandboxId: existingSandbox.sandboxId,
-      sandboxUrl: sandbox.getHost(3000)
-    };
-  }
-
-  const lastGeneration = await getLastCompletedGeneration(exerciseId);
-
-  if (!lastGeneration || !lastGeneration.codeBlobKey) {
-    throw new Error("No completed generation found with code blob key");
-  }
-
-  const zipResponse = await fetch(createBlobUrl(lastGeneration.codeBlobKey));
+async function updateSandboxFiles(sandbox: Sandbox, codeBlobKey: string) {
+  const zipResponse = await fetch(createBlobUrl(codeBlobKey));
 
   if (!zipResponse.ok) {
     throw new Error(`Failed to download code ZIP: ${zipResponse.statusText}`);
@@ -54,6 +38,34 @@ export async function createOrConnectToSandbox(exerciseId: number) {
   // Extract files from the ZIP buffer
   const files = await extractFiles(zipBuffer);
 
+  // Write all files to the sandbox at /home/user
+  const fileWrites = files.map(file => ({
+    path: `/home/user/${file.path}`,
+    data: file.content
+  }));
+
+  await sandbox.files.write(fileWrites);
+}
+
+export async function createOrConnectToSandbox(exerciseId: number) {
+  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
+
+  const lastGeneration = await getLastCompletedGeneration(exerciseId);
+
+  if (!lastGeneration || !lastGeneration.codeBlobKey) {
+    throw new Error("No completed generation found with code blob key");
+  }
+
+  if (existingSandbox) {
+    const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
+    await sandbox.setTimeout(300_000);
+    await updateSandboxFiles(sandbox, lastGeneration.codeBlobKey);
+    return {
+      sandboxId: existingSandbox.sandboxId,
+      sandboxUrl: sandbox.getHost(3000)
+    };
+  }
+
   const exercise = await getExerciseById(exerciseId);
 
   if (!exercise) throw new Error(`Exercise ${exerciseId} not found`);
@@ -61,8 +73,9 @@ export async function createOrConnectToSandbox(exerciseId: number) {
   // Create E2B sandbox with environment variables
   const sandbox = await Sandbox.create(TEMPLATE_ID, {
     metadata: { exerciseId: exerciseId.toString() },
-    timeoutMs: 1_800_000
   });
+
+  await updateSandboxFiles(sandbox, lastGeneration.codeBlobKey);
 
   await sandbox.files.write([
     {
@@ -73,14 +86,6 @@ export async function createOrConnectToSandbox(exerciseId: number) {
 
   // Get the host URL for the sandbox
   const host = sandbox.getHost(3000);
-  
-  // Write all files to the sandbox at /home/user
-  const fileWrites = files.map(file => ({
-    path: `/home/user/${file.path}`,
-    data: file.content
-  }));
-  
-  await sandbox.files.write(fileWrites);
 
   return {
     sandboxId: sandbox.sandboxId, 

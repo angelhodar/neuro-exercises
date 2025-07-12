@@ -144,11 +144,11 @@ export function Chat({
     }
   }, [autoStart]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     return () => {
       stopSandbox(exercise.id);
     };
-  }, []);
+  }, []);*/
 
   // Filter messages to only include user and assistant roles
   const filteredMessages = messages.filter(

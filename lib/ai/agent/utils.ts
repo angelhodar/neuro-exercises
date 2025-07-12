@@ -9,13 +9,9 @@ interface GenerationData {
 export function extractGenerationData(
   generations: ExerciseChatGeneration[],
 ): GenerationData {
-  if (generations.length === 0) {
-    throw new Error("No generations provided");
-  }
-
-  const [mainGeneration] = generations;
+  const mainGeneration = generations.at(0)!;
   const lastGeneration = generations.at(-1);
-  const previousGeneration = generations.at(-2); // Second to last generation
+  const previousGeneration = generations.at(-2);
 
   return {
     mainGuidelinesPrompt: mainGeneration.prompt,

@@ -30,7 +30,7 @@ export function VisualRecognitionExerciseClient({
   const { imagesPerQuestion, correctImagesCount, tags, showImageNames } =
     config;
 
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     targetTag: null,
@@ -120,7 +120,7 @@ export function VisualRecognitionExerciseClient({
         newState.isAnswerSubmitted = true;
         
         setTimeout(() => {
-          addQuestionResult({
+          addResult({
             targetTag: prev.targetTag!,
             correctImages: prev.correctImageIds,
             selectedImages: updatedSelected,

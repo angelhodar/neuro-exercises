@@ -50,7 +50,7 @@ function ColorCell({
 export function Exercise({ config }: ColorSequenceExerciseProps) {
   const { numCells, sequenceLength, highlightInterval } = config;
 
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   // Colores disponibles (Tailwind)
   const availableColorClasses = [
@@ -152,7 +152,7 @@ export function Exercise({ config }: ColorSequenceExerciseProps) {
       // Dar un pequeño tiempo antes de la siguiente pregunta
       setQuestionState(prev => ({ ...prev, isWaitingNext: true }));
       setTimeout(() => {
-        addQuestionResult(result);
+        addResult(result);
         setQuestionState(prev => ({ ...prev, isWaitingNext: false }));
       }, 300);
     }

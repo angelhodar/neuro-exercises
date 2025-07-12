@@ -3,7 +3,7 @@ import type { SearchParams } from "nuqs/server";
 import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import { ExerciseContainer } from "@/components/exercises/exercise-container";
 import { CountdownProvider } from "@/components/exercises/exercise-countdown";
-import { getExerciseBySlug, getExercises } from "@/app/actions/exercises";
+import { getExerciseBySlug } from "@/app/actions/exercises";
 import { parseConfigFromUrl, exerciseParamsSchema, getExerciseConfigFromLink } from "./parsers";
 import { loadExerciseAssets } from "@/app/exercises/loader";
 
@@ -46,9 +46,4 @@ export default async function Page({ params, searchParams }: PageProps) {
       </CountdownProvider>
     </ExerciseProvider>
   );
-}
-
-export async function generateStaticParams() {
-  const exercises = await getExercises();
-  return exercises.map((exercise) => ({ slug: exercise.slug }));
 }

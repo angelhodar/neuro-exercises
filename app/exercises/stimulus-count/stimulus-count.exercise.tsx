@@ -38,7 +38,7 @@ const colors = [
 export function Exercise({ config }: StimulusCountExerciseProps) {
   const { minStimuli, maxStimuli, allowOverlap } = config;
 
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     stimuli: [],
@@ -89,7 +89,7 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
       timeSpent,
     };
 
-    addQuestionResult(result);
+    addResult(result);
   }
 
   return (

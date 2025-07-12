@@ -25,7 +25,7 @@ interface QuestionState {
 
 export function Exercise({ config }: SyllablesExerciseProps) {
   const { syllablesCount } = config;
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     currentWord: null,
@@ -112,7 +112,7 @@ export function Exercise({ config }: SyllablesExerciseProps) {
       timeExpired: false,
     };
 
-    addQuestionResult(result);
+    addResult(result);
   }
 
   // Setup question when question changes

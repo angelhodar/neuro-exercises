@@ -33,7 +33,7 @@ export function Exercise({
   config,
 }: StroopColorInterferenceExerciseProps) {
   const { numOptions } = config;
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
@@ -79,7 +79,7 @@ export function Exercise({
       responseTime,
     };
 
-    addQuestionResult(result);
+    addResult(result);
   };
 
   if (!question) {

@@ -28,7 +28,7 @@ export function OddOneOutExerciseClient({
   config,
   medias,
 }: OddOneOutExerciseClientProps) {
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     selectedAnswerId: null,
@@ -74,7 +74,7 @@ export function OddOneOutExerciseClient({
     // Enviar resultado automáticamente después de un breve delay para mostrar feedback
     setTimeout(() => {
       const isCorrect = mediaId === currentQuestion.correctAnswerId;
-      addQuestionResult({
+      addResult({
         questionIndex: currentQuestionIndex,
         selectedId: mediaId,
         correctId: currentQuestion.correctAnswerId,

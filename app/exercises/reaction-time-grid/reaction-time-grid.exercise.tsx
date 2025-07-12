@@ -24,7 +24,7 @@ interface QuestionState {
 
 export function Exercise({ config }: ReactionTimeGridProps) {
   const { gridSize, delayMin, delayMax, cells, cellDisplayDuration } = config;
-  const { currentQuestionIndex, addQuestionResult } = useExerciseExecution();
+  const { currentQuestionIndex, addResult } = useExerciseExecution();
   
   // Ref to store the auto-complete timeout
   const autoCompleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -136,7 +136,7 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   useEffect(() => {
     if (questionState.pendingResult) {
       console.log('📊 Processing pending result:', questionState.pendingResult);
-      addQuestionResult(questionState.pendingResult);
+      addResult(questionState.pendingResult);
       // Reset the setup ref so next question can be configured
       currentQuestionSetupRef.current = -1;
       setQuestionState((prev) => ({
@@ -144,7 +144,7 @@ export function Exercise({ config }: ReactionTimeGridProps) {
         pendingResult: null,
       }));
     }
-  }, [questionState.pendingResult, addQuestionResult]);
+  }, [questionState.pendingResult, addResult]);
 
   // Handle cell click
   function handleCellClick(cellIndex: number) {

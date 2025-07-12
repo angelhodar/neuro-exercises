@@ -2,16 +2,14 @@ import { notFound } from "next/navigation";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import { getExerciseGenerations } from "@/app/actions/generations";
 import { PreviewIframe } from "./preview-iframe";
-import { createBlobUrl } from "@/lib/utils";
-import EditExerciseButton from "../edit-exercise";
 import { Chat } from "./chat";
 import { SandboxProvider } from "@/hooks/use-sandbox";
+import { ExerciseHeader } from "./exercise-header";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import type { ExerciseChatGeneration } from "@/lib/db/schema";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -24,34 +22,6 @@ interface ChatMessage {
   createdAt: Date;
 }
 
-function convertGenerationsToMessages(
-  generations: ExerciseChatGeneration[],
-): ChatMessage[] {
-  const messages: ChatMessage[] = [];
-
-  for (const generation of generations) {
-    // Add user message (prompt)
-    messages.push({
-      id: `${generation.id}-user`,
-      role: "user",
-      content: generation.prompt,
-      createdAt: generation.createdAt,
-    });
-
-    // Add assistant message (summary) if available
-    if (generation.summary) {
-      messages.push({
-        id: `${generation.id}-assistant`,
-        role: "assistant",
-        content: generation.summary,
-        createdAt: generation.createdAt,
-      });
-    }
-  }
-
-  return messages;
-}
-
 export default async function ExerciseChatPage({ params }: PageProps) {
   const { slug } = await params;
 
@@ -60,7 +30,28 @@ export default async function ExerciseChatPage({ params }: PageProps) {
   if (!exercise) return notFound();
 
   const generations = await getExerciseGenerations(exercise.id);
-  const messages = convertGenerationsToMessages(generations);
+
+  const messages = generations.flatMap((generation) => {
+    const m: ChatMessage[] = [
+      {
+        id: `${generation.id}-user`,
+        role: "user",
+        content: generation.prompt,
+        createdAt: generation.createdAt,
+      },
+    ];
+    
+    if (generation.summary) {
+      m.push({
+        id: `${generation.id}-assistant`,
+        role: "assistant",
+        content: generation.summary,
+        createdAt: generation.createdAt,
+      });
+    }
+
+    return m;
+  });
 
   const autoStart = generations.length === 1 && generations[0].status === "GENERATING";
 
@@ -71,33 +62,10 @@ export default async function ExerciseChatPage({ params }: PageProps) {
           <ResizablePanel defaultSize={20} minSize={20} maxSize={50}>
             <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm border-r border-gray-200/50">
               <div className="flex-shrink-0">
-                <div className="p-6 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative">
-                        <img
-                          src={
-                            createBlobUrl(exercise.thumbnailUrl || "") ||
-                            "/placeholder.svg"
-                          }
-                          alt={exercise.displayName}
-                          className="w-14 h-14 rounded-xl object-cover shadow-sm ring-1 ring-gray-200"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h2 className="font-semibold text-gray-900 text-lg">
-                          {exercise.displayName}
-                        </h2>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <EditExerciseButton exercise={exercise} />
-                    </div>
-                  </div>
-                </div>
+                <ExerciseHeader exercise={exercise} />
               </div>
               <div className="flex-1 min-h-0">
-                <Chat messages={messages} slug={exercise.slug} autoStart={autoStart} />
+                <Chat messages={messages} exercise={exercise} autoStart={autoStart} />
               </div>
             </div>
           </ResizablePanel>

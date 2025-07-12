@@ -128,6 +128,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
               className="w-full h-full rounded-md border-0"
               title="Preview"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+              allowFullScreen
             />
           )}
         </Card>

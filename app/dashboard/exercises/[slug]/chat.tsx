@@ -7,6 +7,8 @@ import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { MessageSquare, Settings, FileText, Code, Loader2 } from "lucide-react";
 import { useSandbox } from "@/hooks/use-sandbox";
+import { stopSandbox } from "@/app/actions/sandbox";
+import { Exercise } from "@/lib/db/schema";
 
 interface Message {
   id: string;
@@ -17,7 +19,7 @@ interface Message {
 
 interface ChatProps {
   messages: Message[];
-  slug: string;
+  exercise: Exercise;
   autoStart: boolean;
 }
 
@@ -54,11 +56,11 @@ function getToolIcon(toolName: string) {
 function getToolDisplayName(toolName: string) {
   switch (toolName) {
     case "getCurrentGeneratedFiles":
-      return "Getting reference files";
+      return "Obteniendo archivos de referencia";
     case "readFiles":
-      return "Reading existing code";
+      return "Leyendo archivos existentes";
     case "writeFiles":
-      return "Writing new code";
+      return "Escribiendo archivos";
     default:
       return toolName;
   }
@@ -69,7 +71,7 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
     return (
       <div className="flex items-center space-x-2 text-blue-600 bg-blue-50 p-3 rounded-lg mb-4">
         <Loader2 className="w-4 h-4 animate-spin" />
-        <span className="text-sm">Processing your request...</span>
+        <span className="text-sm">Procesando tu petición...</span>
       </div>
     );
   }
@@ -79,7 +81,7 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
       <div className="bg-blue-50 p-3 rounded-lg mb-4 space-y-2">
         <div className="flex items-center space-x-2 text-blue-600">
           <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm font-medium">AI is working...</span>
+          <span className="text-sm font-medium">Procesando ejercicio...</span>
         </div>
 
         {data?.toolInvocations && data.toolInvocations.length > 0 && (
@@ -105,7 +107,11 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
   return null;
 }
 
-export function Chat({ messages: initialMessages, slug, autoStart }: ChatProps) {
+export function Chat({
+  messages: initialMessages,
+  exercise,
+  autoStart,
+}: ChatProps) {
   const { initializeSandbox } = useSandbox();
   const hasAutoStarted = useRef(false);
 
@@ -127,7 +133,7 @@ export function Chat({ messages: initialMessages, slug, autoStart }: ChatProps) 
       content: msg.content,
     })),
     credentials: "include",
-    body: { slug },
+    body: { slug: exercise.slug },
     onFinish: initializeSandbox,
   });
 
@@ -139,10 +145,10 @@ export function Chat({ messages: initialMessages, slug, autoStart }: ChatProps) 
   }, [autoStart]);
 
   useEffect(() => {
-    if (status === "streaming") {
-      hasAutoStarted.current = true;
-    }
-  }, [status]);
+    return () => {
+      stopSandbox(exercise.id);
+    };
+  }, []);
 
   // Filter messages to only include user and assistant roles
   const filteredMessages = messages.filter(
@@ -181,7 +187,7 @@ export function Chat({ messages: initialMessages, slug, autoStart }: ChatProps) 
                     onClick={() => reload()}
                     className="text-red-600 hover:text-red-700 text-sm underline"
                   >
-                    Retry
+                    Reintentar
                   </button>
                 </div>
               </div>

@@ -11,14 +11,14 @@ export const createGenerationPrompt = (
   </initial-guidelines>
   `;
 
-  // Only show refinements if there's a last user prompt
+  // Only show requested changes if there's a last user prompt
   if (lastUserPrompt) {
     prompt += `
-  The current user refinements are:
+  The current user requested changes are:
 
-  <refinements-prompt>
+  <changes-prompt>
   ${lastUserPrompt}
-  </refinements-prompt>
+  </changes-prompt>
   `;
   }
 
@@ -42,10 +42,10 @@ export const systemPrompt = `
   4. Call writeFiles to write the generated files to the blob storage
 
   IMPORTANT FILE RESTRICTIONS:
-  - You are ONLY allowed to write files in the following locations:
-    - app/exercises/<slug>/ (where <slug> is the exercise slug provided)
-    - app/exercises/registry.tsx
+  - You are ONLY allowed to write files in the following location: app/exercises/<slug>/ (where <slug> is the exercise slug provided)
   - Do NOT write files in any other locations
+  - Follow the same convention for file names as the existing files in the exercise
+  - For export names, check the existing files in the exercise and use the same convention. You can get more info in the app/exercises/loader.tsx file when you use the getCodeContext tool.
 
   GUIDELINES: 
   - If there are additional requirements, apply them over the initial code
@@ -59,6 +59,6 @@ export const systemPrompt = `
   
   At the end, briefly summarize the actions performed for non technical users. So dont mention the files you created or modified, code strategy, etc. Just a short summary of the changes you made.
 
-  IMPORTANT: The summary needs to be in spanish.
+  IMPORTANT: ALWAYS write the summary in spanish.
   `
 ;

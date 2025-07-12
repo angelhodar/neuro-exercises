@@ -9,3 +9,13 @@ export function createBlobUrl(blobKey: string) {
   if (blobKey.startsWith("https://")) return blobKey;
   return new URL(blobKey, process.env.NEXT_PUBLIC_BLOB_URL).toString();
 }
+
+export function formatDate(dateString: string | Date) {
+  const date = new Date(dateString);
+  
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+}

@@ -3,7 +3,8 @@
 import { auth } from "@/lib/auth/auth.server"
 import { headers } from "next/headers"
 import { db } from "@/lib/db"
-import { users, type User } from "@/lib/db/schema"
+import { users, member, type User } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
@@ -20,12 +21,32 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-export async function getAvailableUsers() {
+export async function getAvailableUsers(organizationId?: string) {
   try {
-    const userData = await db.query.users.findMany({
-      orderBy: users.name,
-    })
-    return userData
+    if (organizationId) {
+      // Get users that are members of the specific organization
+      const members = await db.query.member.findMany({
+        where: eq(member.organizationId, organizationId),
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: member.createdAt,
+      })
+      return members.map(m => m.user)
+    } else {
+      // Get all users
+      const userData = await db.query.users.findMany({
+        orderBy: users.name,
+      })
+      return userData
+    }
   } catch (error) {
     console.error("Error getting available users:", error)
     throw error

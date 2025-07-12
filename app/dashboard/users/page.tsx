@@ -1,33 +1,51 @@
-import { getAvailableUsers } from "@/app/actions/users"
-import { Card, CardContent } from "@/components/ui/card"
-import { User } from "lucide-react"
+import { getAvailableUsers } from "@/app/actions/users";
+import { getOrganizationById } from "@/app/actions/organizations";
+import { Card, CardContent } from "@/components/ui/card";
+import { User, Building2 } from "lucide-react";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
   DashboardHeaderDescription,
-} from "@/app/dashboard/dashboard-header"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+} from "@/app/dashboard/dashboard-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  
-  return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  })
-}
+type PageProps = {
+  searchParams: Promise<{ org?: string }>;
+};
 
-export default async function UsersPage() {
-  const users = await getAvailableUsers()
+export default async function UsersPage({ searchParams }: PageProps) {
+  const { org } = await searchParams;
+  const users = await getAvailableUsers(org);
+  const organization = org ? await getOrganizationById(org) : null;
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
         <div>
-          <DashboardHeaderTitle>Usuarios</DashboardHeaderTitle>
+          <DashboardHeaderTitle>
+            {organization ? (
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Miembros de {organization.name}
+                <Badge variant="outline">{organization.slug}</Badge>
+              </div>
+            ) : (
+              "Usuarios"
+            )}
+          </DashboardHeaderTitle>
           <DashboardHeaderDescription>
-            Gestiona y visualiza el progreso de los usuarios.
+            {organization
+              ? `Gestiona los miembros de la organización ${organization.name}.`
+              : "Gestiona y visualiza el progreso de los usuarios."}
           </DashboardHeaderDescription>
         </div>
       </DashboardHeader>
@@ -61,5 +79,5 @@ export default async function UsersPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

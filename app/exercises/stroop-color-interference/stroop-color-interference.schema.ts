@@ -30,11 +30,11 @@ export const stroopColorInterferenceSpecificConfigSchema = z.object({
 });
 
 // 2. Esquema completo de configuración
-export const stroopColorInterferenceConfigSchema =
+export const configSchema =
   baseExerciseConfigSchema.merge(stroopColorInterferenceSpecificConfigSchema);
 
 // 3. Esquema para los resultados de una pregunta individual
-export const stroopColorInterferenceQuestionResultSchema = z.object({
+export const resultSchema = z.object({
   word: z.string(),
   color: z.string(),
   userAnswer: z.string(),
@@ -42,28 +42,17 @@ export const stroopColorInterferenceQuestionResultSchema = z.object({
   responseTime: z.number(),
 });
 
-// 4. Esquema para los resultados completos del ejercicio
-export const stroopColorInterferenceExerciseResultsSchema = z.object({
-  results: z.array(stroopColorInterferenceQuestionResultSchema),
-  config: stroopColorInterferenceConfigSchema,
-  completedAt: z.date(),
-  totalCorrect: z.number().int().min(0),
-  accuracy: z.number().min(0).max(100),
-});
-
 // 5. Tipos derivados para uso en la aplicación
 export type StroopColorInterferenceSpecificConfig = z.infer<
   typeof stroopColorInterferenceSpecificConfigSchema
 >;
 export type StroopColorInterferenceConfig = z.infer<
-  typeof stroopColorInterferenceConfigSchema
+  typeof configSchema
 >;
 export type StroopColorInterferenceQuestionResult = z.infer<
-  typeof stroopColorInterferenceQuestionResultSchema
+  typeof resultSchema
 >;
-export type StroopColorInterferenceExerciseResults = z.infer<
-  typeof stroopColorInterferenceExerciseResultsSchema
->;
+
 export type { BaseExerciseConfig, ExercisePreset };
 
 // 6. Configuración por defecto y presets
@@ -75,7 +64,7 @@ export const defaultStroopColorInterferenceConfig: StroopColorInterferenceConfig
     timeLimitPerQuestion: 0,
   };
 
-export const stroopColorInterferencePresets: Record<
+export const presets: Record<
   ExercisePreset,
   StroopColorInterferenceConfig
 > = {

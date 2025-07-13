@@ -57,6 +57,8 @@ export default async function ExerciseResultsPage({
 
   if (!config || !results) notFound();
 
+  console.log(results)
+
   const { ResultsComponent } = assets;
 
   return (

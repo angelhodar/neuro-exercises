@@ -80,5 +80,5 @@ export const stimulusCountPresets: Record<ExercisePreset, StimulusCountConfig> =
 
 // Exports required by the loader
 export const configSchema = stimulusCountConfigSchema;
-export const resultSchema = stimulusCountExerciseResultsSchema;
+export const resultSchema = stimulusCountQuestionResultSchema;
 export const presets = stimulusCountPresets; 

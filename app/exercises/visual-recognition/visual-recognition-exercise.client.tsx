@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Badge } from "@/components/ui/badge";
+import { SelectableMediaCard } from "@/components/media-card";
 import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
   type ImageData,
 } from "./visual-recognition.schema";
-import { cn, createBlobUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 
 interface VisualRecognitionExerciseClientProps {
   config: VisualRecognitionConfig;
@@ -21,6 +22,7 @@ interface QuestionState {
   correctImageIds: string[];
   selectedImageIds: string[];
   isAnswerSubmitted: boolean;
+  pendingResult: VisualRecognitionQuestionResult | null;
 }
 
 export function VisualRecognitionExerciseClient({
@@ -31,6 +33,9 @@ export function VisualRecognitionExerciseClient({
     config;
 
   const { currentQuestionIndex, addResult } = useExerciseExecution();
+  
+  // Use ref to prevent multiple submissions for the same question
+  const hasSubmittedRef = useRef(false);
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     targetTag: null,
@@ -38,6 +43,7 @@ export function VisualRecognitionExerciseClient({
     correctImageIds: [],
     selectedImageIds: [],
     isAnswerSubmitted: false,
+    pendingResult: null,
   });
 
   function selectImagesForQuestion(): {
@@ -88,6 +94,9 @@ export function VisualRecognitionExerciseClient({
   }
 
   function setupNewQuestion() {
+    // Reset submission flag for new question
+    hasSubmittedRef.current = false;
+    
     const questionData = selectImagesForQuestion();
     if (!questionData) {
       console.error(
@@ -99,40 +108,66 @@ export function VisualRecognitionExerciseClient({
         correctImageIds: [],
         selectedImageIds: [],
         isAnswerSubmitted: false,
+        pendingResult: null,
       });
       return;
     }
-    setQuestionState({ ...questionData, selectedImageIds: [], isAnswerSubmitted: false });
+    setQuestionState({ 
+      ...questionData, 
+      selectedImageIds: [], 
+      isAnswerSubmitted: false,
+      pendingResult: null,
+    });
   }
 
   function handleImageClick(imageId: string) {
-    if (questionState.isAnswerSubmitted) return;
+    // Prevent clicks if already submitted
+    if (questionState.isAnswerSubmitted || hasSubmittedRef.current) return;
     
-    setQuestionState((prev) => {
-      const isSelected = prev.selectedImageIds.includes(imageId);
-      const updatedSelected = isSelected
-        ? prev.selectedImageIds.filter((id) => id !== imageId)
-        : [...prev.selectedImageIds, imageId];
+    const isSelected = questionState.selectedImageIds.includes(imageId);
+    const updatedSelected = isSelected
+      ? questionState.selectedImageIds.filter((id) => id !== imageId)
+      : [...questionState.selectedImageIds, imageId];
+    
+    // Check if we have the correct number of images selected and haven't submitted yet
+    if (updatedSelected.length === correctImagesCount && !questionState.isAnswerSubmitted && !hasSubmittedRef.current) {
+      hasSubmittedRef.current = true;
       
-      const newState = { ...prev, selectedImageIds: updatedSelected };
+      // Create result immediately
+      const result = {
+        targetTag: questionState.targetTag!,
+        correctImages: questionState.correctImageIds,
+        selectedImages: updatedSelected,
+        timeSpent: 0,
+        timeExpired: false,
+      } as VisualRecognitionQuestionResult;
       
-      if (updatedSelected.length === correctImagesCount && !prev.isAnswerSubmitted) {
-        newState.isAnswerSubmitted = true;
-        
-        setTimeout(() => {
-          addResult({
-            targetTag: prev.targetTag!,
-            correctImages: prev.correctImageIds,
-            selectedImages: updatedSelected,
-            timeSpent: 0,
-            timeExpired: false,
-          } as VisualRecognitionQuestionResult);
-        }, 100);
-      }
-      
-      return newState;
-    });
+      // Update state with result and submitted flag
+      setQuestionState((prev) => ({
+        ...prev,
+        selectedImageIds: updatedSelected,
+        isAnswerSubmitted: true,
+        pendingResult: result,
+      }));
+    } else {
+      // Just update selected images
+      setQuestionState((prev) => ({
+        ...prev,
+        selectedImageIds: updatedSelected,
+      }));
+    }
   }
+
+  // Process pending results
+  useEffect(() => {
+    if (questionState.pendingResult) {
+      addResult(questionState.pendingResult);
+      setQuestionState((prev) => ({
+        ...prev,
+        pendingResult: null,
+      }));
+    }
+  }, [questionState.pendingResult, addResult]);
 
   useEffect(() => {
     setupNewQuestion();
@@ -163,36 +198,16 @@ export function VisualRecognitionExerciseClient({
         {questionState.displayedImages.map((image) => {
           const isSelected = questionState.selectedImageIds.includes(image.id);
           return (
-            <div
+            <SelectableMediaCard
               key={image.id}
-              className={cn(
-                "relative cursor-pointer rounded-lg border-2 transition-all duration-200 bg-white",
-                questionState.isAnswerSubmitted && "pointer-events-none opacity-75",
-                isSelected
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg"
-                  : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:shadow-md",
-              )}
-              onClick={() => handleImageClick(image.id)}
-            >
-              <img
-                src={createBlobUrl(image.url) || "/placeholder.svg"}
-                alt={showImageNames ? image.name : "Imagen del ejercicio"}
-                className="w-full h-48 md:h-56 lg:h-64 object-cover p-1 rounded-lg"
-                crossOrigin="anonymous"
-              />
-              {isSelected && (
-                <div className="absolute top-3 right-3 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg">
-                  ✓
-                </div>
-              )}
-              {showImageNames && (
-                <div className="p-3 text-center">
-                  <p className="text-sm font-medium text-muted-foreground truncate">
-                    {image.name}
-                  </p>
-                </div>
-              )}
-            </div>
+              src={createBlobUrl(image.url)}
+              alt={showImageNames ? image.name : "Imagen del ejercicio"}
+              name={image.name}
+              showName={showImageNames}
+              selected={isSelected}
+              disabled={questionState.isAnswerSubmitted}
+              onSelect={() => handleImageClick(image.id)}
+            />
           );
         })}
       </div>

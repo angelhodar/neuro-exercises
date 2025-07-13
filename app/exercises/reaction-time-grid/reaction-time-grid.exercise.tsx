@@ -25,7 +25,7 @@ interface QuestionState {
 export function Exercise({ config }: ReactionTimeGridProps) {
   const { gridSize, delayMin, delayMax, cells, cellDisplayDuration } = config;
   const { currentQuestionIndex, addResult } = useExerciseExecution();
-  
+
   // Ref to store the auto-complete timeout
   const autoCompleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Ref to track current question setup
@@ -70,18 +70,10 @@ export function Exercise({ config }: ReactionTimeGridProps) {
 
   // Auto-complete current question when time runs out
   function autoCompleteQuestion() {
-    console.log('🔴 autoCompleteQuestion triggered', { currentQuestionIndex, cellDisplayDuration });
     setQuestionState((currentState) => {
       if (!currentState.targetCells) {
-        console.log('⚠️ No target cells, skipping auto-complete');
         return currentState;
       }
-
-      console.log('✅ Auto-completing question', { 
-        targetCells: currentState.targetCells,
-        selectedCells: currentState.selectedCells,
-        reactionTimes: currentState.reactionTimes
-      });
 
       const result: ReactionTimeQuestionResult = {
         targetCells: currentState.targetCells,
@@ -103,7 +95,10 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   }
 
   // Complete current question manually by user action
-  function completeCurrentQuestion(selectedCells: number[], reactionTimes: number[]) {
+  function completeCurrentQuestion(
+    selectedCells: number[],
+    reactionTimes: number[],
+  ) {
     // Clear auto-complete timeout
     if (autoCompleteTimeoutRef.current) {
       clearTimeout(autoCompleteTimeoutRef.current);
@@ -135,7 +130,6 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   // Process pending results
   useEffect(() => {
     if (questionState.pendingResult) {
-      console.log('📊 Processing pending result:', questionState.pendingResult);
       addResult(questionState.pendingResult);
       // Reset the setup ref so next question can be configured
       currentQuestionSetupRef.current = -1;
@@ -173,23 +167,19 @@ export function Exercise({ config }: ReactionTimeGridProps) {
 
   // Set up the next target after a random delay
   function setupNextTarget() {
-    console.log('🚀 setupNextTarget called for question', currentQuestionIndex);
-    
     // Prevent duplicate setup for the same question
     if (currentQuestionSetupRef.current === currentQuestionIndex) {
-      console.log('⚠️ Target already set up for question', currentQuestionIndex, '- skipping');
       return;
     }
-    
+
     // Mark this question as being set up
     currentQuestionSetupRef.current = currentQuestionIndex;
-    
+
     // Clear any existing timeouts FIRST
     clearTimeouts();
-    
+
     // Also clear any pending timeout that might not be tracked in state yet
     if (autoCompleteTimeoutRef.current) {
-      console.log('🧹 Clearing previous auto-complete timeout');
       clearTimeout(autoCompleteTimeoutRef.current);
       autoCompleteTimeoutRef.current = null;
     }
@@ -206,11 +196,8 @@ export function Exercise({ config }: ReactionTimeGridProps) {
 
     // Random delay before showing targets
     const delay = Math.random() * (delayMax - delayMin) + delayMin;
-    console.log(`⏳ Delaying target display by ${delay}ms`);
 
     const timeoutId = setTimeout(() => {
-      console.log('🎯 Showing targets after delay');
-      
       const targets = selectRandomCells();
       const startTime = Date.now();
 
@@ -222,17 +209,14 @@ export function Exercise({ config }: ReactionTimeGridProps) {
       }));
 
       // Set up auto-complete timeout AFTER targets are shown
-      console.log(`⏰ Setting auto-complete timeout for ${cellDisplayDuration}ms`);
       autoCompleteTimeoutRef.current = setTimeout(() => {
-        console.log('⌛ Auto-complete timeout triggered');
         autoCompleteQuestion();
       }, cellDisplayDuration);
-
     }, delay);
 
-    setQuestionState((prev) => ({ 
-      ...prev, 
-      timeoutId: timeoutId 
+    setQuestionState((prev) => ({
+      ...prev,
+      timeoutId: timeoutId,
     }));
   }
 
@@ -248,12 +232,10 @@ export function Exercise({ config }: ReactionTimeGridProps) {
 
   // Setup next question when currentQuestionIndex changes
   useEffect(() => {
-    console.log('📋 Question index changed to:', currentQuestionIndex);
     setupNextTarget();
 
     // Cleanup function
     return () => {
-      console.log('🧽 Cleaning up timeouts for question:', currentQuestionIndex);
       clearTimeouts();
       if (autoCompleteTimeoutRef.current) {
         clearTimeout(autoCompleteTimeoutRef.current);
@@ -263,14 +245,12 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   }, [currentQuestionIndex]);
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 w-full">
+    <div className="flex items-center justify-center w-full h-full aspect-square max-w-[min(calc(100%-2rem),calc(100vh-6rem))] max-h-[min(calc(100%-2rem),calc(100vw-6rem))]">
       <div
-        className="grid gap-2 p-4 border-2 border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+        className="grid w-full h-full gap-1 sm:gap-2 md:gap-3 p-2"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
           gridTemplateRows: `repeat(${gridSize}, 1fr)`,
-          maxWidth: `${Math.min(600, 30 * gridSize)}px`,
-          maxHeight: `${Math.min(600, 30 * gridSize)}px`,
         }}
       >
         {gridCells.map((cellIndex) => (
@@ -285,4 +265,4 @@ export function Exercise({ config }: ReactionTimeGridProps) {
       </div>
     </div>
   );
-} 
+}

@@ -25,7 +25,7 @@ interface QuestionState {
 export function Exercise({ config }: ReactionTimeGridProps) {
   const { gridSize, delayMin, delayMax, cells, cellDisplayDuration } = config;
   const { currentQuestionIndex, addResult } = useExerciseExecution();
-
+  
   // Ref to store the auto-complete timeout
   const autoCompleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Ref to track current question setup
@@ -95,10 +95,7 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   }
 
   // Complete current question manually by user action
-  function completeCurrentQuestion(
-    selectedCells: number[],
-    reactionTimes: number[],
-  ) {
+  function completeCurrentQuestion(selectedCells: number[], reactionTimes: number[]) {
     // Clear auto-complete timeout
     if (autoCompleteTimeoutRef.current) {
       clearTimeout(autoCompleteTimeoutRef.current);
@@ -171,13 +168,13 @@ export function Exercise({ config }: ReactionTimeGridProps) {
     if (currentQuestionSetupRef.current === currentQuestionIndex) {
       return;
     }
-
+    
     // Mark this question as being set up
     currentQuestionSetupRef.current = currentQuestionIndex;
-
+    
     // Clear any existing timeouts FIRST
     clearTimeouts();
-
+    
     // Also clear any pending timeout that might not be tracked in state yet
     if (autoCompleteTimeoutRef.current) {
       clearTimeout(autoCompleteTimeoutRef.current);
@@ -189,60 +186,65 @@ export function Exercise({ config }: ReactionTimeGridProps) {
       targetCells: null,
       selectedCells: [],
       reactionTimes: [],
-      startTime: null,
-      timeoutId: null,
       displayTimeoutId: null,
+      startTime: null,
+      pendingResult: null,
     }));
 
-    // Random delay before showing targets
-    const delay = Math.random() * (delayMax - delayMin) + delayMin;
+    // Random delay before showing the target
+    const delay = Math.floor(Math.random() * (delayMax - delayMin) + delayMin);
 
-    const timeoutId = setTimeout(() => {
-      const targets = selectRandomCells();
+    const timeout = setTimeout(() => {
+      const newTargets = selectRandomCells();
       const startTime = Date.now();
-
-      setQuestionState((prev) => ({
-        ...prev,
-        targetCells: targets,
-        startTime: startTime,
-        timeoutId: null,
-      }));
-
-      // Set up auto-complete timeout AFTER targets are shown
+      
+      // Set up the auto-complete timeout
       autoCompleteTimeoutRef.current = setTimeout(() => {
         autoCompleteQuestion();
       }, cellDisplayDuration);
+
+      setQuestionState((prev) => ({
+        ...prev,
+        targetCells: newTargets,
+        startTime: startTime,
+        timeoutId: null,
+        displayTimeoutId: null,
+        pendingResult: null,
+      }));
     }, delay);
 
-    setQuestionState((prev) => ({
-      ...prev,
-      timeoutId: timeoutId,
+    setQuestionState((prev) => ({ 
+      ...prev, 
+      timeoutId: timeout 
     }));
   }
 
-  // Check if a cell is a target
-  function isTargetCell(cellIndex: number) {
-    return questionState.targetCells?.includes(cellIndex) ?? false;
-  }
-
-  // Check if a cell is selected
-  function isSelectedCell(cellIndex: number) {
-    return questionState.selectedCells.includes(cellIndex);
-  }
-
-  // Setup next question when currentQuestionIndex changes
+  // Set up the next target when the question changes
   useEffect(() => {
     setupNextTarget();
 
-    // Cleanup function
     return () => {
       clearTimeouts();
-      if (autoCompleteTimeoutRef.current) {
-        clearTimeout(autoCompleteTimeoutRef.current);
-        autoCompleteTimeoutRef.current = null;
-      }
     };
   }, [currentQuestionIndex]);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeouts();
+    };
+  }, []);
+
+  // Check if a cell is a target
+  function isTargetCell(cellIndex: number) {
+    if (!questionState.targetCells) return false;
+    return questionState.targetCells.includes(cellIndex);
+  }
+
+  // Check if a cell has been selected
+  function isSelectedCell(cellIndex: number) {
+    return questionState.selectedCells.includes(cellIndex);
+  }
 
   return (
     <div className="flex items-center justify-center w-full h-full aspect-square max-w-[min(calc(100%-2rem),calc(100vh-6rem))] max-h-[min(calc(100%-2rem),calc(100vw-6rem))]">
@@ -259,7 +261,7 @@ export function Exercise({ config }: ReactionTimeGridProps) {
             isTarget={isTargetCell(cellIndex)}
             isSelected={isSelectedCell(cellIndex)}
             onClick={() => handleCellClick(cellIndex)}
-            disabled={!questionState.targetCells}
+            disabled={!questionState.targetCells || isSelectedCell(cellIndex)}
           />
         ))}
       </div>

@@ -90,7 +90,7 @@ export function Exercise({
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full p-8">
-      <div className="flex-grow flex items-center justify-center">
+      <div className="flex-grow flex items-center justify-center mb-12">
         <h1
           className="text-6xl md:text-8xl font-bold"
           style={{ color: question.color.value }}
@@ -103,7 +103,7 @@ export function Exercise({
           <Button
             key={option}
             onClick={() => handleAnswer(option)}
-            className="text-2xl md:text-3xl py-8 px-6 h-auto"
+            className="text-2xl md:text-3xl py-10 px-12 h-auto min-w-[180px]"
             variant="outline"
             size="lg"
           >

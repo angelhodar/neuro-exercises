@@ -275,3 +275,63 @@ export function MediaCardContent({
     </div>
   );
 }
+
+// Selectable MediaCard component for exercises
+interface SelectableMediaCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  src: string;
+  alt: string;
+  name?: string;
+  showName?: boolean;
+  selected?: boolean;
+  disabled?: boolean;
+  overlay?: React.ReactNode;
+  onSelect?: () => void;
+}
+
+export function SelectableMediaCard({
+  src,
+  alt,
+  name,
+  showName = true,
+  selected = false,
+  disabled = false,
+  overlay,
+  onSelect,
+  className,
+  ...props
+}: SelectableMediaCardProps) {
+  return (
+    <div
+      className={cn(
+        "relative cursor-pointer rounded-lg border-2 transition-all duration-200 bg-white",
+        disabled && "pointer-events-none opacity-75",
+        selected
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg"
+          : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600 hover:shadow-md",
+        className
+      )}
+      onClick={onSelect}
+      {...props}
+    >
+      <img
+        src={src || "/placeholder.svg"}
+        alt={alt}
+        className="w-full h-48 md:h-56 lg:h-64 object-cover p-1 rounded-lg"
+        crossOrigin="anonymous"
+      />
+      {selected && (
+        <div className="absolute top-3 right-3 bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold shadow-lg">
+          ✓
+        </div>
+      )}
+      {showName && name && (
+        <div className="p-3 text-center">
+          <p className="text-sm font-medium text-muted-foreground truncate">
+            {name}
+          </p>
+        </div>
+      )}
+      {overlay}
+    </div>
+  );
+}

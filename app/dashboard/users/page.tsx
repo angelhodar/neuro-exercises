@@ -1,5 +1,4 @@
-import { getAvailableUsers } from "@/app/actions/users";
-import { getOrganizationById } from "@/app/actions/organizations";
+import { getOrgMembers, getOrganizationById } from "@/app/actions/organizations";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Building2 } from "lucide-react";
 import {
@@ -24,7 +23,7 @@ type PageProps = {
 
 export default async function UsersPage({ searchParams }: PageProps) {
   const { org } = await searchParams;
-  const users = await getAvailableUsers(org);
+  const members = await getOrgMembers(org);
   const organization = org ? await getOrganizationById(org) : null;
 
   return (
@@ -39,13 +38,13 @@ export default async function UsersPage({ searchParams }: PageProps) {
                 <Badge variant="outline">{organization.slug}</Badge>
               </div>
             ) : (
-              "Usuarios"
+              "Miembros"
             )}
           </DashboardHeaderTitle>
           <DashboardHeaderDescription>
             {organization
               ? `Gestiona los miembros de la organización ${organization.name}.`
-              : "Gestiona y visualiza el progreso de los usuarios."}
+              : "Gestiona y visualiza todos los miembros de las organizaciones."}
           </DashboardHeaderDescription>
         </div>
       </DashboardHeader>
@@ -58,20 +57,36 @@ export default async function UsersPage({ searchParams }: PageProps) {
                 <TableHead>Avatar</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Organización</TableHead>
+                <TableHead>Rol</TableHead>
                 <TableHead>Fecha de creación</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
+              {members.map((member) => (
+                <TableRow key={`${member.user.id}-${member.organization.name}`}>
                   <TableCell>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-5 w-5 text-primary" />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{formatDate(String(user.createdAt))}</TableCell>
+                  <TableCell className="font-medium">{member.user.name}</TableCell>
+                  <TableCell>{member.user.email}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <span>{member.organization.name}</span>
+                      {member.organization.slug && (
+                        <Badge variant="outline" className="text-xs">
+                          {member.organization.slug}
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{member.role}</Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(String(member.user.createdAt))}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

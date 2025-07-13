@@ -104,10 +104,7 @@ export default async function OrganizationsPage() {
                           <Users className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteOrganizationButton
-                        organizationId={org.id}
-                        organizationName={org.name}
-                      />
+                      <DeleteOrganizationButton organization={org} />
                     </div>
                   </TableCell>
                 </TableRow>

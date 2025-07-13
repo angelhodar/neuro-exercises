@@ -110,7 +110,7 @@ export const verifications = pgTable("verifications", {
   ...timestamps,
 });
 
-export const organization = pgTable("organization", {
+export const organization = pgTable("organizations", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").unique(),
@@ -119,7 +119,7 @@ export const organization = pgTable("organization", {
   metadata: text("metadata"),
 });
 
-export const member = pgTable("member", {
+export const member = pgTable("members", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id").notNull(),
   userId: text("user_id").notNull(),
@@ -141,7 +141,7 @@ export const member = pgTable("member", {
   }).onDelete("cascade"),
 ]);
 
-export const invitation = pgTable("invitation", {
+export const invitation = pgTable("invitations", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id").notNull(),
   email: text("email").notNull(),

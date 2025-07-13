@@ -271,4 +271,39 @@ export async function removeMemberFromOrganization(organizationId: string, userI
     console.error("Error removing member from organization:", error)
     throw error
   }
+}
+
+export async function getOrgMembers(organizationId?: string) {
+  try {
+    const whereClause = organizationId
+      ? eq(member.organizationId, organizationId)
+      : undefined;
+
+    const members = await db.query.member.findMany({
+      where: whereClause,
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true,
+          },
+        },
+        organization: {
+          columns: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: member.createdAt,
+    });
+
+    return members;
+  } catch (error) {
+    console.error("Error getting organization members:", error);
+    throw error;
+  }
 } 

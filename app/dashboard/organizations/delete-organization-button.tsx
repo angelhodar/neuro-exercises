@@ -5,31 +5,31 @@ import { Trash2 } from "lucide-react";
 import { deleteOrganization } from "@/app/actions/organizations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useConfirm } from "@/hooks/use-confirm";
+import { Organization } from "@/lib/db/schema";
 
 interface DeleteOrganizationButtonProps {
-  organizationId: string;
-  organizationName: string;
+  organization: Organization;
 }
 
 export function DeleteOrganizationButton({
-  organizationId,
-  organizationName,
+  organization,
 }: DeleteOrganizationButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { confirm } = useConfirm();
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        `¿Estás seguro de que quieres eliminar la organización "${organizationName}"? Esta acción no se puede deshacer.`,
-      )
-    ) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Eliminar organización",
+      description: `¿Estás seguro de que quieres eliminar la organización "${organization.name}"? Esta acción no se puede deshacer.`,
+    });
+
+    if (!confirmed) return;
 
     setIsDeleting(true);
     try {
-      await deleteOrganization(organizationId);
+      await deleteOrganization(organization.id);
       router.refresh();
     } catch (error) {
       console.error("Error eliminando organización:", error);

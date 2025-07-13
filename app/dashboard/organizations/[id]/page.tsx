@@ -16,12 +16,9 @@ export default async function EditOrganizationPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-
   const organization = await getOrganizationById(resolvedParams.id);
 
-  if (!organization) {
-    notFound();
-  }
+  if (!organization) notFound();
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">

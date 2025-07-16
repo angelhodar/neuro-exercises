@@ -6,7 +6,7 @@ import { uploadBlob } from "@/lib/storage";
 import { updateExerciseGeneration } from "@/app/actions/generations";
 import { createBlobUrl } from "@/lib/utils";
 
-export const getCurrentGeneratedFiles = tool({
+export const getCodeContext = tool({
   description:
     "Gets context from other existing exercises, hooks and components to use as reference",
   parameters: z.object({}),

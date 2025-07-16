@@ -36,7 +36,7 @@ export const getFilesContext = async (): Promise<GeneratedFile[]> => {
     const { data: treeData } = await octokit.git.getTree({
       owner,
       repo,
-      tree_sha: "feat/exercise-chat-editor",
+      tree_sha: "main",
       recursive: "true",
     });
 

@@ -2,7 +2,7 @@ import { streamText } from "ai";
 import { google, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
 import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
 import {
-  getCurrentGeneratedFiles,
+  getCodeContext,
   readFiles,
   writeFiles,
 } from "@/lib/ai/agent/tools";
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   const stream = streamText({
     model: google("gemini-2.5-pro"),
     tools: {
-      getCurrentGeneratedFiles,
+      getCodeContext,
       readFiles: readFiles(lastCodeBlobKey),
       writeFiles: writeFiles(lastGeneration.id, lastCodeBlobKey),
     },

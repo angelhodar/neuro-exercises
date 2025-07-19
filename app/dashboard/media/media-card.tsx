@@ -37,15 +37,18 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
   }
 
   return (
-    <div className="relative">
-      <MediaCard className="h-full">
-        <ExpandableMediaCardImage
-          src={createBlobUrl(media.blobKey)}
-          alt={media.name}
-          width={200}
-          height={200}
-        />
-        <MediaCardContent padding="sm">
+    <div className="relative h-full">
+      <MediaCard className="h-full flex flex-col">
+        <div className="aspect-square relative overflow-hidden rounded-t-lg">
+          <ExpandableMediaCardImage
+            src={createBlobUrl(media.blobKey)}
+            alt={media.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        </div>
+        <MediaCardContent padding="sm" className="flex-1 flex flex-col justify-between">
           <MediaCardTitle className="text-sm text-center line-clamp-2">
             {media.name}
           </MediaCardTitle>
@@ -54,7 +57,7 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
               tags={media.tags}
               variant="secondary"
               size="sm"
-              className="justify-center"
+              className="justify-center mt-2"
             />
           )}
         </MediaCardContent>

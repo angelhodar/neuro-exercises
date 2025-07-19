@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, MoreHorizontal, Target, LinkIcon } from "lucide-react";
+import { ExternalLink, Target, LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { CopyLinkButton } from "./copy-link-button";
-import { LinkActionsDropdown } from "./link-actions-dropdown";
+import { DeleteLinkButton } from "./delete-link-button";
 import { getUserExerciseLinks } from "@/app/actions/links";
 import { getAvailableUsers } from "@/app/actions/users";
 import { getExerciseTemplates } from "@/app/actions/templates";
@@ -149,25 +142,7 @@ export default async function LinksPage() {
                           <span className="sr-only">Abrir enlace</span>
                         </Link>
                       </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/s/${link.token}`} target="_blank">
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              Abrir enlace
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <LinkActionsDropdown linkId={link.id} />
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <DeleteLinkButton linkId={link.id} />
                     </div>
                   </TableCell>
                 </TableRow>

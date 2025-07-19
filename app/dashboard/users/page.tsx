@@ -1,6 +1,7 @@
-import { getOrgMembers, getOrganizationById } from "@/app/actions/organizations";
+import { getUsers } from "@/app/actions/users";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Building2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
@@ -14,37 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
-type PageProps = {
-  searchParams: Promise<{ org?: string }>;
-};
-
-export default async function UsersPage({ searchParams }: PageProps) {
-  const { org } = await searchParams;
-  const members = await getOrgMembers(org);
-  const organization = org ? await getOrganizationById(org) : null;
+export default async function UsersPage() {
+  const users = await getUsers();
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
         <div>
-          <DashboardHeaderTitle>
-            {organization ? (
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Miembros de {organization.name}
-                <Badge variant="outline">{organization.slug}</Badge>
-              </div>
-            ) : (
-              "Miembros"
-            )}
-          </DashboardHeaderTitle>
+          <DashboardHeaderTitle>Usuarios</DashboardHeaderTitle>
           <DashboardHeaderDescription>
-            {organization
-              ? `Gestiona los miembros de la organización ${organization.name}.`
-              : "Gestiona y visualiza todos los miembros de las organizaciones."}
+            Gestiona y visualiza todos los usuarios de la plataforma
           </DashboardHeaderDescription>
         </div>
       </DashboardHeader>
@@ -57,36 +39,31 @@ export default async function UsersPage({ searchParams }: PageProps) {
                 <TableHead>Avatar</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Organización</TableHead>
-                <TableHead>Rol</TableHead>
+                <TableHead>Organizaciones</TableHead>
                 <TableHead>Fecha de creación</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members.map((member) => (
-                <TableRow key={`${member.user.id}-${member.organization.name}`}>
+              {users.map((user) => (
+                <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                       <User className="h-5 w-5 text-primary" />
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{member.user.name}</TableCell>
-                  <TableCell>{member.user.email}</TableCell>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span>{member.organization.name}</span>
-                      {member.organization.slug && (
-                        <Badge variant="outline" className="text-xs">
-                          {member.organization.slug}
-                        </Badge>
-                      )}
-                    </div>
+                    {user.memberships && user.memberships.length > 0 ? (
+                      <Badge variant="outline" className="text-xs">
+                        <Building2 className="mr-1 h-3 w-3" />
+                        {user.memberships[0].organization.name}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Sin organizaciones</span>
+                    )}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{member.role}</Badge>
-                  </TableCell>
-                  <TableCell>{formatDate(String(member.user.createdAt))}</TableCell>
+                  <TableCell>{formatDate(String(user.createdAt))}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -20,46 +20,59 @@ import {
   DashboardHeaderDescription,
 } from "@/app/dashboard/dashboard-header";
 import { ArrowLeft, Building2, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import Link from "next/link";
-import { createOrganization } from "@/app/actions/organizations";
+import { updateOrganization } from "@/app/actions/organizations";
 import { toast } from "sonner";
+import type { Organization } from "@/lib/db/schema";
 
-const createOrganizationSchema = z.object({
+const updateOrganizationSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   slug: z.string().optional(),
   logo: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
   metadata: z.string().optional(),
 });
 
-type CreateOrganizationFormValues = z.infer<typeof createOrganizationSchema>;
+type UpdateOrganizationFormValues = z.infer<typeof updateOrganizationSchema>;
 
-export default function CreateOrganizationPage() {
+interface EditOrganizationPageProps {
+  organization: Organization;
+}
+
+export default function EditOrganizationPage({
+  organization,
+}: EditOrganizationPageProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<CreateOrganizationFormValues>({
-    resolver: zodResolver(createOrganizationSchema),
+  const form = useForm<UpdateOrganizationFormValues>({
+    resolver: zodResolver(updateOrganizationSchema),
     defaultValues: {
-      name: "",
-      slug: "",
-      logo: "",
-      metadata: "",
+      name: organization.name,
+      slug: organization.slug || "",
+      logo: organization.logo || "",
+      metadata: organization.metadata || "",
     },
   });
 
-  const onSubmit = async (data: CreateOrganizationFormValues) => {
+  const onSubmit = async (data: UpdateOrganizationFormValues) => {
     setIsLoading(true);
 
     try {
-      await createOrganization(data);
-      toast.success("Organización creada exitosamente");
+      await updateOrganization(organization.id, {
+        name: data.name,
+        slug: data.slug || undefined,
+        logo: data.logo || undefined,
+        metadata: data.metadata || undefined,
+      });
+
+      toast.success("Organización actualizada exitosamente");
       router.push("/dashboard/organizations");
     } catch (error) {
-      console.error("Error creating organization:", error);
-      toast.error("Error al crear la organización");
+      console.error("Error updating organization:", error);
+      toast.error("Error al actualizar la organización");
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +82,9 @@ export default function CreateOrganizationPage() {
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
         <div className="space-y-2">
-          <DashboardHeaderTitle>Crear organización</DashboardHeaderTitle>
+          <DashboardHeaderTitle>Editar Organización</DashboardHeaderTitle>
           <DashboardHeaderDescription>
-            Crea una nueva organización para gestionar usuarios y recursos.
+            Modifica la información de la organización.
           </DashboardHeaderDescription>
         </div>
       </DashboardHeader>
@@ -81,7 +94,7 @@ export default function CreateOrganizationPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Información de la organización
+              Información de {organization.name}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -120,10 +133,6 @@ export default function CreateOrganizationPage() {
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-sm text-muted-foreground">
-                        Si no se especifica, se generará automáticamente a
-                        partir del nombre.
-                      </p>
                     </FormItem>
                   )}
                 />
@@ -150,7 +159,7 @@ export default function CreateOrganizationPage() {
                   name="metadata"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Información adicional (opcional)</FormLabel>
+                      <FormLabel>Metadatos (opcional)</FormLabel>
                       <FormControl>
                         <Textarea
                           placeholder="Información adicional sobre la organización..."
@@ -173,9 +182,12 @@ export default function CreateOrganizationPage() {
                   </Button>
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Actualizando...
+                      </>
                     ) : (
-                      "Crear"
+                      "Actualizar"
                     )}
                   </Button>
                 </div>

@@ -39,7 +39,8 @@ const timestamps = {
     .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
-    .notNull(),
+    .notNull()
+    .$onUpdate(() => new Date()),
 };
 
 // Better-auth tables
@@ -115,8 +116,8 @@ export const organization = pgTable("organizations", {
   name: text("name").notNull(),
   slug: text("slug").unique(),
   logo: text("logo"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   metadata: text("metadata"),
+  ...timestamps,
 });
 
 export const member = pgTable("members", {
@@ -124,7 +125,7 @@ export const member = pgTable("members", {
   organizationId: text("organization_id").notNull(),
   userId: text("user_id").notNull(),
   role: text("role").default("member").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  ...timestamps,
 }, (table) => [
   index("member_organization_idx").on(table.organizationId),
   index("member_user_idx").on(table.userId),
@@ -149,6 +150,7 @@ export const invitation = pgTable("invitations", {
   status: text("status").default("pending").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   inviterId: text("inviter_id").notNull(),
+  ...timestamps,
 }, (table) => [
   index("invitation_organization_idx").on(table.organizationId),
   index("invitation_email_idx").on(table.email),
@@ -211,7 +213,7 @@ export const exerciseTemplateItems = pgTable(
     exerciseId: integer("exercise_id").notNull(),
     config: jsonb().$type<ConfigSchema>(),
     position: integer().notNull(),
-    createdAt: timestamps.createdAt,
+    ...timestamps,
   },
   (table) => [
     index("exercise_template_items_template_idx").on(table.templateId),
@@ -286,7 +288,7 @@ export const exerciseResults = pgTable(
   (table) => [
     index("exercise_results_link_idx").on(table.linkId),
     index("exercise_results_template_item_idx").on(table.templateItemId),
-    index("exercise_results_completed_at_idx").on(table.completedAt), // For time-based queries
+    index("exercise_results_completed_at_idx").on(table.completedAt),
     // Ensure one result per link+template_item combination
     uniqueIndex("exercise_results_link_template_item_unique").on(
       table.linkId,
@@ -585,7 +587,8 @@ export type NewExerciseChatGeneration =
   typeof exerciseChatGeneration.$inferInsert;
 
 export type Organization = typeof organization.$inferSelect;
-export type NewOrganization = typeof organization.$inferInsert;
+export type NewOrganization = Omit<typeof organization.$inferInsert, "id">;
+export type UpdateOrganization = Partial<NewOrganization>;
 
 export type Member = typeof member.$inferSelect;
 export type NewMember = typeof member.$inferInsert;

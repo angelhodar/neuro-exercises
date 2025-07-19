@@ -35,7 +35,7 @@ export default async function OrganizationsPage() {
         <Button asChild>
           <Link href="/dashboard/organizations/create">
             <Plus className="mr-2 h-4 w-4" />
-            Crear Organización
+            Crear organización
           </Link>
         </Button>
       </DashboardHeader>
@@ -47,7 +47,6 @@ export default async function OrganizationsPage() {
               <TableRow>
                 <TableHead>Logo</TableHead>
                 <TableHead>Nombre</TableHead>
-                <TableHead>Slug</TableHead>
                 <TableHead>Miembros</TableHead>
                 <TableHead>Invitaciones</TableHead>
                 <TableHead>Fecha de creación</TableHead>
@@ -72,9 +71,6 @@ export default async function OrganizationsPage() {
                   </TableCell>
                   <TableCell className="font-medium">{org.name}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{org.slug || "Sin slug"}</Badge>
-                  </TableCell>
-                  <TableCell>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span>{org.members?.length || 0} miembros</span>
@@ -96,12 +92,17 @@ export default async function OrganizationsPage() {
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/dashboard/organizations/${org.id}`}>
+                          <Users className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/dashboard/organizations/${org.id}/edit`}>
                           <Edit className="h-4 w-4" />
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/users?org=${org.id}`}>
-                          <Users className="h-4 w-4" />
+                        <Link href={`/dashboard/organizations/${org.id}/invitations`}>
+                          <Mail className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteOrganizationButton organization={org} />

@@ -1,33 +1,36 @@
-"use server"
+"use server";
 
-import { auth } from "@/lib/auth/auth.server"
-import { headers } from "next/headers"
-import { db } from "@/lib/db"
-import { organization, member, invitation } from "@/lib/db/schema"
-import { eq, desc, and } from "drizzle-orm"
-import { revalidatePath } from "next/cache"
-import { nanoid } from "nanoid"
+import { db } from "@/lib/db";
+import {
+  organization,
+  member,
+  invitation,
+  NewOrganization,
+  UpdateOrganization,
+} from "@/lib/db/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { nanoid } from "nanoid";
+import { getCurrentUser } from "./users";
 
 export async function getCurrentUserOrganizations() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) return []
+    if (!user) return [];
 
     const userOrganizations = await db.query.member.findMany({
-      where: eq(member.userId, session.user.id),
+      where: eq(member.userId, user.id),
       with: {
         organization: true,
       },
       orderBy: desc(member.createdAt),
-    })
+    });
 
-    return userOrganizations.map(m => m.organization)
+    return userOrganizations.map((m) => m.organization);
   } catch (error) {
-    console.error("Error getting user organizations:", error)
-    return []
+    console.error("Error getting user organizations:", error);
+    return [];
   }
 }
 
@@ -49,12 +52,12 @@ export async function getAllOrganizations() {
         invitations: true,
       },
       orderBy: desc(organization.createdAt),
-    })
+    });
 
-    return organizations
+    return organizations;
   } catch (error) {
-    console.error("Error getting all organizations:", error)
-    throw error
+    console.error("Error getting all organizations:", error);
+    throw error;
   }
 }
 
@@ -76,200 +79,195 @@ export async function getOrganizationById(id: string) {
         },
         invitations: true,
       },
-    })
+    });
 
-    return org
+    return org;
   } catch (error) {
-    console.error("Error getting organization by id:", error)
-    throw error
+    console.error("Error getting organization by id:", error);
+    throw error;
   }
 }
 
-export async function createOrganization(data: {
-  name: string
-  slug?: string
-  logo?: string
-  metadata?: string
-}) {
+export async function createOrganization(data: NewOrganization) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) {
-      throw new Error("No autorizado")
-    }
+    if (!user) throw new Error("Unauthorized");
 
-    const orgId = nanoid()
-    const slug = data.slug || data.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+    const orgId = nanoid();
+    const slug =
+      data.slug ||
+      data.name
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "");
 
-    const newOrg = await db.insert(organization).values({
-      id: orgId,
-      name: data.name,
-      slug,
-      logo: data.logo,
-      metadata: data.metadata,
-    }).returning()
+    const [newOrg] = await db
+      .insert(organization)
+      .values({
+        id: orgId,
+        name: data.name,
+        slug,
+        logo: data.logo,
+        metadata: data.metadata,
+      })
+      .returning();
 
     // Add the creator as admin member
     await db.insert(member).values({
       id: nanoid(),
       organizationId: orgId,
-      userId: session.user.id,
+      userId: user.id,
       role: "admin",
-    })
+    });
 
-    revalidatePath("/dashboard/organizations")
-    return newOrg[0]
+    revalidatePath("/dashboard/organizations");
+    return newOrg;
   } catch (error) {
-    console.error("Error creating organization:", error)
-    throw error
+    console.error("Error creating organization:", error);
+    throw error;
   }
 }
 
-export async function updateOrganization(id: string, data: {
-  name?: string
-  slug?: string
-  logo?: string
-  metadata?: string
-}) {
+export async function updateOrganization(
+  id: string,
+  data: UpdateOrganization,
+) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) {
-      throw new Error("No autorizado")
-    }
+    if (!user) throw new Error("Unauthorized");
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
-      where: and(
-        eq(member.organizationId, id),
-        eq(member.userId, session.user.id)
-      ),
-    })
+      where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
+    });
 
     if (!userMember || userMember.role !== "admin") {
-      throw new Error("No tienes permisos para editar esta organización")
+      throw new Error("You don't have permission to edit this organization");
     }
 
-    const updatedOrg = await db.update(organization)
+    const updatedOrg = await db
+      .update(organization)
       .set(data)
       .where(eq(organization.id, id))
-      .returning()
+      .returning();
 
-    revalidatePath("/dashboard/organizations")
-    return updatedOrg[0]
+    revalidatePath("/dashboard/organizations");
+    return updatedOrg[0];
   } catch (error) {
-    console.error("Error updating organization:", error)
-    throw error
+    console.error("Error updating organization:", error);
+    throw error;
   }
 }
 
 export async function deleteOrganization(id: string) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) {
-      throw new Error("No autorizado")
-    }
+    if (!user) throw new Error("Unauthorized");
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, id),
-        eq(member.userId, session.user.id)
+        eq(member.userId, user.id),
       ),
-    })
+    });
 
     if (!userMember || userMember.role !== "admin") {
-      throw new Error("No tienes permisos para eliminar esta organización")
+      throw new Error("You don't have permission to delete this organization");
     }
 
-    await db.delete(organization).where(eq(organization.id, id))
+    await db.delete(organization).where(eq(organization.id, id));
 
-    revalidatePath("/dashboard/organizations")
+    revalidatePath("/dashboard/organizations");
   } catch (error) {
-    console.error("Error deleting organization:", error)
-    throw error
+    console.error("Error deleting organization:", error);
+    throw error;
   }
 }
 
-export async function inviteUserToOrganization(organizationId: string, email: string, role: string = "member") {
+export async function inviteUserToOrganization(
+  organizationId: string,
+  email: string,
+  role: string = "member",
+) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) {
-      throw new Error("No autorizado")
-    }
+    if (!user) throw new Error("Unauthorized");
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, organizationId),
-        eq(member.userId, session.user.id)
+        eq(member.userId, user.id),
       ),
-    })
+    });
 
     if (!userMember || userMember.role !== "admin") {
-      throw new Error("No tienes permisos para invitar usuarios a esta organización")
+      throw new Error(
+        "You don't have permission to invite users to this organization",
+      );
     }
 
-    const newInvitation = await db.insert(invitation).values({
-      id: nanoid(),
-      organizationId,
-      email,
-      role,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      inviterId: session.user.id,
-    }).returning()
+    const newInvitation = await db
+      .insert(invitation)
+      .values({
+        id: nanoid(),
+        organizationId,
+        email,
+        role,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        inviterId: user.id,
+      })
+      .returning();
 
-    revalidatePath("/dashboard/organizations")
-    return newInvitation[0]
+    revalidatePath("/dashboard/organizations");
+    return newInvitation[0];
   } catch (error) {
-    console.error("Error inviting user to organization:", error)
-    throw error
+    console.error("Error inviting user to organization:", error);
+    throw error;
   }
 }
 
-export async function removeMemberFromOrganization(organizationId: string, userId: string) {
+export async function removeMemberFromOrganization(
+  organizationId: string,
+  userId: string,
+) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    })
+    const user = await getCurrentUser();
 
-    if (!session || !session.user) {
-      throw new Error("No autorizado")
-    }
+    if (!user) throw new Error("Unauthorized");
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, organizationId),
-        eq(member.userId, session.user.id)
+        eq(member.userId, user.id),
       ),
-    })
+    });
 
     if (!userMember || userMember.role !== "admin") {
-      throw new Error("No tienes permisos para remover miembros de esta organización")
+      throw new Error(
+        "You don't have permission to remove members from this organization",
+      );
     }
 
-    await db.delete(member).where(
-      and(
-        eq(member.organizationId, organizationId),
-        eq(member.userId, userId)
-      )
-    )
+    await db
+      .delete(member)
+      .where(
+        and(
+          eq(member.organizationId, organizationId),
+          eq(member.userId, userId),
+        ),
+      );
 
-    revalidatePath("/dashboard/organizations")
+    revalidatePath("/dashboard/organizations");
   } catch (error) {
-    console.error("Error removing member from organization:", error)
-    throw error
+    console.error("Error removing member from organization:", error);
+    throw error;
   }
 }
 
@@ -306,4 +304,4 @@ export async function getOrgMembers(organizationId?: string) {
     console.error("Error getting organization members:", error);
     throw error;
   }
-} 
+}

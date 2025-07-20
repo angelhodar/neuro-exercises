@@ -12,6 +12,8 @@ import {
   ExpandableMediaCardImage,
   ClickableMediaTags,
 } from "@/components/media-card";
+import { MediaCardAudio } from "@/components/media-card-audio";
+import { MediaCardVideo } from "@/components/media-card-video";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createBlobUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,15 +38,46 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
     });
   }
 
-  return (
-    <div className="relative">
-      <MediaCard className="h-full">
-        <ExpandableMediaCardImage
-          src={createBlobUrl(media.blobKey)}
+  const renderMediaContent = () => {
+    const blobUrl = createBlobUrl(media.blobKey);
+    const thumbnailUrl = media.thumbnailKey ? createBlobUrl(media.thumbnailKey) : undefined;
+
+    if (media.mimeType.startsWith('audio/')) {
+      return (
+        <MediaCardAudio
+          src={blobUrl}
           alt={media.name}
           width={200}
           height={200}
         />
+      );
+    } else if (media.mimeType.startsWith('video/')) {
+      return (
+        <MediaCardVideo
+          src={blobUrl}
+          alt={media.name}
+          width={200}
+          height={200}
+          thumbnailSrc={thumbnailUrl}
+        />
+      );
+    } else {
+      // Default to image for any other type
+      return (
+        <ExpandableMediaCardImage
+          src={blobUrl}
+          alt={media.name}
+          width={200}
+          height={200}
+        />
+      );
+    }
+  };
+
+  return (
+    <div className="relative">
+      <MediaCard className="h-full">
+        {renderMediaContent()}
         <MediaCardContent padding="sm">
           <MediaCardTitle className="text-sm text-center line-clamp-2">
             {media.name}

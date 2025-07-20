@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createMediaSchema, CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadMedia } from "@/app/actions/media";
 import { MediaTagsInput } from "@/components//media-tags";
@@ -40,6 +41,7 @@ export default function CreateMediaButton() {
       prompt: "",
       tags: [],
       file: undefined,
+      mediaType: "image",
     },
   });
 
@@ -53,18 +55,18 @@ export default function CreateMediaButton() {
       form.reset();
     } catch (e) {
       console.error(e);
-      setError("Error guardando la imagen");
+      setError("Error guardando el archivo");
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Generar nueva imagen</Button>
+        <Button>Agregar nuevo medio</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nueva imagen</DialogTitle>
+          <DialogTitle>Nuevo medio</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -84,6 +86,28 @@ export default function CreateMediaButton() {
                       required
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mediaType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de medio</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona el tipo de medio" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="image">Imagen</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -115,7 +139,7 @@ export default function CreateMediaButton() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Selecciona las etiquetas para esta imagen
+                    Selecciona las etiquetas para este medio
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -153,20 +177,34 @@ export default function CreateMediaButton() {
                 <FormField
                   control={form.control}
                   name="file"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Archivo</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => field.onChange(e.target.files?.[0])}
-                          required
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const mediaType = form.watch("mediaType");
+                    const getAcceptTypes = () => {
+                      switch (mediaType) {
+                        case "audio":
+                          return "audio/*";
+                        case "video":
+                          return "video/*";
+                        default:
+                          return "image/*";
+                      }
+                    };
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>Archivo</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="file"
+                            accept={getAcceptTypes()}
+                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                            required
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </TabsContent>
             </Tabs>

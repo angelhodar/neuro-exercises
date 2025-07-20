@@ -80,28 +80,67 @@ export async function generateMediaFromPrompt(prompt: string) {
 }
 
 export async function uploadMedia(data: CreateMediaSchema) {
-  const { prompt, tags, name, description, file } = data;
+  const { prompt, tags, name, description, file, mediaType } = data;
 
   try {
     const user = await getCurrentUser();
 
     if (!user) throw new Error("No hay usuario autenticado");
 
-    const mediaData = file
-      ? await file.arrayBuffer()
-      : await generateMediaFromPrompt(prompt!);
+    let mediaData: ArrayBuffer;
+    let mimeType: string;
+    let fileName: string;
+    let metadata: Record<string, any> = {};
 
-    const fileName = `media/${
-      file ? file.name.replaceAll(" ", "-") : prompt!.replaceAll(" ", "-")
-    }.png`;
+    if (file) {
+      mediaData = await file.arrayBuffer();
+      mimeType = file.type;
+      
+      // Determine file extension based on mime type
+      const extension = mimeType.split('/')[1] || 'bin';
+      fileName = `media/${file.name.replaceAll(" ", "-")}.${extension}`;
+      
+      // Add file metadata
+      metadata = {
+        originalName: file.name,
+        size: file.size,
+        lastModified: file.lastModified,
+      };
+    } else {
+      // Generate image from prompt
+      const imageBuffer = await generateMediaFromPrompt(prompt!);
+      mediaData = imageBuffer.buffer.slice(imageBuffer.byteOffset, imageBuffer.byteOffset + imageBuffer.byteLength);
+      mimeType = 'image/png';
+      fileName = `media/${prompt!.replaceAll(" ", "-")}.png`;
+      metadata = {
+        generatedFromPrompt: prompt,
+        model: MODEL,
+      };
+    }
 
     const blob = await uploadBlob(fileName, mediaData);
+
+    // Generate thumbnail for video files
+    let thumbnailKey: string | null = null;
+    if (mimeType.startsWith('video/') && file) {
+      try {
+        // For now, we'll use the first frame as thumbnail
+        // In a production environment, you might want to use FFmpeg or similar
+        thumbnailKey = blob.pathname; // Use the same file as thumbnail for now
+        metadata.thumbnailGenerated = true;
+      } catch (error) {
+        console.warn("Could not generate thumbnail for video:", error);
+      }
+    }
 
     await db.insert(medias).values({
       name: name,
       description: description || null,
       tags: tags,
       blobKey: blob.pathname,
+      mimeType: mimeType,
+      thumbnailKey: thumbnailKey,
+      metadata: metadata,
       authorId: user.id,
     });
 
@@ -110,7 +149,7 @@ export async function uploadMedia(data: CreateMediaSchema) {
     return { success: true, url: blob.url };
   } catch (error) {
     console.error("Error subiendo media:", error);
-    throw new Error("No se pudo subir la imagen");
+    throw new Error("No se pudo subir el archivo");
   }
 }
 

@@ -5,11 +5,11 @@ import { notFound } from "next/navigation";
 export default async function SharedLinkPage({
   params,
 }: {
-  params: Promise<{ linkId: string }>;
+  params: Promise<{ token: string }>;
 }) {
-  const { linkId } = await params;
+  const { token } = await params;
 
-  const linkData = await getExerciseLinkByToken(linkId);
+  const linkData = await getExerciseLinkByToken(token);
 
   if (!linkData) notFound();
 

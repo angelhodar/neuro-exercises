@@ -39,7 +39,8 @@ const timestamps = {
     .notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
-    .notNull(),
+    .notNull()
+    .$onUpdate(() => new Date()),
 };
 
 // Better-auth tables
@@ -51,6 +52,10 @@ export const users = pgTable(
     email: text().notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text(),
+    role: text("role"),
+    banned: boolean("banned"),
+    banReason: text("ban_reason"),
+    banExpires: timestamp("ban_expires", { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -65,19 +70,23 @@ export const sessions = pgTable("sessions", {
   token: text().notNull().unique(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
+  activeOrganizationId: text("active_organization_id"),
+  impersonatedBy: text("impersonated_by"),
   ...timestamps,
-});
+}, (table) => [
+  foreignKey({
+    columns: [table.userId],
+    foreignColumns: [users.id],
+    name: "sessions_user_fk",
+  }).onDelete("cascade"),
+]);
 
 export const accounts = pgTable("accounts", {
   id: text().primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -86,15 +95,77 @@ export const accounts = pgTable("accounts", {
   scope: text(),
   password: text(),
   ...timestamps,
-});
+}, (table) => [
+  foreignKey({
+    columns: [table.userId],
+    foreignColumns: [users.id],
+    name: "accounts_user_fk",
+  }).onDelete("cascade"),
+]);
 
 export const verifications = pgTable("verifications", {
   id: text().primaryKey(),
-  identifier: text().unique(),
+  identifier: text().notNull(),
   value: text().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   ...timestamps,
 });
+
+export const organization = pgTable("organizations", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").unique(),
+  logo: text("logo"),
+  metadata: text("metadata"),
+  ...timestamps,
+});
+
+export const member = pgTable("members", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id").notNull(),
+  userId: text("user_id").notNull(),
+  role: text("role").default("member").notNull(),
+  ...timestamps,
+}, (table) => [
+  index("member_organization_idx").on(table.organizationId),
+  index("member_user_idx").on(table.userId),
+  uniqueIndex("member_organization_user_unique").on(table.organizationId, table.userId),
+  foreignKey({
+    columns: [table.organizationId],
+    foreignColumns: [organization.id],
+    name: "member_organization_fk",
+  }).onDelete("cascade"),
+  foreignKey({
+    columns: [table.userId],
+    foreignColumns: [users.id],
+    name: "member_user_fk",
+  }).onDelete("cascade"),
+]);
+
+export const invitation = pgTable("invitations", {
+  id: text("id").primaryKey(),
+  organizationId: text("organization_id").notNull(),
+  email: text("email").notNull(),
+  role: text("role"),
+  status: text("status").default("pending").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  inviterId: text("inviter_id").notNull(),
+  ...timestamps,
+}, (table) => [
+  index("invitation_organization_idx").on(table.organizationId),
+  index("invitation_email_idx").on(table.email),
+  index("invitation_status_idx").on(table.status),
+  foreignKey({
+    columns: [table.organizationId],
+    foreignColumns: [organization.id],
+    name: "invitation_organization_fk",
+  }).onDelete("cascade"),
+  foreignKey({
+    columns: [table.inviterId],
+    foreignColumns: [users.id],
+    name: "invitation_inviter_fk",
+  }).onDelete("cascade"),
+]);
 
 export const exercises = pgTable(
   "exercises",
@@ -142,7 +213,7 @@ export const exerciseTemplateItems = pgTable(
     exerciseId: integer("exercise_id").notNull(),
     config: jsonb().$type<ConfigSchema>(),
     position: integer().notNull(),
-    createdAt: timestamps.createdAt,
+    ...timestamps,
   },
   (table) => [
     index("exercise_template_items_template_idx").on(table.templateId),
@@ -217,7 +288,7 @@ export const exerciseResults = pgTable(
   (table) => [
     index("exercise_results_link_idx").on(table.linkId),
     index("exercise_results_template_item_idx").on(table.templateItemId),
-    index("exercise_results_completed_at_idx").on(table.completedAt), // For time-based queries
+    index("exercise_results_completed_at_idx").on(table.completedAt),
     // Ensure one result per link+template_item combination
     uniqueIndex("exercise_results_link_template_item_unique").on(
       table.linkId,
@@ -310,6 +381,8 @@ export const userRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   medias: many(medias),
   exerciseChatGenerations: many(exerciseChatGeneration),
+  memberships: many(member),
+  sentInvitations: many(invitation, { relationName: "sentInvitations" }),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -414,6 +487,34 @@ export const exerciseChatGenerationRelations = relations(
   }),
 );
 
+export const organizationRelations = relations(organization, ({ many }) => ({
+  members: many(member),
+  invitations: many(invitation),
+}));
+
+export const memberRelations = relations(member, ({ one }) => ({
+  organization: one(organization, {
+    fields: [member.organizationId],
+    references: [organization.id],
+  }),
+  user: one(users, {
+    fields: [member.userId],
+    references: [users.id],
+  }),
+}));
+
+export const invitationRelations = relations(invitation, ({ one }) => ({
+  organization: one(organization, {
+    fields: [invitation.organizationId],
+    references: [organization.id],
+  }),
+  inviter: one(users, {
+    fields: [invitation.inviterId],
+    references: [users.id],
+    relationName: "sentInvitations",
+  }),
+}));
+
 // Schemas
 export const exerciseSelectSchema = createSelectSchema(exercises);
 export const exerciseInsertSchema = createInsertSchema(exercises);
@@ -488,3 +589,13 @@ export type NewMedia = typeof medias.$inferInsert;
 export type ExerciseChatGeneration = typeof exerciseChatGeneration.$inferSelect;
 export type NewExerciseChatGeneration =
   typeof exerciseChatGeneration.$inferInsert;
+
+export type Organization = typeof organization.$inferSelect;
+export type NewOrganization = Omit<typeof organization.$inferInsert, "id">;
+export type UpdateOrganization = Partial<NewOrganization>;
+
+export type Member = typeof member.$inferSelect;
+export type NewMember = typeof member.$inferInsert;
+
+export type Invitation = typeof invitation.$inferSelect;
+export type NewInvitation = typeof invitation.$inferInsert;

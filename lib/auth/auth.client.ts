@@ -1,4 +1,5 @@
 import { createAuthClient } from "better-auth/react";
+import { adminClient, organizationClient } from "better-auth/client/plugins"
 
 const getBaseURL = () => {
   if (!process.env.NEXT_PUBLIC_VERCEL_ENV) {
@@ -15,6 +16,7 @@ const getBaseURL = () => {
 
 export const authClient = createAuthClient({
   baseURL: getBaseURL(),
+  plugins: [adminClient(), organizationClient()],
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

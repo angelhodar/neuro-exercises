@@ -87,7 +87,7 @@ export default function DashboardMediaCard({ media }: DashboardMediaCardProps) {
               tags={media.tags}
               variant="secondary"
               size="sm"
-              className="justify-center"
+              className="justify-center mt-2"
             />
           )}
         </MediaCardContent>

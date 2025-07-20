@@ -1,6 +1,7 @@
 "use server";
 
 import { Buffer } from "buffer";
+import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { medias, type Media } from "@/lib/db/schema";
 import { eq, desc, ilike, arrayOverlaps } from "drizzle-orm";
@@ -10,8 +11,41 @@ import { experimental_generateImage as generateImage } from "ai";
 import { getCurrentUser } from "@/app/actions/users";
 import type { CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadBlob, deleteBlobs } from "@/lib/storage";
+import {
+  searchImages as searchImagesFromSerper,
+  type DownloadableImage,
+} from "@/lib/media/serper";
+import { generateObject } from "ai";
+import { google } from "@ai-sdk/google";
+import { mediaMetadataSchema } from "@/lib/schemas/medias";
+import { downloadFromUrl } from "@/lib/utils";
+import { optimizeImage } from "@/lib/media/optimize";
 
 const MODEL = "black-forest-labs/FLUX.1-schnell-Free";
+
+async function generateImageMetadata(imageName: string, imageUrl: string) {
+  const { object } = await generateObject({
+    model: google("gemini-2.5-flash"),
+    schema: mediaMetadataSchema,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen. El nombre original de la imagen es: ${imageName}`,
+          },
+          {
+            type: "image",
+            image: new URL(imageUrl),
+          },
+        ],
+      },
+    ],
+  });
+
+  return object;
+}
 
 export async function getMedias(
   searchTerm?: string,
@@ -74,6 +108,7 @@ export async function generateMediaFromPrompt(prompt: string) {
   });
 
   const [image] = images;
+
   if (!image) throw new Error("No se generó ninguna imagen");
 
   return Buffer.from(image.uint8Array);
@@ -164,5 +199,58 @@ export async function deleteMedia(id: number, blobPathname: string) {
   } catch (error) {
     console.error("Delete error:", error);
     throw new Error("Failed to delete media");
+  }
+}
+
+export async function searchImages(query: string, numResults?: number) {
+  return searchImagesFromSerper(query, numResults);
+}
+
+export async function transferImagesToLibrary(images: DownloadableImage[]) {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) throw new Error("No hay usuario autenticado");
+
+    const results = await Promise.all(
+      images.map(async (image) => {
+        try {
+          const [metadata, imageBuffer] = await Promise.all([
+            generateImageMetadata(image.title, image.imageUrl),
+            downloadFromUrl(image.imageUrl).then((arrayBuffer) =>
+              optimizeImage(Buffer.from(arrayBuffer)),
+            ),
+          ]);
+
+          const fileName = `library/${nanoid()}.webp`;
+          const blob = await uploadBlob(fileName, imageBuffer);
+
+          await db.insert(medias).values({
+            name:
+              metadata.name.charAt(0).toUpperCase() +
+              metadata.name.slice(1).toLowerCase(),
+            description: metadata.description,
+            tags: metadata.tags.map((tag) => tag.toLowerCase()),
+            blobKey: blob.pathname,
+            authorId: user.id,
+          });
+
+          return { success: true, name: metadata.name, url: blob.url };
+        } catch (error) {
+          console.error(`Error processing image ${image.title}:`, error);
+          return {
+            success: false,
+            name: image.title,
+            error: error instanceof Error ? error.message : "Unknown error",
+          };
+        }
+      }),
+    );
+
+    revalidatePath("/dashboard/media");
+    return results;
+  } catch (error) {
+    console.error("Error downloading and uploading images:", error);
+    throw new Error("No se pudieron descargar las imágenes");
   }
 }

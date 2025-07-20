@@ -15,6 +15,7 @@ import {
   Palette,
   Circle,
   ScanSearch,
+  Building2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -72,6 +73,11 @@ const data = {
     },
   ],
   management: [
+    {
+      title: "Organizaciones",
+      url: "/dashboard/organizations",
+      icon: Building2,
+    },
     {
       title: "Usuarios",
       url: "/dashboard/users",

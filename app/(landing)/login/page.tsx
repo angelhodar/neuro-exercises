@@ -1,5 +1,6 @@
 "use client"
 
+import { z } from "zod"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -10,8 +11,6 @@ import { signIn } from "@/lib/auth/auth.client"
 import { Eye, EyeOff } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import Link from "next/link"
 
 const loginSchema = z.object({
   email: z.string().email("Introduce un email válido"),
@@ -132,12 +131,6 @@ export default function LoginPage() {
               <Button variant="link" className="text-sm text-gray-500 hover:text-blue-600" disabled={isLoading}>
                 ¿Olvidaste tu contraseña?
               </Button>
-              <div className="text-sm text-gray-600">
-                ¿No tienes cuenta?{" "}
-                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Regístrate aquí
-                </Link>
-              </div>
             </div>
           </CardContent>
         </Card>

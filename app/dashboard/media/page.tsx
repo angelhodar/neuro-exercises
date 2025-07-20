@@ -1,6 +1,7 @@
 import { getMedias } from "@/app/actions/media";
 import DashboardMediaCard from "./media-card";
 import CreateMediaButton from "./create-media-button";
+import SearchImagesButton from "./search-images-button";
 import MediaFilters from "./media-filters";
 import {
   DashboardHeader,
@@ -29,6 +30,7 @@ export default async function MediasPage({ searchParams }: Props) {
         </div>
         <DashboardHeaderActions>
         <MediaFilters key={tagsArray.join(",")} />
+          <SearchImagesButton />
           <CreateMediaButton />
         </DashboardHeaderActions>
       </DashboardHeader>

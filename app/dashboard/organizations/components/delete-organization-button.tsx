@@ -12,7 +12,7 @@ interface DeleteOrganizationButtonProps {
   organization: Organization;
 }
 
-export function DeleteOrganizationButton({
+export default function DeleteOrganizationButton({
   organization,
 }: DeleteOrganizationButtonProps) {
   const router = useRouter();

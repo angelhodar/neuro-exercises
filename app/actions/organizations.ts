@@ -12,6 +12,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { getCurrentUser } from "./users";
+import { auth } from "@/lib/auth/auth.server";
 
 export async function getCurrentUserOrganizations() {
   try {
@@ -121,6 +122,7 @@ export async function createOrganization(data: NewOrganization) {
       role: "admin",
     });
 
+    // Revalidate the main organizations page to show the new organization
     revalidatePath("/dashboard/organizations");
     return newOrg;
   } catch (error) {
@@ -154,6 +156,7 @@ export async function updateOrganization(
       .returning();
 
     revalidatePath("/dashboard/organizations");
+    revalidatePath(`/dashboard/organizations/${id}`);
     return updatedOrg[0];
   } catch (error) {
     console.error("Error updating organization:", error);
@@ -182,6 +185,7 @@ export async function deleteOrganization(id: string) {
     await db.delete(organization).where(eq(organization.id, id));
 
     revalidatePath("/dashboard/organizations");
+    revalidatePath(`/dashboard/organizations/${id}`);
   } catch (error) {
     console.error("Error deleting organization:", error);
     throw error;
@@ -265,6 +269,7 @@ export async function removeMemberFromOrganization(
       );
 
     revalidatePath("/dashboard/organizations");
+    revalidatePath(`/dashboard/organizations/${organizationId}`);
   } catch (error) {
     console.error("Error removing member from organization:", error);
     throw error;
@@ -303,5 +308,37 @@ export async function getOrgMembers(organizationId?: string) {
   } catch (error) {
     console.error("Error getting organization members:", error);
     throw error;
+  }
+}
+
+export async function addMemberToOrganization(
+  userId: string,
+  role: "member" | "admin" | "owner",
+  organizationId: string
+) {
+  try {
+    if (!userId || !role || !organizationId) {
+      return { error: "Faltan campos requeridos" };
+    }
+
+    // Add the member to the organization using Better Auth API
+    const result = await auth.api.addMember({
+      body: {
+        userId: userId,
+        role: role,
+        organizationId: organizationId,
+      },
+    });
+
+    if (!result) {
+      return { error: "Error al agregar miembro" };
+    }
+
+    revalidatePath(`/dashboard/organizations/${organizationId}`);
+    revalidatePath("/dashboard/organizations");
+    return { success: true };
+  } catch (error) {
+    console.error("Error adding member:", error);
+    return { error: "Error interno del servidor" };
   }
 }

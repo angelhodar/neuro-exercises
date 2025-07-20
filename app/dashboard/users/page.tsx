@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
+import AddUserButton from "./add-user-button";
 
 export default async function UsersPage() {
   const users = await getUsers();
@@ -23,11 +24,14 @@ export default async function UsersPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
-        <div>
-          <DashboardHeaderTitle>Usuarios</DashboardHeaderTitle>
-          <DashboardHeaderDescription>
-            Gestiona y visualiza todos los usuarios de la plataforma
-          </DashboardHeaderDescription>
+        <div className="flex items-center justify-between w-full">
+          <div>
+            <DashboardHeaderTitle>Usuarios</DashboardHeaderTitle>
+            <DashboardHeaderDescription>
+              Gestiona y visualiza todos los usuarios de la plataforma
+            </DashboardHeaderDescription>
+          </div>
+          <AddUserButton />
         </div>
       </DashboardHeader>
 

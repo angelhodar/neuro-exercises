@@ -1,7 +1,6 @@
 import { getAllOrganizations } from "@/app/actions/organizations";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
@@ -15,10 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Users, Plus, Edit, Mail, Calendar } from "lucide-react";
+import { Building2, Users, Mail, Calendar, Edit } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import { DeleteOrganizationButton } from "./delete-organization-button";
+import DeleteOrganizationButton from "./components/delete-organization-button";
+import CreateOrganizationButton from "./components/create-organization-button";
+import EditOrganizationButton from "./components/edit-organization-button";
 
 export default async function OrganizationsPage() {
   const organizations = await getAllOrganizations();
@@ -32,12 +33,7 @@ export default async function OrganizationsPage() {
             Gestiona las organizaciones y sus miembros.
           </DashboardHeaderDescription>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/organizations/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Crear organización
-          </Link>
-        </Button>
+        <CreateOrganizationButton />
       </DashboardHeader>
 
       <Card>
@@ -95,16 +91,18 @@ export default async function OrganizationsPage() {
                           <Users className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/organizations/${org.id}/edit`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="sm" asChild>
+                      <EditOrganizationButton
+                        organization={org}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </EditOrganizationButton>
+                      {/*<Button variant="outline" size="sm" asChild>
                         <Link href={`/dashboard/organizations/${org.id}/invitations`}>
                           <Mail className="h-4 w-4" />
                         </Link>
-                      </Button>
+                      </Button>*/}
                       <DeleteOrganizationButton organization={org} />
                     </div>
                   </TableCell>
@@ -118,12 +116,7 @@ export default async function OrganizationsPage() {
                       <p className="text-muted-foreground">
                         No hay organizaciones creadas
                       </p>
-                      <Button asChild>
-                        <Link href="/dashboard/organizations/create">
-                          <Plus className="mr-2 h-4 w-4" />
-                          Crear primera organización
-                        </Link>
-                      </Button>
+                      <CreateOrganizationButton />
                     </div>
                   </TableCell>
                 </TableRow>

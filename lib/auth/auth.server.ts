@@ -19,7 +19,10 @@ export const auth = betterAuth({
     },
   }),
   plugins: [organization(), admin()],
-  emailAndPassword: { enabled: true },
+  emailAndPassword: { 
+    enabled: true,
+    disableSignUp: true
+  },
   session: {
     cookieCache: {
       enabled: true,

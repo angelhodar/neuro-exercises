@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 import { type User } from "@/lib/db/schema";
+import { revalidatePath } from "next/cache";
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
@@ -58,5 +59,33 @@ export async function getAvailableUsers() {
   } catch (error) {
     console.error("Error getting available users:", error);
     throw error;
+  }
+}
+
+interface CreateUserData {
+  name: string;
+  email: string;
+  password: string;
+  role: "user" | "admin";
+}
+
+export async function createUser(data: CreateUserData) {
+  try {
+    const result = await auth.api.createUser({
+      body: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+      },
+    });
+
+    // Revalidar la página de usuarios para mostrar el nuevo usuario
+    revalidatePath("/dashboard/users");
+
+    return { success: true, user: result.user };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return { error: "Error interno del servidor" };
   }
 }

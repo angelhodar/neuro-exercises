@@ -44,7 +44,7 @@ export default async function OrganizationInvitationsPage({
             href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Enviar Invitación
+            Enviar invitación
           </Link>
         </Button>
       </DashboardHeader>

@@ -4,7 +4,7 @@ import {
 } from "@/app/actions/organizations";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Building2, ArrowLeft, Edit, Mail, Users } from "lucide-react";
+import { User, Edit, Mail, Users } from "lucide-react";
 import {
   DashboardHeader,
   DashboardHeaderTitle,
@@ -22,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddMemberButton from "../components/add-member-button";
+import EditOrganizationButton from "../components/edit-organization-button";
 
 export default async function OrganizationPage({
   params,
@@ -29,11 +31,13 @@ export default async function OrganizationPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const organization = await getOrganizationById(resolvedParams.id);
+
+  const [organization, members] = await Promise.all([
+    getOrganizationById(resolvedParams.id),
+    getOrgMembers(resolvedParams.id),
+  ]);
 
   if (!organization) notFound();
-
-  const members = await getOrgMembers(resolvedParams.id);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -45,20 +49,19 @@ export default async function OrganizationPage({
           </DashboardHeaderDescription>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/dashboard/organizations/${resolvedParams.id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
-              Editar
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
+          <EditOrganizationButton organization={organization}>
+            <Edit className="h-4 w-4" />
+            Editar
+          </EditOrganizationButton>
+          <AddMemberButton organizationId={resolvedParams.id} />
+          {/*<Button variant="outline" asChild>
             <Link
               href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
             >
               <Mail className="mr-2 h-4 w-4" />
               Invitaciones
             </Link>
-          </Button>
+          </Button>*/}
         </div>
       </DashboardHeader>
 

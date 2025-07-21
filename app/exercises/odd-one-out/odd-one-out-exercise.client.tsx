@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { OddOneOutConfig, OddOneOutResult } from "./odd-one-out.schema";
-import { CheckCircle, XCircle } from "lucide-react";
-import { SelectableMediaCard } from "@/components/media-card";
+import { Selectable } from "@/components/selectable";
+import { MediaCard, MediaCardContainer, MediaCardTitle } from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { createBlobUrl } from "@/lib/utils";
@@ -91,16 +92,27 @@ export function OddOneOutExerciseClient({
           const isSelected = questionState.selectedAnswerId === media.id;
           
           return (
-            <SelectableMediaCard
+            <Selectable
               key={media.id}
-              src={createBlobUrl(media.blobKey)}
-              alt={media.name}
-              name={media.name}
-              showName={true}
               selected={isSelected}
-              disabled={questionState.isAnswered}
-              onSelect={() => handleSelectAnswer(media.id)}
-            />
+              onClick={() => handleSelectAnswer(media.id)}
+            >
+              <MediaCard>
+                <MediaCardContainer>
+                  <MediaImage
+                    src={createBlobUrl(media.blobKey)}
+                    alt={media.name}
+                    width={300}
+                    height={300}
+                  />
+                </MediaCardContainer>
+                <div className="p-2">
+                  <MediaCardTitle className="text-sm text-center line-clamp-2">
+                    {media.name}
+                  </MediaCardTitle>
+                </div>
+              </MediaCard>
+            </Selectable>
           );
         })}
       </div>

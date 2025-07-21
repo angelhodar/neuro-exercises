@@ -30,7 +30,7 @@ import {
 } from "@/lib/schemas/exercises";
 import { updateExercise } from "@/app/actions/exercises";
 import type { Exercise } from "@/lib/db/schema";
-import { MediaTagsInput } from "@/components/media-tags";
+import { MediaTagsInput } from "@/components/media/media-tags";
 
 interface EditExerciseButtonProps {
   exercise: Exercise;

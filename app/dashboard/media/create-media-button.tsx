@@ -27,7 +27,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createMediaSchema, CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadMedia } from "@/app/actions/media";
-import { MediaTagsInput } from "@/components//media-tags";
+import { MediaTagsInput } from "@/components/media/media-tags";
 
 export default function CreateMediaButton() {
   const [open, setOpen] = useQueryState("create-dialog", parseAsBoolean.withDefault(false));

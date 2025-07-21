@@ -3,7 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Badge } from "@/components/ui/badge";
-import { SelectableMediaCard } from "@/components/media-card";
+import { Selectable } from "@/components/selectable";
+import { MediaCard, MediaCardContainer, MediaCardTitle } from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
 import {
   type VisualRecognitionConfig,
   type VisualRecognitionQuestionResult,
@@ -198,16 +200,29 @@ export function VisualRecognitionExerciseClient({
         {questionState.displayedImages.map((image) => {
           const isSelected = questionState.selectedImageIds.includes(image.id);
           return (
-            <SelectableMediaCard
+            <Selectable
               key={image.id}
-              src={createBlobUrl(image.url)}
-              alt={showImageNames ? image.name : "Imagen del ejercicio"}
-              name={image.name}
-              showName={showImageNames}
               selected={isSelected}
-              disabled={questionState.isAnswerSubmitted}
-              onSelect={() => handleImageClick(image.id)}
-            />
+              onClick={() => handleImageClick(image.id)}
+            >
+              <MediaCard>
+                <MediaCardContainer>
+                  <MediaImage
+                    src={createBlobUrl(image.url)}
+                    alt={showImageNames ? image.name : "Imagen del ejercicio"}
+                    width={300}
+                    height={300}
+                  />
+                </MediaCardContainer>
+                {showImageNames && (
+                  <div className="p-2">
+                    <MediaCardTitle className="text-sm text-center line-clamp-2">
+                      {image.name}
+                    </MediaCardTitle>
+                  </div>
+                )}
+              </MediaCard>
+            </Selectable>
           );
         })}
       </div>

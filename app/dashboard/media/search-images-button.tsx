@@ -23,13 +23,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Selectable } from "@/components/ui/selectable";
-import {
-  MediaCardImage,
-  MediaCardContent,
-  MediaCardTitle,
-  MediaCardDescription,
-} from "@/components/media-card";
+import { Selectable } from "@/components/selectable";
+import { MediaCard, MediaCardContainer, MediaCardTitle, MediaCardDescription } from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
 import { searchImages, transferImagesToLibrary } from "@/app/actions/media";
 import { Search, Loader2, Download } from "lucide-react";
 import type {
@@ -129,9 +125,7 @@ export default function SearchImagesButton() {
       setSelectedImages(new Set());
 
       // Close dialog if all downloads were successful
-      if (errorCount === 0) {
-        setOpen(false);
-      }
+      if (errorCount === 0) setOpen(false);
     } catch (e) {
       console.error(e);
       toast.error("Error descargando las imágenes");
@@ -212,30 +206,32 @@ export default function SearchImagesButton() {
                 </Button>
               )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] pr-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] p-2">
               {searchResults.map((image) => (
                 <Selectable
                   key={image.position}
                   selected={selectedImages.has(image.position)}
                   onClick={() => handleImageClick(image)}
                 >
-                  <div className="aspect-square relative">
-                    <MediaCardImage
-                      src={image.thumbnailUrl}
-                      alt={image.title}
-                      fill
-                      unoptimized
-                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
-                  </div>
-                  <MediaCardContent padding="sm" className="space-y-1">
-                    <MediaCardTitle className="text-sm line-clamp-2">
-                      {image.title}
-                    </MediaCardTitle>
-                    <MediaCardDescription className="text-xs">
-                      {image.source}
-                    </MediaCardDescription>
-                  </MediaCardContent>
+                  <MediaCard>
+                    <MediaCardContainer>
+                      <MediaImage
+                        src={image.thumbnailUrl}
+                        alt={image.title}
+                        fill
+                        unoptimized
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      />
+                    </MediaCardContainer>
+                    <div className="p-2 space-y-1">
+                      <MediaCardTitle className="text-sm line-clamp-2">
+                        {image.title}
+                      </MediaCardTitle>
+                      <MediaCardDescription className="text-xs">
+                        {image.source}
+                      </MediaCardDescription>
+                    </div>
+                  </MediaCard>
                 </Selectable>
               ))}
             </div>

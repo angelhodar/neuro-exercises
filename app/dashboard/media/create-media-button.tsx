@@ -23,15 +23,17 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createMediaSchema, CreateMediaSchema } from "@/lib/schemas/medias";
 import { uploadMedia } from "@/app/actions/media";
 import { MediaTagsInput } from "@/components/media/media-tags";
+import React from "react";
+import { Plus } from "lucide-react";
 
 export default function CreateMediaButton() {
   const [open, setOpen] = useQueryState("create-dialog", parseAsBoolean.withDefault(false));
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<string>("generate");
 
   const form = useForm<CreateMediaSchema>({
     resolver: zodResolver(createMediaSchema),
@@ -41,16 +43,24 @@ export default function CreateMediaButton() {
       prompt: "",
       tags: [],
       file: undefined,
-      mediaType: "image",
     },
   });
 
   const { isSubmitting } = form.formState;
 
+  const inferMediaType = (file?: File): "image" | "audio" | "video" => {
+    if (!file) return "image";
+    if (file.type.startsWith("audio/")) return "audio";
+    if (file.type.startsWith("video/")) return "video";
+    return "image";
+  };
+
   const onSubmit = async (values: CreateMediaSchema) => {
     setError(null);
     try {
-      await uploadMedia(values);
+      // Infer mediaType before upload
+      const mediaType = inferMediaType(values.file);
+      await uploadMedia({ ...values, mediaType });
       setOpen(false);
       form.reset();
     } catch (e) {
@@ -59,111 +69,71 @@ export default function CreateMediaButton() {
     }
   };
 
+  // Watch file to determine if thumbnail input should be shown
+  const file = form.watch("file");
+  const manualType = file ? inferMediaType(file) : "image";
+  const showThumbnailInput = manualType === "audio" || manualType === "video";
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Agregar nuevo medio</Button>
+        <Button>
+          <Plus className="w-4 h-4" />
+          Añadir contenido
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nuevo medio</DialogTitle>
+          <DialogTitle>Nuevo contenido</DialogTitle>
         </DialogHeader>
+        {/* Move Tabs to the top */}
+        <Tabs defaultValue="generate" value={tab} onValueChange={setTab}>
+          <TabsList className="w-full flex my-4">
+            <TabsTrigger value="generate" className="flex-1">
+              Generar con IA
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex-1">
+              Subir manualmente
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-4 mt-2"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Nombre de la imagen"
-                      {...field}
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="mediaType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de medio</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {/* Only show prompt if AI tab is selected */}
+            {tab === "generate" && (
+              <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instrucciones de generación</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el tipo de medio" />
-                      </SelectTrigger>
+                      <Input
+                        placeholder="Una manzana roja"
+                        {...field}
+                        required
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="image">Imagen</SelectItem>
-                      <SelectItem value="audio">Audio</SelectItem>
-                      <SelectItem value="video">Video</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Etiquetas</FormLabel>
-                  <FormControl>
-                    <MediaTagsInput
-                      value={field.value || []}
-                      onChange={field.onChange}
-                      placeholder="Añadir etiqueta..."
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Selecciona las etiquetas para este medio
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Tabs defaultValue="generate">
-              <TabsList className="w-full flex mb-4">
-                <TabsTrigger value="generate" className="flex-1">
-                  Generar con IA
-                </TabsTrigger>
-                <TabsTrigger value="upload" className="flex-1">
-                  Subir manualmente
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="generate">
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {/* Only show manual fields if manual tab is selected */}
+            {tab === "upload" && (
+              <>
                 <FormField
                   control={form.control}
-                  name="prompt"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Instrucciones de generación</FormLabel>
+                      <FormLabel>Nombre</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Una manzana roja"
+                          placeholder="Nombre del medio"
                           {...field}
                           required
                         />
@@ -172,31 +142,30 @@ export default function CreateMediaButton() {
                     </FormItem>
                   )}
                 />
-              </TabsContent>
-              <TabsContent value="upload">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descripción</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="file"
                   render={({ field }) => {
-                    const mediaType = form.watch("mediaType");
-                    const getAcceptTypes = () => {
-                      switch (mediaType) {
-                        case "audio":
-                          return "audio/*";
-                        case "video":
-                          return "video/*";
-                        default:
-                          return "image/*";
-                      }
-                    };
-                    
                     return (
                       <FormItem>
-                        <FormLabel>Archivo</FormLabel>
+                        <FormLabel>Contenido</FormLabel>
                         <FormControl>
                           <Input
                             type="file"
-                            accept={getAcceptTypes()}
+                            accept="image/*,audio/*,video/*"
                             onChange={(e) => field.onChange(e.target.files?.[0])}
                             required
                           />
@@ -206,8 +175,51 @@ export default function CreateMediaButton() {
                     );
                   }}
                 />
-              </TabsContent>
-            </Tabs>
+                {/* Show thumbnail input if audio or video */}
+                {showThumbnailInput && (
+                  <FormField
+                    control={form.control}
+                    name="thumbnail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Miniatura</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Añade una imagen de miniatura para el audio o video
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Etiquetas</FormLabel>
+                      <FormControl>
+                        <MediaTagsInput
+                          value={field.value || []}
+                          onChange={field.onChange}
+                          placeholder="Añadir etiqueta..."
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Selecciona las etiquetas para este contenido
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             {error && <div className="text-red-500 text-sm">{error}</div>}
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>

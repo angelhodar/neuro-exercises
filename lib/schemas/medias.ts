@@ -6,7 +6,7 @@ export const selectableMediaSchema = z.object({
   blobKey: z.string(),
   mimeType: z.string(),
   thumbnailKey: z.string().nullable(),
-  metadata: z.record(z.any()).nullable(),
+  metadata: z.unknown().nullable(),
   tags: z.array(z.string()).nullable()
 });
 
@@ -14,12 +14,13 @@ export type SelectableMediaSchema = z.infer<typeof selectableMediaSchema>;
 
 export const createMediaSchema = z
   .object({
-    prompt: z.string().optional(),
-    tags: z.array(z.string()).default([]),
     name: z.string().min(1, "El nombre es obligatorio"),
+    tags: z.array(z.string()),
+    prompt: z.string().optional(),
     description: z.string().optional(),
     file: z.instanceof(File).optional(),
     mediaType: z.enum(["image", "audio", "video"]).optional(),
+    thumbnail: z.instanceof(File).optional(),
   })
   .refine((data) => data.prompt || data.file, {
     message: "Debes añadir un prompt o subir un archivo",

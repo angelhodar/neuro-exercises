@@ -138,7 +138,7 @@ export default function SearchImagesButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Search className="w-4 h-4 mr-2" />
+          <Search className="w-4 h-4" />
           Buscar en internet
         </Button>
       </DialogTrigger>

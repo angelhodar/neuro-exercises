@@ -19,9 +19,11 @@ import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { mediaMetadataSchema } from "@/lib/schemas/medias";
 import { downloadFromUrl } from "@/lib/utils";
+import { translatePromptToEnglish } from "@/lib/ai/translate";
 import { optimizeImage } from "@/lib/media/optimize";
+import { extension as mimeExtension } from "mime-types";
 
-const MODEL = "black-forest-labs/FLUX.1-schnell-Free";
+const MODEL = "black-forest-labs/FLUX.1-dev";
 
 async function generateImageMetadata(imageName: string, imageUrl: string) {
   const { object } = await generateObject({
@@ -101,9 +103,11 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
 }
 
 export async function generateMediaFromPrompt(prompt: string) {
+  const translatedPrompt = await translatePromptToEnglish(prompt);
+
   const { images } = await generateImage({
     model: togetherai.image(MODEL),
-    prompt: `Generate an image of ${prompt.toLowerCase()}, clear and simple, centered, suitable for cognitive exercises, white background`,
+    prompt: `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, suitable for cognitive exercises, white background`,
     size: "512x512",
   });
 
@@ -115,57 +119,43 @@ export async function generateMediaFromPrompt(prompt: string) {
 }
 
 export async function uploadMedia(data: CreateMediaSchema) {
-  const { prompt, tags, name, description, file, mediaType } = data;
+  const { prompt, tags, name, description, file, thumbnail } = data;
 
   try {
     const user = await getCurrentUser();
-
     if (!user) throw new Error("No hay usuario autenticado");
 
-    let mediaData: ArrayBuffer;
+    let mediaData: ArrayBuffer | Buffer;
     let mimeType: string;
     let fileName: string;
-    let metadata: Record<string, any> = {};
+    let metadata: Record<string, any> | null = null;
+    let thumbnailKey: string | null = null;
+
+    const id = nanoid();
 
     if (file) {
+      // Manual upload: image, audio, or video
       mediaData = await file.arrayBuffer();
       mimeType = file.type;
-      
-      // Determine file extension based on mime type
-      const extension = mimeType.split('/')[1] || 'bin';
-      fileName = `media/${file.name.replaceAll(" ", "-")}.${extension}`;
-      
-      // Add file metadata
-      metadata = {
-        originalName: file.name,
-        size: file.size,
-        lastModified: file.lastModified,
-      };
+      const extension = mimeExtension(file.type);
+      fileName = `${id}.${extension}`;
     } else {
-      // Generate image from prompt
+      // AI generation: always image
       const imageBuffer = await generateMediaFromPrompt(prompt!);
-      mediaData = imageBuffer.buffer.slice(imageBuffer.byteOffset, imageBuffer.byteOffset + imageBuffer.byteLength);
-      mimeType = 'image/png';
-      fileName = `media/${prompt!.replaceAll(" ", "-")}.png`;
-      metadata = {
-        generatedFromPrompt: prompt,
-        model: MODEL,
-      };
+      mediaData = await optimizeImage(imageBuffer);
+      mimeType = "image/webp";
+      fileName = `${id}.webp`;
+      metadata = { prompt, model: MODEL };
     }
 
-    const blob = await uploadBlob(fileName, mediaData);
+    const blob = await uploadBlob(`library/${fileName}`, mediaData);
 
-    // Generate thumbnail for video files
-    let thumbnailKey: string | null = null;
-    if (mimeType.startsWith('video/') && file) {
-      try {
-        // For now, we'll use the first frame as thumbnail
-        // In a production environment, you might want to use FFmpeg or similar
-        thumbnailKey = blob.pathname; // Use the same file as thumbnail for now
-        metadata.thumbnailGenerated = true;
-      } catch (error) {
-        console.warn("Could not generate thumbnail for video:", error);
-      }
+    if (thumbnail) {
+      const thumbBuffer = await thumbnail.arrayBuffer();
+      const thumbExt = mimeExtension(thumbnail.type);
+      const thumbName = `library/${id}-thumb.${thumbExt}`;
+      const thumbBlob = await uploadBlob(thumbName, thumbBuffer);
+      thumbnailKey = thumbBlob.pathname;
     }
 
     await db.insert(medias).values({
@@ -180,7 +170,6 @@ export async function uploadMedia(data: CreateMediaSchema) {
     });
 
     revalidatePath("/dashboard/medias");
-
     return { success: true, url: blob.url };
   } catch (error) {
     console.error("Error subiendo media:", error);
@@ -233,6 +222,8 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
             tags: metadata.tags.map((tag) => tag.toLowerCase()),
             blobKey: blob.pathname,
             authorId: user.id,
+            mimeType: "image/webp",
+            metadata: { originalImageUrl: image.imageUrl },
           });
 
           return { success: true, name: metadata.name, url: blob.url };

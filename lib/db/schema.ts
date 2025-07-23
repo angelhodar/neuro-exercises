@@ -315,6 +315,9 @@ export const medias = pgTable(
     description: text("description"),
     tags: text("tags").array().default([]),
     blobKey: varchar("blob_key", { length: 500 }).notNull(),
+    mimeType: varchar("mime_type", { length: 100 }).notNull().default("image/png"),
+    thumbnailKey: varchar("thumbnail_key", { length: 500 }),
+    metadata: jsonb("metadata"),
     authorId: text("creator_id").notNull(),
     ...timestamps,
   },
@@ -325,6 +328,7 @@ export const medias = pgTable(
       name: "medias_creator_fk",
     }),
     index("medias_tags_idx").on(table.tags),
+    index("medias_mime_type_idx").on(table.mimeType),
   ],
 );
 

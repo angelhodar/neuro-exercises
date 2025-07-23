@@ -4,23 +4,22 @@ export const selectableMediaSchema = z.object({
   id: z.number(),
   name: z.string(),
   blobKey: z.string(),
+  mimeType: z.string(),
+  thumbnailKey: z.string().nullable(),
+  metadata: z.unknown().nullable(),
   tags: z.array(z.string()).nullable(),
 });
 
 export type SelectableMediaSchema = z.infer<typeof selectableMediaSchema>;
 
-export const createMediaSchema = z
-  .object({
-    prompt: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    name: z.string().min(1, "El nombre es obligatorio"),
-    description: z.string().optional(),
-    file: z.instanceof(File).optional(),
-  })
-  .refine((data) => data.prompt || data.file, {
-    message: "Debes añadir un prompt o subir una imagen",
-    path: ["prompt"],
-  });
+export const createManualMediaSchema = z.object({
+  name: z.string().min(1, "El nombre es obligatorio"),
+  tags: z.array(z.string()).min(1, "Escribe al menos una etiqueta"),
+  description: z.string().min(1, "La descripción es obligatoria"),
+  fileKey: z.string().min(1, "El archivo es obligatorio"),
+  thumbnailKey: z.string().optional(),
+  mimeType: z.string().min(1, "El tipo de archivo es obligatorio")
+});
 
 export const mediaMetadataSchema = z.object({
   name: z
@@ -41,5 +40,5 @@ export const mediaMetadataSchema = z.object({
     ),
 });
 
-export type CreateMediaSchema = z.infer<typeof createMediaSchema>;
+export type CreateManualMediaSchema = z.infer<typeof createManualMediaSchema>;
 export type MediaMetadataSchema = z.infer<typeof mediaMetadataSchema>;

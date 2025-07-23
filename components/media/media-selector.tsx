@@ -14,14 +14,15 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { Search, Loader2 } from "lucide-react";
 import {
   MediaCard,
-  MediaCardImage,
+  MediaCardContainer,
   MediaCardTitle,
-  MediaCardContent,
-  MediaCardTags
-} from "./media-card";
+  MediaCardBadges,
+} from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
 import { SelectableMediaSchema } from "@/lib/schemas/medias";
 import FileMediaSelector from "@/components/ui/file-upload";
-import { cn, createBlobUrl } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
+import { Selectable } from "@/components/selectable";
 
 interface MediaSelectorProps {
   selectedMedias: SelectableMediaSchema[];
@@ -115,29 +116,31 @@ export default function MediaSelector(props: MediaSelectorProps) {
                     );
 
                     return (
-                      <MediaCard
+                      <Selectable
                         key={media.id}
+                        selected={isSelected}
                         onClick={() => addMedia(media)}
-                        className={cn(
-                          "max-w-sm cursor-pointer",
-                          isSelected && "border-2 border-primary",
-                        )}
                       >
-                        <MediaCardImage
-                          src={createBlobUrl(media.blobKey)}
-                          alt={media.name}
-                          width={200}
-                          height={200}
-                        />
-                        <MediaCardContent>
-                          <MediaCardTitle className="text-lg text-center">
-                            {media.name}
-                          </MediaCardTitle>
-                          {media.tags && media.tags.length > 0 && (
-                            <MediaCardTags tags={media.tags} className="justify-center" />
-                          )}
-                        </MediaCardContent>
-                      </MediaCard>
+                        <MediaCard className="max-w-sm">
+                          <MediaCardContainer>
+                            <MediaImage
+                              src={createBlobUrl(media.blobKey)}
+                              alt={media.name}
+                            />
+                          </MediaCardContainer>
+                          <div className="p-2">
+                            <MediaCardTitle className="text-lg text-center">
+                              {media.name}
+                            </MediaCardTitle>
+                            {media.tags && media.tags.length > 0 && (
+                              <MediaCardBadges
+                                badges={media.tags}
+                                className="justify-center"
+                              />
+                            )}
+                          </div>
+                        </MediaCard>
+                      </Selectable>
                     );
                   })}
                 </div>

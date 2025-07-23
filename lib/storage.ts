@@ -1,4 +1,7 @@
 import { put, del } from "@vercel/blob";
+import { upload } from "@vercel/blob/client";
+import { nanoid } from "nanoid";
+import { extension as mimeExtension } from "mime-types";
 
 interface UploadBlobOptions {
   access?: "public";
@@ -43,6 +46,16 @@ export async function uploadBlobPathname(
 ): Promise<string> {
   const result = await uploadBlob(fileName, data, options);
   return result.pathname;
+}
+
+export async function uploadBlobFromFile(file: File) {
+  const ext = mimeExtension(file.type);
+  const fileName = `library/${nanoid()}.${ext}`;
+  return await upload(fileName, file, {
+    access: "public",
+    handleUploadUrl: "/api/media/upload",
+    multipart: true,
+  });
 }
 
 export async function deleteBlobs(

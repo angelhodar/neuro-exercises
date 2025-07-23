@@ -16,6 +16,7 @@ import {
   Circle,
   ScanSearch,
   Building2,
+  Upload,
 } from "lucide-react";
 import {
   Sidebar,
@@ -90,8 +91,13 @@ const data = {
     },
     {
       title: "Generar imágenes con IA",
-      url: "/dashboard/media?create-dialog=true",
+      url: "/dashboard/media?create-media-ai=true",
       icon: ImagePlus,
+    },
+    {
+      title: "Subir contenido manualmente",
+      url: "/dashboard/media?create-media-manual=true",
+      icon: Upload,
     },
   ],
   sharing: [

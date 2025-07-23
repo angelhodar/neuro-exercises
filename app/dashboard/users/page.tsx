@@ -18,6 +18,8 @@ import {
 import { formatDate } from "@/lib/utils";
 import AddUserButton from "./add-user-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function UsersPage() {
   const users = await getUsers();
 

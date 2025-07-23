@@ -21,6 +21,8 @@ import DeleteOrganizationButton from "./components/delete-organization-button";
 import CreateOrganizationButton from "./components/create-organization-button";
 import EditOrganizationButton from "./components/edit-organization-button";
 
+export const dynamic = "force-dynamic";
+
 export default async function OrganizationsPage() {
   const organizations = await getAllOrganizations();
 

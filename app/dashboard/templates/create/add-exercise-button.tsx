@@ -71,7 +71,7 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
                 className="w-full"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2 max-h-[600px]">
               {filteredExercises.map((exercise) => (
                 <ExerciseCard key={exercise.id} exercise={exercise}>
                   <Button

@@ -10,6 +10,8 @@ import {
 import { exerciseHasAssets } from "@/app/exercises/loader";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const exercises = await getExercises();
 
@@ -32,7 +34,7 @@ export default async function DashboardPage() {
           </Button>
         </DashboardHeaderActions>
       </DashboardHeader>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 p-4">
         {exerciseAssetChecks.map((exercise) => (
           <div key={exercise.id} className="relative h-full">
             <Link

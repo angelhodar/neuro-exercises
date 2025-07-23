@@ -1,68 +1,89 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useTransition } from "react"
-import { MoreVertical, ZoomIn, Copy, Trash2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import type React from "react";
+import { useTransition } from "react";
+import { MoreVertical, ZoomIn, Copy, Trash2 } from "lucide-react";
+import { createBlobUrl } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { MediaImage } from "./media-image"
-import { deleteMedia } from "@/app/actions/media"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { MediaImage } from "./media-image";
+import { deleteMedia } from "@/app/actions/media";
+import { Media } from "@/lib/db/schema";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useConfirm } from "@/hooks/use-confirm";
 
-type MediaType = "image" | "audio" | "video"
-
-interface MediaActionsDropdownProps {
-  mediaType: MediaType
-  imageUrl?: string
-  imageAlt?: string
-  mediaId: number
-  blobKey: string
-  onCreateVariant?: () => void
-  className?: string
+interface MediaActionsDropdownProps
+  extends React.HTMLAttributes<HTMLDivElement> {
+  media: Media;
+  onCreateVariant?: () => void;
 }
 
 export function MediaActionsDropdown({
-  mediaType,
-  imageUrl,
-  imageAlt,
-  mediaId,
-  blobKey,
+  media,
   onCreateVariant,
   className,
 }: MediaActionsDropdownProps) {
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const { confirm } = useConfirm();
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  // Infer mediaType from mimeType
+  const getMediaType = (mimeType: string): "image" | "audio" | "video" => {
+    if (mimeType.startsWith("image/")) return "image";
+    if (mimeType.startsWith("audio/")) return "audio";
+    if (mimeType.startsWith("video/")) return "video";
+    return "image"; // fallback
+  };
+
+  const mediaType = getMediaType(media.mimeType);
+
+  const imageUrl = media.thumbnailKey
+    ? createBlobUrl(media.thumbnailKey)
+    : createBlobUrl(media.blobKey);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const confirmed = await confirm({
+      title: "¿Eliminar archivo?",
+      description: "Esta acción no se puede deshacer. ¿Seguro que quieres eliminar este archivo multimedia?"
+    });
+    if (!confirmed) return;
     startTransition(async () => {
       try {
-        await deleteMedia(mediaId, blobKey)
-        router.refresh()
+        await deleteMedia(media);
+        router.refresh();
+        toast.success("Archivo multimedia eliminado correctamente");
       } catch (error) {
-        console.error(error)
-        toast.error("Error al eliminar el archivo multimedia")
+        console.error(error);
+        toast.error("Error al eliminar el archivo multimedia");
       }
-    })
-  }
+    });
+  };
 
-  const handleAction = (action: (() => void) | undefined, e: React.MouseEvent) => {
+  const handleAction = (
+    action: (() => void) | undefined,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation();
     (action ?? (() => {}))();
   };
 
-  const showImageActions = mediaType === "image"
+  const showImageActions = mediaType === "image";
 
   return (
-    <div className={cn("", className)}>
+    <div className={className}>
       <Dialog>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -83,7 +104,9 @@ export function MediaActionsDropdown({
                     Ver imagen completa
                   </DropdownMenuItem>
                 </DialogTrigger>
-                <DropdownMenuItem onClick={(e) => handleAction(onCreateVariant, e)}>
+                <DropdownMenuItem
+                  onClick={(e) => handleAction(onCreateVariant, e)}
+                >
                   <Copy className="w-4 h-4 mr-3" />
                   Crear variante
                 </DropdownMenuItem>
@@ -102,13 +125,18 @@ export function MediaActionsDropdown({
         </DropdownMenu>
         {showImageActions && imageUrl && (
           <DialogContent side="top" className="max-w-4xl p-4">
-            <DialogTitle>{imageAlt}</DialogTitle>
+            <DialogTitle>{media.name}</DialogTitle>
             <div className="relative w-full h-[60vh]">
-              <MediaImage src={imageUrl} alt={imageAlt || "Imagen"} fill className="object-contain" />
+              <MediaImage
+                src={imageUrl}
+                alt={media.name}
+                fill
+                className="object-contain"
+              />
             </div>
           </DialogContent>
         )}
       </Dialog>
     </div>
-  )
+  );
 }

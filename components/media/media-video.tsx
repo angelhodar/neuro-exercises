@@ -1,37 +1,20 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useRef } from "react"
-import { cn } from "@/lib/utils"
-import { MediaControls } from "./media-controls"
+import type React from "react";
+import { cn } from "@/lib/utils";
 
-type MediaVideoProps = React.VideoHTMLAttributes<HTMLVideoElement>
+type MediaVideoProps = React.VideoHTMLAttributes<HTMLVideoElement>;
 
-export function MediaVideo({ children, className, ...videoProps }: MediaVideoProps) {
-  const [showThumbnail, setShowThumbnail] = useState(true)
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  const handlePlay = () => {
-    setShowThumbnail(false)
-  }
-
-  const handleEnded = () => {
-    setShowThumbnail(true)
-  }
-
+export function MediaVideo({
+  children,
+  className,
+  ...videoProps
+}: MediaVideoProps) {
   return (
-    <>
-      {/* Thumbnail/Children */}
-      {showThumbnail && children}
-
-      {/* Video Element */}
-      <video
-        ref={videoRef}
-        className={cn("w-full h-full object-cover", showThumbnail ? "hidden" : "block", className)}
-        {...videoProps}
-      />
-
-      <MediaControls mediaRef={videoRef} onPlay={handlePlay} onEnded={handleEnded} />
-    </>
-  )
+    <video
+      {...videoProps}
+      className={cn("w-full h-full object-cover block", className)}
+      controls
+    />
+  );
 }

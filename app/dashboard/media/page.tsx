@@ -1,6 +1,13 @@
 import { getMedias } from "@/app/actions/media";
-import DashboardMediaCard from "./media-card";
-import CreateMediaButton from "./create-media-button";
+import {
+  MediaCard,
+  MediaCardContainer,
+  MediaCardTitle,
+  MediaCardBadges,
+} from "@/components/media/media-card";
+import { MediaDisplay } from "@/components/media/media-display";
+import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
+import CreateMediaDropdownButton from "./create-media-dropdown-button";
 import SearchImagesButton from "./search-images-button";
 import MediaFilters from "./media-filters";
 import {
@@ -29,17 +36,33 @@ export default async function MediasPage({ searchParams }: Props) {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-        <MediaFilters key={tagsArray.join(",")} />
+          <MediaFilters key={tagsArray.join(",")} />
           <SearchImagesButton />
-          <CreateMediaButton />
+          <CreateMediaDropdownButton />
         </DashboardHeaderActions>
       </DashboardHeader>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-8">
         {medias.map((media) => (
-          <DashboardMediaCard key={media.id} media={media} />
+          <MediaCard key={media.id}>
+            <MediaCardContainer>
+              <MediaDisplay media={media} />
+              <MediaActionsDropdown
+                media={media}
+                className="absolute top-2 right-2"
+              />
+            </MediaCardContainer>
+            <div className="p-4 flex-1 flex flex-col gap-3">
+              <MediaCardTitle className="text-sm text-center line-clamp-2">
+                {media.name}
+              </MediaCardTitle>
+              {media.tags && media.tags.length > 0 && (
+                <MediaCardBadges badges={media.tags} />
+              )}
+            </div>
+          </MediaCard>
         ))}
       </div>
     </div>
   );
-} 
+}

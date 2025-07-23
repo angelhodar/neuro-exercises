@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { togetherai } from "@ai-sdk/togetherai";
 import { experimental_generateImage as generateImage } from "ai";
 import { getCurrentUser } from "@/app/actions/users";
-import type { CreateMediaSchema } from "@/lib/schemas/medias";
+import type { CreateManualMediaSchema } from "@/lib/schemas/medias";
 import { uploadBlob, deleteBlobs } from "@/lib/storage";
 import {
   searchImages as searchImagesFromSerper,
@@ -21,7 +21,6 @@ import { mediaMetadataSchema } from "@/lib/schemas/medias";
 import { downloadFromUrl } from "@/lib/utils";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
 import { optimizeImage } from "@/lib/media/optimize";
-import { extension as mimeExtension } from "mime-types";
 
 const MODEL = "black-forest-labs/FLUX.1-dev";
 
@@ -103,6 +102,10 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
 }
 
 export async function generateMediaFromPrompt(prompt: string) {
+  const user = await getCurrentUser();
+
+  if (!user) throw new Error("Unauthorized");
+
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
   const { images } = await generateImage({
@@ -115,73 +118,51 @@ export async function generateMediaFromPrompt(prompt: string) {
 
   if (!image) throw new Error("No se generó ninguna imagen");
 
-  return Buffer.from(image.uint8Array);
+  const imageBuffer = Buffer.from(image.uint8Array);
+  const optimized = await optimizeImage(imageBuffer);
+  const blob = await uploadBlob(`library/${nanoid()}.webp`, optimized);
+
+  const metadata = await generateImageMetadata(prompt, blob.url);
+
+  await db.insert(medias).values({
+    name: metadata.name.charAt(0).toUpperCase() + metadata.name.slice(1).toLowerCase(),
+    description: metadata.description,
+    tags: metadata.tags.map((tag) => tag.toLowerCase()),
+    blobKey: blob.pathname,
+    mimeType: "image/webp",
+    thumbnailKey: null,
+    metadata: { prompt, model: MODEL },
+    authorId: user.id,
+  });
+
+  revalidatePath("/dashboard/media");
 }
 
-export async function uploadMedia(data: CreateMediaSchema) {
-  const { prompt, tags, name, description, file, thumbnail } = data;
+export async function uploadManualMedia(data: CreateManualMediaSchema) {
+  const { fileKey, ...rest } = data;
 
-  try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error("No hay usuario autenticado");
+  const user = await getCurrentUser();
 
-    let mediaData: ArrayBuffer | Buffer;
-    let mimeType: string;
-    let fileName: string;
-    let metadata: Record<string, any> | null = null;
-    let thumbnailKey: string | null = null;
+  if (!user) throw new Error("No hay usuario autenticado");
 
-    const id = nanoid();
+  await db.insert(medias).values({
+    ...rest,
+    tags: rest.tags.map((tag) => tag.toLowerCase()),
+    blobKey: fileKey,
+    authorId: user.id,
+  });
 
-    if (file) {
-      // Manual upload: image, audio, or video
-      mediaData = await file.arrayBuffer();
-      mimeType = file.type;
-      const extension = mimeExtension(file.type);
-      fileName = `${id}.${extension}`;
-    } else {
-      // AI generation: always image
-      const imageBuffer = await generateMediaFromPrompt(prompt!);
-      mediaData = await optimizeImage(imageBuffer);
-      mimeType = "image/webp";
-      fileName = `${id}.webp`;
-      metadata = { prompt, model: MODEL };
-    }
-
-    const blob = await uploadBlob(`library/${fileName}`, mediaData);
-
-    if (thumbnail) {
-      const thumbBuffer = await thumbnail.arrayBuffer();
-      const thumbExt = mimeExtension(thumbnail.type);
-      const thumbName = `library/${id}-thumb.${thumbExt}`;
-      const thumbBlob = await uploadBlob(thumbName, thumbBuffer);
-      thumbnailKey = thumbBlob.pathname;
-    }
-
-    await db.insert(medias).values({
-      name: name,
-      description: description || null,
-      tags: tags,
-      blobKey: blob.pathname,
-      mimeType: mimeType,
-      thumbnailKey: thumbnailKey,
-      metadata: metadata,
-      authorId: user.id,
-    });
-
-    revalidatePath("/dashboard/medias");
-    return { success: true, url: blob.url };
-  } catch (error) {
-    console.error("Error subiendo media:", error);
-    throw new Error("No se pudo subir el archivo");
-  }
+  revalidatePath("/dashboard/medias");
 }
 
-export async function deleteMedia(id: number, blobPathname: string) {
+export async function deleteMedia(media: Media) {
+  const mediasToDelete = [media.blobKey, media.thumbnailKey].filter(
+    Boolean,
+  ) as string[];
   try {
     await Promise.all([
-      deleteBlobs(blobPathname),
-      db.delete(medias).where(eq(medias.id, id)),
+      deleteBlobs(mediasToDelete),
+      db.delete(medias).where(eq(medias.id, media.id)),
     ]);
     revalidatePath("/dashboard/medias");
     return { success: true };

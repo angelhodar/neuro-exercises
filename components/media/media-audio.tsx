@@ -1,19 +1,14 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useRef } from "react"
-import { MediaControls } from "./media-controls"
+import type React from "react";
 
-type MediaAudioProps = React.AudioHTMLAttributes<HTMLAudioElement>
+type MediaAudioProps = React.AudioHTMLAttributes<HTMLAudioElement>;
 
 export function MediaAudio({ children, ...audioProps }: MediaAudioProps) {
-  const audioRef = useRef<HTMLAudioElement>(null)
-
   return (
-    <>
+    <div className="relative w-full h-full">
       {children}
-      <MediaControls mediaRef={audioRef} />
-      <audio ref={audioRef} {...audioProps} />
-    </>
-  )
+      <audio {...audioProps} className="absolute bottom-2 w-full" controls />
+    </div>
+  );
 }

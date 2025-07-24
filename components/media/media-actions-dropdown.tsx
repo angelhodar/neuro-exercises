@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { MoreVertical, ZoomIn, Copy, Trash2 } from "lucide-react";
 import { createBlobUrl } from "@/lib/utils";
 import {
@@ -23,21 +22,36 @@ import { Media } from "@/lib/db/schema";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useConfirm } from "@/hooks/use-confirm";
+import { generateDerivedMedia } from "@/app/actions/media";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface MediaActionsDropdownProps
   extends React.HTMLAttributes<HTMLDivElement> {
   media: Media;
-  onCreateVariant?: () => void;
 }
 
 export function MediaActionsDropdown({
   media,
-  onCreateVariant,
   className,
 }: MediaActionsDropdownProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { confirm } = useConfirm();
+  const [openVariantDialog, setOpenVariantDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openImageDialog, setOpenImageDialog] = useState(false);
 
   // Infer mediaType from mimeType
   const getMediaType = (mimeType: string): "image" | "audio" | "video" => {
@@ -57,7 +71,8 @@ export function MediaActionsDropdown({
     e.stopPropagation();
     const confirmed = await confirm({
       title: "¿Eliminar archivo?",
-      description: "Esta acción no se puede deshacer. ¿Seguro que quieres eliminar este archivo multimedia?"
+      description:
+        "Esta acción no se puede deshacer. ¿Seguro que quieres eliminar este archivo multimedia?",
     });
     if (!confirmed) return;
     startTransition(async () => {
@@ -72,19 +87,40 @@ export function MediaActionsDropdown({
     });
   };
 
-  const handleAction = (
-    action: (() => void) | undefined,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation();
-    (action ?? (() => {}))();
+  // Formulario para crear variante
+  const schema = z.object({
+    prompt: z.string().min(1, "El prompt es obligatorio"),
+  });
+  type FormSchema = z.infer<typeof schema>;
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(schema),
+    defaultValues: { prompt: "" },
+  });
+
+  const handleCreateVariant = () => setOpenVariantDialog(true);
+  const handleOpenImage = () => setOpenImageDialog(true);
+
+  const onSubmit = async (values: FormSchema) => {
+    setIsSubmitting(true);
+    try {
+      await generateDerivedMedia(media, values.prompt);
+      toast.success("Variante generada correctamente");
+      setOpenVariantDialog(false);
+      form.reset();
+      router.refresh();
+    } catch (e) {
+      toast.error("Error generando la variante");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const showImageActions = mediaType === "image";
 
   return (
     <div className={className}>
-      <Dialog>
+      {/* Dialog para ver imagen ampliada */}
+      <Dialog open={openImageDialog} onOpenChange={setOpenImageDialog}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -98,15 +134,11 @@ export function MediaActionsDropdown({
           <DropdownMenuContent align="end" className="w-62">
             {showImageActions && (
               <>
-                <DialogTrigger asChild>
-                  <DropdownMenuItem>
-                    <ZoomIn className="w-4 h-4 mr-3" />
-                    Ver imagen completa
-                  </DropdownMenuItem>
-                </DialogTrigger>
-                <DropdownMenuItem
-                  onClick={(e) => handleAction(onCreateVariant, e)}
-                >
+                <DropdownMenuItem onClick={handleOpenImage}>
+                  <ZoomIn className="w-4 h-4 mr-3" />
+                  Ver imagen completa
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCreateVariant}>
                   <Copy className="w-4 h-4 mr-3" />
                   Crear variante
                 </DropdownMenuItem>
@@ -136,6 +168,38 @@ export function MediaActionsDropdown({
             </div>
           </DialogContent>
         )}
+      </Dialog>
+      {/* Dialog para crear variante, independiente */}
+      <Dialog open={openVariantDialog} onOpenChange={setOpenVariantDialog}>
+        <DialogContent>
+          <DialogTitle>Crear variante de imagen</DialogTitle>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-4 mt-4"
+            >
+              <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instrucciones para la variante</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Describe la variante que quieres generar..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Generando..." : "Generar variante"}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
       </Dialog>
     </div>
   );

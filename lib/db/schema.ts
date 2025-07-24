@@ -309,7 +309,7 @@ export const exerciseResults = pgTable(
 
 export const medias = pgTable(
   "medias",
-  {
+  (table) => ({
     id: serial().primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
@@ -319,13 +319,19 @@ export const medias = pgTable(
     thumbnailKey: varchar("thumbnail_key", { length: 500 }),
     metadata: jsonb("metadata"),
     authorId: text("creator_id").notNull(),
+    derivedFrom: integer("derived_from"),
     ...timestamps,
-  },
+  }),
   (table) => [
     foreignKey({
       columns: [table.authorId],
       foreignColumns: [users.id],
       name: "medias_creator_fk",
+    }),
+    foreignKey({
+      columns: [table.derivedFrom],
+      foreignColumns: [table.id],
+      name: "medias_derived_from_fk",
     }),
     index("medias_tags_idx").on(table.tags),
     index("medias_mime_type_idx").on(table.mimeType),

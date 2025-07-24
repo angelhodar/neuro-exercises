@@ -18,13 +18,14 @@ import {
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { mediaMetadataSchema } from "@/lib/schemas/medias";
-import { downloadFromUrl } from "@/lib/utils";
+import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
 import { optimizeImage } from "@/lib/media/optimize";
 
-const MODEL = "black-forest-labs/FLUX.1-dev";
+const MEDIA_CREATION_MODEL = "black-forest-labs/FLUX.1-dev";
+const MEDIA_EDITING_MODEL = "black-forest-labs/FLUX.1-kontext-dev";
 
-async function generateImageMetadata(imageName: string, imageUrl: string) {
+async function generateImageMetadata(imageUrl: string) {
   const { object } = await generateObject({
     model: google("gemini-2.5-flash"),
     schema: mediaMetadataSchema,
@@ -34,7 +35,7 @@ async function generateImageMetadata(imageName: string, imageUrl: string) {
         content: [
           {
             type: "text",
-            text: `Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen. El nombre original de la imagen es: ${imageName}`,
+            text: `Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen`,
           },
           {
             type: "image",
@@ -101,6 +102,51 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
   return result;
 }
 
+export async function generateDerivedMedia(media: Media, prompt: string) {
+  const user = await getCurrentUser();
+
+  if (!user) throw new Error("Unauthorized");
+
+  const translatedPrompt = await translatePromptToEnglish(prompt);
+
+  const { images } = await generateImage({
+    model: togetherai.image(MEDIA_EDITING_MODEL),
+    prompt: translatedPrompt,
+    size: "512x512",
+    providerOptions: {
+      togetherai: {
+        image_url: createBlobUrl(media.blobKey),
+      },
+    },
+  });
+
+  const [image] = images;
+
+  if (!image) throw new Error("Error generating image");
+
+  const imageBuffer = Buffer.from(image.uint8Array);
+  const optimized = await optimizeImage(imageBuffer);
+  const blob = await uploadBlob(`library/${nanoid()}.webp`, optimized);
+
+  const metadata = await generateImageMetadata(blob.url);
+
+  await db.insert(medias).values({
+    name:
+      metadata.name.charAt(0).toUpperCase() +
+      metadata.name.slice(1).toLowerCase(),
+    description: metadata.description,
+    tags: metadata.tags.map((tag) => tag.toLowerCase()),
+    blobKey: blob.pathname,
+    mimeType: "image/webp",
+    thumbnailKey: null,
+    metadata: { prompt, model: MEDIA_EDITING_MODEL },
+    authorId: user.id,
+    derivedFrom: media.id,
+  });
+
+  revalidatePath("/dashboard/media");
+}
+
 export async function generateMediaFromPrompt(prompt: string) {
   const user = await getCurrentUser();
 
@@ -109,30 +155,33 @@ export async function generateMediaFromPrompt(prompt: string) {
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
   const { images } = await generateImage({
-    model: togetherai.image(MODEL),
-    prompt: `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, suitable for cognitive exercises, white background`,
+    model: togetherai.image(MEDIA_CREATION_MODEL),
+    prompt: `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`,
     size: "512x512",
   });
 
   const [image] = images;
 
-  if (!image) throw new Error("No se generó ninguna imagen");
+  if (!image) throw new Error("Error generating image");
 
   const imageBuffer = Buffer.from(image.uint8Array);
   const optimized = await optimizeImage(imageBuffer);
   const blob = await uploadBlob(`library/${nanoid()}.webp`, optimized);
 
-  const metadata = await generateImageMetadata(prompt, blob.url);
+  const metadata = await generateImageMetadata(blob.url);
 
   await db.insert(medias).values({
-    name: metadata.name.charAt(0).toUpperCase() + metadata.name.slice(1).toLowerCase(),
+    name:
+      metadata.name.charAt(0).toUpperCase() +
+      metadata.name.slice(1).toLowerCase(),
     description: metadata.description,
     tags: metadata.tags.map((tag) => tag.toLowerCase()),
     blobKey: blob.pathname,
     mimeType: "image/webp",
     thumbnailKey: null,
-    metadata: { prompt, model: MODEL },
+    metadata: { prompt, model: MEDIA_CREATION_MODEL },
     authorId: user.id,
+    derivedFrom: null,
   });
 
   revalidatePath("/dashboard/media");
@@ -186,7 +235,7 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
       images.map(async (image) => {
         try {
           const [metadata, imageBuffer] = await Promise.all([
-            generateImageMetadata(image.title, image.imageUrl),
+            generateImageMetadata(image.imageUrl),
             downloadFromUrl(image.imageUrl).then((arrayBuffer) =>
               optimizeImage(Buffer.from(arrayBuffer)),
             ),

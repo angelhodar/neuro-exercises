@@ -58,12 +58,11 @@ export default function CreateMediaManual({
     setIsSubmitting(true);
     
     try {
-      const blob = await uploadBlobFromFile(values.file);
-      let thumbnailKey: string | undefined = undefined;
-      if (values.thumbnail) {
-        const thumbBlob = await uploadBlobFromFile(values.thumbnail);
-        thumbnailKey = thumbBlob.pathname;
-      }
+      const [blob, thumbBlob] = await Promise.all([
+        uploadBlobFromFile(values.file),
+        values.thumbnail ? uploadBlobFromFile(values.thumbnail) : Promise.resolve(undefined)
+      ]);
+      const thumbnailKey = thumbBlob ? thumbBlob.pathname : undefined;
       await uploadManualMedia({
         name: values.name,
         tags: values.tags,

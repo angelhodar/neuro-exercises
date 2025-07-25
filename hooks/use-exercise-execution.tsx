@@ -6,6 +6,7 @@ import {
   useContext,
   useRef,
   useState,
+  useEffect,
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -15,7 +16,7 @@ import { saveExerciseResults } from "@/app/actions/links";
 
 export type ExerciseState = "ready" | "executing" | "paused" | "finished";
 
-interface ExerciseExecutionContext extends BaseExerciseConfig {
+export type ExerciseExecutionContext = BaseExerciseConfig & {
   exercise: Exercise;
   currentQuestionIndex: number;
   exerciseState: ExerciseState;
@@ -25,7 +26,7 @@ interface ExerciseExecutionContext extends BaseExerciseConfig {
   finishExercise: () => Promise<void>;
   resetExercise: () => void;
   startExercise: () => void;
-}
+};
 
 const ExerciseContext = createContext<ExerciseExecutionContext | null>(null);
 
@@ -42,16 +43,30 @@ export function ExerciseProvider({
   const [waitingForNextQuestionTrigger, setWaitingForNextQuestionTrigger] =
     useState(false);
   const results = useRef<Array<object>>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
   async function nextQuestion() {
     setWaitingForNextQuestionTrigger(false);
-    if (currentQuestionIndex < config.totalQuestions - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    } else {
-      await finishExercise();
+    if ("endConditionType" in config) {
+      if (config.endConditionType === "questions") {
+        if (currentQuestionIndex < (config.totalQuestions ?? 1) - 1) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+        } else await finishExercise();
+      } else if (config.endConditionType === "time") {
+        setCurrentQuestionIndex((prev) => prev + 1);
+      }
     }
   }
 
@@ -62,7 +77,11 @@ export function ExerciseProvider({
   }
 
   async function finishExercise() {
-    // Verificar si estamos ejecutando desde un link
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
     const linkId = searchParams.get("linkId");
     const itemId = searchParams.get("itemId");
 
@@ -71,33 +90,21 @@ export function ExerciseProvider({
         const numericLinkId = parseInt(linkId);
         const numericItemId = parseInt(itemId);
 
-        console.log("Subiendo resultados automáticamente:", {
-          linkId: numericLinkId,
-          itemId: numericItemId,
-          results,
-        });
-
         await saveExerciseResults(numericLinkId, numericItemId, results);
-        console.log("Resultados subidos exitosamente");
 
-        // Solo cambiar estado si la API call fue exitosa
         setExerciseState("finished");
 
-        // Redirigir a la página de resultados con parámetros de link
         router.push(
           `/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`,
         );
       } catch (error) {
         toast.error("Error subiendo resultados");
         console.error("Error subiendo resultados:", error);
-        // No cambiar el estado a "finished" si hay error
         return;
       }
     } else {
-      // Ejercicio normal (sin link) - cambiar estado y redirigir
       setExerciseState("finished");
 
-      // Redirigir a la página de resultados con los resultados en la URL
       const resultsParams = new URLSearchParams();
 
       resultsParams.set("results", JSON.stringify(results.current));
@@ -111,12 +118,26 @@ export function ExerciseProvider({
 
   function startExercise() {
     setExerciseState("executing");
+    if (
+      "endConditionType" in config &&
+      config.endConditionType === "time" &&
+      config.timeLimitSeconds &&
+      !timerRef.current
+    ) {
+      timerRef.current = setTimeout(() => {
+        finishExercise();
+      }, config.timeLimitSeconds * 1000);
+    }
   }
 
   function resetExercise() {
     setCurrentQuestionIndex(0);
     setExerciseState("ready");
     results.current = [];
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
   }
 
   const contextValue: ExerciseExecutionContext = {

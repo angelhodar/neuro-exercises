@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  baseExerciseConfigSchema,
+  explicitGoalSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 import {
@@ -45,7 +45,7 @@ export function syllablesConfigRefinements(
 }
 
 // Complete syllables configuration schema - exported as configSchema
-export const configSchema = baseExerciseConfigSchema
+export const configSchema = explicitGoalSchema
   .merge(syllablesSpecificConfigSchema)
   .superRefine(syllablesConfigRefinements);
 

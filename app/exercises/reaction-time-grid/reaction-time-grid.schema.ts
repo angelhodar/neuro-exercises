@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  baseExerciseConfigSchema,
+  explicitGoalSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -53,7 +53,7 @@ export function reactionTimeConfigRefinements(
   }
 }
 
-export const configSchema = baseExerciseConfigSchema
+export const configSchema = explicitGoalSchema
   .merge(reactionTimeSpecificConfigSchema)
   .superRefine(reactionTimeConfigRefinements);
 

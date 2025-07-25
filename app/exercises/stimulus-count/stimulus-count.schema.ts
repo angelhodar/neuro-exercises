@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  baseExerciseConfigSchema,
+  explicitGoalSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -20,7 +20,7 @@ const stimulusCountRangeSchema = z.object({
   }),
 });
 
-export const stimulusCountConfigSchema = baseExerciseConfigSchema
+export const stimulusCountConfigSchema = explicitGoalSchema
   .merge(stimulusCountRangeSchema)
   .superRefine((data, ctx) => {
     if (data.maxStimuli < data.minStimuli) {

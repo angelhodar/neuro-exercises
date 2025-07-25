@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  baseExerciseConfigSchema,
+  explicitGoalSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -55,7 +55,7 @@ export function visualRecognitionConfigRefinements(
 }
 
 // Complete visual recognition configuration schema - exported as configSchema
-export const configSchema = baseExerciseConfigSchema
+export const configSchema = explicitGoalSchema
   .merge(visualRecognitionSpecificConfigSchema)
   .superRefine(visualRecognitionConfigRefinements);
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  baseExerciseConfigSchema,
+  explicitGoalSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -29,7 +29,7 @@ export const stroopColorInterferenceSpecificConfigSchema = z.object({
 });
 
 // 2. Esquema completo de configuración
-export const configSchema = baseExerciseConfigSchema.merge(
+export const configSchema = explicitGoalSchema.merge(
   stroopColorInterferenceSpecificConfigSchema,
 );
 

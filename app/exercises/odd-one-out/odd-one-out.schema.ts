@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseExerciseConfigSchema, ExercisePreset } from "@/lib/schemas/base-schemas";
+import { explicitGoalSchema, ExercisePreset } from "@/lib/schemas/base-schemas";
 import { selectableMediaSchema } from "@/lib/schemas/medias";
 
 // Schema for a single question configuration
@@ -13,7 +13,7 @@ export const oddOneOutQuestionSchema = z.object({
 });
 
 // Main configuration schema for the exercise
-export const oddOneOutConfigSchema = baseExerciseConfigSchema.extend({
+export const oddOneOutConfigSchema = explicitGoalSchema.extend({
   questions: z
     .array(oddOneOutQuestionSchema)
     .min(1, "Debes configurar al menos una pregunta."),

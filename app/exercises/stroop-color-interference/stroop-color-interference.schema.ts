@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   baseExerciseConfigSchema,
   type ExercisePreset,
-  type BaseExerciseConfig,
 } from "@/lib/schemas/base-schemas";
 
 // Lista de colores disponibles para el ejercicio
@@ -30,8 +29,9 @@ export const stroopColorInterferenceSpecificConfigSchema = z.object({
 });
 
 // 2. Esquema completo de configuración
-export const configSchema =
-  baseExerciseConfigSchema.merge(stroopColorInterferenceSpecificConfigSchema);
+export const configSchema = baseExerciseConfigSchema.merge(
+  stroopColorInterferenceSpecificConfigSchema,
+);
 
 // 3. Esquema para los resultados de una pregunta individual
 export const resultSchema = z.object({
@@ -46,46 +46,25 @@ export const resultSchema = z.object({
 export type StroopColorInterferenceSpecificConfig = z.infer<
   typeof stroopColorInterferenceSpecificConfigSchema
 >;
-export type StroopColorInterferenceConfig = z.infer<
-  typeof configSchema
->;
+export type StroopColorInterferenceConfig = z.infer<typeof configSchema>;
 export type StroopColorInterferenceQuestionResult = z.infer<
   typeof resultSchema
 >;
 
-export type { BaseExerciseConfig, ExercisePreset };
-
-// 6. Configuración por defecto y presets
-export const defaultStroopColorInterferenceConfig: StroopColorInterferenceConfig =
-  {
-    numOptions: 4,
-    totalQuestions: 10,
-    automaticNextQuestion: true,
-    timeLimitPerQuestion: 0,
-  };
-
 export const presets: Record<
   ExercisePreset,
-  StroopColorInterferenceConfig
+  StroopColorInterferenceSpecificConfig
 > = {
   easy: {
-    ...defaultStroopColorInterferenceConfig,
     numOptions: 3,
-    totalQuestions: 10,
   },
   medium: {
-    ...defaultStroopColorInterferenceConfig,
     numOptions: 4,
-    totalQuestions: 15,
   },
   hard: {
-    ...defaultStroopColorInterferenceConfig,
     numOptions: 6,
-    totalQuestions: 20,
   },
   expert: {
-    ...defaultStroopColorInterferenceConfig,
     numOptions: 8,
-    totalQuestions: 25,
   },
 };

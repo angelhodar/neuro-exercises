@@ -1,21 +1,17 @@
 import { z } from "zod";
 
-// Base exercise configuration
 export const baseExerciseConfigSchema = z.object({
+  endConditionType: z.enum(["questions", "time"]).default("questions").nullish(),
   totalQuestions: z.coerce
     .number()
     .min(1, "Debe tener al menos 1 pregunta")
     .max(100, "No puede tener más de 100 preguntas")
-    .int("El total de preguntas debe ser un número entero"),
-  timeLimitPerQuestion: z.coerce
-    .number()
-    .min(0, "No puede ser un numero negativo")
-    .default(0)
+    .int("El total de preguntas debe ser un número entero")
     .optional(),
-  timeIntervalBetweenQuestions: z.coerce
+  timeLimitSeconds: z.coerce
     .number()
-    .min(0, "No puede ser un numero negativo")
-    .default(0)
+    .min(1, "Debe ser al menos 1 segundo")
+    .max(3600, "No puede ser más de 1 hora")
     .optional(),
   automaticNextQuestion: z.boolean().default(true).optional(),
 });

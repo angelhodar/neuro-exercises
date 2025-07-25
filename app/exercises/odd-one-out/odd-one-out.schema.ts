@@ -57,9 +57,8 @@ export type OddOneOutConfig = z.infer<typeof oddOneOutConfigSchema>;
 export type OddOneOutQuestion = z.infer<typeof oddOneOutQuestionSchema>;
 export type OddOneOutResult = z.infer<typeof oddOneOutResultSchema>;
 
-export const defaultOddOneOutConfig: OddOneOutConfig = {
+const defaultOddOneOutConfig: OddOneOutConfig = {
   totalQuestions: 10,
-  timeLimitPerQuestion: 0,
   questions: [
     {
       patternMedias: [],

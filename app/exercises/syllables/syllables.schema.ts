@@ -1,6 +1,12 @@
-import { z } from "zod"
-import { baseExerciseConfigSchema, type ExercisePreset } from "@/lib/schemas/base-schemas"
-import { getWordsBySyllableCount, type SyllableCount } from "./spanish-words-dataset"
+import { z } from "zod";
+import {
+  baseExerciseConfigSchema,
+  type ExercisePreset,
+} from "@/lib/schemas/base-schemas";
+import {
+  getWordsBySyllableCount,
+  type SyllableCount,
+} from "./spanish-words-dataset";
 
 // Syllables specific configuration schema (in Spanish)
 export const syllablesSpecificConfigSchema = z.object({
@@ -8,19 +14,24 @@ export const syllablesSpecificConfigSchema = z.object({
     .number()
     .min(3, "Mínimo 3 sílabas")
     .max(6, "Máximo 6 sílabas")
-    .int("El número de sílabas debe ser un número entero")
-})
+    .int("El número de sílabas debe ser un número entero"),
+});
 
 // Reusable refinement function for syllables configurations
-export function syllablesConfigRefinements(data: z.infer<typeof syllablesSpecificConfigSchema>, ctx: z.RefinementCtx) {
+export function syllablesConfigRefinements(
+  data: z.infer<typeof syllablesSpecificConfigSchema>,
+  ctx: z.RefinementCtx,
+) {
   // Validate that we have words available for the selected syllable count
-  const availableWords = getWordsBySyllableCount(data.syllablesCount as SyllableCount)
+  const availableWords = getWordsBySyllableCount(
+    data.syllablesCount as SyllableCount,
+  );
   if (!availableWords || availableWords.length === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `No hay palabras disponibles para ${data.syllablesCount} sílabas`,
       path: ["syllablesCount"],
-    })
+    });
   }
 
   // Validate that we have enough words for the total questions
@@ -29,14 +40,14 @@ export function syllablesConfigRefinements(data: z.infer<typeof syllablesSpecifi
       code: z.ZodIssueCode.custom,
       message: `No hay suficientes palabras disponibles para ${data.syllablesCount} sílabas (mínimo 5 necesarias)`,
       path: ["syllablesCount"],
-    })
+    });
   }
 }
 
 // Complete syllables configuration schema - exported as configSchema
 export const configSchema = baseExerciseConfigSchema
   .merge(syllablesSpecificConfigSchema)
-  .superRefine(syllablesConfigRefinements)
+  .superRefine(syllablesConfigRefinements);
 
 // Updated question result schema - exported as resultSchema
 export const resultSchema = z.object({
@@ -45,47 +56,25 @@ export const resultSchema = z.object({
   selectedSyllables: z.array(z.string()),
   timeSpent: z.number().min(0),
   timeExpired: z.boolean(),
-})
+});
 
-// Exercise results schema
-export const syllablesExerciseResultsSchema = z.object({
-  results: z.array(resultSchema),
-  config: configSchema,
-  completedAt: z.date(),
-  totalCorrect: z.number().int().min(0),
-  totalQuestions: z.number().int().min(0),
-  accuracy: z.number().min(0).max(100),
-  averageTimeSpent: z.number().min(0),
-})
+export type SyllablesSpecificConfig = z.infer<
+  typeof syllablesSpecificConfigSchema
+>;
+export type SyllablesConfig = z.infer<typeof configSchema>;
+export type SyllablesQuestionResult = z.infer<typeof resultSchema>;
 
-// Inferred types
-export type SyllablesSpecificConfig = z.infer<typeof syllablesSpecificConfigSchema>
-export type SyllablesConfig = z.infer<typeof configSchema>
-export type SyllablesQuestionResult = z.infer<typeof resultSchema>
-export type SyllablesExerciseResults = z.infer<typeof syllablesExerciseResultsSchema>
-
-// Default configuration
-export const defaultSyllablesConfig: SyllablesConfig = {
-  syllablesCount: 4,
-  totalQuestions: 10,
-}
-
-// Preset configurations - exported as presets
-export const presets: Record<ExercisePreset, SyllablesConfig> = {
+export const presets: Record<ExercisePreset, SyllablesSpecificConfig> = {
   easy: {
     syllablesCount: 3,
-    totalQuestions: 5,
   },
   medium: {
     syllablesCount: 4,
-    totalQuestions: 10,
   },
   hard: {
     syllablesCount: 5,
-    totalQuestions: 15,
   },
   expert: {
     syllablesCount: 6,
-    totalQuestions: 20,
   },
-} 
+};

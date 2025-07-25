@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 import {
@@ -45,7 +45,7 @@ export function syllablesConfigRefinements(
 }
 
 // Complete syllables configuration schema - exported as configSchema
-export const configSchema = explicitGoalSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(syllablesSpecificConfigSchema)
   .superRefine(syllablesConfigRefinements);
 
@@ -77,4 +77,12 @@ export const presets: Record<ExercisePreset, SyllablesSpecificConfig> = {
   expert: {
     syllablesCount: 6,
   },
+};
+
+export const defaultConfig: SyllablesConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...presets.easy,
 };

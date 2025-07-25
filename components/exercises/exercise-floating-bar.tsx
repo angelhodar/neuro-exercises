@@ -1,8 +1,8 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, ArrowLeft, Settings, Menu } from "lucide-react";
+import { ChevronRight, ArrowLeft, Settings, Menu, Clock } from "lucide-react";
 import { Button, ButtonProps } from "@/components/ui/button";
 import {
   Tooltip,
@@ -36,32 +36,82 @@ export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
 
 FloatingBarButton.displayName = "FloatingBarButton";
 
+// Format time as MM:SS
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
 export default function FloatingBottomBar() {
   const {
     exercise,
     exerciseState,
     currentQuestionIndex,
     totalQuestions,
+    timeLimitSeconds,
+    endConditionType,
     nextQuestion,
     waitingForNextQuestionTrigger,
   } = useExerciseExecution();
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(timeLimitSeconds);
+
+  // Timer effect
+  useEffect(() => {
+    if (exerciseState === "executing" && timeLimitSeconds > 0) {
+      setTimeRemaining(timeLimitSeconds);
+      
+      const interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      setTimeRemaining(timeLimitSeconds);
+    }
+  }, [exerciseState, timeLimitSeconds]);
 
   if (exerciseState === "finished") return null;
 
-  const progressPercentage = (currentQuestionIndex / totalQuestions) * 100;
+  // Calculate progress based on end condition type
+  const progressPercentage = endConditionType === "time" 
+    ? ((timeLimitSeconds - timeRemaining) / timeLimitSeconds) * 100
+    : (currentQuestionIndex / totalQuestions) * 100;
+  
+  const showTimer = exerciseState === "executing" && timeLimitSeconds > 0;
+  const isTimeBased = endConditionType === "time";
 
   return (
     <div className="fixed inset-0 pointer-events-none">
       <div className="absolute bottom-6 right-6 pointer-events-auto">
         <div className="bg-blue-50/90 backdrop-blur-md border border-blue-200/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out p-2">
           {!isExpanded ? (
-            /* Collapsed State - Hamburger + Next button (if shown) */
-            <div className="flex items-center gap-2">
+            /* Collapsed State - Hamburger + Timer + Next button (if shown) */
+            <div className="flex items-center">
               <FloatingBarButton onClick={() => setIsExpanded(true)}>
                 <Menu className="h-4 w-4" />
               </FloatingBarButton>
+
+              {/* Timer in collapsed state */}
+              {showTimer && (
+                <>
+                  <Separator orientation="vertical" />
+                  <div className="flex items-center gap-2 px-2 text-base font-mono">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    <span className="text-blue-700 font-bold text-lg">
+                      {formatTime(timeRemaining)}
+                    </span>
+                  </div>
+                </>
+              )}
 
               {/* Next Question Button in collapsed state */}
               {waitingForNextQuestionTrigger && (
@@ -85,9 +135,19 @@ export default function FloatingBottomBar() {
               )}
             </div>
           ) : (
-            /* Expanded State - Progress bar + All buttons */
+            /* Expanded State - Progress bar + Timer + All buttons */
             <div className="animate-in fade-in slide-in-from-bottom duration-300">
-              <Progress value={progressPercentage} className="h-2 mb-2" />
+              <Progress value={progressPercentage} className="h-2 mb-3" />
+
+              {/* Timer in expanded state */}
+              {showTimer && (
+                <div className="flex items-center justify-center gap-2 p-2 text-base font-mono">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                  <span className="text-blue-700 font-bold text-xl">
+                    {formatTime(timeRemaining)}
+                  </span>
+                </div>
+              )}
 
               {/* Buttons Row */}
               <div className="flex items-center gap-2">

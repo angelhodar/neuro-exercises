@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { explicitGoalSchema, ExercisePreset } from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema, ExercisePreset } from "@/lib/schemas/base-schemas";
 import { selectableMediaSchema } from "@/lib/schemas/medias";
 
 // Schema for a single question configuration
@@ -13,7 +13,7 @@ export const oddOneOutQuestionSchema = z.object({
 });
 
 // Main configuration schema for the exercise
-export const oddOneOutConfigSchema = explicitGoalSchema.extend({
+export const oddOneOutConfigSchema = baseExerciseConfigSchema.extend({
   questions: z
     .array(oddOneOutQuestionSchema)
     .min(1, "Debes configurar al menos una pregunta."),
@@ -57,8 +57,11 @@ export type OddOneOutConfig = z.infer<typeof oddOneOutConfigSchema>;
 export type OddOneOutQuestion = z.infer<typeof oddOneOutQuestionSchema>;
 export type OddOneOutResult = z.infer<typeof oddOneOutResultSchema>;
 
-const defaultOddOneOutConfig: OddOneOutConfig = {
-  totalQuestions: 10,
+export const defaultConfig: OddOneOutConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
   questions: [
     {
       patternMedias: [],
@@ -68,10 +71,10 @@ const defaultOddOneOutConfig: OddOneOutConfig = {
 };
 
 export const oddOneOutPresets: Record<ExercisePreset, OddOneOutConfig> = {
-  easy: defaultOddOneOutConfig,
-  medium: defaultOddOneOutConfig,
-  hard: defaultOddOneOutConfig,
-  expert: defaultOddOneOutConfig,
+  easy: defaultConfig,
+  medium: defaultConfig,
+  hard: defaultConfig,
+  expert: defaultConfig,
 }
 
 // Exports required by the loader

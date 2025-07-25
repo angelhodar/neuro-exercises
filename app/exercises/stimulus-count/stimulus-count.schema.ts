@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -20,7 +20,7 @@ const stimulusCountRangeSchema = z.object({
   }),
 });
 
-export const stimulusCountConfigSchema = explicitGoalSchema
+export const stimulusCountConfigSchema = baseExerciseConfigSchema
   .merge(stimulusCountRangeSchema)
   .superRefine((data, ctx) => {
     if (data.maxStimuli < data.minStimuli) {
@@ -66,6 +66,14 @@ export const stimulusCountPresets: Record<ExercisePreset, StimulusCountSpecificC
     hard: { minStimuli: 10, maxStimuli: 20, allowOverlap: true },
     expert: { minStimuli: 15, maxStimuli: 30, allowOverlap: true },
   };
+
+export const defaultConfig: StimulusCountConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...stimulusCountPresets.easy,
+};
 
 export const configSchema = stimulusCountConfigSchema;
 export const resultSchema = stimulusCountQuestionResultSchema;

@@ -4,7 +4,8 @@ import type { ZodTypeAny } from "zod";
 export type ExerciseAssets = {
   configSchema: ZodTypeAny;
   resultSchema: ZodTypeAny;
-  presets?: Record<string, any>;
+  presets?: Record<string, Record<string, any>>;
+  defaultConfig: Record<string, any>;
   ExerciseComponent: ComponentType<{ config: any }>;
   ResultsComponent: ComponentType<any>;
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
@@ -20,7 +21,7 @@ export async function loadExerciseAssets(
       { Exercise },
       { Results },
       { ConfigFields },
-      { configSchema, resultSchema, presets },
+      { configSchema, resultSchema, defaultConfig, presets },
     ] = await Promise.all([
       import(`./${slug}/${slug}.exercise`),
       import(`./${slug}/${slug}.results`),
@@ -31,6 +32,7 @@ export async function loadExerciseAssets(
     return {
       configSchema,
       resultSchema,
+      defaultConfig,
       presets,
       ExerciseComponent: Exercise,
       ResultsComponent: Results,
@@ -48,7 +50,7 @@ export async function loadClientAssets(
   try {
     const [
       { ConfigFields },
-      { configSchema, resultSchema, presets },
+      { configSchema, resultSchema, defaultConfig, presets },
     ] = await Promise.all([
       import(`./${slug}/${slug}.config`),
       import(`./${slug}/${slug}.schema`),
@@ -58,6 +60,7 @@ export async function loadClientAssets(
       configSchema,
       resultSchema,
       presets,
+      defaultConfig,
       ConfigFieldsComponent: ConfigFields,
     };
   } catch (error) {

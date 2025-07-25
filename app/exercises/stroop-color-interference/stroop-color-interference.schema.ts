@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -29,7 +29,7 @@ export const stroopColorInterferenceSpecificConfigSchema = z.object({
 });
 
 // 2. Esquema completo de configuración
-export const configSchema = explicitGoalSchema.merge(
+export const configSchema = baseExerciseConfigSchema.merge(
   stroopColorInterferenceSpecificConfigSchema,
 );
 
@@ -67,4 +67,12 @@ export const presets: Record<
   expert: {
     numOptions: 8,
   },
+};
+
+export const defaultConfig: StroopColorInterferenceConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...presets.easy,
 };

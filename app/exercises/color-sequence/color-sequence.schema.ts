@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
   type BaseExerciseConfig,
 } from "@/lib/schemas/base-schemas";
@@ -36,22 +36,9 @@ export function colorSequenceConfigRefinements(
   }
 }
 
-export const configSchema = explicitGoalSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(colorSequenceSpecificConfigSchema)
   .superRefine(colorSequenceConfigRefinements);
-
-export const resultSchema = z.object({
-  targetSequence: z.array(z.number().int()),
-  userSequence: z.array(z.number().int()),
-  isCorrect: z.boolean(),
-});
-
-export type ColorSequenceSpecificConfig = z.infer<
-  typeof colorSequenceSpecificConfigSchema
->;
-export type ColorSequenceConfig = z.infer<typeof configSchema>;
-export type ColorSequenceQuestionResult = z.infer<typeof resultSchema>;
-export type { BaseExerciseConfig, ExercisePreset };
 
 export const presets: Record<ExercisePreset, ColorSequenceSpecificConfig> = {
   easy: {
@@ -75,3 +62,24 @@ export const presets: Record<ExercisePreset, ColorSequenceSpecificConfig> = {
     highlightInterval: 600,
   },
 };
+
+export const defaultConfig: ColorSequenceConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...presets.easy,
+};
+
+export const resultSchema = z.object({
+  targetSequence: z.array(z.number().int()),
+  userSequence: z.array(z.number().int()),
+  isCorrect: z.boolean(),
+});
+
+export type ColorSequenceSpecificConfig = z.infer<
+  typeof colorSequenceSpecificConfigSchema
+>;
+export type ColorSequenceConfig = z.infer<typeof configSchema>;
+export type ColorSequenceQuestionResult = z.infer<typeof resultSchema>;
+export type { BaseExerciseConfig, ExercisePreset };

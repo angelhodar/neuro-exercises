@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -53,7 +53,7 @@ export function reactionTimeConfigRefinements(
   }
 }
 
-export const configSchema = explicitGoalSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(reactionTimeSpecificConfigSchema)
   .superRefine(reactionTimeConfigRefinements);
 
@@ -99,3 +99,11 @@ export const presets: Record<ExercisePreset, ReactionTimeSpecificConfig> = {
     cellDisplayDuration: 1000,
   },
 };
+
+export const defaultConfig: ReactionTimeGridConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...presets.easy,
+}

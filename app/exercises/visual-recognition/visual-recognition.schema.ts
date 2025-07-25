@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  explicitGoalSchema,
+  baseExerciseConfigSchema,
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
@@ -55,7 +55,7 @@ export function visualRecognitionConfigRefinements(
 }
 
 // Complete visual recognition configuration schema - exported as configSchema
-export const configSchema = explicitGoalSchema
+export const configSchema = baseExerciseConfigSchema
   .merge(visualRecognitionSpecificConfigSchema)
   .superRefine(visualRecognitionConfigRefinements);
 
@@ -103,3 +103,11 @@ export const presets: Record<ExercisePreset, VisualRecognitionSpecificConfig> =
       showImageNames: false,
     },
   };
+
+export const defaultConfig: VisualRecognitionConfig = {
+  endConditionType: "questions",
+  automaticNextQuestion: true,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
+  ...presets.easy,
+};

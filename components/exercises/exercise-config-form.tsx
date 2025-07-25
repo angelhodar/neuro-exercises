@@ -36,11 +36,12 @@ function ExerciseConfigFormContent({
   children,
 }: ExerciseConfigFormContentProps) {
   const router = useRouter();
-  const { configSchema, presets, ConfigFieldsComponent } = assets;
+  const { configSchema, presets, defaultConfig, ConfigFieldsComponent } =
+    assets;
 
   const form = useForm<z.infer<typeof configSchema>>({
     resolver: zodResolver(configSchema),
-    defaultValues: { automaticNextQuestion: true, ...presets?.easy },
+    defaultValues: defaultConfig,
   });
 
   function handleSubmit(data: z.infer<typeof configSchema>) {
@@ -71,21 +72,19 @@ function ExerciseConfigFormContent({
           >
             {presets && (
               <>
-                {/* Selector de presets */}
                 <ExerciseConfigPresetSelector presets={presets} />
                 <Separator />
               </>
             )}
 
-            {/* Campos base comunes (totalQuestions, etc.) */}
-            <ExerciseBaseFields />
+            <ExerciseBaseFields
+              hasIntrinsicGoal={!defaultConfig.endConditionType}
+            />
             <Separator />
 
-            {/* Campos específicos del ejercicio */}
             {children || <ConfigFieldsComponent />}
             <Separator />
 
-            {/* Acciones */}
             <div className="flex justify-end">
               <Button type="submit">Comenzar</Button>
             </div>

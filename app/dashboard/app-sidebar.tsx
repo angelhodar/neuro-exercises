@@ -17,6 +17,7 @@ import {
   ScanSearch,
   Building2,
   Upload,
+  Mic,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,7 +72,7 @@ const data = {
       title: "¿Cual te has dejado?",
       url: "/exercises/odd-one-out",
       icon: ScanSearch,
-    },
+    }
   ],
   management: [
     {
@@ -115,6 +116,13 @@ const data = {
       title: "Crear enlace",
       url: "/dashboard/links?create-link=true",
       icon: Plus,
+    },
+  ],
+  tools: [
+    {
+      title: "Reconocimiento de voz",
+      url: "/dashboard/speech-recognition",
+      icon: Mic,
     },
   ],
 };
@@ -206,7 +214,25 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Herramientas</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.tools.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent> 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

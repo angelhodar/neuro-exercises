@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQueryState, parseAsString } from "nuqs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,14 +13,8 @@ import { getDiff } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function SpeechRecognitionClient() {
-  const [referenceText, setReferenceText] = useQueryState(
-    "reference",
-    parseAsString.withDefault(""),
-  );
-  const [transcribedText, setTranscribedText] = useQueryState(
-    "transcription",
-    parseAsString.withDefault(""),
-  );
+  const [referenceText, setReferenceText] = useState("");
+  const [transcribedText, setTranscribedText] = useState("");
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 

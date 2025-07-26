@@ -72,7 +72,7 @@ const data = {
       title: "¿Cual te has dejado?",
       url: "/exercises/odd-one-out",
       icon: ScanSearch,
-    }
+    },
   ],
   management: [
     {
@@ -85,6 +85,8 @@ const data = {
       url: "/dashboard/users",
       icon: Users,
     },
+  ],
+  library: [
     {
       title: "Biblioteca multimedia",
       url: "/dashboard/media",
@@ -120,9 +122,19 @@ const data = {
   ],
   tools: [
     {
-      title: "Reconocimiento de voz",
-      url: "/dashboard/speech-recognition",
+      title: "Textos",
+      url: "/dashboard/speech/texts",
+      icon: BookOpen,
+    },
+    {
+      title: "Transcripciones",
+      url: "/dashboard/speech/transcriptions",
       icon: Mic,
+    },
+    {
+      title: "Crear transcripción",
+      url: "/dashboard/speech/transcript",
+      icon: Plus,
     },
   ],
 };
@@ -198,6 +210,24 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
         <SidebarGroup>
+          <SidebarGroupLabel>Contenidos</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {data.library.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel>Enlaces</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -216,7 +246,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Herramientas</SidebarGroupLabel>
+          <SidebarGroupLabel>Voz</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.tools.map((item) => (
@@ -232,7 +262,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent> 
+      </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>

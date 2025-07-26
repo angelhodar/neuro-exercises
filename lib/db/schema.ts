@@ -389,6 +389,8 @@ export const userRelations = relations(users, ({ many }) => ({
   exerciseChatGenerations: many(exerciseChatGeneration),
   memberships: many(member),
   sentInvitations: many(invitation, { relationName: "sentInvitations" }),
+  referenceTexts: many(speechTexts),
+  transcriptionResults: many(transcriptionResults),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -493,6 +495,58 @@ export const exerciseChatGenerationRelations = relations(
   }),
 );
 
+// Speech recognition tables
+export const speechTexts = pgTable(
+  "speech_texts",
+  {
+    id: serial().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    referenceText: text("reference_text").notNull(),
+    userId: text("user_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("speech_texts_user_idx").on(table.userId),
+    index("speech_texts_name_idx").on(table.name),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "speech_texts_user_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const transcriptionResults = pgTable(
+  "transcription_results",
+  {
+    id: serial().primaryKey(),
+    referenceTextId: integer("reference_text_id").notNull(),
+    targetUserId: text("target_user_id").notNull(),
+    transcribedText: text("transcribed_text").notNull(),
+    audioBlobKey: varchar("audio_blob_key", { length: 500 }).notNull(),
+    accuracy: integer("accuracy").notNull(), // Stored as percentage (0-100)
+    matchingWords: integer("matching_words").notNull(),
+    nonMatchingWords: integer("non_matching_words").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("transcription_results_reference_text_idx").on(table.referenceTextId),
+    index("transcription_results_target_user_idx").on(table.targetUserId),
+    index("transcription_results_accuracy_idx").on(table.accuracy),
+    index("transcription_results_created_at_idx").on(table.createdAt),
+    foreignKey({
+      columns: [table.referenceTextId],
+      foreignColumns: [speechTexts.id],
+      name: "transcription_results_reference_text_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.targetUserId],
+      foreignColumns: [users.id],
+      name: "transcription_results_target_user_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
 export const organizationRelations = relations(organization, ({ many }) => ({
   members: many(member),
   invitations: many(invitation),
@@ -518,6 +572,25 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
     fields: [invitation.inviterId],
     references: [users.id],
     relationName: "sentInvitations",
+  }),
+}));
+
+export const speechTextsRelations = relations(speechTexts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [speechTexts.userId],
+    references: [users.id],
+  }),
+  transcriptionResults: many(transcriptionResults),
+}));
+
+export const transcriptionResultsRelations = relations(transcriptionResults, ({ one }) => ({
+  referenceText: one(speechTexts, {
+    fields: [transcriptionResults.referenceTextId],
+    references: [speechTexts.id],
+  }),
+  targetUser: one(users, {
+    fields: [transcriptionResults.targetUserId],
+    references: [users.id],
   }),
 }));
 
@@ -560,6 +633,14 @@ export const exerciseChatGenerationInsertSchema = createInsertSchema(
 export const exerciseChatGenerationUpdateSchema = createUpdateSchema(
   exerciseChatGeneration,
 );
+
+export const speechTextSelectSchema = createSelectSchema(speechTexts);
+export const speechTextInsertSchema = createInsertSchema(speechTexts);
+export const speechTextUpdateSchema = createUpdateSchema(speechTexts);
+
+export const transcriptionResultSelectSchema = createSelectSchema(transcriptionResults);
+export const transcriptionResultInsertSchema = createInsertSchema(transcriptionResults);
+export const transcriptionResultUpdateSchema = createUpdateSchema(transcriptionResults);
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -605,3 +686,9 @@ export type NewMember = typeof member.$inferInsert;
 
 export type Invitation = typeof invitation.$inferSelect;
 export type NewInvitation = typeof invitation.$inferInsert;
+
+export type SpeechText = typeof speechTexts.$inferSelect;
+export type NewSpeechText = typeof speechTexts.$inferInsert;
+
+export type TranscriptionResult = typeof transcriptionResults.$inferSelect;
+export type NewTranscriptionResult = typeof transcriptionResults.$inferInsert;

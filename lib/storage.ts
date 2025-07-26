@@ -48,9 +48,9 @@ export async function uploadBlobPathname(
   return result.pathname;
 }
 
-export async function uploadBlobFromFile(file: File) {
+export async function uploadBlobFromFile(file: File, folder: string = "library") {
   const ext = mimeExtension(file.type);
-  const fileName = `library/${nanoid()}.${ext}`;
+  const fileName = `${folder}/${nanoid()}.${ext}`;
   return await upload(fileName, file, {
     access: "public",
     handleUploadUrl: "/api/media/upload",

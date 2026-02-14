@@ -6,8 +6,7 @@ import { db } from "@/lib/db";
 import { medias, type Media } from "@/lib/db/schema";
 import { eq, desc, ilike, arrayOverlaps } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { togetherai } from "@ai-sdk/togetherai";
-import { experimental_generateImage as generateImage } from "ai";
+import { generateText, generateImage, Output } from "ai";
 import { getCurrentUser } from "@/app/actions/users";
 import type { CreateManualMediaSchema } from "@/lib/schemas/medias";
 import { uploadBlob, deleteBlobs } from "@/lib/storage";
@@ -15,20 +14,17 @@ import {
   searchImages as searchImagesFromSerper,
   type DownloadableImage,
 } from "@/lib/media/serper";
-import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
 import { mediaMetadataSchema } from "@/lib/schemas/medias";
 import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
 import { optimizeImage } from "@/lib/media/optimize";
 
-const MEDIA_CREATION_MODEL = "black-forest-labs/FLUX.1-dev";
-const MEDIA_EDITING_MODEL = "black-forest-labs/FLUX.1-kontext-dev";
+const IMAGE_MODEL = "bfl/flux-2-flex";
 
 async function generateImageMetadata(imageUrl: string) {
-  const { object } = await generateObject({
-    model: google("gemini-2.5-flash"),
-    schema: mediaMetadataSchema,
+  const { output } = await generateText({
+    model: "google/gemini-2.5-flash",
+    output: Output.object({ schema: mediaMetadataSchema }),
     messages: [
       {
         role: "user",
@@ -46,7 +42,9 @@ async function generateImageMetadata(imageUrl: string) {
     ],
   });
 
-  return object;
+  if (!output) throw new Error("Failed to generate image metadata");
+
+  return output;
 }
 
 export async function getMedias(
@@ -110,14 +108,12 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
   const { images } = await generateImage({
-    model: togetherai.image(MEDIA_EDITING_MODEL),
-    prompt: translatedPrompt,
-    size: "512x512",
-    providerOptions: {
-      togetherai: {
-        image_url: createBlobUrl(media.blobKey),
-      },
+    model: IMAGE_MODEL,
+    prompt: {
+      text: translatedPrompt,
+      images: [await fetch(createBlobUrl(media.blobKey)).then(r => r.arrayBuffer()).then(b => Buffer.from(b))],
     },
+    size: "512x512",
   });
 
   const [image] = images;
@@ -139,7 +135,7 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
     blobKey: blob.pathname,
     mimeType: "image/webp",
     thumbnailKey: null,
-    metadata: { prompt, model: MEDIA_EDITING_MODEL },
+    metadata: { prompt, model: IMAGE_MODEL },
     authorId: user.id,
     derivedFrom: media.id,
   });
@@ -155,7 +151,7 @@ export async function generateMediaFromPrompt(prompt: string) {
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
   const { images } = await generateImage({
-    model: togetherai.image(MEDIA_CREATION_MODEL),
+    model: IMAGE_MODEL,
     prompt: `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`,
     size: "512x512",
   });
@@ -179,7 +175,7 @@ export async function generateMediaFromPrompt(prompt: string) {
     blobKey: blob.pathname,
     mimeType: "image/webp",
     thumbnailKey: null,
-    metadata: { prompt, model: MEDIA_CREATION_MODEL },
+    metadata: { prompt, model: IMAGE_MODEL },
     authorId: user.id,
     derivedFrom: null,
   });

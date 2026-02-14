@@ -9,7 +9,7 @@ import { createBlobUrl } from "@/lib/utils";
 export const getCodeContext = tool({
   description:
     "Gets context from other existing exercises, hooks and components to use as reference",
-  parameters: z.object({}),
+  inputSchema: z.object({}),
   execute: async () => {
     console.log("Getting context from other exercises and components");
     try {
@@ -28,7 +28,7 @@ export const readFiles = (codeBlobKey: string | null) =>
   tool({
     description:
       "Reads existing files for a specific exercise from the repository. If files haven't been created yet, returns an empty array.",
-    parameters: z.object({}),
+    inputSchema: z.object({}),
     execute: async () => {
       console.log(`Reading existing files for generation ${codeBlobKey}`);
 
@@ -46,7 +46,7 @@ export const readFiles = (codeBlobKey: string | null) =>
 
 export const writeFiles = (generationId: number, previousCodeBlobKey: string | null = null) => tool({
   description: "Writes files to the blob storage",
-  parameters: z.object({
+  inputSchema: z.object({
     files: z
       .array(generatedFileSchema)
       .describe(

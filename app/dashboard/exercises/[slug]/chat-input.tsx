@@ -1,27 +1,26 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef, ChangeEvent } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ImagePlus, Send, X, Square } from "lucide-react";
-import { ChatRequestOptions } from "ai";
 
 interface ChatInputProps {
   disabled?: boolean;
   input: string;
-  onInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
-  onSubmit: (event?: { preventDefault?: () => void } | undefined, chatRequestOptions?: ChatRequestOptions | undefined) => void;
+  onInputChange: (value: string) => void;
+  onSubmit: () => void;
   isLoading: boolean;
   onStop?: () => void;
 }
 
-export function ChatInput({ 
-  disabled = false, 
-  input, 
-  onInputChange, 
-  onSubmit, 
+export function ChatInput({
+  disabled = false,
+  input,
+  onInputChange,
+  onSubmit,
   isLoading,
-  onStop 
+  onStop
 }: ChatInputProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,7 +28,7 @@ export function ChatInput({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (input.trim() || uploadedImages.length > 0) {
-      onSubmit(e);
+      onSubmit();
       setUploadedImages([]);
     }
   };
@@ -81,7 +80,7 @@ export function ChatInput({
         <div className="relative">
           <textarea
             value={input}
-            onChange={onInputChange}
+            onChange={(e) => onInputChange(e.target.value)}
             placeholder="Ask about this exercise... (Markdown supported)"
             className="w-full h-24 resize-none pr-20 pb-12 bg-white/80 border border-gray-200 focus:border-blue-200 focus:ring-blue-100 rounded-xl shadow-sm px-3 py-3 focus:outline-none focus:ring-2"
             disabled={disabled || isLoading}
@@ -105,7 +104,7 @@ export function ChatInput({
             >
               <ImagePlus className="h-5 w-5 text-gray-500" />
             </Button>
-            
+
             {isLoading && onStop ? (
               <Button
                 type="button"

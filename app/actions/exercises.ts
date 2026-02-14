@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { generateText, Output } from "ai";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -95,14 +94,16 @@ export async function getExerciseBySlug(
 }
 
 async function generateExerciseData(prompt: string) {
-  const { object } = await generateObject({
-    model: google("gemini-2.5-flash"),
-    schema: generatedExerciseSchema,
+  const { output } = await generateText({
+    model: "google/gemini-2.5-flash",
+    output: Output.object({ schema: generatedExerciseSchema }),
     system: "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
     prompt,
   });
 
-  return object;
+  if (!output) throw new Error("Failed to generate exercise data");
+
+  return output;
 }
 
 export async function createExercise(

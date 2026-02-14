@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
@@ -66,7 +67,18 @@ function getToolDisplayName(toolName: string) {
   }
 }
 
-function StreamingStatus({ status, data }: { status: string; data?: any }) {
+function getTextContent(parts: Array<{ type: string; text?: string }>): string {
+  return parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
+}
+
+function getToolParts(parts: Array<{ type: string; state?: string; toolCallId?: string }>) {
+  return parts.filter((p) => p.type.startsWith("tool-"));
+}
+
+function StreamingStatus({ status, messages }: { status: string; messages: Array<{ role: string; parts: Array<{ type: string; state?: string; toolCallId?: string }> }> }) {
   if (status === "submitted") {
     return (
       <div className="flex items-center space-x-2 text-blue-600 bg-blue-50 p-3 rounded-lg mb-4">
@@ -77,6 +89,9 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
   }
 
   if (status === "streaming") {
+    const lastAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant");
+    const toolParts = lastAssistantMessage ? getToolParts(lastAssistantMessage.parts) : [];
+
     return (
       <div className="bg-blue-50 p-3 rounded-lg mb-4 space-y-2">
         <div className="flex items-center space-x-2 text-blue-600">
@@ -84,20 +99,23 @@ function StreamingStatus({ status, data }: { status: string; data?: any }) {
           <span className="text-sm font-medium">Procesando ejercicio...</span>
         </div>
 
-        {data?.toolInvocations && data.toolInvocations.length > 0 && (
+        {toolParts.length > 0 && (
           <div className="space-y-1">
-            {data.toolInvocations.map((invocation: any, index: number) => (
-              <div
-                key={index}
-                className="flex items-center space-x-2 text-sm text-gray-600"
-              >
-                {getToolIcon(invocation.toolName)}
-                <span>{getToolDisplayName(invocation.toolName)}</span>
-                {invocation.state === "result" && (
-                  <span className="text-green-600">✓</span>
-                )}
-              </div>
-            ))}
+            {toolParts.map((part, index) => {
+              const toolName = part.type.replace("tool-", "");
+              return (
+                <div
+                  key={part.toolCallId ?? index}
+                  className="flex items-center space-x-2 text-sm text-gray-600"
+                >
+                  {getToolIcon(toolName)}
+                  <span>{getToolDisplayName(toolName)}</span>
+                  {part.state === "output-available" && (
+                    <span className="text-green-600">✓</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -114,33 +132,33 @@ export function Chat({
 }: ChatProps) {
   const { initializeSandbox } = useSandbox();
   const hasAutoStarted = useRef(false);
+  const [input, setInput] = useState("");
 
   const {
     messages,
-    input,
-    handleInputChange,
-    handleSubmit,
+    sendMessage,
     status,
     error,
     stop,
-    reload,
-    data,
+    regenerate,
   } = useChat({
-    api: "/api/chat",
-    initialMessages: initialMessages.map((msg) => ({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      credentials: "include",
+      body: { slug: exercise.slug },
+    }),
+    messages: initialMessages.map((msg) => ({
       id: msg.id,
       role: msg.role,
-      content: msg.content,
+      parts: [{ type: "text" as const, text: msg.content }],
     })),
-    credentials: "include",
-    body: { slug: exercise.slug },
-    onFinish: initializeSandbox,
+    onFinish: () => initializeSandbox(),
   });
 
   useEffect(() => {
     if (autoStart && !hasAutoStarted.current) {
       hasAutoStarted.current = true;
-      reload();
+      regenerate();
     }
   }, [autoStart]);
 
@@ -153,9 +171,16 @@ export function Chat({
   // Filter messages to only include user and assistant roles
   const filteredMessages = messages.filter(
     (msg) => msg.role === "user" || msg.role === "assistant",
-  ) as Array<{ id: string; role: "user" | "assistant"; content: string }>;
+  );
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  const handleSubmit = () => {
+    if (input.trim()) {
+      sendMessage({ text: input });
+      setInput("");
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -168,13 +193,20 @@ export function Chat({
             ) : (
               <>
                 {filteredMessages.map((m) => (
-                  <ChatMessage key={m.id} role={m.role} content={m.content} />
+                  <ChatMessage
+                    key={m.id}
+                    role={m.role as "user" | "assistant"}
+                    content={getTextContent(m.parts as Array<{ type: string; text?: string }>)}
+                  />
                 ))}
               </>
             )}
 
             {/* Show streaming status */}
-            <StreamingStatus status={status} data={data} />
+            <StreamingStatus
+              status={status}
+              messages={messages as Array<{ role: string; parts: Array<{ type: string; state?: string; toolCallId?: string }> }>}
+            />
 
             {/* Show error if any */}
             {error && (
@@ -184,7 +216,7 @@ export function Chat({
                     Error: {error.message}
                   </span>
                   <button
-                    onClick={() => reload()}
+                    onClick={() => regenerate()}
                     className="text-red-600 hover:text-red-700 text-sm underline"
                   >
                     Reintentar
@@ -200,7 +232,7 @@ export function Chat({
       <div className="flex-shrink-0">
         <ChatInput
           input={input}
-          onInputChange={handleInputChange}
+          onInputChange={setInput}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           onStop={isLoading ? stop : undefined}

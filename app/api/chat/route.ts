@@ -1,5 +1,4 @@
-import { streamText } from "ai";
-import { google, GoogleGenerativeAIProviderOptions } from "@ai-sdk/google";
+import { streamText, stepCountIs } from "ai";
 import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
 import {
   getCodeContext,
@@ -59,7 +58,7 @@ export async function POST(req: Request) {
     extractGenerationData(generations);
 
   const stream = streamText({
-    model: google("gemini-2.5-pro"),
+    model: "google/gemini-2.5-pro",
     tools: {
       getCodeContext,
       readFiles: readFiles(lastCodeBlobKey),
@@ -67,7 +66,7 @@ export async function POST(req: Request) {
     },
     prompt: createGenerationPrompt(mainGuidelinesPrompt, lastUserPrompt, slug),
     system: systemPrompt,
-    maxSteps: 20,
+    stopWhen: stepCountIs(20),
     onStepFinish: (data) => {
       console.log(data.text);
     },
@@ -83,25 +82,9 @@ export async function POST(req: Request) {
         thinkingConfig: {
           thinkingBudget: 512,
         },
-      } satisfies GoogleGenerativeAIProviderOptions,
+      },
     },
   });
 
-  return stream.toDataStreamResponse({
-    getErrorMessage: (error) => {
-      if (error == null) {
-        return "unknown error";
-      }
-
-      if (typeof error === "string") {
-        return error;
-      }
-
-      if (error instanceof Error) {
-        return error.message;
-      }
-
-      return JSON.stringify(error);
-    },
-  });
+  return stream.toUIMessageStreamResponse();
 }

@@ -29,10 +29,8 @@ export default function HorizontalTags({ tags, maxVisible = 2 }: TagsProps) {
 
       {hasHiddenTags && (
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline" className="cursor-help">
-              +{hiddenTags.length}
-            </Badge>
+          <TooltipTrigger render={<Badge variant="outline" className="cursor-help" />}>
+            +{hiddenTags.length}
           </TooltipTrigger>
           <TooltipContent>
             <div className="flex flex-col gap-1">

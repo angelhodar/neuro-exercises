@@ -46,10 +46,8 @@ export default async function ExerciseResultsPage({
     <div className="flex flex-col container mx-auto items-center justify-center h-screen">
       <ResultsComponent results={results} config={config} />
       <div className="mt-6 flex justify-center">
-        <Button asChild>
-          <Link href={`/exercises/${slug}/config`}>
+        <Button render={<Link href={`/exercises/${slug}/config`} />}>
             Volver a la configuración
-          </Link>
         </Button>
       </div>
     </div>

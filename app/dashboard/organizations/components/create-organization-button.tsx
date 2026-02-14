@@ -68,11 +68,9 @@ export default function CreateOrganizationButton() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Crear organización
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <Plus className="mr-2 h-4 w-4" />
+        Crear organización
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>

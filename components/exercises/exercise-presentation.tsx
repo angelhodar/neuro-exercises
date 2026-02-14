@@ -47,11 +47,13 @@ export function ExercisePresentation() {
 
         {exercise.audioInstructions && (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <ExerciseAudioButton
-                audioSrc={createBlobUrl(exercise.audioInstructions)}
-              />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={
+                <ExerciseAudioButton
+                  audioSrc={createBlobUrl(exercise.audioInstructions)}
+                />
+              }
+            />
             <TooltipContent>Escuchar instrucciones</TooltipContent>
           </Tooltip>
         )}

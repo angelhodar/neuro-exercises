@@ -70,11 +70,9 @@ export default function EditExerciseButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Pencil className="w-4 h-4 mr-2" />
-          Editar
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <Pencil className="w-4 h-4 mr-2" />
+        Editar
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>

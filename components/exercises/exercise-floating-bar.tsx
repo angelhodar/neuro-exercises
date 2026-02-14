@@ -120,13 +120,15 @@ export default function FloatingBottomBar() {
 
                   <div className="relative group">
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <FloatingBarButton
-                          className="bg-blue-500 text-white hover:bg-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
-                          onClick={nextQuestion}
-                        >
-                          <ChevronRight className="h-4 w-4 animate-pulse" />
-                        </FloatingBarButton>
+                      <TooltipTrigger
+                        render={
+                          <FloatingBarButton
+                            className="bg-blue-500 text-white hover:bg-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
+                            onClick={nextQuestion}
+                          />
+                        }
+                      >
+                        <ChevronRight className="h-4 w-4 animate-pulse" />
                       </TooltipTrigger>
                       <TooltipContent>Ir al siguiente ensayo</TooltipContent>
                     </Tooltip>
@@ -153,13 +155,15 @@ export default function FloatingBottomBar() {
               <div className="flex items-center gap-2">
                 {/* Close/Menu Button */}
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FloatingBarButton
-                      className="hover:bg-red-100 hover:text-red-700"
-                      onClick={() => setIsExpanded(false)}
-                    >
-                      <Menu className="h-4 w-4" />
-                    </FloatingBarButton>
+                  <TooltipTrigger
+                    render={
+                      <FloatingBarButton
+                        className="hover:bg-red-100 hover:text-red-700"
+                        onClick={() => setIsExpanded(false)}
+                      />
+                    }
+                  >
+                    <Menu className="h-4 w-4" />
                   </TooltipTrigger>
                   <TooltipContent>Cerrar menu</TooltipContent>
                 </Tooltip>
@@ -167,12 +171,8 @@ export default function FloatingBottomBar() {
                 <Separator orientation="vertical" />
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FloatingBarButton asChild>
-                      <Link href="/dashboard">
-                        <ArrowLeft className="h-4 w-4" />
-                      </Link>
-                    </FloatingBarButton>
+                  <TooltipTrigger render={<FloatingBarButton render={<Link href="/dashboard" />} />}>
+                    <ArrowLeft className="h-4 w-4" />
                   </TooltipTrigger>
                   <TooltipContent>Ir al dashboard</TooltipContent>
                 </Tooltip>
@@ -180,21 +180,15 @@ export default function FloatingBottomBar() {
                 <Separator orientation="vertical" />
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <ExerciseFullscreenButton />
-                  </TooltipTrigger>
+                  <TooltipTrigger render={<ExerciseFullscreenButton />} />
                   <TooltipContent>Mostrar pantalla completa</TooltipContent>
                 </Tooltip>
 
                 <Separator orientation="vertical" />
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FloatingBarButton asChild>
-                      <Link href={`/exercises/${exercise.slug}/config`}>
-                        <Settings className="h-4 w-4" />
-                      </Link>
-                    </FloatingBarButton>
+                  <TooltipTrigger render={<FloatingBarButton render={<Link href={`/exercises/${exercise.slug}/config`} />} />}>
+                    <Settings className="h-4 w-4" />
                   </TooltipTrigger>
                   <TooltipContent>Configurar ejercicio</TooltipContent>
                 </Tooltip>
@@ -205,13 +199,15 @@ export default function FloatingBottomBar() {
 
                     <div className="relative group animate-in fade-in slide-in-from-right duration-300">
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <FloatingBarButton
-                            className="bg-blue-500 text-white hover:bg-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
-                            onClick={nextQuestion}
-                          >
-                            <ChevronRight className="h-4 w-4 animate-pulse" />
-                          </FloatingBarButton>
+                        <TooltipTrigger
+                          render={
+                            <FloatingBarButton
+                              className="bg-blue-500 text-white hover:bg-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
+                              onClick={nextQuestion}
+                            />
+                          }
+                        >
+                          <ChevronRight className="h-4 w-4 animate-pulse" />
                         </TooltipTrigger>
                         <TooltipContent>Ir al siguiente ensayo</TooltipContent>
                       </Tooltip>

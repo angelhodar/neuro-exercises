@@ -84,11 +84,9 @@ export default function AddUserButton() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <UserPlus className="h-4 w-4" />
-          Crear usuario
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <UserPlus className="h-4 w-4" />
+        Crear usuario
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>

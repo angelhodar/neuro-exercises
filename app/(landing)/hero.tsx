@@ -48,11 +48,9 @@ export default function HeroSection() {
               <Button
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
-                asChild
+                render={<Link href="/login" />}
               >
-                <Link href="/login">
-                  Comenzar
-                </Link>
+                Comenzar
               </Button>
               <ScrollToElementButton
                 elementId="landing-exercises"

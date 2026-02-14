@@ -69,10 +69,8 @@ export default async function SpeechTranscriptionsPage() {
                         <div className="font-medium">{transcription.referenceText.name}</div>
                         {transcription.referenceText.referenceText && (
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="text-sm text-muted-foreground truncate max-w-xs">
-                                {transcription.referenceText.referenceText}
-                              </div>
+                            <TooltipTrigger render={<div className="text-sm text-muted-foreground truncate max-w-xs" />}>
+                              {transcription.referenceText.referenceText}
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="max-w-xs">{transcription.referenceText.referenceText}</p>
@@ -83,10 +81,8 @@ export default async function SpeechTranscriptionsPage() {
                     </TableCell>
                     <TableCell>
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="max-w-xs truncate">
-                            {transcription.transcribedText}
-                          </div>
+                        <TooltipTrigger render={<div className="max-w-xs truncate" />}>
+                          {transcription.transcribedText}
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">{transcription.transcribedText}</p>

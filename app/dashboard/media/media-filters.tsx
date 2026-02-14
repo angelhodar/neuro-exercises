@@ -65,16 +65,14 @@ export default function MediaFilters() {
   return (
     <div className="flex gap-2">
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Filter className="w-4 h-4" />
-            Filtros
-            {filterCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
-                {filterCount}
-              </Badge>
-            )}
-          </Button>
+        <PopoverTrigger render={<Button variant="outline" className="gap-2" />}>
+          <Filter className="w-4 h-4" />
+          Filtros
+          {filterCount > 0 && (
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+              {filterCount}
+            </Badge>
+          )}
         </PopoverTrigger>
         <PopoverContent className="max-w-xl p-4" align="end">
           <Form {...form}>

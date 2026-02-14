@@ -161,11 +161,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -179,11 +177,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.exercises.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -197,11 +193,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.management.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -215,11 +209,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.library.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -233,11 +225,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.sharing.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -251,11 +241,9 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {data.tools.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
+                    <item.icon />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

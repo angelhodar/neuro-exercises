@@ -25,10 +25,8 @@ export default function CreateMediaDropdownButton() {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button>
-            <Plus className="w-4 h-4" /> Añadir contenido
-          </Button>
+        <DropdownMenuTrigger render={<Button />}>
+          <Plus className="w-4 h-4" /> Añadir contenido
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setOpenAI(true)}>

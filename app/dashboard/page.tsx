@@ -27,10 +27,8 @@ export default async function DashboardPage() {
       <DashboardHeader>
         <DashboardHeaderTitle>Ejercicios</DashboardHeaderTitle>
         <DashboardHeaderActions>
-          <Button asChild>
-            <Link href="/dashboard/exercises/create">
+          <Button render={<Link href="/dashboard/exercises/create" />}>
               Crear nuevo ejercicio
-            </Link>
           </Button>
         </DashboardHeaderActions>
       </DashboardHeader>

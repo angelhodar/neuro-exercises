@@ -46,11 +46,9 @@ export default function LinkNotFound() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild variant="outline" size="lg">
-              <Link href="/">
+            <Button render={<Link href="/" />} variant="outline" size="lg">
                 <Home className="mr-2 h-4 w-4" />
                 Ir al Inicio
-              </Link>
             </Button>
           </div>
 

@@ -74,10 +74,8 @@ export default function EditSpeechTextButton({ speechText }: EditSpeechTextButto
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Edit className="w-4 h-4" />
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <Edit className="w-4 h-4" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>

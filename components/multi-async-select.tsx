@@ -222,86 +222,87 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
         onOpenChange={setIsPopoverOpen}
         modal={modalPopover}
       >
-        <PopoverTrigger asChild>
-          <Button
-            ref={ref}
-            {...props}
-            onClick={handleTogglePopover}
-            className={cn(
-              "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white hover:bg-transparent focus:outline-none focus:ring-1 focus:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-zinc-800 dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:bg-black dark:hover:bg-black [&_svg]:pointer-events-auto",
-              className
-            )}
-          >
-            {currentValues.length > 0 ? (
-              <div className="flex justify-between items-center w-full">
-                <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
-                  {currentValues.slice(0, maxCount).map((value) => {
-                    let option: Option | undefined;
-                    if (async) {
-                      option = optionsRef[value];
-                    } else {
-                      option = options.find((option) => option.value === value);
-                    }
-                    return (
-                      <Badge key={value} className="capitalize">
-                        <span>{option?.label}</span>
-                        <div
-                          className="ml-2 size-4 cursor-pointer"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            toggleOption(value);
-                          }}
-                        >
-                          <XIcon />
-                        </div>
-                      </Badge>
-                    );
-                  })}
-                  {currentValues.length > maxCount && (
-                    <Badge>
-                      <span>{`+ ${currentValues.length - maxCount}`}</span>
-
+        <PopoverTrigger
+          render={
+            <Button
+              ref={ref}
+              {...props}
+              onClick={handleTogglePopover}
+              className={cn(
+                "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white hover:bg-transparent focus:outline-none focus:ring-1 focus:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-zinc-800 dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:bg-black dark:hover:bg-black [&_svg]:pointer-events-auto",
+                className
+              )}
+            />
+          }
+        >
+          {currentValues.length > 0 ? (
+            <div className="flex justify-between items-center w-full">
+              <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
+                {currentValues.slice(0, maxCount).map((value) => {
+                  let option: Option | undefined;
+                  if (async) {
+                    option = optionsRef[value];
+                  } else {
+                    option = options.find((option) => option.value === value);
+                  }
+                  return (
+                    <Badge key={value} className="capitalize">
+                      <span>{option?.label}</span>
                       <div
                         className="ml-2 size-4 cursor-pointer"
                         onClick={(event) => {
                           event.stopPropagation();
-                          clearExtraOptions();
+                          toggleOption(value);
                         }}
                       >
                         <XIcon />
                       </div>
                     </Badge>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <XIcon
-                    className="h-4 cursor-pointer text-zinc-500"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleClear();
-                    }}
-                  />
-                  <Separator
-                    orientation="vertical"
-                    className="flex min-h-6 h-full mx-2"
-                  />
-                  <ChevronDown className="h-4 cursor-pointer text-zinc-300 dark:text-zinc-500" />
-                </div>
+                  );
+                })}
+                {currentValues.length > maxCount && (
+                  <Badge>
+                    <span>{`+ ${currentValues.length - maxCount}`}</span>
+
+                    <div
+                      className="ml-2 size-4 cursor-pointer"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        clearExtraOptions();
+                      }}
+                    >
+                      <XIcon />
+                    </div>
+                  </Badge>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center justify-between w-full mx-auto">
-                <span className="text-sm font-normal text-zinc-500">
-                  {placeholder}
-                </span>
+              <div className="flex items-center justify-between">
+                <XIcon
+                  className="h-4 cursor-pointer text-zinc-500"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleClear();
+                  }}
+                />
+                <Separator
+                  orientation="vertical"
+                  className="flex min-h-6 h-full mx-2"
+                />
                 <ChevronDown className="h-4 cursor-pointer text-zinc-300 dark:text-zinc-500" />
               </div>
-            )}
-          </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between w-full mx-auto">
+              <span className="text-sm font-normal text-zinc-500">
+                {placeholder}
+              </span>
+              <ChevronDown className="h-4 cursor-pointer text-zinc-300 dark:text-zinc-500" />
+            </div>
+          )}
         </PopoverTrigger>
         <PopoverContent
           className="w-auto p-0"
           align="start"
-          onEscapeKeyDown={() => setIsPopoverOpen(false)}
         >
           <Command shouldFilter={!async}>
             <CommandInput

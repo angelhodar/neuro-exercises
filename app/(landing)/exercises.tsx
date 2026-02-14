@@ -100,11 +100,9 @@ export default async function ExercisesSection() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0 mt-auto">
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-3" asChild>
-                      <Link href={`/exercises/${exercise.slug}`}>
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-3" render={<Link href={`/exercises/${exercise.slug}`} />}>
                         <Play className="mr-2 h-5 w-5" />
                         Probar
-                      </Link>
                     </Button>
                   </CardContent>
                 </Card>

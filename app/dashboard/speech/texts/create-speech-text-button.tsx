@@ -65,11 +65,9 @@ export default function CreateSpeechTextButton() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Crear texto
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <Plus className="w-4 h-4 mr-2" />
+        Crear texto
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>

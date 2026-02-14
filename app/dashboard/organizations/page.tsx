@@ -88,10 +88,8 @@ export default async function OrganizationsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/organizations/${org.id}`}>
+                      <Button variant="outline" size="sm" render={<Link href={`/dashboard/organizations/${org.id}`} />}>
                           <Users className="h-4 w-4" />
-                        </Link>
                       </Button>
                       <EditOrganizationButton
                         organization={org}
@@ -100,10 +98,8 @@ export default async function OrganizationsPage() {
                       >
                         <Edit className="h-4 w-4" />
                       </EditOrganizationButton>
-                      {/*<Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/organizations/${org.id}/invitations`}>
+                      {/*<Button variant="outline" size="sm" render={<Link href={`/dashboard/organizations/${org.id}/invitations`} />}>
                           <Mail className="h-4 w-4" />
-                        </Link>
                       </Button>*/}
                       <DeleteOrganizationButton organization={org} />
                     </div>

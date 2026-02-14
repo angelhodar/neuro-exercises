@@ -64,9 +64,7 @@ export default async function ExerciseResultsPage({
       <ResultsComponent results={results} config={config} />
       {parsedParams.type === "result" && (
         <div className="mt-6 flex justify-center">
-          <Button asChild>
-            <Link href={backUrl}>Volver a la lista de ejercicios</Link>
-          </Button>
+          <Button render={<Link href={backUrl} />}>Volver a la lista de ejercicios</Button>
         </div>
       )}
     </div>

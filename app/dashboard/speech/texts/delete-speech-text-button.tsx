@@ -39,10 +39,8 @@ export default function DeleteSpeechTextButton({ id, name }: DeleteSpeechTextBut
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Trash2 className="w-4 h-4" />
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" />}>
+        <Trash2 className="w-4 h-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

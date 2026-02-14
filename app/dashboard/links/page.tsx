@@ -135,12 +135,10 @@ export default async function LinksPage() {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0"
-                        asChild
+                        render={<Link href={`/s/${link.token}`} target="_blank" />}
                       >
-                        <Link href={`/s/${link.token}`} target="_blank">
                           <ExternalLink className="h-4 w-4" />
                           <span className="sr-only">Abrir enlace</span>
-                        </Link>
                       </Button>
                       <DeleteLinkButton linkId={link.id} />
                     </div>

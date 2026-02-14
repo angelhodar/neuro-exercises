@@ -65,10 +65,8 @@ export default async function SpeechTextsPage() {
                     <TableCell className="font-medium">{text.name}</TableCell>
                     <TableCell>
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="max-w-xs truncate cursor-help">
-                            {text.referenceText}
-                          </div>
+                        <TooltipTrigger render={<div className="max-w-xs truncate cursor-help" />}>
+                          {text.referenceText}
                         </TooltipTrigger>
                         <TooltipContent className="max-w-md">
                           <p className="whitespace-pre-wrap">

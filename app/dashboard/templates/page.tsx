@@ -25,11 +25,9 @@ export default async function TemplatesPage() {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <Button asChild>
-            <Link href="/dashboard/templates/create">
+          <Button render={<Link href="/dashboard/templates/create" />}>
               <Plus className="mr-2 h-4 w-4" />
               Crear plantilla
-            </Link>
           </Button>
         </DashboardHeaderActions>
       </DashboardHeader>

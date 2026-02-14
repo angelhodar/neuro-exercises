@@ -105,11 +105,9 @@ export default function CreateExercisePage() {
                               variant="outline"
                               size="sm"
                               className="h-10 w-10 p-0 border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 bg-white shadow-sm rounded-full"
-                              asChild
+                              render={<div className="cursor-pointer" />}
                             >
-                              <div className="cursor-pointer">
                                 <ImagePlus className="w-5 h-5 text-blue-600" />
-                              </div>
                             </Button>
                           </label>
 

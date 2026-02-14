@@ -64,13 +64,15 @@ export default function MediaSelector(props: MediaSelectorProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <FileMediaSelector
-              medias={selectedMedias}
-              removeFile={removeMedia}
-              onAddMediaClick={() => setIsOpen(true)}
-            />
-          </DialogTrigger>
+          <DialogTrigger
+            render={
+              <FileMediaSelector
+                medias={selectedMedias}
+                removeFile={removeMedia}
+                onAddMediaClick={() => setIsOpen(true)}
+              />
+            }
+          />
           <DialogContent className="min-w-[800px]">
             <DialogHeader>
               <DialogTitle>Buscar y seleccionar imágenes</DialogTitle>

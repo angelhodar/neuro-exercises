@@ -48,21 +48,17 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
           </div>
           <div className="flex items-center gap-2">
             {completed ? (
-              <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                <Link href={`/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`}>
+              <Button render={<Link href={`/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`} />} className="bg-blue-600 hover:bg-blue-700">
                   <Eye className="mr-2 h-4 w-4" />
                   Ver Resultados
-                </Link>
               </Button>
             ) : (
               <Button
                 className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                asChild
+                render={<Link href={`/exercises/${exercise.slug}?linkId=${linkId}&itemId=${itemId}`} />}
               >
-                <Link href={`/exercises/${exercise.slug}?linkId=${linkId}&itemId=${itemId}`}>
                   <Play className="mr-2 h-4 w-4" />
                   Comenzar
-                </Link>
               </Button>
             )}
           </div>

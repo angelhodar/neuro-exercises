@@ -39,13 +39,11 @@ export default async function OrganizationInvitationsPage({
             Gestiona las invitaciones para {organization.name}.
           </DashboardHeaderDescription>
         </div>
-        <Button asChild>
-          <Link
+        <Button render={<Link
             href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
-          >
+          />}>
             <Plus className="mr-2 h-4 w-4" />
             Enviar invitación
-          </Link>
         </Button>
       </DashboardHeader>
 
@@ -114,13 +112,11 @@ export default async function OrganizationInvitationsPage({
                       <p className="text-muted-foreground">
                         No se han enviado invitaciones aún
                       </p>
-                      <Button asChild>
-                        <Link
+                      <Button render={<Link
                           href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
-                        >
+                        />}>
                           <Plus className="mr-2 h-4 w-4" />
                           Enviar primera invitación
-                        </Link>
                       </Button>
                     </div>
                   </TableCell>

@@ -80,10 +80,8 @@ export default function EditOrganizationButton({ organization, children, ...butt
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button {...buttonProps}>
-          {children}
-        </Button>
+      <DialogTrigger render={<Button {...buttonProps} />}>
+        {children}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>

@@ -108,11 +108,9 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <UserPlus className="h-4 w-4" />
-          Añadir usuario
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <UserPlus className="h-4 w-4" />
+        Añadir usuario
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

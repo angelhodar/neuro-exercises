@@ -122,14 +122,16 @@ export function MediaActionsDropdown({
       {/* Dialog para ver imagen ampliada */}
       <Dialog open={openImageDialog} onOpenChange={setOpenImageDialog}>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="p-2 rounded-full bg-white/80 hover:bg-white/90 backdrop-blur-sm transition-colors shadow-sm"
-              aria-label="Media actions"
-              onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
-            >
-              <MoreVertical className="w-4 h-4 text-gray-700" />
-            </button>
+          <DropdownMenuTrigger
+            render={
+              <button
+                className="p-2 rounded-full bg-white/80 hover:bg-white/90 backdrop-blur-sm transition-colors shadow-sm"
+                aria-label="Media actions"
+                onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
+              />
+            }
+          >
+            <MoreVertical className="w-4 h-4 text-gray-700" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-62">
             {showImageActions && (
@@ -156,7 +158,7 @@ export function MediaActionsDropdown({
           </DropdownMenuContent>
         </DropdownMenu>
         {showImageActions && imageUrl && (
-          <DialogContent side="top" className="max-w-4xl p-4">
+          <DialogContent className="max-w-4xl p-4 sm:max-w-4xl">
             <DialogTitle>{media.name}</DialogTitle>
             <div className="relative w-full h-[60vh]">
               <MediaImage

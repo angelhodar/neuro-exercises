@@ -82,11 +82,9 @@ export default function CreateLinkButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Crear enlace
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <Plus className="mr-2 h-4 w-4" />
+        Crear enlace
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

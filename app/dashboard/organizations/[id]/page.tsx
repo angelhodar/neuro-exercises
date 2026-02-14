@@ -54,13 +54,11 @@ export default async function OrganizationPage({
             Editar
           </EditOrganizationButton>
           <AddMemberButton organizationId={resolvedParams.id} />
-          {/*<Button variant="outline" asChild>
-            <Link
+          {/*<Button variant="outline" render={<Link
               href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
-            >
+            />}>
               <Mail className="mr-2 h-4 w-4" />
               Invitaciones
-            </Link>
           </Button>*/}
         </div>
       </DashboardHeader>
@@ -105,13 +103,11 @@ export default async function OrganizationPage({
                       <p className="text-muted-foreground">
                         No hay miembros en esta organización
                       </p>
-                      <Button asChild>
-                        <Link
+                      <Button render={<Link
                           href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
-                        >
+                        />}>
                           <Mail className="mr-2 h-4 w-4" />
                           Invitar miembros
-                        </Link>
                       </Button>
                     </div>
                   </TableCell>

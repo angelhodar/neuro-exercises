@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { generateText, Output } from "ai";
+import { generateText, generateImage, Output } from "ai";
 import { db } from "@/lib/db";
 import { exercises } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -14,14 +14,22 @@ import {
   generatedExerciseSchema,
 } from "@/lib/schemas/exercises";
 import { generateAudio } from "@/lib/ai/audio";
-import { generateMediaFromPrompt } from "./media";
 import { uploadBlobPathname } from "@/lib/storage";
 import { createExerciseGeneration } from "./generations";
 
 // Función para generar thumbnail
 async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise<string | null> {
   try {
-    const imageBuffer = await generateMediaFromPrompt(thumbnailPrompt);
+    const { images } = await generateImage({
+      model: "google/imagen-4",
+      prompt: `Generate an image of ${thumbnailPrompt.toLowerCase()}, clear and simple, centered, white background`,
+      size: "512x512",
+    });
+
+    const [image] = images;
+    if (!image) throw new Error("Error generating thumbnail");
+
+    const imageBuffer = Buffer.from(image.uint8Array);
     const fileName = `thumbnails/${slug}.png`;
     return await uploadBlobPathname(fileName, imageBuffer);
   } catch (error) {

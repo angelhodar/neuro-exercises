@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import type { ExercisePreset } from "@/app/exercises/reaction-time-grid/reaction-time-grid-schema";
+import type { ExercisePreset } from "@/lib/schemas/base-schemas";
 
 interface ExerciseConfigPresetSelectorProps {
   presets: Record<ExercisePreset, object>;

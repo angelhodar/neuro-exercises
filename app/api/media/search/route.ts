@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ media: [], success: true });
     }
 
-    const media = await getMedias(query.trim(), limit);
+    const media = await getMedias(query.trim(), undefined, limit);
 
     return NextResponse.json({
       media,

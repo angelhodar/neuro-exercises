@@ -39,7 +39,7 @@ const templateSchema = z.object({
   exercises: z
     .array(
       z.object({
-        exerciseId: z.coerce.number(),
+        exerciseId: z.number(),
         slug: z.string(),
         config: z.any(),
       })

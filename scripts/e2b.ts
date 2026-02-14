@@ -10,11 +10,9 @@ const blobKey =
 const exerciseId = 5;
 
 async function getRunningExerciseSandbox(exerciseId: number) {
-  const sandboxes = await Sandbox.list();
-  const existingSandbox = sandboxes.find(
-    (sb) => sb.metadata?.exerciseId === exerciseId.toString(),
-  );
-  return existingSandbox;
+  const paginator = Sandbox.list({ query: { metadata: { exerciseId: exerciseId.toString() } } });
+  const sandboxes = await paginator.nextItems();
+  return sandboxes[0];
 }
 
 async function main() {

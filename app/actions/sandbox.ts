@@ -11,9 +11,9 @@ import { getExerciseById } from "./exercises";
 const TEMPLATE_ID = process.env.E2B_TEMPLATE_ID || "uwjrc97qg8qfno0643qu";
 
 async function getRunningExerciseSandbox(exerciseId: number) {
-  const sandboxes = await Sandbox.list();
-  const existingSandbox = sandboxes.find(sb => sb.metadata?.exerciseId === exerciseId.toString());
-  return existingSandbox;
+  const paginator = Sandbox.list({ query: { metadata: { exerciseId: exerciseId.toString() } } });
+  const sandboxes = await paginator.nextItems();
+  return sandboxes[0];
 }
 
 function createSandboxEnvVars(exercise: Exercise) {

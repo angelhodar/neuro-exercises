@@ -16,7 +16,7 @@ const stimulusCountRangeSchema = z.object({
     .max(50, "No puede haber más de 50 estímulos")
     .int("El máximo debe ser un número entero"),
   allowOverlap: z.boolean({
-    required_error: "Debe especificar si se permite solapamiento",
+    error: "Debe especificar si se permite solapamiento",
   }),
 });
 

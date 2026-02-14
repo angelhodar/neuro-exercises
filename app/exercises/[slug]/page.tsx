@@ -6,6 +6,7 @@ import { CountdownProvider } from "@/components/exercises/exercise-countdown";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import { parseConfigFromUrl, exerciseParamsSchema, getExerciseConfigFromLink } from "./parsers";
 import { loadExerciseAssets } from "@/app/exercises/loader";
+import type { BaseExerciseConfig } from "@/lib/schemas/base-schemas";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -38,7 +39,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   const { ExerciseComponent } = entry;
 
   return (
-    <ExerciseProvider {...config} exercise={exercise}>
+    <ExerciseProvider {...(config as BaseExerciseConfig)} exercise={exercise}>
       <CountdownProvider>
         <ExerciseContainer>
           <ExerciseComponent config={config} />

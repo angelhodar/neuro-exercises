@@ -1,9 +1,9 @@
 import type { ComponentType } from "react";
-import type { ZodTypeAny } from "zod";
+import type { z } from "zod";
 
 export type ExerciseAssets = {
-  configSchema: ZodTypeAny;
-  resultSchema: ZodTypeAny;
+  configSchema: z.ZodType<Record<string, any>, Record<string, any>>;
+  resultSchema: z.ZodType<Record<string, any>, Record<string, any>>;
   presets?: Record<string, Record<string, any>>;
   defaultConfig: Record<string, any>;
   ExerciseComponent: ComponentType<{ config: any }>;

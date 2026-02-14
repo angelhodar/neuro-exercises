@@ -1,4 +1,4 @@
-import { z, ZodTypeAny } from "zod";
+import { z } from "zod";
 import { getExerciseLinkByToken } from "@/app/actions/links";
 import { Exercise } from "@/lib/db/schema";
 
@@ -61,7 +61,7 @@ export const exerciseResultsParamsSchema = z.union([
 
 export type ExerciseResultsParams = z.infer<typeof exerciseResultsParamsSchema>;
 
-export function parseConfigFromUrl(configString: string, schema: ZodTypeAny) {
+export function parseConfigFromUrl(configString: string, schema: z.ZodType) {
   let parsedJson: unknown;
 
   try {
@@ -79,7 +79,7 @@ export function parseConfigFromUrl(configString: string, schema: ZodTypeAny) {
 
 export function parseResultsFromUrl(
   resultsString: string,
-  resultsSchema: ZodTypeAny,
+  resultsSchema: z.ZodType,
 ) {
   let parsedJson: unknown;
 

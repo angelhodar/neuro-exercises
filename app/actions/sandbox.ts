@@ -1,33 +1,24 @@
 "use server";
 
-import { Sandbox } from "@e2b/code-interpreter";
+import { Sandbox } from "@vercel/sandbox";
 import { getLastCompletedGeneration } from "@/app/actions/generations";
+import { getLatestSnapshot } from "@/app/actions/snapshots";
 import type { Exercise } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 import { extractFiles } from "@/lib/zip";
 import { getExerciseById } from "./exercises";
 
-// E2B Template ID - replace with your actual template ID
-const TEMPLATE_ID = process.env.E2B_TEMPLATE_ID || "uwjrc97qg8qfno0643qu";
-
-async function getRunningExerciseSandbox(exerciseId: number) {
-  const paginator = Sandbox.list({
-    query: { metadata: { exerciseId: exerciseId.toString() } },
-  });
-  const sandboxes = await paginator.nextItems();
-  return sandboxes[0];
-}
-
 function createSandboxEnvVars(exercise: Exercise) {
-  const vars = {
+  const vars: Record<string, string> = {
     NEXT_PUBLIC_BLOB_URL: process.env.NEXT_PUBLIC_BLOB_URL ?? "",
     SANDBOX_EXERCISE: JSON.stringify(exercise),
+    NODE_ENV: "development",
+    NEXT_TELEMETRY_DISABLED: "1",
   };
 
-  const stringifiedVars = Object.entries(vars)
+  return Object.entries(vars)
     .map(([key, value]) => `${key}=${value}`)
     .join("\n");
-  return stringifiedVars;
 }
 
 async function updateSandboxFiles(sandbox: Sandbox, codeBlobKey: string) {
@@ -38,36 +29,49 @@ async function updateSandboxFiles(sandbox: Sandbox, codeBlobKey: string) {
   }
 
   const zipBuffer = Buffer.from(await zipResponse.arrayBuffer());
-
-  // Extract files from the ZIP buffer
   const files = await extractFiles(zipBuffer);
 
-  // Write all files to the sandbox at /home/user
-  const fileWrites = files.map((file) => ({
-    path: `/home/user/${file.path}`,
-    data: file.content,
-  }));
+  // Write files relative to the sandbox working directory
+  await sandbox.writeFiles(
+    files.map((file) => ({
+      path: file.path,
+      content: Buffer.from(file.content),
+    }))
+  );
+}
 
-  await sandbox.files.write(fileWrites);
+async function waitForServer(sandbox: Sandbox, maxWaitMs = 60_000) {
+  const url = sandbox.domain(3000);
+  const start = Date.now();
+
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        return;
+      }
+    } catch {
+      // Server not ready yet
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+
+  throw new Error("Dev server did not start in time");
 }
 
 export async function createOrConnectToSandbox(exerciseId: number) {
-  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
-
   const lastGeneration = await getLastCompletedGeneration(exerciseId);
 
   if (!lastGeneration?.codeBlobKey) {
     throw new Error("No completed generation found with code blob key");
   }
 
-  if (existingSandbox) {
-    const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
-    await sandbox.setTimeout(300_000);
-    await updateSandboxFiles(sandbox, lastGeneration.codeBlobKey);
-    return {
-      sandboxId: existingSandbox.sandboxId,
-      sandboxUrl: sandbox.getHost(3000),
-    };
+  const snapshot = await getLatestSnapshot();
+
+  if (!snapshot) {
+    throw new Error(
+      "No valid sandbox snapshot found. Run: npm run sandbox snapshot"
+    );
   }
 
   const exercise = await getExerciseById(exerciseId);
@@ -76,38 +80,38 @@ export async function createOrConnectToSandbox(exerciseId: number) {
     throw new Error(`Exercise ${exerciseId} not found`);
   }
 
-  // Create E2B sandbox with environment variables
-  const sandbox = await Sandbox.create(TEMPLATE_ID, {
-    metadata: { exerciseId: exerciseId.toString() },
+  // Create sandbox from snapshot
+  const sandbox = await Sandbox.create({
+    source: { type: "snapshot", snapshotId: snapshot.snapshotId },
+    ports: [3000],
+    timeout: 300_000, // 5 min
   });
 
+  // Write exercise files from blob
   await updateSandboxFiles(sandbox, lastGeneration.codeBlobKey);
 
-  await sandbox.files.write([
+  // Write .env with exercise data
+  await sandbox.writeFiles([
     {
-      path: "/home/user/.env",
-      data: createSandboxEnvVars(exercise),
+      path: ".env",
+      content: Buffer.from(createSandboxEnvVars(exercise)),
     },
   ]);
 
-  // Get the host URL for the sandbox
-  const host = sandbox.getHost(3000);
+  // Start dev server (detached so it doesn't block)
+  await sandbox.runCommand({
+    cmd: "npm",
+    args: ["run", "dev"],
+    detached: true,
+  });
+
+  // Wait for the dev server to be ready
+  await waitForServer(sandbox);
+
+  const sandboxUrl = sandbox.domain(3000);
 
   return {
     sandboxId: sandbox.sandboxId,
-    sandboxUrl: host,
+    sandboxUrl,
   };
-}
-
-export async function stopSandbox(exerciseId: number) {
-  const existingSandbox = await getRunningExerciseSandbox(exerciseId);
-
-  if (!existingSandbox) {
-    throw new Error(`No sandbox found for the exercise ${exerciseId}`);
-  }
-
-  const sandbox = await Sandbox.connect(existingSandbox.sandboxId);
-  await sandbox.kill();
-
-  return sandbox.sandboxId;
 }

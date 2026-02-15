@@ -390,6 +390,19 @@ export const exerciseChatGeneration = pgTable(
   ]
 );
 
+// Sandbox snapshots
+export const sandboxSnapshots = pgTable(
+  "sandbox_snapshots",
+  {
+    id: serial().primaryKey(),
+    snapshotId: varchar("snapshot_id", { length: 255 }).notNull(),
+    gitRevision: varchar("git_revision", { length: 100 }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("sandbox_snapshots_expires_at_idx").on(table.expiresAt)]
+);
+
 // Materialized view for distinct media tags
 export const mediaTagsView = pgMaterializedView("media_tags", {
   tag: text("tag").primaryKey(),
@@ -669,6 +682,9 @@ export const transcriptionResultInsertSchema =
 export const transcriptionResultUpdateSchema =
   createUpdateSchema(transcriptionResults);
 
+export const sandboxSnapshotSelectSchema = createSelectSchema(sandboxSnapshots);
+export const sandboxSnapshotInsertSchema = createInsertSchema(sandboxSnapshots);
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -719,3 +735,6 @@ export type NewSpeechText = typeof speechTexts.$inferInsert;
 
 export type TranscriptionResult = typeof transcriptionResults.$inferSelect;
 export type NewTranscriptionResult = typeof transcriptionResults.$inferInsert;
+
+export type SandboxSnapshot = typeof sandboxSnapshots.$inferSelect;
+export type NewSandboxSnapshot = typeof sandboxSnapshots.$inferInsert;

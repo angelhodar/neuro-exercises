@@ -5,10 +5,9 @@ import {
   type PropsWithChildren,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from "react";
-import { createOrConnectToSandbox, stopSandbox } from "@/app/actions/sandbox";
+import { createOrConnectToSandbox } from "@/app/actions/sandbox";
 
 interface SandboxContextType {
   sandboxUrl: string | null;
@@ -42,7 +41,6 @@ export function SandboxProvider({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize or connect to sandbox
   const initializeSandbox = useCallback(async () => {
     if (isLoading) {
       return;
@@ -63,18 +61,6 @@ export function SandboxProvider({
       setIsLoading(false);
     }
   }, [exerciseId, isLoading]);
-
-  // Initialize on mount
-  useEffect(() => {
-    initializeSandbox();
-
-    return () => {
-      // Stop sandbox when component unmounts
-      if (sandboxUrl) {
-        stopSandbox(exerciseId).catch(console.error);
-      }
-    };
-  }, [exerciseId, initializeSandbox, sandboxUrl]);
 
   const value: SandboxContextType = {
     sandboxUrl,

@@ -126,7 +126,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
               className="h-full w-full rounded-md border-0"
               ref={iframeRef}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-              src={`https://${sandboxUrl}/exercises/${slug}`}
+              src={`${sandboxUrl}/exercises/${slug}`}
               title="Preview"
             />
           )}

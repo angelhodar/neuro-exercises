@@ -2,18 +2,20 @@
 
 ## Project Overview
 
-NeuroGranada — a neurological rehabilitation platform built with Next.js 15, featuring AI-powered cognitive exercises, speech recognition, and media management.
+NeuroGranada — a neurological rehabilitation platform built with Next.js 16, featuring AI-powered cognitive exercises, speech recognition, and media management. Professionals can define exercises via natural language through a chat agent; the generated code runs in an isolated Vercel Sandbox for preview.
 
 ## Commands
 
 ```bash
-npm run dev          # Dev server (Turbopack)
-npm run build        # Production build
-npm run lint         # ESLint
-npm run db:push      # Push schema to database
-npm run db:generate  # Generate Drizzle migrations
-npm run db:migrate   # Run Drizzle migrations
-npm run db:studio    # Open Drizzle Studio
+npm run dev                    # Dev server (Turbopack)
+npm run build                  # Production build
+npm run check                  # Lint & format check (Ultracite/Biome)
+npm run fix                    # Auto-fix lint & format issues
+npm run db:push                # Push schema to database
+npm run db:generate            # Generate Drizzle migrations
+npm run db:migrate             # Run Drizzle migrations
+npm run db:studio              # Open Drizzle Studio
+npm run sandbox <command>      # Manage Vercel Sandbox (snapshot, start, stop, list, info)
 ```
 
 ## Architecture & Conventions
@@ -79,9 +81,29 @@ Each exercise lives in `/app/exercises/<slug>/` with 4 files:
 - Dynamic loading via `loadExerciseAssets()` in `/app/exercises/loader.tsx`
 - Base config schema extended per exercise via `.merge()` + `.superRefine()`
 
+### AI Exercise Generation
+
+Exercises can be generated/modified via a chat agent (`app/api/chat/route.ts`):
+
+1. Agent uses Vercel AI SDK (`streamText`) with tools: `getCodeContext`, `readFiles`, `writeFiles`
+2. Generated files are stored as ZIPs in Vercel Blob (`lib/storage.ts`, `lib/zip.ts`)
+3. Generations tracked in `exerciseChatGeneration` DB table
+4. Chat UI in `app/dashboard/exercises/[slug]/chat.tsx`
+
+### Sandbox Preview
+
+Generated exercises are previewed in an isolated Vercel Sandbox:
+
+- **Snapshot-based**: A base snapshot has the project pre-installed with sandbox page variants
+- **Per-exercise**: Sandbox created from snapshot, exercise files injected, dev server started
+- **Sandbox pages** (`*.sandbox.tsx`): DB-free variants using `pglite` and `SANDBOX_EXERCISE` env var
+- **Flow**: `SandboxProvider` → `createOrConnectToSandbox()` → iframe preview
+- **Refresh snapshot**: `npm run sandbox snapshot` (snapshots expire after 7 days)
+
 ## UI Patterns
 
-- ShadCN components from `@/components/ui/`
+- ShadCN components (Base UI / `base-nova` style) from `@/components/ui/`
+- Tailwind CSS v4 with `@theme inline` configuration
 - Icons from `lucide-react`
 - Notifications via `toast` from `sonner`
 - Animations via `motion` library

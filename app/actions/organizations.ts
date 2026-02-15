@@ -1,7 +1,6 @@
 "use server";
 
 import { and, desc, eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth.server";
 import { db } from "@/lib/db";
@@ -99,7 +98,7 @@ export async function createOrganization(data: NewOrganization) {
       throw new Error("Unauthorized");
     }
 
-    const orgId = nanoid();
+    const orgId = crypto.randomUUID();
     const slug =
       data.slug ||
       data.name
@@ -120,7 +119,7 @@ export async function createOrganization(data: NewOrganization) {
 
     // Add the creator as admin member
     await db.insert(member).values({
-      id: nanoid(),
+      id: crypto.randomUUID(),
       organizationId: orgId,
       userId: user.id,
       role: "admin",
@@ -223,7 +222,7 @@ export async function inviteUserToOrganization(
     const newInvitation = await db
       .insert(invitation)
       .values({
-        id: nanoid(),
+        id: crypto.randomUUID(),
         organizationId,
         email,
         role,

@@ -1,7 +1,6 @@
 "use server";
 
 import { and, desc, eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import type { NewExerciseLink } from "@/lib/db/schema";
@@ -9,7 +8,7 @@ import { exerciseLinks, exerciseResults } from "@/lib/db/schema";
 import { getCurrentUser } from "./users";
 
 function generateSecureToken(): string {
-  return nanoid(12);
+  return crypto.randomUUID().replaceAll("-", "").slice(0, 12);
 }
 
 type CreateExerciseLink = Pick<NewExerciseLink, "targetUserId" | "templateId">;

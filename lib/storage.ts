@@ -1,7 +1,6 @@
 import { del, put } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
 import { extension as mimeExtension } from "mime-types";
-import { nanoid } from "nanoid";
 
 interface UploadBlobOptions {
   access?: "public";
@@ -47,7 +46,7 @@ export async function uploadBlobPathname(
 
 export async function uploadBlobFromFile(file: File, folder = "library") {
   const ext = mimeExtension(file.type);
-  const fileName = `${folder}/${nanoid()}.${ext}`;
+  const fileName = `${folder}/${crypto.randomUUID()}.${ext}`;
   return await upload(fileName, file, {
     access: "public",
     handleUploadUrl: "/api/media/upload",

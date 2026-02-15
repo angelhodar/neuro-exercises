@@ -3,7 +3,6 @@
 import { Buffer } from "node:buffer";
 import { generateImage, generateText, Output } from "ai";
 import { arrayOverlaps, desc, eq, ilike } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/actions/users";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
@@ -135,7 +134,10 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
 
   const imageBuffer = Buffer.from(image.uint8Array);
   const optimized = await optimizeImage(imageBuffer);
-  const blob = await uploadBlob(`library/${nanoid()}.webp`, optimized);
+  const blob = await uploadBlob(
+    `library/${crypto.randomUUID()}.webp`,
+    optimized
+  );
 
   const metadata = await generateImageMetadata(blob.url);
 
@@ -179,7 +181,10 @@ export async function generateMediaFromPrompt(prompt: string) {
 
   const imageBuffer = Buffer.from(image.uint8Array);
   const optimized = await optimizeImage(imageBuffer);
-  const blob = await uploadBlob(`library/${nanoid()}.webp`, optimized);
+  const blob = await uploadBlob(
+    `library/${crypto.randomUUID()}.webp`,
+    optimized
+  );
 
   const metadata = await generateImageMetadata(blob.url);
 
@@ -258,7 +263,7 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
             ),
           ]);
 
-          const fileName = `library/${nanoid()}.webp`;
+          const fileName = `library/${crypto.randomUUID()}.webp`;
           const blob = await uploadBlob(fileName, imageBuffer);
 
           await db.insert(medias).values({

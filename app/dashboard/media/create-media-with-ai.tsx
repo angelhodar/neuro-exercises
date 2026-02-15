@@ -1,15 +1,27 @@
-"use client"
+"use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { generateMediaFromPrompt } from "@/app/actions/media";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const schema = z.object({
   prompt: z.string().min(1, "El prompt es obligatorio"),
@@ -17,7 +29,13 @@ const schema = z.object({
 
 type FormSchema = z.infer<typeof schema>;
 
-export default function CreateMediaWithAI({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
+export default function CreateMediaWithAI({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}) {
   const form = useForm<FormSchema>({
     resolver: zodResolver(schema),
     defaultValues: { prompt: "" },
@@ -32,7 +50,7 @@ export default function CreateMediaWithAI({ open, setOpen }: { open: boolean; se
       toast.success("Imagen generada correctamente");
       setOpen(false);
       form.reset();
-    } catch (e) {
+    } catch (_e) {
       toast.error("Error generando la imagen");
     } finally {
       setIsSubmitting(false);
@@ -40,13 +58,16 @@ export default function CreateMediaWithAI({ open, setOpen }: { open: boolean; se
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Generar imagen con IA</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-4">
+          <form
+            className="mt-4 flex flex-col gap-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="prompt"
@@ -54,13 +75,16 @@ export default function CreateMediaWithAI({ open, setOpen }: { open: boolean; se
                 <FormItem>
                   <FormLabel>Instrucciones</FormLabel>
                   <FormControl>
-                    <Input placeholder="Describe la imagen que quieres generar..." {...field} />
+                    <Input
+                      placeholder="Describe la imagen que quieres generar..."
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button disabled={isSubmitting} type="submit">
               {isSubmitting ? "Generando..." : "Generar"}
             </Button>
           </form>
@@ -68,4 +92,4 @@ export default function CreateMediaWithAI({ open, setOpen }: { open: boolean; se
       </DialogContent>
     </Dialog>
   );
-} 
+}

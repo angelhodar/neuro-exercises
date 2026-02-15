@@ -1,6 +1,6 @@
 "use client";
 
-import { DiffWord } from "@/lib/utils";
+import type { DiffWord } from "@/lib/utils";
 
 interface DiffViewerProps {
   diffWords: DiffWord[];
@@ -34,12 +34,12 @@ export function DiffViewer({ diffWords }: DiffViewerProps) {
   };
 
   return (
-    <div className="p-4 bg-gray-50 rounded-md border">
+    <div className="rounded-md border bg-gray-50 p-4">
       <div className="flex flex-wrap gap-1">
         {diffWords.map((word, index) => (
           <span
-            key={index}
-            className={`px-1 py-0.5 rounded text-sm font-medium ${getWordStyle(word.type)}`}
+            className={`rounded px-1 py-0.5 font-medium text-sm ${getWordStyle(word.type)}`}
+            key={`${word.text}-${word.type}-${index}`}
             title={getWordLabel(word.type)}
           >
             {word.text}

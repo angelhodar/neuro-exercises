@@ -1,8 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Copy, MoreVertical, Trash2, ZoomIn } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { MoreVertical, ZoomIn, Copy, Trash2 } from "lucide-react";
-import { createBlobUrl } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { deleteMedia, generateDerivedMedia } from "@/app/actions/media";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,31 +18,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { MediaImage } from "./media-image";
-import { deleteMedia } from "@/app/actions/media";
-import { Media } from "@/lib/db/schema";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useConfirm } from "@/hooks/use-confirm";
-import { generateDerivedMedia } from "@/app/actions/media";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useConfirm } from "@/hooks/use-confirm";
+import type { Media } from "@/lib/db/schema";
+import { createBlobUrl } from "@/lib/utils";
+import { MediaImage } from "./media-image";
 
 interface MediaActionsDropdownProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -55,9 +49,15 @@ export function MediaActionsDropdown({
 
   // Infer mediaType from mimeType
   const getMediaType = (mimeType: string): "image" | "audio" | "video" => {
-    if (mimeType.startsWith("image/")) return "image";
-    if (mimeType.startsWith("audio/")) return "audio";
-    if (mimeType.startsWith("video/")) return "video";
+    if (mimeType.startsWith("image/")) {
+      return "image";
+    }
+    if (mimeType.startsWith("audio/")) {
+      return "audio";
+    }
+    if (mimeType.startsWith("video/")) {
+      return "video";
+    }
     return "image"; // fallback
   };
 
@@ -74,7 +74,9 @@ export function MediaActionsDropdown({
       description:
         "Esta acción no se puede deshacer. ¿Seguro que quieres eliminar este archivo multimedia?",
     });
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
     startTransition(async () => {
       try {
         await deleteMedia(media);
@@ -108,7 +110,7 @@ export function MediaActionsDropdown({
       setOpenVariantDialog(false);
       form.reset();
       router.refresh();
-    } catch (e) {
+    } catch (_e) {
       toast.error("Error generando la variante");
     } finally {
       setIsSubmitting(false);
@@ -120,39 +122,40 @@ export function MediaActionsDropdown({
   return (
     <div className={className}>
       {/* Dialog para ver imagen ampliada */}
-      <Dialog open={openImageDialog} onOpenChange={setOpenImageDialog}>
+      <Dialog onOpenChange={setOpenImageDialog} open={openImageDialog}>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <button
-                className="p-2 rounded-full bg-white/80 hover:bg-white/90 backdrop-blur-sm transition-colors shadow-sm"
                 aria-label="Media actions"
+                className="rounded-full bg-white/80 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/90"
                 onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
+                type="button"
               />
             }
           >
-            <MoreVertical className="w-4 h-4 text-gray-700" />
+            <MoreVertical className="h-4 w-4 text-gray-700" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-62">
             {showImageActions && (
               <>
                 <DropdownMenuItem onClick={handleOpenImage}>
-                  <ZoomIn className="w-4 h-4 mr-3" />
+                  <ZoomIn className="mr-3 h-4 w-4" />
                   Ver imagen completa
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleCreateVariant}>
-                  <Copy className="w-4 h-4 mr-3" />
+                  <Copy className="mr-3 h-4 w-4" />
                   Crear variante
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>
             )}
             <DropdownMenuItem
-              onClick={handleDelete}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              className="text-red-600 focus:bg-red-50 focus:text-red-600"
               disabled={isPending}
+              onClick={handleDelete}
             >
-              <Trash2 className="w-4 h-4 mr-3" />
+              <Trash2 className="mr-3 h-4 w-4" />
               Eliminar
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -160,25 +163,25 @@ export function MediaActionsDropdown({
         {showImageActions && imageUrl && (
           <DialogContent className="max-w-4xl p-4 sm:max-w-4xl">
             <DialogTitle>{media.name}</DialogTitle>
-            <div className="relative w-full h-[60vh]">
+            <div className="relative h-[60vh] w-full">
               <MediaImage
-                src={imageUrl}
                 alt={media.name}
-                fill
                 className="object-contain"
+                fill
+                src={imageUrl}
               />
             </div>
           </DialogContent>
         )}
       </Dialog>
       {/* Dialog para crear variante, independiente */}
-      <Dialog open={openVariantDialog} onOpenChange={setOpenVariantDialog}>
+      <Dialog onOpenChange={setOpenVariantDialog} open={openVariantDialog}>
         <DialogContent>
           <DialogTitle>Crear variante de imagen</DialogTitle>
           <Form {...form}>
             <form
+              className="mt-4 flex flex-col gap-4"
               onSubmit={form.handleSubmit(onSubmit)}
-              className="flex flex-col gap-4 mt-4"
             >
               <FormField
                 control={form.control}
@@ -196,7 +199,7 @@ export function MediaActionsDropdown({
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isSubmitting}>
+              <Button disabled={isSubmitting} type="submit">
                 {isSubmitting ? "Generando..." : "Generar variante"}
               </Button>
             </form>

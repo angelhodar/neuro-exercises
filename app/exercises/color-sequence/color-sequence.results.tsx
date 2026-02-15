@@ -1,4 +1,11 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { ColorSequenceQuestionResult } from "./color-sequence.schema";
 
 interface ColorSequenceResultsProps {
@@ -11,22 +18,22 @@ export function Results({ results }: ColorSequenceResultsProps) {
 
   return (
     <div className="w-full max-w-3xl">
-      <h2 className="text-2xl font-bold mb-4">Resultados del Ejercicio</h2>
+      <h2 className="mb-4 font-bold text-2xl">Resultados del Ejercicio</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Precisión</p>
-          <p className="text-2xl font-bold">{accuracy.toFixed(1)}%</p>
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
+          <p className="text-gray-500 text-sm dark:text-gray-400">Precisión</p>
+          <p className="font-bold text-2xl">{accuracy.toFixed(1)}%</p>
         </div>
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Puntuación</p>
-          <p className="text-2xl font-bold">
+        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
+          <p className="text-gray-500 text-sm dark:text-gray-400">Puntuación</p>
+          <p className="font-bold text-2xl">
             {totalCorrect}/{results.length}
           </p>
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden mb-6">
+      <div className="mb-6 overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -38,11 +45,14 @@ export function Results({ results }: ColorSequenceResultsProps) {
           </TableHeader>
           <TableBody>
             {results.map((result, index) => (
-              <TableRow key={index}>
+              <TableRow key={`row-${result.targetSequence.join("-")}-${index}`}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   {result.targetSequence.map((c: number, i: number) => (
-                    <span key={i} className="inline-block mr-1">
+                    <span
+                      className="mr-1 inline-block"
+                      key={`target-${i}-${c}`}
+                    >
                       {c}
                     </span>
                   ))}
@@ -50,10 +60,12 @@ export function Results({ results }: ColorSequenceResultsProps) {
                 <TableCell>
                   {result.userSequence.map((c: number, i: number) => (
                     <span
-                      key={i}
-                      className={`inline-block mr-1 ${
-                        c === result.targetSequence[i] ? "text-green-600" : "text-red-600"
+                      className={`mr-1 inline-block ${
+                        c === result.targetSequence[i]
+                          ? "text-green-600"
+                          : "text-red-600"
                       }`}
+                      key={`user-${i}-${c}`}
                     >
                       {c}
                     </span>
@@ -61,9 +73,9 @@ export function Results({ results }: ColorSequenceResultsProps) {
                 </TableCell>
                 <TableCell>
                   {result.isCorrect ? (
-                    <span className="text-green-600 font-semibold">Sí</span>
+                    <span className="font-semibold text-green-600">Sí</span>
                   ) : (
-                    <span className="text-red-600 font-semibold">No</span>
+                    <span className="font-semibold text-red-600">No</span>
                   )}
                 </TableCell>
               </TableRow>
@@ -73,4 +85,4 @@ export function Results({ results }: ColorSequenceResultsProps) {
       </div>
     </div>
   );
-} 
+}

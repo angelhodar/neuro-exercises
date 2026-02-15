@@ -23,19 +23,21 @@ export default function HorizontalTags({ tags, maxVisible = 2 }: TagsProps) {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      {visibleTags.map((tag, index) => (
-        <Badge key={index}>{tag}</Badge>
+      {visibleTags.map((tag) => (
+        <Badge key={tag}>{tag}</Badge>
       ))}
 
       {hasHiddenTags && (
         <Tooltip>
-          <TooltipTrigger render={<Badge variant="outline" className="cursor-help" />}>
+          <TooltipTrigger
+            render={<Badge className="cursor-help" variant="outline" />}
+          >
             +{hiddenTags.length}
           </TooltipTrigger>
           <TooltipContent>
             <div className="flex flex-col gap-1">
-              {hiddenTags.map((tag, index) => (
-                <span key={index} className="text-sm">
+              {hiddenTags.map((tag) => (
+                <span className="text-sm" key={tag}>
                   {tag}
                 </span>
               ))}

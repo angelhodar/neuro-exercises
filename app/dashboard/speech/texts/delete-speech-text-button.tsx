@@ -1,6 +1,9 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { deleteSpeechText } from "@/app/actions/speech";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,16 +14,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
-import { deleteSpeechText } from "@/app/actions/speech";
-import { toast } from "sonner";
 
 interface DeleteSpeechTextButtonProps {
   id: number;
   name: string;
 }
 
-export default function DeleteSpeechTextButton({ id, name }: DeleteSpeechTextButtonProps) {
+export default function DeleteSpeechTextButton({
+  id,
+  name,
+}: DeleteSpeechTextButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,7 +33,7 @@ export default function DeleteSpeechTextButton({ id, name }: DeleteSpeechTextBut
       await deleteSpeechText(id);
       toast.success("Texto de referencia eliminado exitosamente");
       setIsOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error al eliminar el texto de referencia");
     } finally {
       setIsLoading(false);
@@ -38,31 +41,32 @@ export default function DeleteSpeechTextButton({ id, name }: DeleteSpeechTextBut
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <Trash2 className="w-4 h-4" />
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+      <DialogTrigger render={<Button size="sm" variant="outline" />}>
+        <Trash2 className="h-4 w-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Eliminar Texto de Referencia</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que quieres eliminar el texto "{name}"? Esta acción no se puede deshacer.
+            ¿Estás seguro de que quieres eliminar el texto "{name}"? Esta acción
+            no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button
+            disabled={isLoading}
+            onClick={() => setIsOpen(false)}
             type="button"
             variant="outline"
-            onClick={() => setIsOpen(false)}
-            disabled={isLoading}
           >
             Cancelar
           </Button>
           <Button
+            disabled={isLoading}
+            onClick={handleDelete}
             type="button"
             variant="destructive"
-            onClick={handleDelete}
-            disabled={isLoading}
           >
             {isLoading ? "Eliminando..." : "Eliminar"}
           </Button>
@@ -70,4 +74,4 @@ export default function DeleteSpeechTextButton({ id, name }: DeleteSpeechTextBut
       </DialogContent>
     </Dialog>
   );
-} 
+}

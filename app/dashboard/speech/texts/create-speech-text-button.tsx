@@ -1,9 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { createSpeechText } from "@/app/actions/speech";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -13,18 +17,14 @@ import {
 } from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Plus } from "lucide-react";
-import { createSpeechText } from "@/app/actions/speech";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const schema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -51,12 +51,12 @@ export default function CreateSpeechTextButton() {
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("referenceText", values.referenceText);
-      
+
       await createSpeechText(formData);
       toast.success("Texto de referencia creado exitosamente");
       setIsOpen(false);
       form.reset();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error al crear el texto de referencia");
     } finally {
       setIsLoading(false);
@@ -64,9 +64,9 @@ export default function CreateSpeechTextButton() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger render={<Button />}>
-        <Plus className="w-4 h-4 mr-2" />
+        <Plus className="mr-2 h-4 w-4" />
         Crear texto
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
@@ -74,7 +74,10 @@ export default function CreateSpeechTextButton() {
           <DialogTitle>Crear nuevo texto de referencia</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form
+            className="mt-4 space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="name"
@@ -107,14 +110,14 @@ export default function CreateSpeechTextButton() {
             />
             <div className="flex justify-end gap-2">
               <Button
+                disabled={isLoading}
+                onClick={() => setIsOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setIsOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? "Creando..." : "Crear"}
               </Button>
             </div>

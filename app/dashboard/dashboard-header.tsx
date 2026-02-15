@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 export function DashboardHeader({ children }: PropsWithChildren) {
   return (
@@ -9,17 +9,13 @@ export function DashboardHeader({ children }: PropsWithChildren) {
 }
 
 export function DashboardHeaderTitle({ children }: PropsWithChildren) {
-  return (
-    <h1 className="text-3xl font-bold tracking-tight">{children}</h1>
-  );
+  return <h1 className="font-bold text-3xl tracking-tight">{children}</h1>;
 }
 
 export function DashboardHeaderDescription({ children }: PropsWithChildren) {
-  return (
-    <p className="text-muted-foreground">{children}</p>
-  );
+  return <p className="text-muted-foreground">{children}</p>;
 }
 
 export function DashboardHeaderActions({ children }: PropsWithChildren) {
-  return <div className="flex gap-2 items-end">{children}</div>;
-} 
+  return <div className="flex items-end gap-2">{children}</div>;
+}

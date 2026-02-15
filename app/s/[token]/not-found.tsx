@@ -1,17 +1,17 @@
+import { AlertCircle, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Home } from "lucide-react";
 
 export default function LinkNotFound() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto max-w-2xl px-4 py-8">
       <Card className="border-red-200 shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
             <AlertCircle className="h-10 w-10 text-red-600" />
           </div>
-          <CardTitle className="text-2xl font-bold text-red-600">
+          <CardTitle className="font-bold text-2xl text-red-600">
             Enlace no encontrado
           </CardTitle>
         </CardHeader>
@@ -23,21 +23,21 @@ export default function LinkNotFound() {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <h3 className="mb-2 font-semibold text-blue-900">
                 Posibles causas:
               </h3>
-              <ul className="text-sm text-blue-800 space-y-1 text-left">
+              <ul className="space-y-1 text-left text-blue-800 text-sm">
                 <li>• El enlace no existe</li>
                 <li>• El enlace ha sido eliminado</li>
               </ul>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold text-yellow-900 mb-2">
+            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+              <h3 className="mb-2 font-semibold text-yellow-900">
                 ¿Qué puedes hacer?
               </h3>
-              <ul className="text-sm text-yellow-800 space-y-1 text-left">
+              <ul className="space-y-1 text-left text-sm text-yellow-800">
                 <li>• Verifica que la URL esté completa y correcta</li>
                 <li>• Contacta a la persona que te compartió el enlace</li>
                 <li>• Solicita un nuevo enlace si el anterior expiró</li>
@@ -45,19 +45,19 @@ export default function LinkNotFound() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button render={<Link href="/" />} variant="outline" size="lg">
-                <Home className="mr-2 h-4 w-4" />
-                Ir al Inicio
+          <div className="flex flex-col justify-center gap-3 sm:flex-row">
+            <Button render={<Link href="/" />} size="lg" variant="outline">
+              <Home className="mr-2 h-4 w-4" />
+              Ir al Inicio
             </Button>
           </div>
 
-          <div className="pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500">
+          <div className="border-gray-200 border-t pt-4">
+            <p className="text-gray-500 text-xs">
               Si crees que esto es un error, por favor{" "}
               <Link
+                className="text-blue-600 underline hover:text-blue-700"
                 href="/contacto"
-                className="text-blue-600 hover:text-blue-700 underline"
               >
                 contáctanos
               </Link>

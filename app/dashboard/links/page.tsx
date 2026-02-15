@@ -1,14 +1,18 @@
-import Link from "next/link";
-import { ExternalLink, Target, LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
+import { ExternalLink, LinkIcon, Target } from "lucide-react";
+import Link from "next/link";
+import { getUserExerciseLinks } from "@/app/actions/links";
+import { getExerciseTemplates } from "@/app/actions/templates";
+import { getAvailableUsers } from "@/app/actions/users";
 import {
   DashboardHeader,
-  DashboardHeaderTitle,
-  DashboardHeaderDescription,
   DashboardHeaderActions,
+  DashboardHeaderDescription,
+  DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -17,14 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
 import { CopyLinkButton } from "./copy-link-button";
-import { DeleteLinkButton } from "./delete-link-button";
-import { getUserExerciseLinks } from "@/app/actions/links";
-import { getAvailableUsers } from "@/app/actions/users";
-import { getExerciseTemplates } from "@/app/actions/templates";
 import CreateLinkButton from "./create-link-button";
+import { DeleteLinkButton } from "./delete-link-button";
 
 // Forzar renderizado dinámico
 export const dynamic = "force-dynamic";
@@ -37,9 +36,9 @@ function TargetUserInfo({ name, email }: { name: string; email: string }) {
         <Target className="h-4 w-4 text-primary" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{name || email}</p>
+        <p className="truncate font-medium text-sm">{name || email}</p>
         {name && (
-          <p className="truncate text-xs text-muted-foreground">{email}</p>
+          <p className="truncate text-muted-foreground text-xs">{email}</p>
         )}
       </div>
     </div>
@@ -63,19 +62,19 @@ export default async function LinksPage() {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <CreateLinkButton users={users} templates={templates} />
+          <CreateLinkButton templates={templates} users={users} />
         </DashboardHeaderActions>
       </DashboardHeader>
 
       {links.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-4 py-12 text-center">
           <LinkIcon className="h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-lg font-semibold">No hay enlaces creados</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h3 className="mt-4 font-semibold text-lg">No hay enlaces creados</h3>
+          <p className="mt-2 text-muted-foreground text-sm">
             Comienza creando tu primer enlace compartido para enviar ejercicios
             a tus usuarios.
           </p>
-          <CreateLinkButton users={users} templates={templates} />
+          <CreateLinkButton templates={templates} users={users} />
         </div>
       ) : (
         <div className="rounded-md border">
@@ -90,7 +89,7 @@ export default async function LinksPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {links.map((link: any) => (
+              {links.map((link) => (
                 <TableRow key={link.id}>
                   <TableCell>
                     <div className="space-y-1">
@@ -98,7 +97,7 @@ export default async function LinksPage() {
                         {link.template?.title}
                       </p>
                       {link.template?.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="line-clamp-2 text-muted-foreground text-sm">
                           {link.template.description}
                         </p>
                       )}
@@ -106,8 +105,8 @@ export default async function LinksPage() {
                   </TableCell>
                   <TableCell>
                     <TargetUserInfo
-                      name={link.targetUser?.name || ""}
                       email={link.targetUser?.email || ""}
+                      name={link.targetUser?.name || ""}
                     />
                   </TableCell>
                   <TableCell>
@@ -120,8 +119,8 @@ export default async function LinksPage() {
                   </TableCell>
                   <TableCell>
                     <time
+                      className="text-muted-foreground text-sm"
                       dateTime={link.createdAt.toString()}
-                      className="text-sm text-muted-foreground"
                     >
                       {format(new Date(link.createdAt), "dd MMM yyyy", {
                         locale: es,
@@ -132,13 +131,15 @@ export default async function LinksPage() {
                     <div className="flex items-center justify-end gap-2">
                       <CopyLinkButton token={link.token} />
                       <Button
-                        variant="ghost"
-                        size="sm"
                         className="h-8 w-8 p-0"
-                        render={<Link href={`/s/${link.token}`} target="_blank" />}
+                        render={
+                          <Link href={`/s/${link.token}`} target="_blank" />
+                        }
+                        size="sm"
+                        variant="ghost"
                       >
-                          <ExternalLink className="h-4 w-4" />
-                          <span className="sr-only">Abrir enlace</span>
+                        <ExternalLink className="h-4 w-4" />
+                        <span className="sr-only">Abrir enlace</span>
                       </Button>
                       <DeleteLinkButton linkId={link.id} />
                     </div>

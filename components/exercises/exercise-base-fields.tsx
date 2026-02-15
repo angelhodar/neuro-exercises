@@ -1,7 +1,7 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -11,14 +11,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface ExerciseFieldsBaseProps {
   basePath?: string;
@@ -34,8 +34,10 @@ export function ExerciseIntrinsicGoalFields(props: ExerciseFieldsBaseProps) {
   const enableTimeLimit = watch(enableTimeLimitPath);
 
   useEffect(() => {
-    if (!enableTimeLimit) setValue(timeLimitSecondsPath, 0);
-  }, [enableTimeLimit, timeLimitSecondsPath]);
+    if (!enableTimeLimit) {
+      setValue(timeLimitSecondsPath, 0);
+    }
+  }, [enableTimeLimit, timeLimitSecondsPath, setValue]);
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -72,8 +74,8 @@ export function ExerciseIntrinsicGoalFields(props: ExerciseFieldsBaseProps) {
                 <FormLabel>Tiempo límite</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
                     placeholder="60"
+                    type="number"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
                   />
@@ -105,14 +107,20 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
   const enableTimeLimit = watch(enableTimeLimitPath);
 
   useEffect(() => {
-    if (!enableTimeLimit) setValue(timeLimitSecondsPath, 0);
-    if (endConditionType === "questions") setValue(timeLimitSecondsPath, 0);
-    else if (endConditionType === "time") setValue(totalQuestionsPath, 0);
+    if (!enableTimeLimit) {
+      setValue(timeLimitSecondsPath, 0);
+    }
+    if (endConditionType === "questions") {
+      setValue(timeLimitSecondsPath, 0);
+    } else if (endConditionType === "time") {
+      setValue(totalQuestionsPath, 0);
+    }
   }, [
     enableTimeLimit,
     endConditionType,
     timeLimitSecondsPath,
     totalQuestionsPath,
+    setValue,
   ]);
 
   return (
@@ -124,7 +132,7 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
           <FormItem>
             <FormLabel>Condición de finalización</FormLabel>
             <FormControl>
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecciona una opción" />
                 </SelectTrigger>
@@ -151,8 +159,8 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
               <FormLabel>Número de ensayos</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="10"
+                  type="number"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
@@ -173,8 +181,8 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
               <FormLabel>Tiempo límite</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="60"
+                  type="number"
                   {...field}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
@@ -218,7 +226,7 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
 export function ExerciseBaseFields(
   props: {
     hasIntrinsicGoal?: boolean;
-  } & ExerciseFieldsBaseProps,
+  } & ExerciseFieldsBaseProps
 ) {
   const { hasIntrinsicGoal = false, basePath = "" } = props;
   return hasIntrinsicGoal ? (

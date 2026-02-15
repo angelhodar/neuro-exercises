@@ -1,7 +1,7 @@
-import { put, del } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
-import { nanoid } from "nanoid";
 import { extension as mimeExtension } from "mime-types";
+import { nanoid } from "nanoid";
 
 interface UploadBlobOptions {
   access?: "public";
@@ -18,10 +18,7 @@ export async function uploadBlob(
   data: Buffer | File | ArrayBuffer,
   options: UploadBlobOptions = {}
 ): Promise<UploadBlobResult> {
-  const {
-    access = "public",
-    addRandomSuffix = true,
-  } = options;
+  const { access = "public", addRandomSuffix = true } = options;
 
   try {
     const blob = await put(fileName, data, {
@@ -48,7 +45,7 @@ export async function uploadBlobPathname(
   return result.pathname;
 }
 
-export async function uploadBlobFromFile(file: File, folder: string = "library") {
+export async function uploadBlobFromFile(file: File, folder = "library") {
   const ext = mimeExtension(file.type);
   const fileName = `${folder}/${nanoid()}.${ext}`;
   return await upload(fileName, file, {
@@ -58,14 +55,14 @@ export async function uploadBlobFromFile(file: File, folder: string = "library")
   });
 }
 
-export async function deleteBlobs(
-  pathnames: string | string[]
-): Promise<void> {
+export async function deleteBlobs(pathnames: string | string[]): Promise<void> {
   try {
     const pathsToDelete = Array.isArray(pathnames) ? pathnames : [pathnames];
-    
-    const validPaths = pathsToDelete.filter(path => path && typeof path === 'string');
-    
+
+    const validPaths = pathsToDelete.filter(
+      (path) => path && typeof path === "string"
+    );
+
     if (validPaths.length === 0) {
       console.warn("No valid pathnames provided for deletion");
       return;
@@ -74,6 +71,8 @@ export async function deleteBlobs(
     await del(validPaths);
   } catch (error) {
     console.error("Error deleting blobs:", error);
-    throw new Error(`Failed to delete blobs: ${Array.isArray(pathnames) ? pathnames.join(', ') : pathnames}`);
+    throw new Error(
+      `Failed to delete blobs: ${Array.isArray(pathnames) ? pathnames.join(", ") : pathnames}`
+    );
   }
 }

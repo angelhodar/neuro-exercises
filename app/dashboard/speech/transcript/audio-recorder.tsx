@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Mic, Square, RotateCcw, Upload, FileAudio } from "lucide-react";
+import { FileAudio, Mic, RotateCcw, Square, Upload } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { transcribeAudio } from "@/app/actions/speech";
+import { Button } from "@/components/ui/button";
 
 interface AudioRecorderProps {
   onTranscriptionComplete: (text: string, audioBlob: Blob) => void;
@@ -22,7 +23,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
   // Generar URL dinámicamente a partir del blob
   const audioUrl = useMemo(() => {
-    if (!audioBlob) return null;
+    if (!audioBlob) {
+      return null;
+    }
     const url = URL.createObjectURL(audioBlob);
     return url;
   }, [audioBlob]);
@@ -45,7 +48,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     setFileName("");
     setRecordingDuration(0);
     setIsRecording(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current);
       recordingTimerRef.current = null;
@@ -70,18 +75,20 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         const blob = new Blob(chunksRef.current, { type: "audio/wav" });
         setAudioBlob(blob);
         setFileName("");
-        stream.getTracks().forEach(track => track.stop());
+        for (const track of stream.getTracks()) {
+          track.stop();
+        }
       };
 
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingDuration(0);
       recordingTimerRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration((prev) => prev + 1);
       }, 1000);
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      alert("Error accessing microphone. Please check permissions.");
+      toast.error("Error accessing microphone. Please check permissions.");
     }
   };
 
@@ -99,8 +106,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('audio/')) {
-        alert("Please select an audio file");
+      if (!file.type.startsWith("audio/")) {
+        toast.error("Please select an audio file");
         return;
       }
       resetState();
@@ -111,7 +118,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
   const handleTranscribe = async () => {
     if (!audioBlob) {
-      alert("Please record audio or upload an audio file first");
+      toast.error("Please record audio or upload an audio file first");
       return;
     }
     setIsProcessing(true);
@@ -122,7 +129,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       onTranscriptionComplete(result.text, audioBlob);
     } catch (error) {
       console.error("Error transcribing audio:", error);
-      alert("Error transcribing audio. Please try again.");
+      toast.error("Error transcribing audio. Please try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -131,7 +138,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -142,24 +149,24 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           {!isRecording && (
             <>
               <Button
-                onClick={startRecording}
-                disabled={isRecording}
                 className="flex items-center gap-2"
+                disabled={isRecording}
+                onClick={startRecording}
               >
                 <Mic className="h-4 w-4" />
                 Iniciar Grabación
               </Button>
               <input
+                accept="audio/*"
+                className="hidden"
+                onChange={handleFileUpload}
                 ref={fileInputRef}
                 type="file"
-                accept="audio/*"
-                onChange={handleFileUpload}
-                className="hidden"
               />
               <Button
+                className="flex items-center gap-2"
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
-                className="flex items-center gap-2"
               >
                 <Upload className="h-4 w-4" />
                 Subir Audio
@@ -168,9 +175,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           )}
           {isRecording && (
             <Button
+              className="flex items-center gap-2"
               onClick={stopRecording}
               variant="destructive"
-              className="flex items-center gap-2"
             >
               <Square className="h-4 w-4" />
               Detener Grabación
@@ -179,7 +186,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         </div>
         {isRecording && (
           <div className="flex items-center gap-2 text-red-600">
-            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+            <div className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
             <span>Grabando... {formatTime(recordingDuration)}</span>
           </div>
         )}
@@ -193,25 +200,26 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
             {fileName ? `Archivo: ${fileName}` : "Audio grabado correctamente"}
           </div>
           <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Escucha tu audio antes de transcribir:
             </span>
             {audioUrl && (
-              <audio src={audioUrl} controls className="w-full" />
+              // biome-ignore lint/a11y/useMediaCaption: captions not available
+              <audio className="w-full" controls src={audioUrl} />
             )}
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={handleTranscribe}
-              disabled={isProcessing}
               className="flex items-center gap-2"
+              disabled={isProcessing}
+              onClick={handleTranscribe}
             >
               {isProcessing ? "Transcribiendo..." : "Transcribir"}
             </Button>
             <Button
+              className="flex items-center gap-2"
               onClick={resetState}
               variant="outline"
-              className="flex items-center gap-2"
             >
               <RotateCcw className="h-4 w-4" />
               {fileName ? "Cambiar archivo" : "Grabar de nuevo"}
@@ -221,4 +229,4 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       )}
     </div>
   );
-}; 
+};

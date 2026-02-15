@@ -2,6 +2,14 @@
 
 import { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import MediaSelector from "@/components/media/media-selector";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
   FormField,
@@ -9,9 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import MediaSelector from "@/components/media/media-selector";
-import { Card, CardContent } from "@/components/ui/card";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 interface OddOneOutConfigFieldsProps {
   basePath?: string;
@@ -47,14 +52,18 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
   }, [totalQuestions, fields.length, append, remove]);
 
   return (
-    <Accordion type="multiple" className="space-y-6 overflow-y-auto h-96">
+    <Accordion className="h-96 space-y-6 overflow-y-auto" type="multiple">
       {fields.map((field, index) => (
-        <AccordionItem key={field.id} value={`pregunta-${index}`} className="bg-gray-50/50 dark:bg-gray-900/50 rounded-md">
+        <AccordionItem
+          className="rounded-md bg-gray-50/50 dark:bg-gray-900/50"
+          key={field.id}
+          value={`pregunta-${index}`}
+        >
           <AccordionTrigger className="px-4 text-lg">
             Pregunta {index + 1}
           </AccordionTrigger>
           <AccordionContent>
-            <Card className="p-0 bg-transparent shadow-none border-none">
+            <Card className="border-none bg-transparent p-0 shadow-none">
               <CardContent className="space-y-4 p-2">
                 <FormField
                   control={control}
@@ -64,8 +73,8 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
                       <FormLabel>Imágenes del patrón</FormLabel>
                       <FormControl>
                         <MediaSelector
-                          selectedMedias={field.value ?? []}
                           onMediasChange={field.onChange}
+                          selectedMedias={field.value ?? []}
                         />
                       </FormControl>
                       <FormMessage />
@@ -80,8 +89,8 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
                       <FormLabel>Imagen diferente</FormLabel>
                       <FormControl>
                         <MediaSelector
-                          selectedMedias={field.value ?? []}
                           onMediasChange={field.onChange}
+                          selectedMedias={field.value ?? []}
                           selectionMode="single"
                         />
                       </FormControl>
@@ -96,4 +105,4 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
       ))}
     </Accordion>
   );
-} 
+}

@@ -1,19 +1,18 @@
 "use client";
 
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { Card } from "@/components/ui/card";
-import { CountdownDisplay } from "./exercise-countdown";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { ExercisePresentation } from "./exercise-presentation";
-import { useCountdown } from "./exercise-countdown";
+import { CountdownDisplay, useCountdown } from "./exercise-countdown";
 import FloatingBottomBar from "./exercise-floating-bar";
+import { ExercisePresentation } from "./exercise-presentation";
 
 export function ExerciseContainer({ children }: PropsWithChildren) {
   const { exerciseState } = useExerciseExecution();
   const { countdown } = useCountdown();
 
   return (
-    <Card className="relative flex-1 flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 h-full">
+    <Card className="relative flex h-full flex-1 items-center justify-center rounded-lg border-2 border-gray-300 border-dashed bg-gray-50">
       {exerciseState === "ready" && !countdown ? (
         <ExercisePresentation />
       ) : (

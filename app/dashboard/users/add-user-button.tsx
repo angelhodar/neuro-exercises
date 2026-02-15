@@ -1,13 +1,16 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { createUser } from "@/app/actions/users";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,11 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { UserPlus, Eye, EyeOff } from "lucide-react";
-import { createUser } from "@/app/actions/users";
 
 const createUserSchema = z.object({
   name: z
@@ -67,7 +66,7 @@ export default function AddUserButton() {
       const result = await createUser(values);
 
       if (result.error) {
-        toast.error("Error al crear usuario: " + result.error);
+        toast.error(`Error al crear usuario: ${result.error}`);
         return;
       }
 
@@ -83,7 +82,7 @@ export default function AddUserButton() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger render={<Button />}>
         <UserPlus className="h-4 w-4" />
         Crear usuario
@@ -103,8 +102,8 @@ export default function AddUserButton() {
                     <FormLabel>Nombre completo</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Nombre del usuario"
                         disabled={isLoading}
+                        placeholder="Nombre del usuario"
                         {...field}
                       />
                     </FormControl>
@@ -121,9 +120,9 @@ export default function AddUserButton() {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
+                        disabled={isLoading}
                         placeholder="usuario@ejemplo.com"
                         type="email"
-                        disabled={isLoading}
                         {...field}
                       />
                     </FormControl>
@@ -142,19 +141,19 @@ export default function AddUserButton() {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            placeholder="••••••••"
-                            type={showPassword ? "text" : "password"}
                             className="pr-10"
                             disabled={isLoading}
+                            placeholder="••••••••"
+                            type={showPassword ? "text" : "password"}
                             {...field}
                           />
                           <Button
+                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                            disabled={isLoading}
+                            onClick={() => setShowPassword(!showPassword)}
+                            size="sm"
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                            disabled={isLoading}
                           >
                             {showPassword ? (
                               <EyeOff className="h-4 w-4 text-gray-400" />
@@ -176,9 +175,9 @@ export default function AddUserButton() {
                     <FormItem>
                       <FormLabel>Rol</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
                         defaultValue={field.value}
                         disabled={isLoading}
+                        onValueChange={field.onChange}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -198,14 +197,14 @@ export default function AddUserButton() {
             </div>
             <DialogFooter>
               <Button
+                disabled={isLoading}
+                onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? "Creando..." : "Crear"}
               </Button>
             </DialogFooter>

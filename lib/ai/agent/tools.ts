@@ -1,10 +1,10 @@
-import { z } from "zod";
 import { tool } from "ai";
-import { extractFiles, createZipBuffer } from "@/lib/zip";
-import { generatedFileSchema, getFilesContext } from "./context";
-import { uploadBlob } from "@/lib/storage";
+import { z } from "zod";
 import { updateExerciseGeneration } from "@/app/actions/generations";
+import { uploadBlob } from "@/lib/storage";
 import { createBlobUrl } from "@/lib/utils";
+import { createZipBuffer, extractFiles } from "@/lib/zip";
+import { generatedFileSchema, getFilesContext } from "./context";
 
 export const getCodeContext = tool({
   description:
@@ -14,7 +14,7 @@ export const getCodeContext = tool({
     console.log("Getting context from other exercises and components");
     try {
       const context = await getFilesContext();
-      console.log("Context:")
+      console.log("Context:");
       console.log(context.map((c) => c.path));
       return context;
     } catch (error) {
@@ -32,58 +32,68 @@ export const readFiles = (codeBlobKey: string | null) =>
     execute: async () => {
       console.log(`Reading existing files for generation ${codeBlobKey}`);
 
-      if (!codeBlobKey) return [];
+      if (!codeBlobKey) {
+        return [];
+      }
 
-      const buffer = await fetch(createBlobUrl(codeBlobKey)).then((res) => res.arrayBuffer());
+      const buffer = await fetch(createBlobUrl(codeBlobKey)).then((res) =>
+        res.arrayBuffer()
+      );
       const files = await extractFiles(Buffer.from(buffer));
 
-      console.log("Files read:")
+      console.log("Files read:");
       console.log(files.map((f) => f.path));
 
       return files;
     },
   });
 
-export const writeFiles = (generationId: number, previousCodeBlobKey: string | null = null) => tool({
-  description: "Writes files to the blob storage",
-  inputSchema: z.object({
-    files: z
-      .array(generatedFileSchema)
-      .describe(
-        "Array of files to write to the blob storage",
-      ),
-  }),
-  execute: async ({ files }) => {
-    console.log(`Processing ${files.length} file changes...`);
+export const writeFiles = (
+  generationId: number,
+  previousCodeBlobKey: string | null = null
+) =>
+  tool({
+    description: "Writes files to the blob storage",
+    inputSchema: z.object({
+      files: z
+        .array(generatedFileSchema)
+        .describe("Array of files to write to the blob storage"),
+    }),
+    execute: async ({ files }) => {
+      console.log(`Processing ${files.length} file changes...`);
 
-    console.log("Files to write:")
-    console.log(files.map((f) => f.path));
+      console.log("Files to write:");
+      console.log(files.map((f) => f.path));
 
-    let filesToSave = files;
+      let filesToSave = files;
 
-    if (previousCodeBlobKey) {
-      const buffer = await fetch(createBlobUrl(previousCodeBlobKey)).then((res) => res.arrayBuffer());
-      const previousFiles = await extractFiles(Buffer.from(buffer));
+      if (previousCodeBlobKey) {
+        const buffer = await fetch(createBlobUrl(previousCodeBlobKey)).then(
+          (res) => res.arrayBuffer()
+        );
+        const previousFiles = await extractFiles(Buffer.from(buffer));
 
-      const currentFilePaths = new Set(files.map(f => f.path));
-      const missingFiles = previousFiles.filter(f => !currentFilePaths.has(f.path));
-      
-      filesToSave = [...files, ...missingFiles];
-    }
+        const currentFilePaths = new Set(files.map((f) => f.path));
+        const missingFiles = previousFiles.filter(
+          (f) => !currentFilePaths.has(f.path)
+        );
 
-    const zipBuffer = await createZipBuffer(filesToSave);
+        filesToSave = [...files, ...missingFiles];
+      }
 
-    const blobKey = await uploadBlob(
-      `generations/${crypto.randomUUID()}.zip`,
-      zipBuffer,
-    );
+      const zipBuffer = await createZipBuffer(filesToSave);
 
-    console.log(`Generated blob key: ${blobKey.pathname}`)
+      const blobKey = await uploadBlob(
+        `generations/${crypto.randomUUID()}.zip`,
+        zipBuffer
+      );
 
-    await updateExerciseGeneration(generationId, {
-      codeBlobKey: blobKey.pathname,
-    });
+      console.log(`Generated blob key: ${blobKey.pathname}`);
 
-    return blobKey.pathname;
-  },
-});
+      await updateExerciseGeneration(generationId, {
+        codeBlobKey: blobKey.pathname,
+      });
+
+      return blobKey.pathname;
+    },
+  });

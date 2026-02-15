@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import {
   FormControl,
   FormDescription,
@@ -10,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface ColorSequenceConfigFieldsProps {
   basePath?: string;
@@ -33,7 +33,7 @@ export function ConfigFields({
           <FormItem>
             <FormLabel>Número de celdas</FormLabel>
             <FormControl>
-              <Input type="number" placeholder="6" {...field} />
+              <Input placeholder="6" type="number" {...field} />
             </FormControl>
             <FormDescription>
               Cantidad total de celdas (máximo 12)
@@ -50,7 +50,7 @@ export function ConfigFields({
           <FormItem>
             <FormLabel>Longitud de la secuencia</FormLabel>
             <FormControl>
-              <Input type="number" placeholder="3" {...field} />
+              <Input placeholder="3" type="number" {...field} />
             </FormControl>
             <FormDescription>
               Cantidad de celdas que se iluminarán por pregunta
@@ -59,7 +59,7 @@ export function ConfigFields({
           </FormItem>
         )}
       />
-      
+
       <div className="col-span-full">
         <FormField
           control={control}
@@ -68,7 +68,7 @@ export function ConfigFields({
             <FormItem>
               <FormLabel>Intervalo de iluminación (ms)</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="1000" {...field} />
+                <Input placeholder="1000" type="number" {...field} />
               </FormControl>
               <FormDescription>
                 Tiempo entre iluminaciones de cada celda
@@ -80,4 +80,4 @@ export function ConfigFields({
       </div>
     </div>
   );
-} 
+}

@@ -1,29 +1,36 @@
-"use client"
+"use client";
 
-import { z } from "zod"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { signIn } from "@/lib/auth/auth.client"
-import { Eye, EyeOff } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { signIn } from "@/lib/auth/auth.client";
 
 const loginSchema = z.object({
   email: z.string().email("Introduce un email válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-})
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,42 +38,49 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-  })
+  });
 
   const onLoginSubmit = async ({ email, password }: LoginFormValues) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       const result = await signIn.email({
         email,
         password,
-      })
+      });
 
       if (result.error) {
-        console.log(result.error)
-        return
+        console.log(result.error);
+        return;
       }
 
-      router.push("/dashboard")
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Error en login:", error)
+      console.error("Error en login:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4">
+    <div className="flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">Iniciar Sesión</h1>
-          <p className="text-gray-600">Accede a tu plataforma de ejercicios neurológicos</p>
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 font-bold text-3xl text-blue-900">
+            Iniciar Sesión
+          </h1>
+          <p className="text-gray-600">
+            Accede a tu plataforma de ejercicios neurológicos
+          </p>
         </div>
 
         <Card className="border-blue-100 shadow-lg">
-          <CardContent className="space-y-4 mt-4">
+          <CardContent className="mt-4 space-y-4">
             <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              <form
+                className="space-y-4"
+                onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+              >
                 <FormField
                   control={loginForm.control}
                   name="email"
@@ -75,10 +89,10 @@ export default function LoginPage() {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="tu@email.com"
-                          type="email"
                           className="border-blue-200 focus:border-blue-500"
                           disabled={isLoading}
+                          placeholder="tu@email.com"
+                          type="email"
                           {...field}
                         />
                       </FormControl>
@@ -95,19 +109,19 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Input
+                            className="border-blue-200 pr-10 focus:border-blue-500"
+                            disabled={isLoading}
                             placeholder="••••••••"
                             type={showPassword ? "text" : "password"}
-                            className="border-blue-200 focus:border-blue-500 pr-10"
-                            disabled={isLoading}
                             {...field}
                           />
                           <Button
+                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                            disabled={isLoading}
+                            onClick={() => setShowPassword(!showPassword)}
+                            size="sm"
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                            disabled={isLoading}
                           >
                             {showPassword ? (
                               <EyeOff className="h-4 w-4 text-gray-400" />
@@ -121,14 +135,22 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading}
+                  type="submit"
+                >
                   {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
               </form>
             </Form>
 
-            <div className="text-center space-y-2">
-              <Button variant="link" className="text-sm text-gray-500 hover:text-blue-600" disabled={isLoading}>
+            <div className="space-y-2 text-center">
+              <Button
+                className="text-gray-500 text-sm hover:text-blue-600"
+                disabled={isLoading}
+                variant="link"
+              >
                 ¿Olvidaste tu contraseña?
               </Button>
             </div>
@@ -136,5 +158,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

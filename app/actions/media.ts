@@ -1,23 +1,23 @@
 "use server";
 
-import { Buffer } from "buffer";
+import { Buffer } from "node:buffer";
+import { generateImage, generateText, Output } from "ai";
+import { arrayOverlaps, desc, eq, ilike } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { db } from "@/lib/db";
-import { medias, type Media } from "@/lib/db/schema";
-import { eq, desc, ilike, arrayOverlaps } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { generateText, generateImage, Output } from "ai";
 import { getCurrentUser } from "@/app/actions/users";
-import type { CreateManualMediaSchema } from "@/lib/schemas/medias";
-import { uploadBlob, deleteBlobs } from "@/lib/storage";
-import {
-  searchImages as searchImagesFromSerper,
-  type DownloadableImage,
-} from "@/lib/media/serper";
-import { mediaMetadataSchema } from "@/lib/schemas/medias";
-import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
+import { db } from "@/lib/db";
+import { type Media, medias } from "@/lib/db/schema";
 import { optimizeImage } from "@/lib/media/optimize";
+import {
+  type DownloadableImage,
+  searchImages as searchImagesFromSerper,
+} from "@/lib/media/serper";
+import type { CreateManualMediaSchema } from "@/lib/schemas/medias";
+import { mediaMetadataSchema } from "@/lib/schemas/medias";
+import { deleteBlobs, uploadBlob } from "@/lib/storage";
+import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 
 const IMAGE_MODEL = "bfl/flux-2-flex";
 
@@ -31,7 +31,7 @@ async function generateImageMetadata(imageUrl: string) {
         content: [
           {
             type: "text",
-            text: `Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen`,
+            text: "Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen",
           },
           {
             type: "image",
@@ -42,7 +42,9 @@ async function generateImageMetadata(imageUrl: string) {
     ],
   });
 
-  if (!output) throw new Error("Failed to generate image metadata");
+  if (!output) {
+    throw new Error("Failed to generate image metadata");
+  }
 
   return output;
 }
@@ -50,13 +52,13 @@ async function generateImageMetadata(imageUrl: string) {
 export async function getMedias(
   searchTerm?: string,
   tags?: string[],
-  limit?: number,
+  limit?: number
 ) {
   const result = await db.query.medias.findMany({
     where: (fields) => {
-      const conditions = [];
+      const conditions: ReturnType<typeof ilike>[] = [];
 
-      if (searchTerm && searchTerm.trim()) {
+      if (searchTerm?.trim()) {
         conditions.push(ilike(fields.name, `%${searchTerm.trim()}%`));
       }
 
@@ -64,13 +66,16 @@ export async function getMedias(
         conditions.push(arrayOverlaps(fields.tags, tags));
       }
 
-      if (conditions.length === 0) return undefined;
-      else if (conditions.length === 1) return conditions[0];
-      else {
-        return conditions.reduce((acc, condition) => {
-          return acc ? acc && condition : condition;
-        });
+      if (conditions.length === 0) {
+        return undefined;
       }
+      if (conditions.length === 1) {
+        return conditions[0];
+      }
+
+      return conditions.reduce((acc, condition) => {
+        return acc ? acc && condition : condition;
+      });
     },
     with: {
       author: {
@@ -103,7 +108,9 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
 export async function generateDerivedMedia(media: Media, prompt: string) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
@@ -111,14 +118,20 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
     model: IMAGE_MODEL,
     prompt: {
       text: translatedPrompt,
-      images: [await fetch(createBlobUrl(media.blobKey)).then(r => r.arrayBuffer()).then(b => Buffer.from(b))],
+      images: [
+        await fetch(createBlobUrl(media.blobKey))
+          .then((r) => r.arrayBuffer())
+          .then((b) => Buffer.from(b)),
+      ],
     },
     size: "512x512",
   });
 
   const [image] = images;
 
-  if (!image) throw new Error("Error generating image");
+  if (!image) {
+    throw new Error("Error generating image");
+  }
 
   const imageBuffer = Buffer.from(image.uint8Array);
   const optimized = await optimizeImage(imageBuffer);
@@ -146,7 +159,9 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
 export async function generateMediaFromPrompt(prompt: string) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
@@ -158,7 +173,9 @@ export async function generateMediaFromPrompt(prompt: string) {
 
   const [image] = images;
 
-  if (!image) throw new Error("Error generating image");
+  if (!image) {
+    throw new Error("Error generating image");
+  }
 
   const imageBuffer = Buffer.from(image.uint8Array);
   const optimized = await optimizeImage(imageBuffer);
@@ -188,7 +205,9 @@ export async function uploadManualMedia(data: CreateManualMediaSchema) {
 
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("No hay usuario autenticado");
+  if (!user) {
+    throw new Error("No hay usuario autenticado");
+  }
 
   await db.insert(medias).values({
     ...rest,
@@ -202,7 +221,7 @@ export async function uploadManualMedia(data: CreateManualMediaSchema) {
 
 export async function deleteMedia(media: Media) {
   const mediasToDelete = [media.blobKey, media.thumbnailKey].filter(
-    Boolean,
+    Boolean
   ) as string[];
   try {
     await Promise.all([
@@ -218,14 +237,16 @@ export async function deleteMedia(media: Media) {
 }
 
 export async function searchImages(query: string, numResults?: number) {
-  return searchImagesFromSerper(query, numResults);
+  return await searchImagesFromSerper(query, numResults);
 }
 
 export async function transferImagesToLibrary(images: DownloadableImage[]) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("No hay usuario autenticado");
+    if (!user) {
+      throw new Error("No hay usuario autenticado");
+    }
 
     const results = await Promise.all(
       images.map(async (image) => {
@@ -233,7 +254,7 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
           const [metadata, imageBuffer] = await Promise.all([
             generateImageMetadata(image.imageUrl),
             downloadFromUrl(image.imageUrl).then((arrayBuffer) =>
-              optimizeImage(Buffer.from(arrayBuffer)),
+              optimizeImage(Buffer.from(arrayBuffer))
             ),
           ]);
 
@@ -261,7 +282,7 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
             error: error instanceof Error ? error.message : "Unknown error",
           };
         }
-      }),
+      })
     );
 
     revalidatePath("/dashboard/media");

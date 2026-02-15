@@ -1,10 +1,10 @@
-import type { ImageProps } from "next/image"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import type { ImageProps } from "next/image";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface MediaImageProps extends Omit<ImageProps, "src" | "alt"> {
-  src: string
-  alt: string
+  src: string;
+  alt: string;
 }
 
 export function MediaImage({
@@ -18,19 +18,17 @@ export function MediaImage({
   placeholder = "empty",
   ...props
 }: MediaImageProps) {
-  const useFill = !width && !height;
+  const useFill = !(width || height);
 
   return (
     <Image
-      src={src || "/placeholder.svg"}
       alt={alt}
-      {...(useFill
-        ? { fill: true, sizes }
-        : { width, height })}
-      quality={quality}
-      placeholder={placeholder}
+      src={src || "/placeholder.svg"}
+      {...(useFill ? { fill: true, sizes } : { width, height })}
       className={cn("object-contain", className)}
+      placeholder={placeholder}
+      quality={quality}
       {...props}
     />
-  )
+  );
 }

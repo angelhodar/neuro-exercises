@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { Code, FileText, Loader2, MessageSquare, Settings } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChatMessage } from "./chat-message";
-import { ChatInput } from "./chat-input";
-import { MessageSquare, Settings, FileText, Code, Loader2 } from "lucide-react";
 import { useSandbox } from "@/hooks/use-sandbox";
-import { stopSandbox } from "@/app/actions/sandbox";
-import { Exercise } from "@/lib/db/schema";
+import type { Exercise } from "@/lib/db/schema";
+import { ChatInput } from "./chat-input";
+import { ChatMessage } from "./chat-message";
 
 interface Message {
   id: string;
@@ -26,14 +25,14 @@ interface ChatProps {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-6">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <MessageSquare className="w-8 h-8 text-gray-400" />
+    <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+        <MessageSquare className="h-8 w-8 text-gray-400" />
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <h3 className="mb-2 font-medium text-gray-900 text-lg">
         No messages yet
       </h3>
-      <p className="text-gray-500 text-sm max-w-sm">
+      <p className="max-w-sm text-gray-500 text-sm">
         Start a conversation about this exercise. Ask questions, share thoughts,
         or request help.
       </p>
@@ -44,13 +43,13 @@ function EmptyState() {
 function getToolIcon(toolName: string) {
   switch (toolName) {
     case "getCurrentGeneratedFiles":
-      return <FileText className="w-4 h-4" />;
+      return <FileText className="h-4 w-4" />;
     case "readFiles":
-      return <Code className="w-4 h-4" />;
+      return <Code className="h-4 w-4" />;
     case "writeFiles":
-      return <Settings className="w-4 h-4" />;
+      return <Settings className="h-4 w-4" />;
     default:
-      return <Settings className="w-4 h-4" />;
+      return <Settings className="h-4 w-4" />;
   }
 }
 
@@ -74,29 +73,44 @@ function getTextContent(parts: Array<{ type: string; text?: string }>): string {
     .join("");
 }
 
-function getToolParts(parts: Array<{ type: string; state?: string; toolCallId?: string }>) {
+function getToolParts(
+  parts: Array<{ type: string; state?: string; toolCallId?: string }>
+) {
   return parts.filter((p) => p.type.startsWith("tool-"));
 }
 
-function StreamingStatus({ status, messages }: { status: string; messages: Array<{ role: string; parts: Array<{ type: string; state?: string; toolCallId?: string }> }> }) {
+function StreamingStatus({
+  status,
+  messages,
+}: {
+  status: string;
+  messages: Array<{
+    role: string;
+    parts: Array<{ type: string; state?: string; toolCallId?: string }>;
+  }>;
+}) {
   if (status === "submitted") {
     return (
-      <div className="flex items-center space-x-2 text-blue-600 bg-blue-50 p-3 rounded-lg mb-4">
-        <Loader2 className="w-4 h-4 animate-spin" />
+      <div className="mb-4 flex items-center space-x-2 rounded-lg bg-blue-50 p-3 text-blue-600">
+        <Loader2 className="h-4 w-4 animate-spin" />
         <span className="text-sm">Procesando tu petición...</span>
       </div>
     );
   }
 
   if (status === "streaming") {
-    const lastAssistantMessage = [...messages].reverse().find((m) => m.role === "assistant");
-    const toolParts = lastAssistantMessage ? getToolParts(lastAssistantMessage.parts) : [];
+    const lastAssistantMessage = [...messages]
+      .reverse()
+      .find((m) => m.role === "assistant");
+    const toolParts = lastAssistantMessage
+      ? getToolParts(lastAssistantMessage.parts)
+      : [];
 
     return (
-      <div className="bg-blue-50 p-3 rounded-lg mb-4 space-y-2">
+      <div className="mb-4 space-y-2 rounded-lg bg-blue-50 p-3">
         <div className="flex items-center space-x-2 text-blue-600">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm font-medium">Procesando ejercicio...</span>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="font-medium text-sm">Procesando ejercicio...</span>
         </div>
 
         {toolParts.length > 0 && (
@@ -105,8 +119,8 @@ function StreamingStatus({ status, messages }: { status: string; messages: Array
               const toolName = part.type.replace("tool-", "");
               return (
                 <div
+                  className="flex items-center space-x-2 text-gray-600 text-sm"
                   key={part.toolCallId ?? index}
-                  className="flex items-center space-x-2 text-sm text-gray-600"
                 >
                   {getToolIcon(toolName)}
                   <span>{getToolDisplayName(toolName)}</span>
@@ -134,14 +148,7 @@ export function Chat({
   const hasAutoStarted = useRef(false);
   const [input, setInput] = useState("");
 
-  const {
-    messages,
-    sendMessage,
-    status,
-    error,
-    stop,
-    regenerate,
-  } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       credentials: "include",
@@ -160,7 +167,7 @@ export function Chat({
       hasAutoStarted.current = true;
       regenerate();
     }
-  }, [autoStart]);
+  }, [autoStart, regenerate]);
 
   /*useEffect(() => {
     return () => {
@@ -170,7 +177,7 @@ export function Chat({
 
   // Filter messages to only include user and assistant roles
   const filteredMessages = messages.filter(
-    (msg) => msg.role === "user" || msg.role === "assistant",
+    (msg) => msg.role === "user" || msg.role === "assistant"
   );
 
   const isLoading = status === "submitted" || status === "streaming";
@@ -183,41 +190,51 @@ export function Chat({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Messages area with scrolling */}
-      <div className="flex-1 min-h-0">
+      <div className="min-h-0 flex-1">
         <ScrollArea className="h-full">
-          <div className="p-6 space-y-6">
+          <div className="space-y-6 p-6">
             {filteredMessages.length === 0 ? (
               <EmptyState />
             ) : (
-              <>
-                {filteredMessages.map((m) => (
-                  <ChatMessage
-                    key={m.id}
-                    role={m.role as "user" | "assistant"}
-                    content={getTextContent(m.parts as Array<{ type: string; text?: string }>)}
-                  />
-                ))}
-              </>
+              filteredMessages.map((m) => (
+                <ChatMessage
+                  content={getTextContent(
+                    m.parts as Array<{ type: string; text?: string }>
+                  )}
+                  key={m.id}
+                  role={m.role as "user" | "assistant"}
+                />
+              ))
             )}
 
             {/* Show streaming status */}
             <StreamingStatus
+              messages={
+                messages as Array<{
+                  role: string;
+                  parts: Array<{
+                    type: string;
+                    state?: string;
+                    toolCallId?: string;
+                  }>;
+                }>
+              }
               status={status}
-              messages={messages as Array<{ role: string; parts: Array<{ type: string; state?: string; toolCallId?: string }> }>}
             />
 
             {/* Show error if any */}
             {error && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-red-600">
+                  <span className="text-red-600 text-sm">
                     Error: {error.message}
                   </span>
                   <button
+                    className="text-red-600 text-sm underline hover:text-red-700"
                     onClick={() => regenerate()}
-                    className="text-red-600 hover:text-red-700 text-sm underline"
+                    type="button"
                   >
                     Reintentar
                   </button>
@@ -232,10 +249,10 @@ export function Chat({
       <div className="flex-shrink-0">
         <ChatInput
           input={input}
-          onInputChange={setInput}
-          onSubmit={handleSubmit}
           isLoading={isLoading}
+          onInputChange={setInput}
           onStop={isLoading ? stop : undefined}
+          onSubmit={handleSubmit}
         />
       </div>
     </div>

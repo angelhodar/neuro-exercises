@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { loadClientAssets, type ClientAssets } from "@/app/exercises/loader";
+import { type ClientAssets, loadClientAssets } from "@/app/exercises/loader";
 
-export type { ClientAssets };
+export type { ClientAssets } from "@/app/exercises/loader";
 
 export function useExerciseAssetsLoader(slug: string) {
   const [assets, setAssets] = useState<ClientAssets | null>(null);
@@ -11,7 +11,9 @@ export function useExerciseAssetsLoader(slug: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -37,4 +39,4 @@ export function useExerciseAssetsLoader(slug: string) {
     isLoading,
     error,
   };
-} 
+}

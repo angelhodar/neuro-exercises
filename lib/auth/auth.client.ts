@@ -1,5 +1,5 @@
+import { adminClient, organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { adminClient, organizationClient } from "better-auth/client/plugins"
 
 const getBaseURL = () => {
   if (!process.env.NEXT_PUBLIC_VERCEL_ENV) {

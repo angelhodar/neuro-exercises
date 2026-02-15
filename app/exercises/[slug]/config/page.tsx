@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
 import { getExerciseBySlug } from "@/app/actions/exercises";
+import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -11,10 +11,12 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
 
   const exercise = await getExerciseBySlug(slug);
 
-  if (!exercise) notFound();
+  if (!exercise) {
+    notFound();
+  }
 
   return (
-    <div className="flex flex-1 container justify-center items-center py-8 mx-auto min-h-full">
+    <div className="container mx-auto flex min-h-full flex-1 items-center justify-center py-8">
       <ExerciseConfigForm slug={slug} title={exercise.displayName} />
     </div>
   );

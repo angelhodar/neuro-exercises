@@ -1,4 +1,9 @@
 import { getSpeechTexts } from "@/app/actions/speech";
+import {
+  DashboardHeader,
+  DashboardHeaderDescription,
+  DashboardHeaderTitle,
+} from "@/app/dashboard/dashboard-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -13,15 +18,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DashboardHeader,
-  DashboardHeaderTitle,
-  DashboardHeaderDescription,
-} from "@/app/dashboard/dashboard-header";
 import { formatDate } from "@/lib/utils";
 import CreateSpeechTextButton from "./create-speech-text-button";
-import EditSpeechTextButton from "./edit-speech-text-button";
 import DeleteSpeechTextButton from "./delete-speech-text-button";
+import EditSpeechTextButton from "./edit-speech-text-button";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export default async function SpeechTextsPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <div className="flex flex-col gap-2">
             <DashboardHeaderTitle>Textos de referencia</DashboardHeaderTitle>
             <DashboardHeaderDescription>
@@ -46,7 +46,7 @@ export default async function SpeechTextsPage() {
       <Card>
         <CardContent className="mt-4">
           {speechTexts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-center text-muted-foreground">
               No hay textos de referencia. Crea uno nuevo para empezar.
             </div>
           ) : (
@@ -65,7 +65,11 @@ export default async function SpeechTextsPage() {
                     <TableCell className="font-medium">{text.name}</TableCell>
                     <TableCell>
                       <Tooltip>
-                        <TooltipTrigger render={<div className="max-w-xs truncate cursor-help" />}>
+                        <TooltipTrigger
+                          render={
+                            <div className="max-w-xs cursor-help truncate" />
+                          }
+                        >
                           {text.referenceText}
                         </TooltipTrigger>
                         <TooltipContent className="max-w-md">

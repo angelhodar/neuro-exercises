@@ -4,7 +4,7 @@ import Providers from "@/app/dashboard/providers";
 export default function ExerciseLayout({ children }: PropsWithChildren) {
   return (
     <Providers>
-      <div className="flex flex-col min-h-screen w-screen bg-blue-50 p-2 overflow-y-auto">
+      <div className="flex min-h-screen w-screen flex-col overflow-y-auto bg-blue-50 p-2">
         {children}
       </div>
     </Providers>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import {
+  STROOP_COLORS,
   type StroopColorInterferenceConfig,
   type StroopColorInterferenceQuestionResult,
-  STROOP_COLORS,
 } from "./stroop-color-interference.schema";
 
 interface StroopColorInterferenceExerciseProps {
@@ -29,18 +29,17 @@ function shuffle<T>(array: T[]): T[] {
   return newArray;
 }
 
-export function Exercise({
-  config,
-}: StroopColorInterferenceExerciseProps) {
+export function Exercise({ config }: StroopColorInterferenceExerciseProps) {
   const { numOptions } = config;
-  const { currentQuestionIndex, addResult } = useExerciseExecution();
+  const { addResult } = useExerciseExecution();
 
   const [question, setQuestion] = useState<CurrentQuestion | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
 
   useEffect(() => {
     const setupQuestion = () => {
-      let word, color;
+      let word: (typeof STROOP_COLORS)[number];
+      let color: (typeof STROOP_COLORS)[number];
 
       // Asegurarse de que la palabra y el color no sean el mismo
       do {
@@ -50,7 +49,7 @@ export function Exercise({
 
       const correctAnswer = color.name;
       const otherOptions = STROOP_COLORS.map((c) => c.name).filter(
-        (name) => name !== correctAnswer,
+        (name) => name !== correctAnswer
       );
 
       const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
@@ -61,10 +60,12 @@ export function Exercise({
     };
 
     setupQuestion();
-  }, [currentQuestionIndex, numOptions]);
+  }, [numOptions]);
 
   const handleAnswer = (selectedAnswer: string) => {
-    if (!question) return;
+    if (!question) {
+      return;
+    }
 
     const endTime = Date.now();
     const responseTime = endTime - startTime;
@@ -84,28 +85,28 @@ export function Exercise({
 
   if (!question) {
     return (
-      <div className="flex items-center justify-center h-full">Cargando...</div>
+      <div className="flex h-full items-center justify-center">Cargando...</div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-8">
-      <div className="flex-grow flex items-center justify-center mb-12">
+    <div className="flex h-full w-full flex-col items-center justify-center p-8">
+      <div className="mb-12 flex flex-grow items-center justify-center">
         <h1
-          className="text-6xl md:text-8xl font-bold"
+          className="font-bold text-6xl md:text-8xl"
           style={{ color: question.color.value }}
         >
           {question.word.name}
         </h1>
       </div>
-      <div className="flex-shrink-0 flex flex-wrap justify-center items-center gap-4 w-full max-w-4xl">
+      <div className="flex w-full max-w-4xl flex-shrink-0 flex-wrap items-center justify-center gap-4">
         {question.options.map((option) => (
           <Button
+            className="h-auto min-w-[180px] px-12 py-10 text-2xl md:text-3xl"
             key={option}
             onClick={() => handleAnswer(option)}
-            className="text-2xl md:text-3xl py-10 px-12 h-auto min-w-[180px]"
-            variant="outline"
             size="lg"
+            variant="outline"
           >
             {option}
           </Button>

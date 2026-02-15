@@ -1,13 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { OddOneOutConfig, OddOneOutResult } from "./odd-one-out.schema";
-import { Selectable } from "@/components/selectable";
-import { MediaCard, MediaCardContainer, MediaCardTitle } from "@/components/media/media-card";
+import {
+  MediaCard,
+  MediaCardContainer,
+  MediaCardTitle,
+} from "@/components/media/media-card";
 import { MediaImage } from "@/components/media/media-image";
-import { SelectableMediaSchema } from "@/lib/schemas/medias";
+import { Selectable } from "@/components/selectable";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
+import type { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createBlobUrl } from "@/lib/utils";
+import type { OddOneOutConfig, OddOneOutResult } from "./odd-one-out.schema";
 
 interface OddOneOutExerciseClientProps {
   config: OddOneOutConfig;
@@ -33,9 +37,9 @@ export function OddOneOutExerciseClient({
   // Crear un mapa para acceso rápido por id
   const mediaMap = useMemo(() => {
     const map: Record<number, SelectableMediaSchema> = {};
-    medias.forEach((m) => {
+    for (const m of medias) {
       map[m.id] = m;
-    });
+    }
     return map;
   }, [medias]);
 
@@ -58,14 +62,16 @@ export function OddOneOutExerciseClient({
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleSelectAnswer = (mediaId: number) => {
-    if (questionState.isAnswered) return;
-    
-    setQuestionState(prev => ({
+    if (questionState.isAnswered) {
+      return;
+    }
+
+    setQuestionState((prev) => ({
       ...prev,
       selectedAnswerId: mediaId,
       isAnswered: true,
     }));
-    
+
     // Enviar resultado automáticamente después de un breve delay para mostrar feedback
     setTimeout(() => {
       const isCorrect = mediaId === currentQuestion.correctAnswerId;
@@ -75,9 +81,9 @@ export function OddOneOutExerciseClient({
         correctId: currentQuestion.correctAnswerId,
         isCorrect,
       } as OddOneOutResult);
-      
+
       // Reset para la siguiente pregunta
-      setQuestionState(prev => ({
+      setQuestionState((prev) => ({
         ...prev,
         selectedAnswerId: null,
         isAnswered: false,
@@ -86,28 +92,28 @@ export function OddOneOutExerciseClient({
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 w-full h-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="flex h-full w-full flex-col items-center gap-6 p-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {currentQuestion.options.map((media) => {
           const isSelected = questionState.selectedAnswerId === media.id;
-          
+
           return (
             <Selectable
               key={media.id}
-              selected={isSelected}
               onClick={() => handleSelectAnswer(media.id)}
+              selected={isSelected}
             >
               <MediaCard>
                 <MediaCardContainer>
                   <MediaImage
-                    src={createBlobUrl(media.blobKey)}
                     alt={media.name}
-                    width={300}
                     height={300}
+                    src={createBlobUrl(media.blobKey)}
+                    width={300}
                   />
                 </MediaCardContainer>
                 <div className="p-2">
-                  <MediaCardTitle className="text-sm text-center line-clamp-2">
+                  <MediaCardTitle className="line-clamp-2 text-center text-sm">
                     {media.name}
                   </MediaCardTitle>
                 </div>

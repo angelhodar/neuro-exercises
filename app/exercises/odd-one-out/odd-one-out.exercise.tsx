@@ -1,9 +1,9 @@
-import { OddOneOutConfig } from "./odd-one-out.schema";
-import { OddOneOutExerciseClient } from "./odd-one-out-exercise.client";
+import { inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { medias } from "@/lib/db/schema";
-import { inArray } from "drizzle-orm";
-import { SelectableMediaSchema } from "@/lib/schemas/medias";
+import type { SelectableMediaSchema } from "@/lib/schemas/medias";
+import type { OddOneOutConfig } from "./odd-one-out.schema";
+import { OddOneOutExerciseClient } from "./odd-one-out-exercise.client";
 
 interface OddOneOutExerciseProps {
   config: OddOneOutConfig;
@@ -17,9 +17,9 @@ export async function Exercise({ config }: OddOneOutExerciseProps) {
         ...q.outlierMedia.map((m) => m.id),
       ])
     )
-  )
+  );
 
-  const allMediasFromDb = await db.query.medias.findMany({
+  const allMediasFromDb = (await db.query.medias.findMany({
     columns: {
       id: true,
       name: true,
@@ -27,7 +27,7 @@ export async function Exercise({ config }: OddOneOutExerciseProps) {
       tags: true,
     },
     where: inArray(medias.id, allMediaIds),
-  }) as SelectableMediaSchema[];
+  })) as SelectableMediaSchema[];
 
   return <OddOneOutExerciseClient config={config} medias={allMediasFromDb} />;
-} 
+}

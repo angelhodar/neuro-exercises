@@ -1,11 +1,11 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/app/actions/users";
 import { transcribeWithGroq } from "@/lib/ai/transcribe";
 import { db } from "@/lib/db";
 import { speechTexts, transcriptionResults } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
-import { getCurrentUser } from "@/app/actions/users";
 
 export interface TranscriptionResult {
   text: string;
@@ -22,12 +22,20 @@ export interface CreateTranscriptionResultData {
   nonMatchingWords: number;
 }
 
-export async function transcribeAudio(formData: FormData): Promise<TranscriptionResult> {
+export async function transcribeAudio(
+  formData: FormData
+): Promise<TranscriptionResult> {
   const audioFile = formData.get("audio") as File;
-  
-  if (!audioFile) throw new Error("No audio file provided");
-  if (!audioFile.type.startsWith("audio/")) throw new Error("Invalid file type");
-  if (audioFile.size > 10 * 1024 * 1024) throw new Error("File too large");
+
+  if (!audioFile) {
+    throw new Error("No audio file provided");
+  }
+  if (!audioFile.type.startsWith("audio/")) {
+    throw new Error("Invalid file type");
+  }
+  if (audioFile.size > 10 * 1024 * 1024) {
+    throw new Error("File too large");
+  }
 
   const text = await transcribeWithGroq(audioFile);
   revalidatePath("/dashboard/speech-recognition");
@@ -37,7 +45,9 @@ export async function transcribeAudio(formData: FormData): Promise<Transcription
 export async function getSpeechTexts() {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   return await db.query.speechTexts.findMany({
     where: eq(speechTexts.userId, user.id),
@@ -48,12 +58,14 @@ export async function getSpeechTexts() {
 export async function createSpeechText(formData: FormData) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   const name = formData.get("name") as string;
   const referenceText = formData.get("referenceText") as string;
 
-  if (!name || !referenceText) {
+  if (!(name && referenceText)) {
     throw new Error("Name and reference text are required");
   }
 
@@ -70,12 +82,14 @@ export async function createSpeechText(formData: FormData) {
 export async function updateSpeechText(id: number, formData: FormData) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   const name = formData.get("name") as string;
   const referenceText = formData.get("referenceText") as string;
 
-  if (!name || !referenceText) {
+  if (!(name && referenceText)) {
     throw new Error("Name and reference text are required");
   }
 
@@ -85,12 +99,7 @@ export async function updateSpeechText(id: number, formData: FormData) {
       name,
       referenceText,
     })
-    .where(
-      and(
-        eq(speechTexts.id, id),
-        eq(speechTexts.userId, user.id)
-      )
-    );
+    .where(and(eq(speechTexts.id, id), eq(speechTexts.userId, user.id)));
 
   revalidatePath("/dashboard/speech-texts");
   revalidatePath("/dashboard/speech-recognition");
@@ -99,16 +108,13 @@ export async function updateSpeechText(id: number, formData: FormData) {
 export async function deleteSpeechText(id: number) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   await db
     .delete(speechTexts)
-    .where(
-      and(
-        eq(speechTexts.id, id),
-        eq(speechTexts.userId, user.id)
-      )
-    );
+    .where(and(eq(speechTexts.id, id), eq(speechTexts.userId, user.id)));
 
   revalidatePath("/dashboard/speech-texts");
   revalidatePath("/dashboard/speech-recognition");
@@ -118,7 +124,9 @@ export async function deleteSpeechText(id: number) {
 export async function getTranscriptionResults() {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
   return await db.query.transcriptionResults.findMany({
     where: eq(transcriptionResults.targetUserId, user.id),
@@ -135,14 +143,25 @@ export async function getTranscriptionResults() {
   });
 }
 
-export async function createTranscriptionResult(data: CreateTranscriptionResultData) {
+export async function createTranscriptionResult(
+  data: CreateTranscriptionResultData
+) {
   const user = await getCurrentUser();
 
-  if (!user) throw new Error("Unauthorized");
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
 
-  const { referenceText, transcribedText, audioBlobKey, accuracy, matchingWords, nonMatchingWords } = data;
+  const {
+    referenceText,
+    transcribedText,
+    audioBlobKey,
+    accuracy,
+    matchingWords,
+    nonMatchingWords,
+  } = data;
 
-  if (!referenceText || !transcribedText || !audioBlobKey) {
+  if (!(referenceText && transcribedText && audioBlobKey)) {
     throw new Error("Missing required fields");
   }
 

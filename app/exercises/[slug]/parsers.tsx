@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getExerciseLinkByToken } from "@/app/actions/links";
-import { Exercise } from "@/lib/db/schema";
+import type { Exercise } from "@/lib/db/schema";
 
 // Esquemas más específicos que permiten discriminated unions
 const configOnlySchema = z
@@ -66,26 +66,28 @@ export function parseConfigFromUrl(configString: string, schema: z.ZodType) {
 
   try {
     parsedJson = JSON.parse(configString);
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 
   const config = schema.safeParse(parsedJson);
 
-  if (!config.success) return null;
+  if (!config.success) {
+    return null;
+  }
 
   return config.data;
 }
 
 export function parseResultsFromUrl(
   resultsString: string,
-  resultsSchema: z.ZodType,
+  resultsSchema: z.ZodType
 ) {
   let parsedJson: unknown;
 
   try {
     parsedJson = JSON.parse(resultsString);
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 
@@ -94,29 +96,35 @@ export function parseResultsFromUrl(
     .min(1, "Debe haber al menos un resultado")
     .safeParse(parsedJson);
 
-  if (!results.success) return null;
+  if (!results.success) {
+    return null;
+  }
 
   return results.data;
 }
 
 export async function getExerciseConfigFromLink(
   linkId: string,
-  itemId: string,
+  itemId: string
 ) {
   const linkData = await getExerciseLinkByToken(linkId);
 
-  if (!linkData) return null;
+  if (!linkData) {
+    return null;
+  }
 
-  const numericItemId = parseInt(itemId);
+  const numericItemId = Number.parseInt(itemId, 10);
   const item = linkData.template.exerciseTemplateItems.find(
-    (item) => item.id === numericItemId,
+    (item) => item.id === numericItemId
   );
 
-  if (!item || !item.config) return null;
+  if (!item?.config) {
+    return null;
+  }
 
   return item.config;
 }
 
 export function getExerciseFromSandboxEnv() {
-  return JSON.parse(process.env.SANDBOX_EXERCISE!) as Exercise;
+  return JSON.parse(process.env.SANDBOX_EXERCISE ?? "{}") as Exercise;
 }

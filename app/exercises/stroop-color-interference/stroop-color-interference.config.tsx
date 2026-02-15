@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import {
   FormControl,
   FormDescription,
@@ -10,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 interface StroopColorInterferenceConfigFieldsProps {
   basePath?: string;
@@ -30,7 +30,7 @@ export function ConfigFields({
           <FormItem>
             <FormLabel>Número de opciones</FormLabel>
             <FormControl>
-              <Input type="number" placeholder="4" {...field} />
+              <Input placeholder="4" type="number" {...field} />
             </FormControl>
             <FormDescription>
               Cantidad de botones de respuesta que se mostrarán.

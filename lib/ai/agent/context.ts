@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
 
-if (!GITHUB_TOKEN || !GITHUB_REPOSITORY) {
+if (!(GITHUB_TOKEN && GITHUB_REPOSITORY)) {
   throw new Error("Missing environment variables");
 }
 
@@ -16,7 +16,7 @@ export const generatedFileSchema = z.object({
   path: z.string(),
   content: z.string(),
 });
- 
+
 export type GeneratedFile = z.infer<typeof generatedFileSchema>;
 
 export interface FoundFileContent {
@@ -28,7 +28,7 @@ export interface FoundFileContent {
 export const contextPaths = [
   "app/exercises/color-sequence",
   "app/exercises/loader.tsx",
-  "hooks/use-exercise-execution.ts"
+  "hooks/use-exercise-execution.ts",
 ];
 
 export const getFilesContext = async (): Promise<GeneratedFile[]> => {
@@ -40,15 +40,19 @@ export const getFilesContext = async (): Promise<GeneratedFile[]> => {
       recursive: "true",
     });
 
-    const matchedFiles = treeData.tree.filter(item => {
-      if (item.type !== 'blob' || !item.path) return false;
-      return contextPaths.some(prefix => item.path!.startsWith(prefix));
+    const matchedFiles = treeData.tree.filter((item) => {
+      if (item.type !== "blob" || !item.path) {
+        return false;
+      }
+      return contextPaths.some((prefix) => item.path?.startsWith(prefix));
     });
 
     const fileContents = await Promise.all(
       matchedFiles.map(async (item) => {
-        if (!item.sha || !item.path) return null;
-        
+        if (!(item.sha && item.path)) {
+          return null;
+        }
+
         try {
           const { data: blobData } = await octokit.git.getBlob({
             owner,
@@ -58,7 +62,10 @@ export const getFilesContext = async (): Promise<GeneratedFile[]> => {
 
           return {
             path: item.path,
-            content: Buffer.from(blobData.content, blobData.encoding as BufferEncoding).toString('utf8'),
+            content: Buffer.from(
+              blobData.content,
+              blobData.encoding as BufferEncoding
+            ).toString("utf8"),
           };
         } catch (error) {
           console.error(`Error fetching blob for ${item.path}:`, error);
@@ -69,7 +76,7 @@ export const getFilesContext = async (): Promise<GeneratedFile[]> => {
 
     return fileContents.filter((file): file is GeneratedFile => file !== null);
   } catch (error) {
-    console.error('Error fetching files context:', error);
+    console.error("Error fetching files context:", error);
     return [];
   }
 };

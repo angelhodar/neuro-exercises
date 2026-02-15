@@ -1,5 +1,5 @@
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
-import { NextResponse } from 'next/server';
+import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody;
@@ -9,14 +9,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       body,
       request,
       onBeforeGenerateToken: async () => ({
-        allowedContentTypes: [
-          'image/*',
-          'audio/*',
-          'video/*',
-        ],
+        allowedContentTypes: ["image/*", "audio/*", "video/*"],
         addRandomSuffix: true,
       }),
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
+      onUploadCompleted: ({ blob }) => {
         console.log(blob);
       },
     });
@@ -28,4 +24,4 @@ export async function POST(request: Request): Promise<NextResponse> {
       { status: 400 }
     );
   }
-} 
+}

@@ -1,24 +1,27 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { generateText, generateImage, Output } from "ai";
-import { db } from "@/lib/db";
-import { exercises } from "@/lib/db/schema";
+import { generateImage, generateText, Output } from "ai";
 import { eq } from "drizzle-orm";
-import type { Exercise } from "@/lib/db/schema";
-import {
-  createExerciseSchema,
-  CreateExerciseSchema,
-  updateExerciseSchema,
-  UpdateExerciseSchema,
-  generatedExerciseSchema,
-} from "@/lib/schemas/exercises";
+import { revalidatePath } from "next/cache";
 import { generateAudio } from "@/lib/ai/audio";
+import { db } from "@/lib/db";
+import type { Exercise } from "@/lib/db/schema";
+import { exercises } from "@/lib/db/schema";
+import {
+  type CreateExerciseSchema,
+  createExerciseSchema,
+  generatedExerciseSchema,
+  type UpdateExerciseSchema,
+  updateExerciseSchema,
+} from "@/lib/schemas/exercises";
 import { uploadBlobPathname } from "@/lib/storage";
 import { createExerciseGeneration } from "./generations";
 
 // Función para generar thumbnail
-async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise<string | null> {
+async function generateThumbnail(
+  thumbnailPrompt: string,
+  slug: string
+): Promise<string | null> {
   try {
     const { images } = await generateImage({
       model: "google/imagen-4",
@@ -27,7 +30,9 @@ async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise
     });
 
     const [image] = images;
-    if (!image) throw new Error("Error generating thumbnail");
+    if (!image) {
+      throw new Error("Error generating thumbnail");
+    }
 
     const imageBuffer = Buffer.from(image.uint8Array);
     const fileName = `thumbnails/${slug}.png`;
@@ -39,9 +44,12 @@ async function generateThumbnail(thumbnailPrompt: string, slug: string): Promise
 }
 
 // Función para subir thumbnail manualmente
-async function uploadThumbnail(file: File, slug: string): Promise<string | null> {
+async function uploadThumbnail(
+  file: File,
+  slug: string
+): Promise<string | null> {
   try {
-    const fileName = `thumbnails/${slug}.${file.name.split('.').pop()}`;
+    const fileName = `thumbnails/${slug}.${file.name.split(".").pop()}`;
     return await uploadBlobPathname(fileName, file);
   } catch (error) {
     console.error("Error subiendo thumbnail:", error);
@@ -49,7 +57,10 @@ async function uploadThumbnail(file: File, slug: string): Promise<string | null>
   }
 }
 
-async function generateAudioInstructions(audioPrompt: string, slug: string): Promise<string | null> {
+async function generateAudioInstructions(
+  audioPrompt: string,
+  slug: string
+): Promise<string | null> {
   try {
     const audioBuffer = await generateAudio(audioPrompt);
     const fileName = `audio/${slug}.mp3`;
@@ -68,7 +79,7 @@ export async function getExercises(slugs?: string[]) {
 
     return filteredExercises;
   }
-  
+
   const allExercises = await db.query.exercises.findMany();
   return allExercises;
 }
@@ -105,11 +116,14 @@ async function generateExerciseData(prompt: string) {
   const { output } = await generateText({
     model: "google/gemini-2.5-flash",
     output: Output.object({ schema: generatedExerciseSchema }),
-    system: "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
+    system:
+      "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
     prompt,
   });
 
-  if (!output) throw new Error("Failed to generate exercise data");
+  if (!output) {
+    throw new Error("Failed to generate exercise data");
+  }
 
   return output;
 }
@@ -125,7 +139,7 @@ export async function createExercise(
 
     const [thumbnail, audioInstructions] = await Promise.all([
       generateThumbnail(generatedData.thumbnailPrompt, generatedData.slug),
-      generateAudioInstructions(generatedData.audioPrompt, generatedData.slug)
+      generateAudioInstructions(generatedData.audioPrompt, generatedData.slug),
     ]);
 
     const [created] = await db
@@ -141,7 +155,7 @@ export async function createExercise(
     if (created) {
       await createExerciseGeneration({
         exerciseId: created.id,
-        prompt: prompt,
+        prompt,
       });
     }
 
@@ -158,7 +172,15 @@ export async function updateExercise(
 ): Promise<Exercise | null> {
   try {
     const parsed = updateExerciseSchema.parse(data);
-    const { id, displayName, description, tags, thumbnailPrompt, file, audioPrompt } = parsed;
+    const {
+      id,
+      displayName,
+      description,
+      tags,
+      thumbnailPrompt,
+      file,
+      audioPrompt,
+    } = parsed;
 
     let thumbnailUrl: string | null = null;
     let audioInstructions: string | null = null;
@@ -180,7 +202,10 @@ export async function updateExercise(
 
     // Si se proporciona audioPrompt, generar nuevo audio
     if (audioPrompt) {
-      audioInstructions = await generateAudioInstructions(audioPrompt, exercise.slug);
+      audioInstructions = await generateAudioInstructions(
+        audioPrompt,
+        exercise.slug
+      );
     }
 
     const updateData: Partial<Exercise> = {

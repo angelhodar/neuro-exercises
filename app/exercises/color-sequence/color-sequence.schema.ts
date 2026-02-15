@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   baseExerciseConfigSchema,
   type ExercisePreset,
-  type BaseExerciseConfig,
 } from "@/lib/schemas/base-schemas";
 
 export const colorSequenceSpecificConfigSchema = z.object({
@@ -24,7 +23,7 @@ export const colorSequenceSpecificConfigSchema = z.object({
 
 export function colorSequenceConfigRefinements(
   data: z.infer<typeof colorSequenceSpecificConfigSchema>,
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ) {
   if (data.sequenceLength > data.numCells) {
     ctx.addIssue({
@@ -82,4 +81,7 @@ export type ColorSequenceSpecificConfig = z.infer<
 >;
 export type ColorSequenceConfig = z.infer<typeof configSchema>;
 export type ColorSequenceQuestionResult = z.infer<typeof resultSchema>;
-export type { BaseExerciseConfig, ExercisePreset };
+export type {
+  BaseExerciseConfig,
+  ExercisePreset,
+} from "@/lib/schemas/base-schemas";

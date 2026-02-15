@@ -1,8 +1,8 @@
-import { MediaImage } from "./media-image";
-import { MediaAudio } from "./media-audio";
-import { MediaVideo } from "./media-video";
-import { createBlobUrl } from "@/lib/utils";
 import type { Media } from "@/lib/db/schema";
+import { createBlobUrl } from "@/lib/utils";
+import { MediaAudio } from "./media-audio";
+import { MediaImage } from "./media-image";
+import { MediaVideo } from "./media-video";
 
 interface MediaDisplayProps {
   media: Media;
@@ -16,16 +16,17 @@ export function MediaDisplay({ media }: MediaDisplayProps) {
 
   if (media.mimeType.startsWith("audio/")) {
     return (
-      <MediaAudio src={blobUrl} preload="metadata">
-        {thumbnailUrl && <MediaImage src={thumbnailUrl} alt={media.name} />}
+      <MediaAudio preload="metadata" src={blobUrl}>
+        {thumbnailUrl && <MediaImage alt={media.name} src={thumbnailUrl} />}
       </MediaAudio>
     );
   }
 
-  if (media.mimeType.startsWith("video/"))
+  if (media.mimeType.startsWith("video/")) {
     return (
-      <MediaVideo src={blobUrl} poster={thumbnailUrl} preload="metadata" />
+      <MediaVideo poster={thumbnailUrl} preload="metadata" src={blobUrl} />
     );
+  }
 
-  return <MediaImage src={blobUrl} alt={media.name} />;
+  return <MediaImage alt={media.name} src={blobUrl} />;
 }

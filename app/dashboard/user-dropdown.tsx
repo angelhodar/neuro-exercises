@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -9,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { Settings, LogOut } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth/auth.client";
+import { signOut, useSession } from "@/lib/auth/auth.client";
 
 export function UserDropdown() {
   const { data: session } = useSession();
@@ -23,7 +23,9 @@ export function UserDropdown() {
 
   const user = session?.user;
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -40,10 +42,7 @@ export function UserDropdown() {
         </Avatar>
         <span>{user.name || "Usuario"}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        side="top"
-        className="w-(--anchor-width)"
-      >
+      <DropdownMenuContent className="w-(--anchor-width)" side="top">
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Configuración</span>

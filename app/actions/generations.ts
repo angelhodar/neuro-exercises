@@ -1,13 +1,13 @@
 "use server";
 
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { exerciseChatGeneration } from "@/lib/db/schema";
-import { eq, asc } from "drizzle-orm";
 import type { ExerciseChatGeneration } from "@/lib/db/schema";
+import { exerciseChatGeneration } from "@/lib/db/schema";
 import { getCurrentUser } from "./users";
 
 export async function getExerciseGenerations(
-  exerciseId: number,
+  exerciseId: number
 ): Promise<ExerciseChatGeneration[]> {
   try {
     const generations = await db.query.exerciseChatGeneration.findMany({
@@ -30,7 +30,9 @@ export async function createExerciseGeneration(data: {
   try {
     const user = await getCurrentUser();
 
-    if (!user) return null;
+    if (!user) {
+      return null;
+    }
 
     const [generation] = await db
       .insert(exerciseChatGeneration)
@@ -56,7 +58,7 @@ export async function updateExerciseGeneration(
     summary?: string;
     codeBlobKey?: string;
     sandboxId?: string | null;
-  },
+  }
 ): Promise<ExerciseChatGeneration | null> {
   try {
     const [generation] = await db
@@ -76,11 +78,11 @@ export async function updateExerciseGeneration(
 }
 
 export async function getLastCompletedGeneration(
-  exerciseId: number,
+  exerciseId: number
 ): Promise<ExerciseChatGeneration | null> {
   try {
     const generation = await db.query.exerciseChatGeneration.findFirst({
-      where: (generation, { eq, and }) => 
+      where: (generation, { eq, and }) =>
         and(
           eq(generation.status, "COMPLETED"),
           eq(generation.exerciseId, exerciseId)

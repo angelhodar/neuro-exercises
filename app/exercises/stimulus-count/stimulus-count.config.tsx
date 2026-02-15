@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useFormContext } from "react-hook-form"
+import { useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -8,20 +8,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 interface StimulusCountConfigFieldsProps {
-  basePath?: string
+  basePath?: string;
 }
 
-export function ConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) {
-  const { control } = useFormContext()
+export function ConfigFields({
+  basePath = "",
+}: StimulusCountConfigFieldsProps) {
+  const { control } = useFormContext();
 
-  const minStimuliPath = `${basePath}minStimuli`
-  const maxStimuliPath = `${basePath}maxStimuli`
-  const allowOverlapPath = `${basePath}allowOverlap`
+  const minStimuliPath = `${basePath}minStimuli`;
+  const maxStimuliPath = `${basePath}maxStimuli`;
+  const allowOverlapPath = `${basePath}allowOverlap`;
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -33,10 +35,12 @@ export function ConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) 
             <FormLabel>Mínimo de estímulos</FormLabel>
             <FormControl>
               <Input
-                type="number"
                 placeholder="5"
+                type="number"
                 {...field}
-                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                onChange={(e) =>
+                  field.onChange(Number.parseInt(e.target.value, 10) || 0)
+                }
               />
             </FormControl>
             <FormDescription>Mínimo de estímulos por pregunta</FormDescription>
@@ -53,10 +57,12 @@ export function ConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) 
             <FormLabel>Máximo de estímulos</FormLabel>
             <FormControl>
               <Input
-                type="number"
                 placeholder="10"
+                type="number"
                 {...field}
-                onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                onChange={(e) =>
+                  field.onChange(Number.parseInt(e.target.value, 10) || 0)
+                }
               />
             </FormControl>
             <FormDescription>Máximo de estímulos por pregunta</FormDescription>
@@ -85,5 +91,5 @@ export function ConfigFields({ basePath = "" }: StimulusCountConfigFieldsProps) 
         )}
       />
     </div>
-  )
+  );
 }

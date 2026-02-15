@@ -1,33 +1,42 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from "next/image";
+import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t bg-blue-50">
+    <footer className="flex w-full shrink-0 flex-col items-center gap-2 border-t bg-blue-50 px-4 py-6 sm:flex-row md:px-6">
       <div className="flex items-center gap-2">
         <Image
-          src="/logo.png"
           alt="NeuroGranada Logo"
-          width={20}
-          height={20}
           className="h-5 w-5"
+          height={20}
+          src="/logo.png"
+          width={20}
         />
-        <p className="text-xs text-gray-600">© {new Date().getFullYear()} NeuroGranada. Desarrollado con ❤️ en Granada, Andalucía.</p>
+        <p className="text-gray-600 text-xs">
+          © {new Date().getFullYear()} NeuroGranada. Desarrollado con ❤️ en
+          Granada, Andalucía.
+        </p>
       </div>
-      <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-        <Link href="/terminos" className="text-xs hover:underline underline-offset-4 text-gray-600 hover:text-blue-600">
+      <nav className="flex gap-4 sm:ml-auto sm:gap-6">
+        <Link
+          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
+          href="/terminos"
+        >
           Términos de Servicio
         </Link>
         <Link
+          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
           href="/privacidad"
-          className="text-xs hover:underline underline-offset-4 text-gray-600 hover:text-blue-600"
         >
           Privacidad
         </Link>
-        <Link href="/contacto" className="text-xs hover:underline underline-offset-4 text-gray-600 hover:text-blue-600">
+        <Link
+          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
+          href="/contacto"
+        >
           Contacto
         </Link>
       </nav>
     </footer>
-  )
+  );
 }

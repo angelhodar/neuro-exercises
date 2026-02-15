@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, Fragment } from "react";
-import { Volume2, Pause } from "lucide-react";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Pause, Volume2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
 
 interface ExerciseAudioButtonProps extends ButtonProps {
   audioSrc?: string;
@@ -12,7 +12,9 @@ export function ExerciseAudioButton({ audioSrc }: ExerciseAudioButtonProps) {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  if (!audioSrc) return null;
+  if (!audioSrc) {
+    return null;
+  }
 
   const handleToggleAudio = () => {
     if (audioRef.current) {
@@ -31,29 +33,30 @@ export function ExerciseAudioButton({ audioSrc }: ExerciseAudioButtonProps) {
   };
 
   return (
-    <Fragment>
+    <>
       <Button
-        size="lg"
+        className="bg-blue-600 px-8 py-3 text-lg text-white hover:bg-blue-700"
         onClick={handleToggleAudio}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+        size="lg"
       >
         {isPlayingAudio ? (
           <>
-            <Pause className="w-6 h-6 mr-2" />
+            <Pause className="mr-2 h-6 w-6" />
             <span>Pausar</span>
           </>
         ) : (
           <>
-            <Volume2 className="w-6 h-6 mr-2" />
+            <Volume2 className="mr-2 h-6 w-6" />
             <span>Instrucciones</span>
           </>
         )}
       </Button>
 
-      <audio ref={audioRef} onEnded={handleAudioEnded} preload="none">
+      {/* biome-ignore lint/a11y/useMediaCaption: exercise audio instructions do not have captions available */}
+      <audio onEnded={handleAudioEnded} preload="none" ref={audioRef}>
         <source src={audioSrc} type="audio/mpeg" />
         Tu navegador no soporta el elemento de audio.
       </audio>
-    </Fragment>
+    </>
   );
 }

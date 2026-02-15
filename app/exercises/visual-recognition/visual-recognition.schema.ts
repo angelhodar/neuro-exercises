@@ -4,12 +4,12 @@ import {
   type ExercisePreset,
 } from "@/lib/schemas/base-schemas";
 
-export type ImageData = {
+export interface ImageData {
   id: string;
   name: string;
   url: string;
   tags: string[];
-};
+}
 
 // Visual recognition specific configuration schema
 export const visualRecognitionSpecificConfigSchema = z.object({
@@ -30,7 +30,7 @@ export const visualRecognitionSpecificConfigSchema = z.object({
 // Reusable refinement function for visual recognition configurations
 export function visualRecognitionConfigRefinements(
   data: z.infer<typeof visualRecognitionSpecificConfigSchema>,
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ) {
   // Validate that correctImagesCount doesn't exceed imagesPerQuestion
   if (data.correctImagesCount >= data.imagesPerQuestion) {

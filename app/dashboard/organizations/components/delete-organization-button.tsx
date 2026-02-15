@@ -1,12 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { deleteOrganization } from "@/app/actions/organizations";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+import { deleteOrganization } from "@/app/actions/organizations";
+import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/hooks/use-confirm";
-import { Organization } from "@/lib/db/schema";
+import type { Organization } from "@/lib/db/schema";
 
 interface DeleteOrganizationButtonProps {
   organization: Organization;
@@ -25,7 +26,9 @@ export default function DeleteOrganizationButton({
       description: `¿Estás seguro de que quieres eliminar la organización "${organization.name}"? Esta acción no se puede deshacer.`,
     });
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     setIsDeleting(true);
     try {
@@ -33,7 +36,7 @@ export default function DeleteOrganizationButton({
       router.refresh();
     } catch (error) {
       console.error("Error eliminando organización:", error);
-      alert("Error al eliminar la organización");
+      toast.error("Error al eliminar la organización");
     } finally {
       setIsDeleting(false);
     }
@@ -41,10 +44,10 @@ export default function DeleteOrganizationButton({
 
   return (
     <Button
-      variant="outline"
-      size="sm"
-      onClick={handleDelete}
       disabled={isDeleting}
+      onClick={handleDelete}
+      size="sm"
+      variant="outline"
     >
       <Trash2 className="h-4 w-4" />
     </Button>

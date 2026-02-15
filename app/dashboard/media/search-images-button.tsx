@@ -1,37 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { parseAsBoolean, useQueryState } from "nuqs";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Download, Loader2, Search } from "lucide-react";
+import { parseAsBoolean, useQueryState } from "nuqs";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+import { searchImages, transferImagesToLibrary } from "@/app/actions/media";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  MediaCard,
+  MediaCardContainer,
+  MediaCardDescription,
+  MediaCardTitle,
+} from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
+import { Selectable } from "@/components/selectable";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Form,
+  FormControl,
   FormField,
   FormItem,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Selectable } from "@/components/selectable";
-import { MediaCard, MediaCardContainer, MediaCardTitle, MediaCardDescription } from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
-import { searchImages, transferImagesToLibrary } from "@/app/actions/media";
-import { Search, Loader2, Download } from "lucide-react";
 import type {
+  DownloadableImage,
   ImageResult,
   SearchResponse,
-  DownloadableImage,
 } from "@/lib/media/serper";
 
 const searchSchema = z.object({
@@ -43,7 +48,7 @@ type SearchSchema = z.infer<typeof searchSchema>;
 export default function SearchImagesButton() {
   const [open, setOpen] = useQueryState(
     "search-dialog",
-    parseAsBoolean.withDefault(false),
+    parseAsBoolean.withDefault(false)
   );
   const [isSearching, setIsSearching] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -88,13 +93,15 @@ export default function SearchImagesButton() {
   };
 
   const handleDownloadSelected = async () => {
-    if (selectedImages.size === 0) return;
+    if (selectedImages.size === 0) {
+      return;
+    }
 
     setIsDownloading(true);
 
     try {
       const selectedImageResults = searchResults.filter((img) =>
-        selectedImages.has(img.position),
+        selectedImages.has(img.position)
       );
 
       const downloadableImages: DownloadableImage[] = selectedImageResults.map(
@@ -103,7 +110,7 @@ export default function SearchImagesButton() {
           imageUrl: img.imageUrl,
           imageWidth: img.imageWidth,
           imageHeight: img.imageHeight,
-        }),
+        })
       );
 
       const results = await transferImagesToLibrary(downloadableImages);
@@ -113,11 +120,11 @@ export default function SearchImagesButton() {
 
       if (errorCount > 0) {
         toast.warning(
-          `${successCount} imágenes descargadas, ${errorCount} errores`,
+          `${successCount} imágenes descargadas, ${errorCount} errores`
         );
       } else {
         toast.success(
-          `${successCount} imágenes transferidas exitosamente a tu biblioteca`,
+          `${successCount} imágenes transferidas exitosamente a tu biblioteca`
         );
       }
 
@@ -125,7 +132,9 @@ export default function SearchImagesButton() {
       setSelectedImages(new Set());
 
       // Close dialog if all downloads were successful
-      if (errorCount === 0) setOpen(false);
+      if (errorCount === 0) {
+        setOpen(false);
+      }
     } catch (e) {
       console.error(e);
       toast.error("Error descargando las imágenes");
@@ -135,12 +144,12 @@ export default function SearchImagesButton() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger render={<Button />}>
-        <Search className="w-4 h-4" />
+        <Search className="h-4 w-4" />
         Buscar en internet
       </DialogTrigger>
-      <DialogContent className="max-w-7xl max-h-[90vh]">
+      <DialogContent className="max-h-[90vh] max-w-7xl">
         <DialogHeader>
           <DialogTitle>Buscar imágenes</DialogTitle>
           <DialogDescription>
@@ -152,8 +161,8 @@ export default function SearchImagesButton() {
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
             className="mt-4 space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField
               control={form.control}
@@ -167,11 +176,11 @@ export default function SearchImagesButton() {
                         {...field}
                         className="flex-1"
                       />
-                      <Button type="submit" disabled={isSearching}>
+                      <Button disabled={isSearching} type="submit">
                         {isSearching ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Search className="w-4 h-4" />
+                          <Search className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
@@ -184,45 +193,45 @@ export default function SearchImagesButton() {
         </Form>
 
         {searchResults.length > 0 && (
-          <div className="mt-6 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-muted-foreground">
+          <div className="mt-6 flex h-full flex-col">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">
                 {selectedImages.size} de {searchResults.length} seleccionadas
               </span>
               {selectedImages.size > 0 && (
                 <Button
-                  onClick={handleDownloadSelected}
                   disabled={isDownloading}
+                  onClick={handleDownloadSelected}
                   size="sm"
                 >
                   {isDownloading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Download className="w-4 h-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                   )}
                   Transferir a mi biblioteca
                 </Button>
               )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto max-h-[60vh] p-2">
+            <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto p-2 md:grid-cols-3">
               {searchResults.map((image) => (
                 <Selectable
                   key={image.position}
-                  selected={selectedImages.has(image.position)}
                   onClick={() => handleImageClick(image)}
+                  selected={selectedImages.has(image.position)}
                 >
                   <MediaCard>
                     <MediaCardContainer>
                       <MediaImage
-                        src={image.thumbnailUrl}
                         alt={image.title}
                         fill
-                        unoptimized
                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        src={image.thumbnailUrl}
+                        unoptimized
                       />
                     </MediaCardContainer>
-                    <div className="p-2 space-y-1">
-                      <MediaCardTitle className="text-sm line-clamp-2">
+                    <div className="space-y-1 p-2">
+                      <MediaCardTitle className="line-clamp-2 text-sm">
                         {image.title}
                       </MediaCardTitle>
                       <MediaCardDescription className="text-xs">
@@ -238,7 +247,7 @@ export default function SearchImagesButton() {
 
         {isSearching && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin mr-2" />
+            <Loader2 className="mr-2 h-6 w-6 animate-spin" />
             <span>Buscando imágenes...</span>
           </div>
         )}

@@ -1,6 +1,6 @@
+import ExercisesSection from "./exercises";
 import HeroSection from "./hero";
 import MultimediaFeaturesSection from "./multimedia-features";
-import ExercisesSection from "./exercises";
 import TemplatesSection from "./templates";
 
 export default function Home() {

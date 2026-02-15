@@ -1,10 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { createOrganization } from "@/app/actions/organizations";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +24,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Building2, Plus, Loader2 } from "lucide-react";
-import { createOrganization } from "@/app/actions/organizations";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const createOrganizationSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -67,7 +67,7 @@ export default function CreateOrganizationButton() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger render={<Button />}>
         <Plus className="mr-2 h-4 w-4" />
         Crear organización
@@ -90,8 +90,8 @@ export default function CreateOrganizationButton() {
                     <FormLabel>Nombre de la organización *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ej: NeuroGranada Research"
                         disabled={isLoading}
+                        placeholder="Ej: NeuroGranada Research"
                         {...field}
                       />
                     </FormControl>
@@ -108,13 +108,13 @@ export default function CreateOrganizationButton() {
                     <FormLabel>Slug (opcional)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ej: neurogranada-research"
                         disabled={isLoading}
+                        placeholder="Ej: neurogranada-research"
                         {...field}
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Si no se especifica, se generará automáticamente a partir
                       del nombre.
                     </p>
@@ -130,8 +130,8 @@ export default function CreateOrganizationButton() {
                     <FormLabel>URL del logo (opcional)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://ejemplo.com/logo.png"
                         disabled={isLoading}
+                        placeholder="https://ejemplo.com/logo.png"
                         {...field}
                       />
                     </FormControl>
@@ -148,8 +148,8 @@ export default function CreateOrganizationButton() {
                     <FormLabel>Información adicional (opcional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Información adicional sobre la organización..."
                         disabled={isLoading}
+                        placeholder="Información adicional sobre la organización..."
                         {...field}
                       />
                     </FormControl>
@@ -160,14 +160,14 @@ export default function CreateOrganizationButton() {
             </div>
             <DialogFooter>
               <Button
+                disabled={isLoading}
+                onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

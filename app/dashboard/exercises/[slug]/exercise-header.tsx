@@ -1,6 +1,6 @@
+import type { Exercise } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 import EditExerciseButton from "../edit-exercise";
-import type { Exercise } from "@/lib/db/schema";
 
 interface ExerciseHeaderProps {
   exercise: Exercise;
@@ -8,17 +8,19 @@ interface ExerciseHeaderProps {
 
 export function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
   return (
-    <div className="p-6 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
+    <div className="border-gray-200/50 border-b bg-white/50 p-6 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
+            {/* biome-ignore lint/performance/noImgElement: dynamic blob URL from storage */}
             <img
-              src={
-                createBlobUrl(exercise.thumbnailUrl || "") ||
-                "/placeholder.svg"
-              }
               alt={exercise.displayName}
-              className="w-14 h-14 rounded-xl object-cover shadow-sm ring-1 ring-gray-200"
+              className="h-14 w-14 rounded-xl object-cover shadow-sm ring-1 ring-gray-200"
+              height={56}
+              src={
+                createBlobUrl(exercise.thumbnailUrl || "") || "/placeholder.svg"
+              }
+              width={56}
             />
           </div>
           <div className="flex-1">
@@ -33,4 +35,4 @@ export function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
       </div>
     </div>
   );
-} 
+}

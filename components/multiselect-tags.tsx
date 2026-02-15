@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { MultiAsyncSelect } from "@/components/multi-async-select";
+import { useDebounce } from "@/hooks/use-debounce";
 
 // Async fetcher for tags
 async function fetchTags(query: string): Promise<string[]> {
   const res = await fetch(`/api/media/tags?query=${query}`);
-  if (!res.ok) throw new Error("Network error");
+  if (!res.ok) {
+    throw new Error("Network error");
+  }
   return res.json();
 }
 
@@ -43,14 +45,14 @@ export default function MultiSelectTags(props: MultiSelectTagsProps) {
 
   return (
     <MultiAsyncSelect
-      loading={isLoading}
-      error={error}
-      options={options}
-      value={value}
-      onValueChange={(values) => onChange?.(values)}
-      onSearch={handleSearch}
-      searchPlaceholder="Buscar etiquetas..."
       async
+      error={error}
+      loading={isLoading}
+      onSearch={handleSearch}
+      onValueChange={(values) => onChange?.(values)}
+      options={options}
+      searchPlaceholder="Buscar etiquetas..."
+      value={value}
       {...rest}
     />
   );

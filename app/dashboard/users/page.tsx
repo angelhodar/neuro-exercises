@@ -1,12 +1,12 @@
+import { Building2, User } from "lucide-react";
 import { getUsers } from "@/app/actions/users";
-import { Card, CardContent } from "@/components/ui/card";
-import { User, Building2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   DashboardHeader,
-  DashboardHeaderTitle,
   DashboardHeaderDescription,
+  DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ export default async function UsersPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <DashboardHeader>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex w-full items-center justify-between">
           <div>
             <DashboardHeaderTitle>Usuarios</DashboardHeaderTitle>
             <DashboardHeaderDescription>
@@ -61,12 +61,14 @@ export default async function UsersPage() {
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     {user.memberships && user.memberships.length > 0 ? (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="text-xs" variant="outline">
                         <Building2 className="mr-1 h-3 w-3" />
                         {user.memberships[0].organization.name}
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground text-sm">Sin organizaciones</span>
+                      <span className="text-muted-foreground text-sm">
+                        Sin organizaciones
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>{formatDate(String(user.createdAt))}</TableCell>

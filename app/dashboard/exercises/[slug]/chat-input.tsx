@@ -1,9 +1,9 @@
 "use client";
 
+import { ImagePlus, Send, Square, X } from "lucide-react";
 import type React from "react";
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ImagePlus, Send, X, Square } from "lucide-react";
 
 interface ChatInputProps {
   disabled?: boolean;
@@ -20,7 +20,7 @@ export function ChatInput({
   onInputChange,
   onSubmit,
   isLoading,
-  onStop
+  onStop,
 }: ChatInputProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +36,7 @@ export function ChatInput({
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      Array.from(files).forEach((file) => {
+      for (const file of Array.from(files)) {
         if (file.type.startsWith("image/")) {
           const reader = new FileReader();
           reader.onload = (e) => {
@@ -45,7 +45,7 @@ export function ChatInput({
           };
           reader.readAsDataURL(file);
         }
-      });
+      }
     }
   };
 
@@ -54,76 +54,82 @@ export function ChatInput({
   };
 
   return (
-    <div className="p-2 border-t border-gray-200/50 bg-white/50 backdrop-blur-sm">
+    <div className="border-gray-200/50 border-t bg-white/50 p-2 backdrop-blur-sm">
       {/* Image Preview Area */}
       {uploadedImages.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {uploadedImages.map((image, index) => (
-            <div key={index} className="relative group">
+            <div className="group relative" key={image.slice(0, 64)}>
+              {/* biome-ignore lint/performance/noImgElement: data URL from FileReader cannot use next/image */}
               <img
-                src={image || "/placeholder.svg"}
                 alt={`Upload ${index + 1}`}
-                className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                className="h-16 w-16 rounded-lg border border-gray-200 object-cover shadow-sm"
+                height={64}
+                src={image || "/placeholder.svg"}
+                width={64}
               />
               <button
+                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={() => removeImage(index)}
-                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                type="button"
               >
-                <X className="w-3 h-3" />
+                <X className="h-3 w-3" />
               </button>
             </div>
           ))}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form className="space-y-3" onSubmit={handleSubmit}>
         <div className="relative">
           <textarea
-            value={input}
+            className="h-24 w-full resize-none rounded-xl border border-gray-200 bg-white/80 px-3 py-3 pr-20 pb-12 shadow-sm focus:border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            disabled={disabled || isLoading}
             onChange={(e) => onInputChange(e.target.value)}
             placeholder="Ask about this exercise... (Markdown supported)"
-            className="w-full h-24 resize-none pr-20 pb-12 bg-white/80 border border-gray-200 focus:border-blue-200 focus:ring-blue-100 rounded-xl shadow-sm px-3 py-3 focus:outline-none focus:ring-2"
-            disabled={disabled || isLoading}
+            value={input}
           />
           <input
-            ref={fileInputRef}
-            type="file"
             accept="image/*"
+            className="hidden"
             multiple
             onChange={handleImageUpload}
-            className="hidden"
+            ref={fileInputRef}
+            type="file"
           />
-          <div className="absolute bottom-3 right-3 flex items-center space-x-2">
+          <div className="absolute right-3 bottom-3 flex items-center space-x-2">
             <Button
+              className="h-9 w-9 rounded-lg p-0 hover:bg-gray-100"
+              disabled={isLoading}
+              onClick={() => fileInputRef.current?.click()}
+              size="sm"
               type="button"
               variant="ghost"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
-              disabled={isLoading}
             >
               <ImagePlus className="h-5 w-5 text-gray-500" />
             </Button>
 
             {isLoading && onStop ? (
               <Button
+                className="h-9 w-9 rounded-lg p-0 hover:bg-gray-100"
+                onClick={onStop}
+                size="sm"
                 type="button"
                 variant="ghost"
-                size="sm"
-                onClick={onStop}
-                className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
               >
                 <Square className="h-5 w-5 text-gray-500" />
               </Button>
             ) : (
               <Button
-                type="submit"
+                className="h-9 w-9 rounded-lg p-0 hover:bg-gray-100"
                 disabled={
-                  disabled || isLoading || (!input.trim() && uploadedImages.length === 0)
+                  disabled ||
+                  isLoading ||
+                  (!input.trim() && uploadedImages.length === 0)
                 }
-                variant="ghost"
                 size="sm"
-                className="h-9 w-9 p-0 hover:bg-gray-100 rounded-lg"
+                type="submit"
+                variant="ghost"
               >
                 <Send className="h-5 w-5 text-gray-500" />
               </Button>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Maximize, Minimize } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FloatingBarButton } from "./exercise-floating-bar";
 
 export function ExerciseFullscreenButton() {
@@ -47,9 +47,9 @@ export function ExerciseFullscreenButton() {
   return (
     <FloatingBarButton onClick={handleToggleFullscreen}>
       {isFullscreen ? (
-        <Minimize className="w-4 h-4" />
+        <Minimize className="h-4 w-4" />
       ) : (
-        <Maximize className="w-4 h-4" />
+        <Maximize className="h-4 w-4" />
       )}
     </FloatingBarButton>
   );

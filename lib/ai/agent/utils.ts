@@ -1,4 +1,4 @@
-import { ExerciseChatGeneration } from "@/lib/db/schema";
+import type { ExerciseChatGeneration } from "@/lib/db/schema";
 
 interface GenerationData {
   mainGuidelinesPrompt: string;
@@ -7,15 +7,19 @@ interface GenerationData {
 }
 
 export function extractGenerationData(
-  generations: ExerciseChatGeneration[],
+  generations: ExerciseChatGeneration[]
 ): GenerationData {
-  const mainGeneration = generations.at(0)!;
+  const mainGeneration = generations.at(0);
+
+  if (!mainGeneration) {
+    throw new Error("No generations available");
+  }
   const lastGeneration = generations.at(-1);
   const previousGeneration = generations.at(-2);
 
   return {
     mainGuidelinesPrompt: mainGeneration.prompt,
     lastCodeBlobKey: previousGeneration?.codeBlobKey || null,
-    lastUserPrompt: generations.length > 1 ? lastGeneration!.prompt : null,
+    lastUserPrompt: generations.length > 1 ? lastGeneration?.prompt : null,
   };
 }

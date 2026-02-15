@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,9 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import { Exercise } from "@/lib/db/schema";
+import type { Exercise } from "@/lib/db/schema";
 import { ExerciseCard } from "./exercise-card";
 
 interface AddExerciseButtonProps {
@@ -38,22 +37,24 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (!open) setSearchTerm("");
+    if (!open) {
+      setSearchTerm("");
+    }
   };
 
   return (
-    <Fragment>
+    <>
       <Button
-        type="button"
         onClick={() => setIsOpen(true)}
-        variant="outline"
         size="sm"
+        type="button"
+        variant="outline"
       >
-        <Plus className="w-4 h-4 mr-2" />
+        <Plus className="mr-2 h-4 w-4" />
         Añadir ejercicio
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Dialog onOpenChange={handleOpenChange} open={isOpen}>
         <DialogContent className="lg:max-w-5xl">
           <DialogHeader>
             <DialogTitle>Añadir ejercicio</DialogTitle>
@@ -62,32 +63,32 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2 mt-4">
+            <div className="mt-4 space-y-2">
               <Input
+                className="w-full"
                 id="search"
-                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar ejercicio..."
-                className="w-full"
+                value={searchTerm}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2 max-h-[600px]">
+            <div className="grid max-h-[600px] grid-cols-1 gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3">
               {filteredExercises.map((exercise) => (
-                <ExerciseCard key={exercise.id} exercise={exercise}>
+                <ExerciseCard exercise={exercise} key={exercise.id}>
                   <Button
-                    type="button"
+                    className="w-full"
                     onClick={() => handleAddExercise(exercise)}
                     size="sm"
-                    className="w-full"
+                    type="button"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Añadir
                   </Button>
                 </ExerciseCard>
               ))}
             </div>
             {filteredExercises.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="py-8 text-center text-muted-foreground">
                 <p>
                   No se han encontrado ejercicios que coincidan con "
                   {searchTerm}"
@@ -97,6 +98,6 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
           </div>
         </DialogContent>
       </Dialog>
-    </Fragment>
+    </>
   );
 }

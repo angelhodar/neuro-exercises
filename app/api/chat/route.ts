@@ -1,22 +1,18 @@
-import { streamText, stepCountIs } from "ai";
-import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
-import {
-  getCodeContext,
-  readFiles,
-  writeFiles,
-} from "@/lib/ai/agent/tools";
-import { extractGenerationData } from "@/lib/ai/agent/utils";
+import { stepCountIs, streamText } from "ai";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import {
-  getExerciseGenerations,
   createExerciseGeneration,
+  getExerciseGenerations,
   updateExerciseGeneration,
 } from "@/app/actions/generations";
+import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
+import { getCodeContext, readFiles, writeFiles } from "@/lib/ai/agent/tools";
+import { extractGenerationData } from "@/lib/ai/agent/utils";
 
 export async function POST(req: Request) {
   const { messages, slug } = await req.json();
 
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
 
   if (!lastMessage || lastMessage.role !== "user") {
     return new Response("No user message found", { status: 400 });
@@ -34,7 +30,7 @@ export async function POST(req: Request) {
     return new Response("No generation to process", { status: 400 });
   }
 
-  if (generations.at(-1)!.status === "COMPLETED") {
+  if (generations.at(-1)?.status === "COMPLETED") {
     const newGeneration = await createExerciseGeneration({
       exerciseId: exercise.id,
       prompt: lastMessage.content,

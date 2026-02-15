@@ -1,11 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { updateOrganization } from "@/app/actions/organizations";
 import type { ButtonProps } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -22,11 +25,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Building2, Edit, Loader2 } from "lucide-react";
-import { updateOrganization } from "@/app/actions/organizations";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { Organization } from "@/lib/db/schema";
 
 const updateOrganizationSchema = z.object({
@@ -42,7 +42,11 @@ interface EditOrganizationButtonProps extends ButtonProps {
   organization: Organization;
 }
 
-export default function EditOrganizationButton({ organization, children, ...buttonProps }: EditOrganizationButtonProps) {
+export default function EditOrganizationButton({
+  organization,
+  children,
+  ...buttonProps
+}: EditOrganizationButtonProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -79,7 +83,7 @@ export default function EditOrganizationButton({ organization, children, ...butt
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger render={<Button {...buttonProps} />}>
         {children}
       </DialogTrigger>
@@ -101,8 +105,8 @@ export default function EditOrganizationButton({ organization, children, ...butt
                     <FormLabel>Nombre de la organización *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ej: NeuroGranada Research"
                         disabled={isLoading}
+                        placeholder="Ej: NeuroGranada Research"
                         {...field}
                       />
                     </FormControl>
@@ -119,8 +123,8 @@ export default function EditOrganizationButton({ organization, children, ...butt
                     <FormLabel>Slug (opcional)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ej: neurogranada-research"
                         disabled={isLoading}
+                        placeholder="Ej: neurogranada-research"
                         {...field}
                       />
                     </FormControl>
@@ -137,8 +141,8 @@ export default function EditOrganizationButton({ organization, children, ...butt
                     <FormLabel>URL del logo (opcional)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://ejemplo.com/logo.png"
                         disabled={isLoading}
+                        placeholder="https://ejemplo.com/logo.png"
                         {...field}
                       />
                     </FormControl>
@@ -155,8 +159,8 @@ export default function EditOrganizationButton({ organization, children, ...butt
                     <FormLabel>Metadatos (opcional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Información adicional sobre la organización..."
                         disabled={isLoading}
+                        placeholder="Información adicional sobre la organización..."
                         {...field}
                       />
                     </FormControl>
@@ -167,14 +171,14 @@ export default function EditOrganizationButton({ organization, children, ...butt
             </div>
             <DialogFooter>
               <Button
+                disabled={isLoading}
+                onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -190,4 +194,4 @@ export default function EditOrganizationButton({ organization, children, ...butt
       </DialogContent>
     </Dialog>
   );
-} 
+}

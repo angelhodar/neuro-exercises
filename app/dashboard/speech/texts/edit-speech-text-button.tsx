@@ -1,9 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Edit } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { updateSpeechText } from "@/app/actions/speech";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -13,18 +17,14 @@ import {
 } from "@/components/ui/dialog";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Edit } from "lucide-react";
-import { updateSpeechText } from "@/app/actions/speech";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const schema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -43,7 +43,9 @@ interface EditSpeechTextButtonProps {
   speechText: SpeechText;
 }
 
-export default function EditSpeechTextButton({ speechText }: EditSpeechTextButtonProps) {
+export default function EditSpeechTextButton({
+  speechText,
+}: EditSpeechTextButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,11 +63,11 @@ export default function EditSpeechTextButton({ speechText }: EditSpeechTextButto
       const formData = new FormData();
       formData.append("name", values.name);
       formData.append("referenceText", values.referenceText);
-      
+
       await updateSpeechText(speechText.id, formData);
       toast.success("Texto de referencia actualizado exitosamente");
       setIsOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error al actualizar el texto de referencia");
     } finally {
       setIsLoading(false);
@@ -73,16 +75,19 @@ export default function EditSpeechTextButton({ speechText }: EditSpeechTextButto
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={<Button variant="outline" size="sm" />}>
-        <Edit className="w-4 h-4" />
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+      <DialogTrigger render={<Button size="sm" variant="outline" />}>
+        <Edit className="h-4 w-4" />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Editar texto</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form
+            className="mt-4 space-y-4"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
             <FormField
               control={form.control}
               name="name"
@@ -115,14 +120,14 @@ export default function EditSpeechTextButton({ speechText }: EditSpeechTextButto
             />
             <div className="flex justify-end gap-2">
               <Button
+                disabled={isLoading}
+                onClick={() => setIsOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setIsOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? "Guardando..." : "Guardar Cambios"}
               </Button>
             </div>
@@ -131,4 +136,4 @@ export default function EditSpeechTextButton({ speechText }: EditSpeechTextButto
       </DialogContent>
     </Dialog>
   );
-} 
+}

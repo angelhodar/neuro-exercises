@@ -1,21 +1,21 @@
 import { getMedias } from "@/app/actions/media";
 import {
+  DashboardHeader,
+  DashboardHeaderActions,
+  DashboardHeaderDescription,
+  DashboardHeaderTitle,
+} from "@/app/dashboard/dashboard-header";
+import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
+import {
   MediaCard,
+  MediaCardBadges,
   MediaCardContainer,
   MediaCardTitle,
-  MediaCardBadges,
 } from "@/components/media/media-card";
 import { MediaDisplay } from "@/components/media/media-display";
-import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
 import CreateMediaDropdownButton from "./create-media-dropdown-button";
-import SearchImagesButton from "./search-images-button";
 import MediaFilters from "./media-filters";
-import {
-  DashboardHeader,
-  DashboardHeaderTitle,
-  DashboardHeaderDescription,
-  DashboardHeaderActions,
-} from "@/app/dashboard/dashboard-header";
+import SearchImagesButton from "./search-images-button";
 
 interface Props {
   searchParams: Promise<{ q?: string; tags?: string | string[] }>;
@@ -23,7 +23,14 @@ interface Props {
 
 export default async function MediasPage({ searchParams }: Props) {
   const { q, tags } = await searchParams;
-  const tagsArray = Array.isArray(tags) ? tags : tags ? [tags] : [];
+  let tagsArray: string[];
+  if (Array.isArray(tags)) {
+    tagsArray = tags;
+  } else if (tags) {
+    tagsArray = [tags];
+  } else {
+    tagsArray = [];
+  }
   const medias = await getMedias(q, tagsArray);
 
   return (
@@ -42,18 +49,18 @@ export default async function MediasPage({ searchParams }: Props) {
         </DashboardHeaderActions>
       </DashboardHeader>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-8">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {medias.map((media) => (
           <MediaCard key={media.id}>
             <MediaCardContainer>
               <MediaDisplay media={media} />
               <MediaActionsDropdown
-                media={media}
                 className="absolute top-2 right-2"
+                media={media}
               />
             </MediaCardContainer>
-            <div className="p-4 flex-1 flex flex-col gap-3">
-              <MediaCardTitle className="text-sm text-center line-clamp-2">
+            <div className="flex flex-1 flex-col gap-3 p-4">
+              <MediaCardTitle className="line-clamp-2 text-center text-sm">
                 {media.name}
               </MediaCardTitle>
               {media.tags && media.tags.length > 0 && (

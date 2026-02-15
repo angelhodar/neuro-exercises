@@ -2,11 +2,11 @@
 
 import {
   createContext,
+  type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  useCallback,
-  PropsWithChildren,
 } from "react";
 import { createOrConnectToSandbox, stopSandbox } from "@/app/actions/sandbox";
 
@@ -44,7 +44,9 @@ export function SandboxProvider({
 
   // Initialize or connect to sandbox
   const initializeSandbox = useCallback(async () => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -55,7 +57,7 @@ export function SandboxProvider({
     } catch (error) {
       console.error("Error initializing sandbox:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to initialize sandbox",
+        error instanceof Error ? error.message : "Failed to initialize sandbox"
       );
     } finally {
       setIsLoading(false);
@@ -72,7 +74,7 @@ export function SandboxProvider({
         stopSandbox(exerciseId).catch(console.error);
       }
     };
-  }, []);
+  }, [exerciseId, initializeSandbox, sandboxUrl]);
 
   const value: SandboxContextType = {
     sandboxUrl,

@@ -59,13 +59,15 @@ export const stimulusSchema = z.object({
 
 export type Stimulus = z.infer<typeof stimulusSchema>;
 
-export const stimulusCountPresets: Record<ExercisePreset, StimulusCountSpecificConfig> =
-  {
-    easy: { minStimuli: 3, maxStimuli: 5, allowOverlap: false },
-    medium: { minStimuli: 5, maxStimuli: 10, allowOverlap: false },
-    hard: { minStimuli: 10, maxStimuli: 20, allowOverlap: true },
-    expert: { minStimuli: 15, maxStimuli: 30, allowOverlap: true },
-  };
+export const stimulusCountPresets: Record<
+  ExercisePreset,
+  StimulusCountSpecificConfig
+> = {
+  easy: { minStimuli: 3, maxStimuli: 5, allowOverlap: false },
+  medium: { minStimuli: 5, maxStimuli: 10, allowOverlap: false },
+  hard: { minStimuli: 10, maxStimuli: 20, allowOverlap: true },
+  expert: { minStimuli: 15, maxStimuli: 30, allowOverlap: true },
+};
 
 export const defaultConfig: StimulusCountConfig = {
   endConditionType: "questions",

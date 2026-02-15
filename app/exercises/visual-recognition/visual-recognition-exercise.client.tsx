@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useExerciseExecution } from "@/hooks/use-exercise-execution";
-import { Badge } from "@/components/ui/badge";
-import { Selectable } from "@/components/selectable";
-import { MediaCard, MediaCardContainer, MediaCardTitle } from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+import { useEffect, useRef, useState } from "react";
 import {
-  type VisualRecognitionConfig,
-  type VisualRecognitionQuestionResult,
-  type ImageData,
-} from "./visual-recognition.schema";
+  MediaCard,
+  MediaCardContainer,
+  MediaCardTitle,
+} from "@/components/media/media-card";
+import { MediaImage } from "@/components/media/media-image";
+import { Selectable } from "@/components/selectable";
+import { Badge } from "@/components/ui/badge";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { createBlobUrl } from "@/lib/utils";
+import type {
+  ImageData,
+  VisualRecognitionConfig,
+  VisualRecognitionQuestionResult,
+} from "./visual-recognition.schema";
 
 interface VisualRecognitionExerciseClientProps {
   config: VisualRecognitionConfig;
@@ -35,7 +39,7 @@ export function VisualRecognitionExerciseClient({
     config;
 
   const { currentQuestionIndex, addResult } = useExerciseExecution();
-  
+
   // Use ref to prevent multiple submissions for the same question
   const hasSubmittedRef = useRef(false);
 
@@ -48,102 +52,34 @@ export function VisualRecognitionExerciseClient({
     pendingResult: null,
   });
 
-  function selectImagesForQuestion(): {
-    targetTag: string;
-    displayedImages: ImageData[];
-    correctImageIds: string[];
-  } | null {
-    if (tags.length < 2) return null;
-
-    const targetTag = tags[Math.floor(Math.random() * tags.length)];
-
-    const targetImages = images.filter((img) => img.tags.includes(targetTag));
-    if (targetImages.length < correctImagesCount) return null;
-
-    const shuffledTargetImages = [...targetImages].sort(
-      () => 0.5 - Math.random(),
-    );
-    const correctImages = shuffledTargetImages.slice(0, correctImagesCount);
-
-    const distractorTags = tags.filter((t) => t !== targetTag);
-    const distractorImagesNeeded = imagesPerQuestion - correctImagesCount;
-
-    const potentialDistractors = images.filter(
-      (img) =>
-        !img.tags.includes(targetTag) &&
-        img.tags.some((t) => distractorTags.includes(t)),
-    );
-
-    if (potentialDistractors.length < distractorImagesNeeded) return null;
-
-    const shuffledDistractors = [...potentialDistractors].sort(
-      () => 0.5 - Math.random(),
-    );
-    const distractorImages = shuffledDistractors.slice(
-      0,
-      distractorImagesNeeded,
-    );
-
-    const allImages = [...correctImages, ...distractorImages].sort(
-      () => 0.5 - Math.random(),
-    );
-
-    return {
-      targetTag,
-      displayedImages: allImages,
-      correctImageIds: correctImages.map((img) => img.id),
-    };
-  }
-
-  function setupNewQuestion() {
-    // Reset submission flag for new question
-    hasSubmittedRef.current = false;
-    
-    const questionData = selectImagesForQuestion();
-    if (!questionData) {
-      console.error(
-        "No se pudieron generar las preguntas. Verifica la configuración y las imágenes disponibles.",
-      );
-      setQuestionState({
-        targetTag: "Error",
-        displayedImages: [],
-        correctImageIds: [],
-        selectedImageIds: [],
-        isAnswerSubmitted: false,
-        pendingResult: null,
-      });
-      return;
-    }
-    setQuestionState({ 
-      ...questionData, 
-      selectedImageIds: [], 
-      isAnswerSubmitted: false,
-      pendingResult: null,
-    });
-  }
-
   function handleImageClick(imageId: string) {
     // Prevent clicks if already submitted
-    if (questionState.isAnswerSubmitted || hasSubmittedRef.current) return;
-    
+    if (questionState.isAnswerSubmitted || hasSubmittedRef.current) {
+      return;
+    }
+
     const isSelected = questionState.selectedImageIds.includes(imageId);
     const updatedSelected = isSelected
       ? questionState.selectedImageIds.filter((id) => id !== imageId)
       : [...questionState.selectedImageIds, imageId];
-    
+
     // Check if we have the correct number of images selected and haven't submitted yet
-    if (updatedSelected.length === correctImagesCount && !questionState.isAnswerSubmitted && !hasSubmittedRef.current) {
+    if (
+      updatedSelected.length === correctImagesCount &&
+      !questionState.isAnswerSubmitted &&
+      !hasSubmittedRef.current
+    ) {
       hasSubmittedRef.current = true;
-      
+
       // Create result immediately
       const result = {
-        targetTag: questionState.targetTag!,
+        targetTag: questionState.targetTag ?? "",
         correctImages: questionState.correctImageIds,
         selectedImages: updatedSelected,
         timeSpent: 0,
         timeExpired: false,
       } as VisualRecognitionQuestionResult;
-      
+
       // Update state with result and submitted flag
       setQuestionState((prev) => ({
         ...prev,
@@ -171,19 +107,104 @@ export function VisualRecognitionExerciseClient({
     }
   }, [questionState.pendingResult, addResult]);
 
+  // Setup question when question changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
   useEffect(() => {
-    setupNewQuestion();
-  }, [currentQuestionIndex]);
+    hasSubmittedRef.current = false;
+
+    if (tags.length < 2) {
+      console.error(
+        "No se pudieron generar las preguntas. Verifica la configuracion y las imagenes disponibles."
+      );
+      setQuestionState({
+        targetTag: "Error",
+        displayedImages: [],
+        correctImageIds: [],
+        selectedImageIds: [],
+        isAnswerSubmitted: false,
+        pendingResult: null,
+      });
+      return;
+    }
+
+    const targetTag = tags[Math.floor(Math.random() * tags.length)];
+    const targetImages = images.filter((img) => img.tags.includes(targetTag));
+
+    if (targetImages.length < correctImagesCount) {
+      setQuestionState({
+        targetTag: "Error",
+        displayedImages: [],
+        correctImageIds: [],
+        selectedImageIds: [],
+        isAnswerSubmitted: false,
+        pendingResult: null,
+      });
+      return;
+    }
+
+    const shuffledTargetImages = [...targetImages].sort(
+      () => 0.5 - Math.random()
+    );
+    const correctImages = shuffledTargetImages.slice(0, correctImagesCount);
+
+    const distractorTags = tags.filter((t) => t !== targetTag);
+    const distractorImagesNeeded = imagesPerQuestion - correctImagesCount;
+
+    const potentialDistractors = images.filter(
+      (img) =>
+        !img.tags.includes(targetTag) &&
+        img.tags.some((t) => distractorTags.includes(t))
+    );
+
+    if (potentialDistractors.length < distractorImagesNeeded) {
+      setQuestionState({
+        targetTag: "Error",
+        displayedImages: [],
+        correctImageIds: [],
+        selectedImageIds: [],
+        isAnswerSubmitted: false,
+        pendingResult: null,
+      });
+      return;
+    }
+
+    const shuffledDistractors = [...potentialDistractors].sort(
+      () => 0.5 - Math.random()
+    );
+    const distractorImages = shuffledDistractors.slice(
+      0,
+      distractorImagesNeeded
+    );
+
+    const allImages = [...correctImages, ...distractorImages].sort(
+      () => 0.5 - Math.random()
+    );
+
+    setQuestionState({
+      targetTag,
+      displayedImages: allImages,
+      correctImageIds: correctImages.map((img) => img.id),
+      selectedImageIds: [],
+      isAnswerSubmitted: false,
+      pendingResult: null,
+    });
+  }, [
+    currentQuestionIndex,
+    tags,
+    images,
+    correctImagesCount,
+    imagesPerQuestion,
+  ]);
 
   if (questionState.targetTag === "Error") {
     return (
-      <div className="text-center p-8">
+      <div className="p-8 text-center">
         <p className="font-bold text-red-600">Error al generar la pregunta</p>
         <p className="text-muted-foreground">
           No hay suficientes imágenes con las etiquetas configuradas para crear
           la pregunta.
         </p>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           Asegúrate de tener suficientes imágenes correctas y distractoras.
         </p>
       </div>
@@ -191,32 +212,32 @@ export function VisualRecognitionExerciseClient({
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 w-full h-full">
-      <Badge variant="outline" className="mt-6 text-2xl px-4 py-2 capitalize">
+    <div className="flex h-full w-full flex-col items-center gap-6 p-4">
+      <Badge className="mt-6 px-4 py-2 text-2xl capitalize" variant="outline">
         {questionState.targetTag}
       </Badge>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {questionState.displayedImages.map((image) => {
           const isSelected = questionState.selectedImageIds.includes(image.id);
           return (
             <Selectable
               key={image.id}
-              selected={isSelected}
               onClick={() => handleImageClick(image.id)}
+              selected={isSelected}
             >
               <MediaCard>
                 <MediaCardContainer>
                   <MediaImage
-                    src={createBlobUrl(image.url)}
                     alt={showImageNames ? image.name : "Imagen del ejercicio"}
-                    width={300}
                     height={300}
+                    src={createBlobUrl(image.url)}
+                    width={300}
                   />
                 </MediaCardContainer>
                 {showImageNames && (
                   <div className="p-2">
-                    <MediaCardTitle className="text-sm text-center line-clamp-2">
+                    <MediaCardTitle className="line-clamp-2 text-center text-sm">
                       {image.name}
                     </MediaCardTitle>
                   </div>

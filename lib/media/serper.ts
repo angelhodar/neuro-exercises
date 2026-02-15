@@ -31,30 +31,33 @@ export interface SearchResponse {
   credits: number;
 }
 
-export async function searchImages(query: string, numResults: number = 10): Promise<SearchResponse> {
+export async function searchImages(
+  query: string,
+  numResults = 10
+): Promise<SearchResponse> {
   try {
-    const response = await fetch('https://google.serper.dev/images', {
-      method: 'POST',
+    const response = await fetch("https://google.serper.dev/images", {
+      method: "POST",
       headers: {
-        'X-API-KEY': process.env.SERPER_API_KEY!,
-        'Content-Type': 'application/json',
+        "X-API-KEY": process.env.SERPER_API_KEY ?? "",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         q: query,
         gl: "es",
         hl: "es",
-        num: numResults
+        num: numResults,
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to search images');
+      throw new Error("Failed to search images");
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error searching images:', error);
-    throw new Error('Error searching images');
+    console.error("Error searching images:", error);
+    throw new Error("Error searching images");
   }
-} 
+}

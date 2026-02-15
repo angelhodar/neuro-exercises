@@ -1,7 +1,7 @@
 export const createGenerationPrompt = (
   mainGuidelinesPrompt: string,
   lastUserPrompt: string | null,
-  slug: string,
+  slug: string
 ) => {
   let prompt = `
   The initial guidelines for the exercise are:
@@ -62,5 +62,4 @@ export const systemPrompt = `
   At the end, briefly summarize the actions performed for non technical users. So dont mention the files you created or modified, code strategy, etc. Just a short summary of the changes you made.
 
   IMPORTANT: ALWAYS write the summary in spanish.
-  `
-;
+  `;

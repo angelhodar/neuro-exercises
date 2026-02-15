@@ -1,13 +1,13 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { notFound } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
 import { loadExerciseAssets } from "@/app/exercises/loader";
+import { Button } from "@/components/ui/button";
 import {
-  parseConfigFromUrl,
-  parseResultsFromUrl,
   exerciseResultsParamsSchema,
   getExerciseFromSandboxEnv,
+  parseConfigFromUrl,
+  parseResultsFromUrl,
 } from "../parsers";
 
 interface PageProps {
@@ -25,17 +25,23 @@ export default async function ExerciseResultsPage({
   const validationResult =
     exerciseResultsParamsSchema.safeParse(resolvedSearchParams);
 
-  if (!validationResult.success) notFound();
+  if (!validationResult.success) {
+    notFound();
+  }
 
   const exercise = getExerciseFromSandboxEnv();
   const entry = await loadExerciseAssets(slug);
 
-  if (!exercise || !entry) notFound();
+  if (!(exercise && entry)) {
+    notFound();
+  }
 
   const { configSchema, resultSchema } = entry;
   const parsedParams = validationResult.data;
 
-  if (parsedParams.type !== "config") notFound();
+  if (parsedParams.type !== "config") {
+    notFound();
+  }
 
   const config = parseConfigFromUrl(parsedParams.config, configSchema);
   const results = parseResultsFromUrl(parsedParams.results, resultSchema);
@@ -43,11 +49,11 @@ export default async function ExerciseResultsPage({
   const { ResultsComponent } = entry;
 
   return (
-    <div className="flex flex-col container mx-auto items-center justify-center h-screen">
-      <ResultsComponent results={results} config={config} />
+    <div className="container mx-auto flex h-screen flex-col items-center justify-center">
+      <ResultsComponent config={config} results={results} />
       <div className="mt-6 flex justify-center">
         <Button render={<Link href={`/exercises/${slug}/config`} />}>
-            Volver a la configuración
+          Volver a la configuración
         </Button>
       </div>
     </div>

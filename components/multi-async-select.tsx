@@ -1,17 +1,14 @@
 "use client";
 
-import * as React from "react";
-import { useMemo } from "react";
-import { ChevronDown, XIcon, CheckIcon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { CheckIcon, ChevronDown, Loader2, XIcon } from "lucide-react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  type ButtonHTMLAttributes,
+  forwardRef,
+  useMemo,
+  useState,
+} from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -20,13 +17,20 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface Option {
   label: string;
   value: string; // should be unique, and not empty
 }
 
-interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * An array of objects to be displayed in the Select.Option.
    */
@@ -112,7 +116,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   onSearch?: (value: string) => void;
 }
 
-export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
+export const MultiAsyncSelect = forwardRef<HTMLButtonElement, Props>(
   (
     {
       options,
@@ -134,35 +138,42 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
     },
     ref
   ) => {
-    const [selectedValues, setSelectedValues] =
-      React.useState<string[]>(value || defaultValue);
-    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+    const [selectedValues, setSelectedValues] = useState<string[]>(
+      value || defaultValue
+    );
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     // Use controlled value if provided, otherwise use internal state
     const currentValues = value !== undefined ? value : selectedValues;
 
     // Use useMemo to compute optionsRef instead of useEffect
     const optionsRef = useMemo(() => {
-      const temp = options.reduce((acc, option) => {
-        acc[option.value] = option;
-        return acc;
-      }, {} as Record<string, Option>);
-      
-      if (async) {
-        const temp2 = currentValues.reduce((acc, value) => {
-          const option = temp[value];
-          if (option) {
-            acc[option.value] = option;
-          }
+      const temp = options.reduce(
+        (acc, option) => {
+          acc[option.value] = option;
           return acc;
-        }, {} as Record<string, Option>);
-        
+        },
+        {} as Record<string, Option>
+      );
+
+      if (async) {
+        const temp2 = currentValues.reduce(
+          (acc, value) => {
+            const option = temp[value];
+            if (option) {
+              acc[option.value] = option;
+            }
+            return acc;
+          },
+          {} as Record<string, Option>
+        );
+
         return {
           ...temp,
           ...temp2,
         };
       }
-      
+
       return temp;
     }, [async, options, currentValues]);
 
@@ -171,7 +182,7 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
       const newSelectedValues = isAddon
         ? currentValues.filter((value) => value !== option)
         : [...currentValues, option];
-      
+
       // Only update internal state if not controlled
       if (value === undefined) {
         setSelectedValues(newSelectedValues);
@@ -214,29 +225,29 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
       }
     };
 
-    console.log(currentValues)
+    console.log(currentValues);
 
     return (
       <Popover
-        open={isPopoverOpen}
-        onOpenChange={setIsPopoverOpen}
         modal={modalPopover}
+        onOpenChange={setIsPopoverOpen}
+        open={isPopoverOpen}
       >
         <PopoverTrigger
           render={
             <Button
               ref={ref}
               {...props}
-              onClick={handleTogglePopover}
               className={cn(
-                "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white hover:bg-transparent focus:outline-none focus:ring-1 focus:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 dark:border-zinc-800 dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:bg-black dark:hover:bg-black [&_svg]:pointer-events-auto",
+                "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-white hover:bg-transparent focus:outline-none focus:ring-1 focus:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-black dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:hover:bg-black [&>span]:line-clamp-1 [&_svg]:pointer-events-auto",
                 className
               )}
+              onClick={handleTogglePopover}
             />
           }
         >
           {currentValues.length > 0 ? (
-            <div className="flex justify-between items-center w-full">
+            <div className="flex w-full items-center justify-between">
               <div className="flex flex-nowrap items-center gap-1 overflow-x-auto">
                 {currentValues.slice(0, maxCount).map((value) => {
                   let option: Option | undefined;
@@ -246,17 +257,18 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                     option = options.find((option) => option.value === value);
                   }
                   return (
-                    <Badge key={value} className="capitalize">
+                    <Badge className="capitalize" key={value}>
                       <span>{option?.label}</span>
-                      <div
+                      <button
                         className="ml-2 size-4 cursor-pointer"
                         onClick={(event) => {
                           event.stopPropagation();
                           toggleOption(value);
                         }}
+                        type="button"
                       >
                         <XIcon />
-                      </div>
+                      </button>
                     </Badge>
                   );
                 })}
@@ -264,15 +276,16 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                   <Badge>
                     <span>{`+ ${currentValues.length - maxCount}`}</span>
 
-                    <div
+                    <button
                       className="ml-2 size-4 cursor-pointer"
                       onClick={(event) => {
                         event.stopPropagation();
                         clearExtraOptions();
                       }}
+                      type="button"
                     >
                       <XIcon />
-                    </div>
+                    </button>
                   </Badge>
                 )}
               </div>
@@ -285,70 +298,64 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                   }}
                 />
                 <Separator
+                  className="mx-2 flex h-full min-h-6"
                   orientation="vertical"
-                  className="flex min-h-6 h-full mx-2"
                 />
                 <ChevronDown className="h-4 cursor-pointer text-zinc-300 dark:text-zinc-500" />
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between w-full mx-auto">
-              <span className="text-sm font-normal text-zinc-500">
+            <div className="mx-auto flex w-full items-center justify-between">
+              <span className="font-normal text-sm text-zinc-500">
                 {placeholder}
               </span>
               <ChevronDown className="h-4 cursor-pointer text-zinc-300 dark:text-zinc-500" />
             </div>
           )}
         </PopoverTrigger>
-        <PopoverContent
-          className="w-auto p-0"
-          align="start"
-        >
+        <PopoverContent align="start" className="w-auto p-0">
           <Command shouldFilter={!async}>
             <CommandInput
-              placeholder={searchPlaceholder}
               onValueChange={(value) => {
                 if (onSearch) {
                   onSearch(value);
                 }
               }}
+              placeholder={searchPlaceholder}
             />
             <CommandList>
               {async && error && (
-                <div className="p-4 text-destructive text-center">
+                <div className="p-4 text-center text-destructive">
                   {error.message}
                 </div>
               )}
               {async && loading && options.length === 0 && (
-                <div className="flex justify-center py-6 items-center h-full">
+                <div className="flex h-full items-center justify-center py-6">
                   <Loader2 className="animate-spin" />
                 </div>
               )}
               {async ? (
-                !loading &&
-                !error &&
+                !(loading || error) &&
                 options.length === 0 && (
                   <div className="pt-6 pb-4 text-center text-sm">
                     Sin resultados
                   </div>
                 )
               ) : (
-                <CommandEmpty>
-                  Sin resultados
-                </CommandEmpty>
+                <CommandEmpty>Sin resultados</CommandEmpty>
               )}
               <CommandGroup>
                 {!async && (
                   <CommandItem
+                    className="cursor-pointer"
                     key="all"
                     onSelect={toggleAll}
-                    className="cursor-pointer"
                   >
                     <div
                       className={cn(
-                        "mr-1 size-4 text-center rounded-[4px] border border-primary shadow-xs transition-shadow outline-none",
+                        "mr-1 size-4 rounded-[4px] border border-primary text-center shadow-xs outline-none transition-shadow",
                         currentValues.length === options.length
-                          ? "bg-primary text-primary-foreground border-primary"
+                          ? "border-primary bg-primary text-primary-foreground"
                           : "opacity-50 [&_svg]:invisible"
                       )}
                     >
@@ -361,15 +368,15 @@ export const MultiAsyncSelect = React.forwardRef<HTMLButtonElement, Props>(
                   const isSelected = currentValues.includes(option.value);
                   return (
                     <CommandItem
+                      className="cursor-pointer capitalize"
                       key={option.value}
                       onSelect={() => toggleOption(option.value)}
-                      className="cursor-pointer capitalize"
                     >
                       <div
                         className={cn(
-                          "mr-1 size-4 text-center rounded-[4px] border border-primary shadow-xs transition-shadow outline-none",
+                          "mr-1 size-4 rounded-[4px] border border-primary text-center shadow-xs outline-none transition-shadow",
                           isSelected
-                            ? "bg-primary text-primary-foreground border-primary"
+                            ? "border-primary bg-primary text-primary-foreground"
                             : "opacity-50 [&_svg]:invisible"
                         )}
                       >

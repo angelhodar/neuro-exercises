@@ -13,11 +13,11 @@ export const reactionTimeSpecificConfigSchema = z.object({
   delayMin: z.coerce
     .number()
     .min(100, "El retraso mínimo debe ser al menos 100ms")
-    .max(10000, "El retraso mínimo debe ser como máximo 10 segundos"),
+    .max(10_000, "El retraso mínimo debe ser como máximo 10 segundos"),
   delayMax: z.coerce
     .number()
     .min(200, "El retraso máximo debe ser al menos 200ms")
-    .max(15000, "El retraso máximo debe ser como máximo 15 segundos"),
+    .max(15_000, "El retraso máximo debe ser como máximo 15 segundos"),
   cells: z.coerce
     .number()
     .min(1, "Debe tener al menos 1 celda objetivo")
@@ -26,14 +26,14 @@ export const reactionTimeSpecificConfigSchema = z.object({
     .number()
     .min(500, "La duración de visualización debe ser al menos 500ms")
     .max(
-      10000,
-      "La duración de visualización debe ser como máximo 10 segundos",
+      10_000,
+      "La duración de visualización debe ser como máximo 10 segundos"
     ),
 });
 
 export function reactionTimeConfigRefinements(
   data: z.infer<typeof reactionTimeSpecificConfigSchema>,
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ) {
   if (data.delayMax <= data.delayMin) {
     ctx.addIssue({
@@ -106,4 +106,4 @@ export const defaultConfig: ReactionTimeGridConfig = {
   totalQuestions: 5,
   timeLimitSeconds: 0,
   ...presets.easy,
-}
+};

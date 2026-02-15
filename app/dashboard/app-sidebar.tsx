@@ -1,24 +1,24 @@
-import type { ComponentProps } from "react";
+import {
+  BookOpen,
+  Building2,
+  Circle,
+  Clipboard,
+  FileImage,
+  Grid3x3,
+  Home,
+  Image as ImageIcon,
+  ImagePlus,
+  Link as LinkIcon,
+  Mic,
+  Palette,
+  Plus,
+  ScanSearch,
+  Upload,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Home,
-  Users,
-  FileImage,
-  Clipboard,
-  Link as LinkIcon,
-  Plus,
-  ImagePlus,
-  Grid3x3,
-  BookOpen,
-  Image as ImageIcon,
-  Palette,
-  Circle,
-  ScanSearch,
-  Building2,
-  Upload,
-  Mic,
-} from "lucide-react";
+import type { ComponentProps } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -143,15 +143,15 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1">
+        <Link className="flex items-center gap-2 px-2 py-1" href="/dashboard">
           <Image
-            src="/logo.png"
             alt="NeuroGranada Logo"
-            width={32}
-            height={32}
             className="h-8 w-8"
+            height={32}
+            src="/logo.png"
+            width={32}
           />
-          <span className="text-lg font-bold text-blue-900">NeuroGranada</span>
+          <span className="font-bold text-blue-900 text-lg">NeuroGranada</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

@@ -1,13 +1,16 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UserPlus } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { addMemberToOrganization } from "@/app/actions/organizations";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,12 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@/lib/auth/auth.client";
-import { toast } from "sonner";
-import { UserPlus } from "lucide-react";
-import { addMemberToOrganization } from "@/app/actions/organizations";
 
 const addMemberSchema = z.object({
   email: z.string().email("Introduce un email válido"),
@@ -46,7 +45,9 @@ interface AddMemberButtonProps {
   organizationId: string;
 }
 
-export default function AddMemberButton({ organizationId }: AddMemberButtonProps) {
+export default function AddMemberButton({
+  organizationId,
+}: AddMemberButtonProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -71,12 +72,12 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
       });
 
       if (users.error) {
-        toast.error("Error al buscar usuario: " + users.error);
+        toast.error(`Error al buscar usuario: ${users.error}`);
         return;
       }
 
       const userList = users.data?.users || [];
-      const user = userList.find(u => u.email === values.email);
+      const user = userList.find((u) => u.email === values.email);
 
       if (!user) {
         toast.error("No se encontró un usuario con ese email");
@@ -91,7 +92,7 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
       );
 
       if (result.error) {
-        toast.error("Error al agregar miembro: " + result.error);
+        toast.error(`Error al agregar miembro: ${result.error}`);
         return;
       }
 
@@ -107,7 +108,7 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger render={<Button />}>
         <UserPlus className="h-4 w-4" />
         Añadir usuario
@@ -127,9 +128,9 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
                     <FormLabel>Email del usuario</FormLabel>
                     <FormControl>
                       <Input
+                        disabled={isLoading}
                         placeholder="usuario@ejemplo.com"
                         type="email"
-                        disabled={isLoading}
                         {...field}
                       />
                     </FormControl>
@@ -137,14 +138,18 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={addMemberForm.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Rol en la organización</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                    <Select
+                      defaultValue={field.value}
+                      disabled={isLoading}
+                      onValueChange={field.onChange}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona un rol" />
@@ -163,14 +168,14 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
             </div>
             <DialogFooter>
               <Button
+                disabled={isLoading}
+                onClick={() => setOpen(false)}
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isLoading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button disabled={isLoading} type="submit">
                 {isLoading ? "Añadiendo..." : "Añadir"}
               </Button>
             </DialogFooter>
@@ -179,4 +184,4 @@ export default function AddMemberButton({ organizationId }: AddMemberButtonProps
       </DialogContent>
     </Dialog>
   );
-} 
+}

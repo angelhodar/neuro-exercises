@@ -23,14 +23,14 @@ export const stroopColorInterferenceSpecificConfigSchema = z.object({
     .min(2, "Debe haber al menos 2 opciones")
     .max(
       STROOP_COLORS.length,
-      `No puede haber más de ${STROOP_COLORS.length} opciones`,
+      `No puede haber más de ${STROOP_COLORS.length} opciones`
     )
     .int("El número de opciones debe ser un número entero"),
 });
 
 // 2. Esquema completo de configuración
 export const configSchema = baseExerciseConfigSchema.merge(
-  stroopColorInterferenceSpecificConfigSchema,
+  stroopColorInterferenceSpecificConfigSchema
 );
 
 // 3. Esquema para los resultados de una pregunta individual

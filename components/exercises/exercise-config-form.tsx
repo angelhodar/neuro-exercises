@@ -1,26 +1,26 @@
 "use client";
 
-import { PropsWithChildren } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import type { PropsWithChildren } from "react";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
+import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
-import { ExerciseConfigPresetSelector } from "@/components/exercises/exercise-config-preset-selector";
 import {
-  useExerciseAssetsLoader,
   type ClientAssets,
+  useExerciseAssetsLoader,
 } from "@/hooks/use-exercise-assets-loader";
-import { Loader2 } from "lucide-react";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
   title: string;
-  onSubmit?: (config: any) => void;
+  onSubmit?: (config: Record<string, unknown>) => void;
 }
 
 interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
@@ -60,15 +60,15 @@ function ExerciseConfigFormContent({
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
+            onSubmit={form.handleSubmit(handleSubmit)}
           >
             {presets && (
               <>
@@ -106,7 +106,7 @@ export function ExerciseConfigForm({
   if (error) {
     console.error(`Error loading assets for ${slug}:`, error);
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="mx-auto w-full max-w-2xl">
         <CardContent className="p-6">
           <div className="text-center text-red-600">
             Error loading exercise configuration
@@ -118,10 +118,10 @@ export function ExerciseConfigForm({
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="mx-auto w-full max-w-2xl">
         <CardContent className="p-6">
           <div className="text-center">
-            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+            <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin" />
             <div className="text-gray-600">
               Loading exercise configuration...
             </div>
@@ -131,10 +131,12 @@ export function ExerciseConfigForm({
     );
   }
 
-  if (!assets) return null;
+  if (!assets) {
+    return null;
+  }
 
   return (
-    <ExerciseConfigFormContent {...rest} slug={slug} assets={assets}>
+    <ExerciseConfigFormContent {...rest} assets={assets} slug={slug}>
       {children}
     </ExerciseConfigFormContent>
   );

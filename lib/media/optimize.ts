@@ -7,7 +7,7 @@ interface OptimizeImageOptions {
 
 export async function optimizeImage(
   imageBuffer: Buffer,
-  options: OptimizeImageOptions = {},
+  options: OptimizeImageOptions = {}
 ) {
   try {
     const processedBuffer = await sharp(imageBuffer)

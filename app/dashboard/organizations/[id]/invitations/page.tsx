@@ -1,13 +1,14 @@
-import { Button } from "@/components/ui/button";
+import { Mail, Plus } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getOrganizationById } from "@/app/actions/organizations";
 import {
   DashboardHeader,
-  DashboardHeaderTitle,
   DashboardHeaderDescription,
+  DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
-import { ArrowLeft, Mail, Plus } from "lucide-react";
-import Link from "next/link";
-import { getOrganizationById } from "@/app/actions/organizations";
-import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -17,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
 export default async function OrganizationInvitationsPage({
@@ -28,7 +28,9 @@ export default async function OrganizationInvitationsPage({
   const resolvedParams = await params;
   const organization = await getOrganizationById(resolvedParams.id);
 
-  if (!organization) notFound();
+  if (!organization) {
+    notFound();
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -39,11 +41,15 @@ export default async function OrganizationInvitationsPage({
             Gestiona las invitaciones para {organization.name}.
           </DashboardHeaderDescription>
         </div>
-        <Button render={<Link
-            href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
-          />}>
-            <Plus className="mr-2 h-4 w-4" />
-            Enviar invitación
+        <Button
+          render={
+            <Link
+              href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
+            />
+          }
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Enviar invitación
         </Button>
       </DashboardHeader>
 
@@ -93,10 +99,10 @@ export default async function OrganizationInvitationsPage({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button size="sm" variant="outline">
                         Reenviar
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button size="sm" variant="outline">
                         Eliminar
                       </Button>
                     </div>
@@ -106,17 +112,21 @@ export default async function OrganizationInvitationsPage({
               {(!organization.invitations ||
                 organization.invitations.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell className="py-8 text-center" colSpan={6}>
                     <div className="flex flex-col items-center gap-2">
                       <Mail className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
                         No se han enviado invitaciones aún
                       </p>
-                      <Button render={<Link
-                          href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
-                        />}>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Enviar primera invitación
+                      <Button
+                        render={
+                          <Link
+                            href={`/dashboard/organizations/${resolvedParams.id}/invitations/create`}
+                          />
+                        }
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Enviar primera invitación
                       </Button>
                     </div>
                   </TableCell>

@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
+import { NumericPad } from "./numeric-pad";
 import type {
-  StimulusCountConfig,
-  StimulusCountQuestionResult,
   Shape,
   Stimulus,
+  StimulusCountConfig,
+  StimulusCountQuestionResult,
 } from "./stimulus-count.schema";
 import { StimulusGrid } from "./stimulus-grid";
-import { NumericPad } from "./numeric-pad";
 
 interface StimulusCountExerciseProps {
   config: StimulusCountConfig;
@@ -48,7 +47,8 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function setupQuestion() {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
+  useEffect(() => {
     const count =
       Math.floor(Math.random() * (maxStimuli - minStimuli + 1)) + minStimuli;
     const newStimuli = Array.from({ length: count }).map(
@@ -57,27 +57,27 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
         color: colors[Math.floor(Math.random() * colors.length)],
       })
     );
-    
+
     setQuestionState({
       stimuli: newStimuli,
       userAnswer: "",
       questionStart: Date.now(),
     });
-  }
-
-  useEffect(() => {
-    setupQuestion();
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, minStimuli, maxStimuli]);
 
   useEffect(() => {
     inputRef.current?.focus();
-  }, [questionState.stimuli]);
+  }, []);
 
   function handleSubmit() {
-    if (!questionState.questionStart) return;
+    if (!questionState.questionStart) {
+      return;
+    }
 
-    const numericAnswer = parseInt(questionState.userAnswer, 10);
-    if (isNaN(numericAnswer)) return;
+    const numericAnswer = Number.parseInt(questionState.userAnswer, 10);
+    if (Number.isNaN(numericAnswer)) {
+      return;
+    }
 
     const timeSpent = Date.now() - questionState.questionStart;
     const isCorrect = numericAnswer === questionState.stimuli.length;
@@ -93,17 +93,22 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 w-full">
-      <div className="flex flex-col md:flex-row gap-6 w-full items-start justify-center">
-        <StimulusGrid stimuli={questionState.stimuli} allowOverlap={allowOverlap} />
+    <div className="flex w-full flex-col items-center gap-6 p-4">
+      <div className="flex w-full flex-col items-start justify-center gap-6 md:flex-row">
+        <StimulusGrid
+          allowOverlap={allowOverlap}
+          stimuli={questionState.stimuli}
+        />
 
         <NumericPad
-          value={questionState.userAnswer}
-          onChange={(value) => setQuestionState(prev => ({ ...prev, userAnswer: value }))}
-          onSubmit={handleSubmit}
           inputRef={inputRef}
+          onChange={(value) =>
+            setQuestionState((prev) => ({ ...prev, userAnswer: value }))
+          }
+          onSubmit={handleSubmit}
+          value={questionState.userAnswer}
         />
       </div>
     </div>
   );
-} 
+}

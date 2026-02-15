@@ -1,15 +1,18 @@
+import { Edit, Mail, User, Users } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
-  getOrgMembers,
   getOrganizationById,
+  getOrgMembers,
 } from "@/app/actions/organizations";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { User, Edit, Mail, Users } from "lucide-react";
 import {
   DashboardHeader,
-  DashboardHeaderTitle,
   DashboardHeaderDescription,
+  DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,10 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
-import Link from "next/link";
-import { notFound } from "next/navigation";
 import AddMemberButton from "../components/add-member-button";
 import EditOrganizationButton from "../components/edit-organization-button";
 
@@ -37,7 +37,9 @@ export default async function OrganizationPage({
     getOrgMembers(resolvedParams.id),
   ]);
 
-  if (!organization) notFound();
+  if (!organization) {
+    notFound();
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -97,17 +99,21 @@ export default async function OrganizationPage({
               ))}
               {members.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell className="py-8 text-center" colSpan={6}>
                     <div className="flex flex-col items-center gap-2">
                       <Users className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">
                         No hay miembros en esta organización
                       </p>
-                      <Button render={<Link
-                          href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
-                        />}>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Invitar miembros
+                      <Button
+                        render={
+                          <Link
+                            href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
+                          />
+                        }
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Invitar miembros
                       </Button>
                     </div>
                   </TableCell>

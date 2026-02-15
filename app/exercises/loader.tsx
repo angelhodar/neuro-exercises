@@ -1,20 +1,23 @@
 import type { ComponentType } from "react";
 import type { z } from "zod";
 
-export type ExerciseAssets = {
-  configSchema: z.ZodType<Record<string, any>, Record<string, any>>;
-  resultSchema: z.ZodType<Record<string, any>, Record<string, any>>;
-  presets?: Record<string, Record<string, any>>;
-  defaultConfig: Record<string, any>;
-  ExerciseComponent: ComponentType<{ config: any }>;
-  ResultsComponent: ComponentType<any>;
+export interface ExerciseAssets {
+  configSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
+  resultSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
+  presets?: Record<string, Record<string, unknown>>;
+  defaultConfig: Record<string, unknown>;
+  ExerciseComponent: ComponentType<{ config: Record<string, unknown> }>;
+  ResultsComponent: ComponentType<Record<string, unknown>>;
   ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
-};
+}
 
-export type ClientAssets = Omit<ExerciseAssets, "ExerciseComponent" | "ResultsComponent">;
+export type ClientAssets = Omit<
+  ExerciseAssets,
+  "ExerciseComponent" | "ResultsComponent"
+>;
 
 export async function loadExerciseAssets(
-  slug: string,
+  slug: string
 ): Promise<ExerciseAssets | null> {
   try {
     const [
@@ -45,7 +48,7 @@ export async function loadExerciseAssets(
 }
 
 export async function loadClientAssets(
-  slug: string,
+  slug: string
 ): Promise<ClientAssets | null> {
   try {
     const [
@@ -73,9 +76,7 @@ export async function exerciseHasAssets(slug: string): Promise<boolean> {
   try {
     await import(`./${slug}/${slug}.schema`);
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
-
-

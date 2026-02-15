@@ -1,15 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import {
   AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 interface ConfirmOptions {
@@ -23,14 +23,21 @@ interface ConfirmContextProps {
 
 interface PendingPromise {
   resolve: (value: boolean) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }
 
-const ConfirmContext = createContext<ConfirmContextProps | undefined>(undefined);
+const ConfirmContext = createContext<ConfirmContextProps | undefined>(
+  undefined
+);
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
-  const [options, setOptions] = useState<ConfirmOptions>({ title: "", description: "" });
-  const [pendingPromise, setPendingPromise] = useState<PendingPromise | null>(null);
+  const [options, setOptions] = useState<ConfirmOptions>({
+    title: "",
+    description: "",
+  });
+  const [pendingPromise, setPendingPromise] = useState<PendingPromise | null>(
+    null
+  );
 
   const confirm = (options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve, reject) => {
@@ -58,15 +65,24 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
-      <AlertDialog open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
+      <AlertDialog
+        onOpenChange={(open) => !open && handleCancel()}
+        open={isOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{options.title}</AlertDialogTitle>
-            <AlertDialogDescription>{options.description}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {options.description}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>Confirmar</AlertDialogAction>
+            <AlertDialogCancel onClick={handleCancel}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirm}>
+              Confirmar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -82,4 +98,4 @@ export function useConfirm() {
   }
 
   return context;
-} 
+}

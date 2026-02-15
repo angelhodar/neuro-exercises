@@ -2,11 +2,11 @@
 
 import {
   createContext,
+  type PropsWithChildren,
   useContext,
-  useRef,
   useEffect,
+  useRef,
   useState,
-  PropsWithChildren
 } from "react";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 
@@ -36,26 +36,36 @@ export function CountdownProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
 
   const startCountdown = () => {
     setCountdown(3);
 
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
     intervalRef.current = setInterval(() => {
       setCountdown((prev) => {
-        if (prev > 1) return prev - 1;
-        if (intervalRef.current) clearInterval(intervalRef.current);
+        if (prev > 1) {
+          return prev - 1;
+        }
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
         return 0;
       });
     }, 1000);
   };
 
   useEffect(() => {
-    if (countdown === 0 && intervalRef.current === null) return;
+    if (countdown === 0 && intervalRef.current === null) {
+      return;
+    }
 
     if (countdown === 0) {
       startExercise();
@@ -78,8 +88,8 @@ export function CountdownDisplay({ children }: PropsWithChildren) {
 
   if (countdown > 0) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10">
-        <div className="text-8xl font-bold text-blue-600 animate-pulse">
+      <div className="absolute inset-0 z-10 flex items-center justify-center bg-white bg-opacity-90">
+        <div className="animate-pulse font-bold text-8xl text-blue-600">
           {countdown}
         </div>
       </div>

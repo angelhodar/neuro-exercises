@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  type SyllablesConfig,
-  type SyllablesQuestionResult,
-} from "./syllables.schema";
+import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import {
   getWordsBySyllableCount,
   type SpanishWord,
 } from "./spanish-words-dataset";
+import type {
+  SyllablesConfig,
+  SyllablesQuestionResult,
+} from "./syllables.schema";
 
 interface SyllablesExerciseProps {
   config: SyllablesConfig;
@@ -34,40 +34,15 @@ export function Exercise({ config }: SyllablesExerciseProps) {
   });
 
   // Get available words for the selected syllable count
-  const availableWords = getWordsBySyllableCount(syllablesCount as 3 | 4 | 5 | 6);
-
-  // Select a random word
-  function selectRandomWord(): SpanishWord {
-    const randomIndex = Math.floor(Math.random() * availableWords.length);
-    // @ts-ignore Its ok
-    return availableWords[randomIndex];
-  }
-
-  // Scramble syllables
-  function scrambleSyllables(syllables: string[]): string[] {
-    const scrambled = [...syllables];
-    for (let i = scrambled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
-    }
-    return scrambled;
-  }
-
-  // Setup new question
-  function setupNewQuestion() {
-    const word = selectRandomWord();
-    const scrambled = scrambleSyllables(word.syllables);
-
-    setQuestionState({
-      currentWord: word,
-      scrambledSyllables: scrambled,
-      selectedSyllables: [],
-    });
-  }
+  const availableWords = getWordsBySyllableCount(
+    syllablesCount as 3 | 4 | 5 | 6
+  );
 
   // Handle syllable click
   function handleSyllableClick(syllable: string, index: number) {
-    if (!questionState.currentWord) return;
+    if (!questionState.currentWord) {
+      return;
+    }
 
     const updatedSelected = [...questionState.selectedSyllables, syllable];
     const updatedScrambled = questionState.scrambledSyllables.filter(
@@ -82,7 +57,15 @@ export function Exercise({ config }: SyllablesExerciseProps) {
 
     // Check if word is complete
     if (updatedSelected.length === questionState.currentWord.syllables.length) {
-      submitAnswer(updatedSelected);
+      // Submit answer inline
+      const result: SyllablesQuestionResult = {
+        targetWord: questionState.currentWord.word,
+        targetSyllables: questionState.currentWord.syllables,
+        selectedSyllables: updatedSelected,
+        timeSpent: 0,
+        timeExpired: false,
+      };
+      addResult(result);
     }
   }
 
@@ -100,43 +83,47 @@ export function Exercise({ config }: SyllablesExerciseProps) {
     }));
   }
 
-  // Submit answer
-  function submitAnswer(selectedSyllables: string[]) {
-    if (!questionState.currentWord) return;
-
-    const result: SyllablesQuestionResult = {
-      targetWord: questionState.currentWord.word,
-      targetSyllables: questionState.currentWord.syllables,
-      selectedSyllables,
-      timeSpent: 0,
-      timeExpired: false,
-    };
-
-    addResult(result);
-  }
-
   // Setup question when question changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
   useEffect(() => {
-    setupNewQuestion();
-  }, [currentQuestionIndex]);
+    // Select a random word
+    const randomIndex = Math.floor(Math.random() * availableWords.length);
+    // @ts-expect-error Its ok
+    const word: SpanishWord = availableWords[randomIndex];
+
+    // Scramble syllables (Fisher-Yates shuffle)
+    const scrambled = [...word.syllables];
+    for (let i = scrambled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
+    }
+
+    setQuestionState({
+      currentWord: word,
+      scrambledSyllables: scrambled,
+      selectedSyllables: [],
+    });
+  }, [currentQuestionIndex, availableWords]);
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 max-w-6xl w-full">
+    <div className="flex w-full max-w-6xl flex-col items-center gap-6 p-4">
       {/* Selected syllables */}
       <Card className="w-full max-w-2xl">
         <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2 min-h-[3rem] items-center justify-center">
-            {questionState.selectedSyllables.map((syllable, index) => (
-              <Button
-                key={index}
-                variant="default"
-                size="sm"
-                onClick={() => handleSelectedSyllableClick(syllable, index)}
-                className="text-lg"
-              >
-                {syllable}
-              </Button>
-            ))}
+          <div className="flex min-h-[3rem] flex-wrap items-center justify-center gap-2">
+            {[...questionState.selectedSyllables.entries()].map(
+              ([idx, syllable]) => (
+                <Button
+                  className="text-lg"
+                  key={`selected-${syllable}-${idx}`}
+                  onClick={() => handleSelectedSyllableClick(syllable, idx)}
+                  size="sm"
+                  variant="default"
+                >
+                  {syllable}
+                </Button>
+              )
+            )}
           </div>
         </CardContent>
       </Card>
@@ -144,21 +131,23 @@ export function Exercise({ config }: SyllablesExerciseProps) {
       {/* Available syllables */}
       <Card className="w-full max-w-2xl">
         <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {questionState.scrambledSyllables.map((syllable, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="lg"
-                onClick={() => handleSyllableClick(syllable, index)}
-                className="text-2xl"
-              >
-                {syllable}
-              </Button>
-            ))}
+          <div className="flex flex-wrap justify-center gap-2">
+            {[...questionState.scrambledSyllables.entries()].map(
+              ([idx, syllable]) => (
+                <Button
+                  className="text-2xl"
+                  key={`scrambled-${syllable}-${idx}`}
+                  onClick={() => handleSyllableClick(syllable, idx)}
+                  size="lg"
+                  variant="outline"
+                >
+                  {syllable}
+                </Button>
+              )
+            )}
           </div>
         </CardContent>
       </Card>
     </div>
   );
-} 
+}

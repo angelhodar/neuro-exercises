@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { createExerciseTemplate } from "@/app/actions/templates";
+import { loadClientAssets } from "@/app/exercises/loader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,13 +28,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { Exercise } from "@/lib/db/schema";
 import { AddExerciseButton } from "./add-exercise-button";
-import { ExerciseCard } from "./exercise-card";
-import { Exercise } from "@/lib/db/schema";
-import { loadClientAssets } from "@/app/exercises/loader";
 import ConfigureExerciseButton from "./configure-exercise-button";
-import { createExerciseTemplate } from "@/app/actions/templates";
-import { Trash2 } from "lucide-react";
+import { ExerciseCard } from "./exercise-card";
 
 const templateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -49,9 +49,9 @@ const templateSchema = z.object({
 
 type TemplateFormData = z.infer<typeof templateSchema>;
 
-type CreateTemplateFormProps = {
-  exercises: Array<Exercise>;
-};
+interface CreateTemplateFormProps {
+  exercises: Exercise[];
+}
 
 export default function CreateTemplateForm(props: CreateTemplateFormProps) {
   const { exercises } = props;
@@ -125,14 +125,14 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
       });
       toast.success("Plantilla guardada!");
       router.push("/dashboard/templates");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error al guardar la plantilla");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const onSubmitError = (errors: any) => {
+  const onSubmitError = (errors: Record<string, unknown>) => {
     console.log("Form errors:", errors);
     toast.error("Por favor, verifica los campos requeridos");
   };
@@ -142,7 +142,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
   );
 
   return (
-    <div className="max-w-6xl p-6 space-y-6">
+    <div className="max-w-6xl space-y-6 p-6">
       <Card>
         <CardHeader>
           <CardTitle>Crear plantilla de ejercicio</CardTitle>
@@ -154,8 +154,8 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
               className="space-y-6"
+              onSubmit={form.handleSubmit(onSubmit, onSubmitError)}
             >
               {/* Template Basic Info */}
               <div className="grid grid-cols-1 gap-4">
@@ -186,8 +186,8 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                       <FormLabel>Descripción</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Descripción de la plantilla"
                           className="min-h-[100px]"
+                          placeholder="Descripción de la plantilla"
                           {...field}
                         />
                       </FormControl>
@@ -203,7 +203,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
               {/* Exercises Section */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <FormLabel className="text-lg font-semibold">
+                  <FormLabel className="font-semibold text-lg">
                     Ejercicios
                   </FormLabel>
                   <AddExerciseButton
@@ -224,31 +224,33 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {fields.map((field, index) => {
                       const exercise = exercises.find(
                         (e) => e.id === field.exerciseId
                       );
 
-                      if (!exercise) return null;
+                      if (!exercise) {
+                        return null;
+                      }
 
                       return (
                         <ExerciseCard
-                          key={field.exerciseId}
                           exercise={exercise}
+                          key={field.exerciseId}
                         >
                           <Button
+                            className="absolute -top-2 right-1 z-10 h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            onClick={() => removeExercise(index)}
+                            size="sm"
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            onClick={() => removeExercise(index)}
-                            className="absolute -top-2 right-1 z-10 text-destructive hover:text-destructive h-8 w-8 p-0"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                           <ConfigureExerciseButton
-                            slug={field.slug}
                             index={index}
+                            slug={field.slug}
                           />
                         </ExerciseCard>
                       );
@@ -257,14 +259,14 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                 )}
 
                 {form.formState.errors.exercises && (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="font-medium text-destructive text-sm">
                     {form.formState.errors.exercises.message}
                   </p>
                 )}
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" size="lg" disabled={isSubmitting}>
+                <Button disabled={isSubmitting} size="lg" type="submit">
                   {isSubmitting ? "Creando plantilla..." : "Crear plantilla"}
                 </Button>
               </div>

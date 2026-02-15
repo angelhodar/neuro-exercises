@@ -1,3 +1,4 @@
+import { CheckCircle, XCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -6,49 +7,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckCircle, XCircle } from "lucide-react";
 import type { StroopColorInterferenceQuestionResult } from "./stroop-color-interference.schema";
 
 interface StroopColorInterferenceResultsProps {
   results: StroopColorInterferenceQuestionResult[];
 }
 
-export function Results({
-  results,
-}: StroopColorInterferenceResultsProps) {
+export function Results({ results }: StroopColorInterferenceResultsProps) {
   const totalCorrect = results.filter((r) => r.isCorrect).length;
   const accuracy = (totalCorrect / results.length) * 100;
   const averageResponseTime =
     results.reduce((acc, r) => acc + r.responseTime, 0) / results.length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">
+    <div className="mx-auto w-full max-w-3xl">
+      <h2 className="mb-4 text-center font-bold text-2xl">
         Resultados del Ejercicio
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Precisión</p>
-          <p className="text-2xl font-bold">{accuracy.toFixed(1)}%</p>
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
+          <p className="text-gray-500 text-sm dark:text-gray-400">Precisión</p>
+          <p className="font-bold text-2xl">{accuracy.toFixed(1)}%</p>
         </div>
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Puntuación</p>
-          <p className="text-2xl font-bold">
+        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
+          <p className="text-gray-500 text-sm dark:text-gray-400">Puntuación</p>
+          <p className="font-bold text-2xl">
             {totalCorrect}/{results.length}
           </p>
         </div>
-        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
+          <p className="text-gray-500 text-sm dark:text-gray-400">
             Tiempo Medio
           </p>
-          <p className="text-2xl font-bold">
+          <p className="font-bold text-2xl">
             {(averageResponseTime / 1000).toFixed(2)}s
           </p>
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -61,7 +59,7 @@ export function Results({
           </TableHeader>
           <TableBody>
             {results.map((result, index) => (
-              <TableRow key={index}>
+              <TableRow key={`${result.word}-${result.color}-${index}`}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{result.word}</TableCell>
                 <TableCell>{result.color}</TableCell>
@@ -74,9 +72,9 @@ export function Results({
                 </TableCell>
                 <TableCell className="text-right">
                   {result.isCorrect ? (
-                    <CheckCircle className="w-5 h-5 text-green-600 inline-block" />
+                    <CheckCircle className="inline-block h-5 w-5 text-green-600" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-600 inline-block" />
+                    <XCircle className="inline-block h-5 w-5 text-red-600" />
                   )}
                 </TableCell>
               </TableRow>

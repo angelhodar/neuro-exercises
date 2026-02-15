@@ -1,8 +1,8 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { exerciseResults } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function getResultsById(resultId: number) {
   try {
@@ -30,7 +30,9 @@ export async function getResultsById(resultId: number) {
       },
     });
 
-    if (!result) return null;
+    if (!result) {
+      return null;
+    }
 
     return {
       id: result.id,
@@ -46,4 +48,4 @@ export async function getResultsById(resultId: number) {
     console.error("Error fetching result by ID:", error);
     return null;
   }
-} 
+}

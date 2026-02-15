@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, BarChart3 } from "lucide-react";
-import { AudioRecorder } from "./audio-recorder";
-import { DiffViewer } from "./diff-viewer";
+import { BarChart3, CheckCircle, XCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { createTranscriptionResult } from "@/app/actions/speech";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { uploadBlobFromFile } from "@/lib/storage";
 import { getDiff } from "@/lib/utils";
-import { toast } from "sonner";
+import { AudioRecorder } from "./audio-recorder";
+import { DiffViewer } from "./diff-viewer";
 
 export default function SpeechRecognitionClient() {
   const [referenceText, setReferenceText] = useState("");
@@ -25,12 +25,14 @@ export default function SpeechRecognitionClient() {
 
   // Calculate diff result when both texts are available
   const diffResult = useMemo(() => {
-    if (!referenceText || !transcribedText) return null;
+    if (!(referenceText && transcribedText)) {
+      return null;
+    }
     return getDiff(referenceText, transcribedText);
   }, [referenceText, transcribedText]);
 
   const saveTranscriptionResult = async () => {
-    if (!transcribedText || !referenceText || !diffResult || !audioBlob) {
+    if (!(transcribedText && referenceText && diffResult && audioBlob)) {
       toast.error("Faltan datos para guardar el resultado");
       return;
     }
@@ -72,13 +74,13 @@ export default function SpeechRecognitionClient() {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Textarea
-          id="reference-text"
-          value={referenceText || ""}
-          onChange={(e) => setReferenceText(e.target.value)}
           className="min-h-[200px]"
+          id="reference-text"
+          onChange={(e) => setReferenceText(e.target.value)}
           placeholder="Escribe aquí el texto de referencia"
+          value={referenceText || ""}
         />
 
         <Card>
@@ -100,20 +102,20 @@ export default function SpeechRecognitionClient() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* KPIs Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Card className="border-blue-200 bg-blue-50/50">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-blue-600">
+                      <p className="font-medium text-blue-600 text-sm">
                         Precisión
                       </p>
-                      <p className="text-3xl font-bold text-blue-700">
+                      <p className="font-bold text-3xl text-blue-700">
                         {diffResult.accuracy.toFixed(2)}%
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <BarChart3 className="w-6 h-6 text-blue-600" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                      <BarChart3 className="h-6 w-6 text-blue-600" />
                     </div>
                   </div>
                 </CardContent>
@@ -123,15 +125,15 @@ export default function SpeechRecognitionClient() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-green-600">
+                      <p className="font-medium text-green-600 text-sm">
                         Coincidencias
                       </p>
-                      <p className="text-3xl font-bold text-green-700">
+                      <p className="font-bold text-3xl text-green-700">
                         {diffResult.matches}
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                   </div>
                 </CardContent>
@@ -141,15 +143,15 @@ export default function SpeechRecognitionClient() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-red-600">
+                      <p className="font-medium text-red-600 text-sm">
                         Diferencias
                       </p>
-                      <p className="text-3xl font-bold text-red-700">
+                      <p className="font-bold text-3xl text-red-700">
                         {diffResult.differences}
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                      <XCircle className="w-6 h-6 text-red-600" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                      <XCircle className="h-6 w-6 text-red-600" />
                     </div>
                   </div>
                 </CardContent>
@@ -160,11 +162,11 @@ export default function SpeechRecognitionClient() {
             <DiffViewer diffWords={diffResult.diffWords} />
 
             {referenceText && audioBlob && (
-              <div className="flex justify-end pt-4 border-t">
-                <Button 
-                  onClick={saveTranscriptionResult}
-                  disabled={isSaving}
+              <div className="flex justify-end border-t pt-4">
+                <Button
                   className="ml-auto"
+                  disabled={isSaving}
+                  onClick={saveTranscriptionResult}
                 >
                   {isSaving ? "Guardando..." : "Guardar resultado"}
                 </Button>

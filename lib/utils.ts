@@ -6,7 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function createBlobUrl(blobKey: string): string {
-  if (blobKey.startsWith("https://")) return blobKey;
+  if (blobKey.startsWith("https://")) {
+    return blobKey;
+  }
   return new URL(blobKey, process.env.NEXT_PUBLIC_BLOB_URL).toString();
 }
 
@@ -30,6 +32,9 @@ export async function downloadFromUrl(url: string): Promise<ArrayBuffer> {
   return await response.arrayBuffer();
 }
 
+// Regex patterns for diff analysis
+const WHITESPACE_REGEX = /\s+/;
+
 // Diff analysis types and functions
 export interface DiffWord {
   text: string;
@@ -49,79 +54,127 @@ const normalizeWord = (word: string): string => {
   return word.toLowerCase().replace(/[.,;:!?()[\]{}"'`~@#$%^&*+=|\\/<>]/g, "");
 };
 
+// Checks if two words match when normalized
+function wordsMatch(a: string, b: string): boolean {
+  return normalizeWord(a) === normalizeWord(b);
+}
+
+// Checks if the next original word matches the current modified word (lookahead)
+function isAddedWord(
+  originalWords: string[],
+  modifiedWords: string[],
+  i: number,
+  j: number
+): boolean {
+  if (j >= modifiedWords.length) {
+    return false;
+  }
+  if (i >= originalWords.length) {
+    return true;
+  }
+  return (
+    i + 1 < originalWords.length &&
+    wordsMatch(originalWords[i + 1], modifiedWords[j])
+  );
+}
+
+// Checks if the current original word matches the next modified word (lookahead)
+function isRemovedWord(
+  originalWords: string[],
+  modifiedWords: string[],
+  i: number,
+  j: number
+): boolean {
+  if (i >= originalWords.length) {
+    return false;
+  }
+  if (j >= modifiedWords.length) {
+    return true;
+  }
+  return (
+    j + 1 < modifiedWords.length &&
+    wordsMatch(originalWords[i], modifiedWords[j + 1])
+  );
+}
+
+// Processes one step of the diff algorithm and returns the diff word(s) with updated indices
+function processDiffStep(
+  originalWords: string[],
+  modifiedWords: string[],
+  i: number,
+  j: number
+): { words: DiffWord[]; nextI: number; nextJ: number } {
+  const hasOriginal = i < originalWords.length;
+  const hasModified = j < modifiedWords.length;
+
+  if (
+    hasOriginal &&
+    hasModified &&
+    wordsMatch(originalWords[i], modifiedWords[j])
+  ) {
+    return {
+      words: [{ text: originalWords[i], type: "unchanged" }],
+      nextI: i + 1,
+      nextJ: j + 1,
+    };
+  }
+
+  if (isAddedWord(originalWords, modifiedWords, i, j)) {
+    return {
+      words: [{ text: modifiedWords[j], type: "added" }],
+      nextI: i,
+      nextJ: j + 1,
+    };
+  }
+
+  if (isRemovedWord(originalWords, modifiedWords, i, j)) {
+    return {
+      words: [{ text: originalWords[i], type: "removed" }],
+      nextI: i + 1,
+      nextJ: j,
+    };
+  }
+
+  // Words are different, mark as removed and added
+  const words: DiffWord[] = [];
+  let nextI = i;
+  let nextJ = j;
+
+  if (hasOriginal) {
+    words.push({ text: originalWords[i], type: "removed" });
+    nextI = i + 1;
+  }
+  if (hasModified) {
+    words.push({ text: modifiedWords[j], type: "added" });
+    nextJ = j + 1;
+  }
+
+  return { words, nextI, nextJ };
+}
+
 export function getDiff(original: string, modified: string): DiffResult {
-  const originalWords = original.trim().split(/\s+/);
-  const modifiedWords = modified.trim().split(/\s+/);
+  const originalWords = original.trim().split(WHITESPACE_REGEX);
+  const modifiedWords = modified.trim().split(WHITESPACE_REGEX);
 
   const diffWords: DiffWord[] = [];
   let i = 0;
   let j = 0;
 
   while (i < originalWords.length || j < modifiedWords.length) {
-    if (
-      i < originalWords.length &&
-      j < modifiedWords.length &&
-      normalizeWord(originalWords[i]) === normalizeWord(modifiedWords[j])
-    ) {
-      // Words match (ignoring punctuation)
-      diffWords.push({
-        text: originalWords[i],
-        type: "unchanged",
-      });
-      i++;
-      j++;
-    } else if (
-      j < modifiedWords.length &&
-      (i >= originalWords.length ||
-        (i + 1 < originalWords.length &&
-          normalizeWord(originalWords[i + 1]) ===
-            normalizeWord(modifiedWords[j])))
-    ) {
-      // Word was added in modified
-      diffWords.push({
-        text: modifiedWords[j],
-        type: "added",
-      });
-      j++;
-    } else if (
-      i < originalWords.length &&
-      (j >= modifiedWords.length ||
-        (j + 1 < modifiedWords.length &&
-          normalizeWord(originalWords[i]) ===
-            normalizeWord(modifiedWords[j + 1])))
-    ) {
-      // Word was removed from original
-      diffWords.push({
-        text: originalWords[i],
-        type: "removed",
-      });
-      i++;
-    } else {
-      // Words are different, mark as removed and added
-      if (i < originalWords.length) {
-        diffWords.push({
-          text: originalWords[i],
-          type: "removed",
-        });
-        i++;
-      }
-      if (j < modifiedWords.length) {
-        diffWords.push({
-          text: modifiedWords[j],
-          type: "added",
-        });
-        j++;
-      }
-    }
+    const step = processDiffStep(originalWords, modifiedWords, i, j);
+    diffWords.push(...step.words);
+    i = step.nextI;
+    j = step.nextJ;
   }
 
   const matches = diffWords.filter((w) => w.type === "unchanged").length;
   const differences = Math.max(
     diffWords.filter((w) => w.type === "added").length,
-    diffWords.filter((w) => w.type === "removed").length,
+    diffWords.filter((w) => w.type === "removed").length
   );
-  const totalOriginalWords = original.trim().split(/\s+/).length;
-  const accuracy = totalOriginalWords > 0 ? (matches / totalOriginalWords) * 100 : 0;
+  const totalOriginalWords = originalWords.length;
+  const accuracy =
+    totalOriginalWords > 0 ? (matches / totalOriginalWords) * 100 : 0;
 
   return {
     diffWords,

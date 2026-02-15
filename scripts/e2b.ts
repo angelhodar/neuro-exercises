@@ -1,16 +1,16 @@
 import "dotenv/config";
 import { Sandbox } from "@e2b/code-interpreter";
-import { createBlobUrl } from "@/lib/utils";
-import { extractFiles } from "@/lib/zip";
 import { getExerciseById } from "@/app/actions/exercises";
 
 const TEMPLATE_ID = "uwjrc97qg8qfno0643qu";
-const blobKey =
+const _blobKey =
   "generations/3a287f5e-12a4-4957-bae8-aa5d9385ade8-QIVXbfwwnSJCA0jCXYQYCgBia7I8ea.zip";
 const exerciseId = 5;
 
 async function getRunningExerciseSandbox(exerciseId: number) {
-  const paginator = Sandbox.list({ query: { metadata: { exerciseId: exerciseId.toString() } } });
+  const paginator = Sandbox.list({
+    query: { metadata: { exerciseId: exerciseId.toString() } },
+  });
   const sandboxes = await paginator.nextItems();
   return sandboxes[0];
 }
@@ -25,7 +25,7 @@ async function main() {
   } else {
     sandbox = await Sandbox.create(TEMPLATE_ID, {
       metadata: { exerciseId: exerciseId.toString() },
-      timeoutMs: 300_000
+      timeoutMs: 300_000,
     });
   }
 
@@ -50,7 +50,7 @@ async function main() {
 
   await sandbox.files.write(fileWrites);*/
 
-  const env = `NEXT_PUBLIC_BLOB_URL=${process.env.NEXT_PUBLIC_BLOB_URL!}\nSANDBOX_EXERCISE=${JSON.stringify(exercise)}`;
+  const env = `NEXT_PUBLIC_BLOB_URL=${process.env.NEXT_PUBLIC_BLOB_URL ?? ""}\nSANDBOX_EXERCISE=${JSON.stringify(exercise)}`;
 
   await sandbox.files.write([
     {

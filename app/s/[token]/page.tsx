@@ -1,6 +1,6 @@
+import { notFound } from "next/navigation";
 import { getExerciseLinkByToken } from "@/app/actions/links";
 import { LinkExerciseCard } from "./link-exercise-card";
-import { notFound } from "next/navigation";
 
 export default async function SharedLinkPage({
   params,
@@ -11,33 +11,36 @@ export default async function SharedLinkPage({
 
   const linkData = await getExerciseLinkByToken(token);
 
-  if (!linkData) notFound();
+  if (!linkData) {
+    notFound();
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-blue-900 mb-2">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 font-bold text-3xl text-blue-900">
           {linkData.template.title}
         </h1>
-        <p className="text-gray-600 mb-4">{linkData.template.description}</p>
-        <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+        <p className="mb-4 text-gray-600">{linkData.template.description}</p>
+        <div className="flex items-center justify-center gap-4 text-gray-500 text-sm">
           <span>Creado por: {linkData.creator.name}</span>
           <span>•</span>
           <span>
-            Tiempo estimado: {linkData.template.exerciseTemplateItems.length} minutos
+            Tiempo estimado: {linkData.template.exerciseTemplateItems.length}{" "}
+            minutos
           </span>
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
-        {linkData.template.exerciseTemplateItems.map((item, i) => {
+      <div className="mb-6 space-y-4">
+        {linkData.template.exerciseTemplateItems.map((item) => {
           return (
             <LinkExerciseCard
-              key={i}
-              exercise={item.exercise}
-              linkId={linkData.id}
-              itemId={item.id}
               completed={!!item.exerciseResults[0]}
+              exercise={item.exercise}
+              itemId={item.id}
+              key={item.id}
+              linkId={linkData.id}
             />
           );
         })}

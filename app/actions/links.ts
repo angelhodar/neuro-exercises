@@ -1,18 +1,18 @@
 "use server";
 
+import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
-import { eq, desc, and } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { exerciseLinks, exerciseResults } from "@/lib/db/schema";
-import type { NewExerciseLink } from "@/lib/db/schema";
-import { getCurrentUser } from "./users";
 import { revalidatePath } from "next/cache";
+import { db } from "@/lib/db";
+import type { NewExerciseLink } from "@/lib/db/schema";
+import { exerciseLinks, exerciseResults } from "@/lib/db/schema";
+import { getCurrentUser } from "./users";
 
 function generateSecureToken(): string {
   return nanoid(12);
 }
 
-type CreateExerciseLink = Pick<NewExerciseLink, "targetUserId" | "templateId">
+type CreateExerciseLink = Pick<NewExerciseLink, "targetUserId" | "templateId">;
 
 export async function createExerciseLink(link: CreateExerciseLink) {
   try {
@@ -154,11 +154,11 @@ export async function getExerciseLinkByToken(token: string) {
 export async function saveExerciseResults(
   linkId: number,
   exerciseItemId: number,
-  results: any
+  results: Record<string, unknown>
 ) {
   try {
     await db.insert(exerciseResults).values({
-      linkId: linkId,
+      linkId,
       templateItemId: exerciseItemId,
       results,
     });

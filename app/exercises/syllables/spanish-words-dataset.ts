@@ -73,62 +73,119 @@ export const spanishWordsDataset = {
   ],
   6: [
     // Palabras con exactamente 6 sílabas
-    { word: "responsabilidad", syllables: ["res", "pon", "sa", "bi", "li", "dad"] },
-    { word: "extraordinario", syllables: ["ex", "tra", "or", "di", "na", "rio"] },
-    { word: "característica", syllables: ["ca", "rac", "te", "rís", "ti", "ca"] },
-    { word: "tradicionalmente", syllables: ["tra", "di", "cio", "nal", "men", "te"] },
-    { word: "profesionalmente", syllables: ["pro", "fe", "sio", "nal", "men", "te"] },
+    {
+      word: "responsabilidad",
+      syllables: ["res", "pon", "sa", "bi", "li", "dad"],
+    },
+    {
+      word: "extraordinario",
+      syllables: ["ex", "tra", "or", "di", "na", "rio"],
+    },
+    {
+      word: "característica",
+      syllables: ["ca", "rac", "te", "rís", "ti", "ca"],
+    },
+    {
+      word: "tradicionalmente",
+      syllables: ["tra", "di", "cio", "nal", "men", "te"],
+    },
+    {
+      word: "profesionalmente",
+      syllables: ["pro", "fe", "sio", "nal", "men", "te"],
+    },
     { word: "personalmente", syllables: ["per", "so", "nal", "men", "te"] },
     { word: "nacionalmente", syllables: ["na", "cio", "nal", "men", "te"] },
     { word: "regionalmente", syllables: ["re", "gio", "nal", "men", "te"] },
-    { word: "emocionalmente", syllables: ["e", "mo", "cio", "nal", "men", "te"] },
+    {
+      word: "emocionalmente",
+      syllables: ["e", "mo", "cio", "nal", "men", "te"],
+    },
     { word: "racionalmente", syllables: ["ra", "cio", "nal", "men", "te"] },
     { word: "funcionalmente", syllables: ["fun", "cio", "nal", "men", "te"] },
-    { word: "ocasionalmente", syllables: ["o", "ca", "sio", "nal", "men", "te"] },
-    { word: "especialización", syllables: ["es", "pe", "cia", "li", "za", "ción"] },
-    { word: "comercialización", syllables: ["co", "mer", "cia", "li", "za", "ción"] },
-    { word: "multidimensional", syllables: ["mul", "ti", "di", "men", "sio", "nal"] },
-    { word: "materialización", syllables: ["ma", "te", "ria", "li", "za", "ción"] },
-    { word: "personalización", syllables: ["per", "so", "na", "li", "za", "ción"] },
-    { word: "nacionalización", syllables: ["na", "cio", "na", "li", "za", "ción"] },
-    { word: "regionalización", syllables: ["re", "gio", "na", "li", "za", "ción"] },
-    { word: "racionalización", syllables: ["ra", "cio", "na", "li", "za", "ción"] },
-  ]
-} as const
+    {
+      word: "ocasionalmente",
+      syllables: ["o", "ca", "sio", "nal", "men", "te"],
+    },
+    {
+      word: "especialización",
+      syllables: ["es", "pe", "cia", "li", "za", "ción"],
+    },
+    {
+      word: "comercialización",
+      syllables: ["co", "mer", "cia", "li", "za", "ción"],
+    },
+    {
+      word: "multidimensional",
+      syllables: ["mul", "ti", "di", "men", "sio", "nal"],
+    },
+    {
+      word: "materialización",
+      syllables: ["ma", "te", "ria", "li", "za", "ción"],
+    },
+    {
+      word: "personalización",
+      syllables: ["per", "so", "na", "li", "za", "ción"],
+    },
+    {
+      word: "nacionalización",
+      syllables: ["na", "cio", "na", "li", "za", "ción"],
+    },
+    {
+      word: "regionalización",
+      syllables: ["re", "gio", "na", "li", "za", "ción"],
+    },
+    {
+      word: "racionalización",
+      syllables: ["ra", "cio", "na", "li", "za", "ción"],
+    },
+  ],
+} as const;
 
-export type SpanishWord = {
-  word: string
-  syllables: string[]
+export interface SpanishWord {
+  word: string;
+  syllables: string[];
 }
 
-export type SyllableCount = 3 | 4 | 5 | 6
+export type SyllableCount = 3 | 4 | 5 | 6;
 
 // Función para validar que una palabra tiene el número correcto de sílabas
-export function validateWordSyllables(word: SpanishWord, expectedCount: number): boolean {
-  return word.syllables.length === expectedCount
+export function validateWordSyllables(
+  word: SpanishWord,
+  expectedCount: number
+): boolean {
+  return word.syllables.length === expectedCount;
 }
 
 // Función para obtener palabras por número de sílabas
 export function getWordsBySyllableCount(count: SyllableCount): SpanishWord[] {
-  const words = spanishWordsDataset[count] || []
-  return words.map(word => ({
+  const words = spanishWordsDataset[count] || [];
+  return words.map((word) => ({
     word: word.word,
-    syllables: [...word.syllables]
-  }))
+    syllables: [...word.syllables],
+  }));
 }
 
 // Función para obtener una palabra aleatoria por número de sílabas
-export function getRandomWordBySyllableCount(count: SyllableCount): SpanishWord | null {
-  const words = getWordsBySyllableCount(count)
-  if (words.length === 0) return null
-  return words[Math.floor(Math.random() * words.length)]
+export function getRandomWordBySyllableCount(
+  count: SyllableCount
+): SpanishWord | null {
+  const words = getWordsBySyllableCount(count);
+  if (words.length === 0) {
+    return null;
+  }
+  return words[Math.floor(Math.random() * words.length)];
 }
 
 // Función para obtener múltiples palabras aleatorias por número de sílabas
-export function getRandomWordsBySyllableCount(count: SyllableCount, quantity: number): SpanishWord[] {
-  const words = getWordsBySyllableCount(count)
-  if (words.length === 0) return []
-  
-  const shuffled = [...words].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, Math.min(quantity, words.length))
-} 
+export function getRandomWordsBySyllableCount(
+  count: SyllableCount,
+  quantity: number
+): SpanishWord[] {
+  const words = getWordsBySyllableCount(count);
+  if (words.length === 0) {
+    return [];
+  }
+
+  const shuffled = [...words].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(quantity, words.length));
+}

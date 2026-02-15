@@ -1,6 +1,8 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Loader2, Pencil } from "lucide-react";
+import { useState } from "react";
+import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,9 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { ExerciseBaseFields } from "@/components/exercises/exercise-base-fields";
 import { useExerciseAssetsLoader } from "@/hooks/use-exercise-assets-loader";
-import { Pencil, Loader2 } from "lucide-react";
 
 interface ConfigureExerciseButtonProps {
   slug: string;
@@ -31,37 +31,39 @@ export default function ConfigureExerciseButton(
     return null;
   }
 
-  if (!assets) return null;
+  if (!assets) {
+    return null;
+  }
 
   const { ConfigFieldsComponent } = assets;
 
   return (
-    <Fragment>
-      <Button 
-        type="button" 
-        onClick={() => setOpen(true)} 
+    <>
+      <Button
         className="w-full"
         disabled={isLoading}
+        onClick={() => setOpen(true)}
+        type="button"
       >
         {isLoading ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <Pencil className="w-4 h-4 mr-2" />
+          <Pencil className="mr-2 h-4 w-4" />
         )}
         Configurar
       </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog onOpenChange={setOpen} open={open}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Configura los parámetros del ejercicio</DialogTitle>
           </DialogHeader>
-          <div className="p-1 pt-4 space-y-6 border-t">
+          <div className="space-y-6 border-t p-1 pt-4">
             <ExerciseBaseFields basePath={`exercises.${index}.config.`} />
             <Separator />
             <ConfigFieldsComponent basePath={`exercises.${index}.config.`} />
           </div>
         </DialogContent>
       </Dialog>
-    </Fragment>
+    </>
   );
 }

@@ -20,11 +20,11 @@ export const syllablesSpecificConfigSchema = z.object({
 // Reusable refinement function for syllables configurations
 export function syllablesConfigRefinements(
   data: z.infer<typeof syllablesSpecificConfigSchema>,
-  ctx: z.RefinementCtx,
+  ctx: z.RefinementCtx
 ) {
   // Validate that we have words available for the selected syllable count
   const availableWords = getWordsBySyllableCount(
-    data.syllablesCount as SyllableCount,
+    data.syllablesCount as SyllableCount
   );
   if (!availableWords || availableWords.length === 0) {
     ctx.addIssue({

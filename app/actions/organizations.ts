@@ -1,24 +1,26 @@
 "use server";
 
+import { and, desc, eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth/auth.server";
 import { db } from "@/lib/db";
 import {
-  organization,
-  member,
   invitation,
-  NewOrganization,
-  UpdateOrganization,
+  member,
+  type NewOrganization,
+  organization,
+  type UpdateOrganization,
 } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { nanoid } from "nanoid";
 import { getCurrentUser } from "./users";
-import { auth } from "@/lib/auth/auth.server";
 
 export async function getCurrentUserOrganizations() {
   try {
     const user = await getCurrentUser();
 
-    if (!user) return [];
+    if (!user) {
+      return [];
+    }
 
     const userOrganizations = await db.query.member.findMany({
       where: eq(member.userId, user.id),
@@ -93,7 +95,9 @@ export async function createOrganization(data: NewOrganization) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
     const orgId = nanoid();
     const slug =
@@ -131,14 +135,13 @@ export async function createOrganization(data: NewOrganization) {
   }
 }
 
-export async function updateOrganization(
-  id: string,
-  data: UpdateOrganization,
-) {
+export async function updateOrganization(id: string, data: UpdateOrganization) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
@@ -168,14 +171,13 @@ export async function deleteOrganization(id: string) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
-      where: and(
-        eq(member.organizationId, id),
-        eq(member.userId, user.id),
-      ),
+      where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
     });
 
     if (!userMember || userMember.role !== "admin") {
@@ -195,24 +197,26 @@ export async function deleteOrganization(id: string) {
 export async function inviteUserToOrganization(
   organizationId: string,
   email: string,
-  role: string = "member",
+  role = "member"
 ) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, organizationId),
-        eq(member.userId, user.id),
+        eq(member.userId, user.id)
       ),
     });
 
     if (!userMember || userMember.role !== "admin") {
       throw new Error(
-        "You don't have permission to invite users to this organization",
+        "You don't have permission to invite users to this organization"
       );
     }
 
@@ -238,24 +242,26 @@ export async function inviteUserToOrganization(
 
 export async function removeMemberFromOrganization(
   organizationId: string,
-  userId: string,
+  userId: string
 ) {
   try {
     const user = await getCurrentUser();
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
 
     // Check if user is admin of the organization
     const userMember = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, organizationId),
-        eq(member.userId, user.id),
+        eq(member.userId, user.id)
       ),
     });
 
     if (!userMember || userMember.role !== "admin") {
       throw new Error(
-        "You don't have permission to remove members from this organization",
+        "You don't have permission to remove members from this organization"
       );
     }
 
@@ -264,8 +270,8 @@ export async function removeMemberFromOrganization(
       .where(
         and(
           eq(member.organizationId, organizationId),
-          eq(member.userId, userId),
-        ),
+          eq(member.userId, userId)
+        )
       );
 
     revalidatePath("/dashboard/organizations");
@@ -317,16 +323,16 @@ export async function addMemberToOrganization(
   organizationId: string
 ) {
   try {
-    if (!userId || !role || !organizationId) {
+    if (!(userId && role && organizationId)) {
       return { error: "Faltan campos requeridos" };
     }
 
     // Add the member to the organization using Better Auth API
     const result = await auth.api.addMember({
       body: {
-        userId: userId,
-        role: role,
-        organizationId: organizationId,
+        userId,
+        role,
+        organizationId,
       },
     });
 

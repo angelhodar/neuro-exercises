@@ -1,8 +1,8 @@
+import { Brain, CheckCircle, Eye, Play } from "lucide-react";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Eye, Brain, Play } from "lucide-react";
-import { Exercise } from "@/lib/db/schema";
+import { Card, CardContent } from "@/components/ui/card";
+import type { Exercise } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
 interface LinkExerciseCardProps {
@@ -20,8 +20,8 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
       className={cn(
         "transition-all",
         completed
-          ? "bg-green-50 border-green-200"
-          : "ring-2 ring-blue-500 shadow-lg"
+          ? "border-green-200 bg-green-50"
+          : "shadow-lg ring-2 ring-blue-500"
       )}
     >
       <CardContent className="pt-6">
@@ -41,24 +41,35 @@ export function LinkExerciseCard(props: LinkExerciseCardProps) {
             </div>
             <div>
               <h3 className="font-semibold text-lg">{exercise.displayName}</h3>
-              <p className="text-gray-600 text-sm mb-2">
+              <p className="mb-2 text-gray-600 text-sm">
                 {exercise.description}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {completed ? (
-              <Button render={<Link href={`/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`} />} className="bg-blue-600 hover:bg-blue-700">
-                  <Eye className="mr-2 h-4 w-4" />
-                  Ver Resultados
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                render={
+                  <Link
+                    href={`/exercises/${exercise.slug}/results?linkId=${linkId}&itemId=${itemId}`}
+                  />
+                }
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Ver Resultados
               </Button>
             ) : (
               <Button
                 className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                render={<Link href={`/exercises/${exercise.slug}?linkId=${linkId}&itemId=${itemId}`} />}
+                render={
+                  <Link
+                    href={`/exercises/${exercise.slug}?linkId=${linkId}&itemId=${itemId}`}
+                  />
+                }
               >
-                  <Play className="mr-2 h-4 w-4" />
-                  Comenzar
+                <Play className="mr-2 h-4 w-4" />
+                Comenzar
               </Button>
             )}
           </div>

@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
-import { mediaTagsView } from "@/lib/db/schema";
 import { asc, ilike } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { mediaTagsView } from "@/lib/db/schema";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

@@ -1,28 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowUp, ImagePlus, Loader2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { createExercise } from "@/app/actions/exercises";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, X, ArrowUp, Loader2 } from "lucide-react";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
-  FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import {
+  type CreateExerciseSchema,
   createExerciseSchema,
-  CreateExerciseSchema,
 } from "@/lib/schemas/exercises";
-import { createExercise } from "@/app/actions/exercises";
 
 export default function CreateExercisePage() {
   const [error, setError] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [_selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const router = useRouter();
 
@@ -39,9 +39,11 @@ export default function CreateExercisePage() {
     setError(null);
     try {
       const created = await createExercise(values);
-      if (!created) throw new Error("Failed to create exercise");
+      if (!created) {
+        throw new Error("Failed to create exercise");
+      }
       router.push(`/dashboard/exercises/${created.slug}`);
-    } catch (e) {
+    } catch (_e) {
       setError("Error creando el ejercicio. Por favor intenta nuevamente.");
     }
   };
@@ -64,16 +66,16 @@ export default function CreateExercisePage() {
   };
 
   return (
-    <div className="h-full flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-8 tracking-tight">
+    <div className="flex h-full items-center justify-center p-4">
+      <div className="mx-auto w-full max-w-4xl">
+        <div className="mb-12 text-center">
+          <h1 className="mb-8 font-bold text-4xl text-blue-900 tracking-tight md:text-5xl">
             ¿Qué ejercicio quieres crear?
           </h1>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <div className="space-y-6">
               <FormField
                 control={form.control}
@@ -83,44 +85,44 @@ export default function CreateExercisePage() {
                     <FormControl>
                       <div className="relative">
                         <Textarea
+                          className="min-h-48 w-full resize-none rounded-xl border-blue-200 p-4 text-lg leading-relaxed transition-all duration-200 placeholder:text-blue-400 focus:border-transparent focus:ring-2 focus:ring-blue-400"
                           placeholder="Describe el ejercicio que quieres crear..."
-                          className="w-full min-h-48 p-4 text-lg border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200 placeholder:text-blue-400 resize-none leading-relaxed"
                           rows={8}
                           {...field}
                         />
 
                         {/* Action Buttons */}
-                        <div className="absolute bottom-2 right-2 flex gap-2">
+                        <div className="absolute right-2 bottom-2 flex gap-2">
                           {/* Image Upload Button */}
                           <input
-                            type="file"
                             accept="image/*"
-                            onChange={handleImageUpload}
                             className="hidden"
                             id="image-upload"
+                            onChange={handleImageUpload}
+                            type="file"
                           />
                           <label htmlFor="image-upload">
                             <Button
+                              className="h-10 w-10 rounded-full border-blue-300 bg-white p-0 shadow-sm transition-colors duration-200 hover:border-blue-400 hover:bg-blue-50"
+                              render={<div className="cursor-pointer" />}
+                              size="sm"
                               type="button"
                               variant="outline"
-                              size="sm"
-                              className="h-10 w-10 p-0 border-blue-300 hover:bg-blue-50 hover:border-blue-400 transition-colors duration-200 bg-white shadow-sm rounded-full"
-                              render={<div className="cursor-pointer" />}
                             >
-                                <ImagePlus className="w-5 h-5 text-blue-600" />
+                              <ImagePlus className="h-5 w-5 text-blue-600" />
                             </Button>
                           </label>
 
                           {/* Submit Button */}
                           <Button
-                            type="submit"
+                            className="h-10 w-10 rounded-full bg-blue-600 p-0 text-white shadow-sm transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={isSubmitting}
-                            className="h-10 w-10 p-0 bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full shadow-sm"
+                            type="submit"
                           >
                             {isSubmitting ? (
-                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
-                              <ArrowUp className="w-5 h-5" />
+                              <ArrowUp className="h-5 w-5" />
                             )}
                           </Button>
                         </div>
@@ -133,18 +135,21 @@ export default function CreateExercisePage() {
 
               {/* Image Preview */}
               {imagePreview && (
-                <div className="relative rounded-xl overflow-hidden border border-blue-200">
+                <div className="relative overflow-hidden rounded-xl border border-blue-200">
+                  {/* biome-ignore lint/performance/noImgElement: data URL from FileReader cannot use next/image */}
                   <img
-                    src={imagePreview || "/placeholder.svg"}
                     alt="Preview"
-                    className="w-full h-64 object-cover"
+                    className="h-64 w-full object-cover"
+                    height={256}
+                    src={imagePreview || "/placeholder.svg"}
+                    width={512}
                   />
                   <button
-                    type="button"
+                    className="absolute top-3 right-3 rounded-full bg-red-500 p-2 text-white shadow-lg transition-colors duration-200 hover:bg-red-600"
                     onClick={removeImage}
-                    className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors duration-200 shadow-lg"
+                    type="button"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
               )}
@@ -152,7 +157,7 @@ export default function CreateExercisePage() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="text-red-600 text-sm">{error}</div>
               </div>
             )}

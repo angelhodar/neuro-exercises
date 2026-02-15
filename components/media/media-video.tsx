@@ -13,7 +13,7 @@ export function MediaVideo({
   return (
     <video
       {...videoProps}
-      className={cn("w-full h-full object-cover block", className)}
+      className={cn("block h-full w-full object-cover", className)}
       controls
     />
   );

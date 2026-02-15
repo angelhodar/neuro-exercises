@@ -1,28 +1,28 @@
+import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
+  foreignKey,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgMaterializedView,
   pgTable,
   serial,
   text,
-  integer,
   timestamp,
-  jsonb,
-  varchar,
-  index,
   uniqueIndex,
-  foreignKey,
-  boolean,
-  pgMaterializedView,
-  pgEnum,
+  varchar,
 } from "drizzle-orm/pg-core";
-import { relations, sql } from "drizzle-orm";
 import {
-  createSelectSchema,
   createInsertSchema,
+  createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
-import { BaseExerciseConfig } from "../schemas/base-schemas";
+import type { BaseExerciseConfig } from "../schemas/base-schemas";
 
 interface ConfigSchema extends BaseExerciseConfig {
-  [x: string]: any;
+  [x: string]: unknown;
 }
 
 // Enums
@@ -61,47 +61,55 @@ export const users = pgTable(
   (table) => [
     uniqueIndex("users_email_idx").on(table.email),
     index("users_created_at_idx").on(table.createdAt),
-  ],
+  ]
 );
 
-export const sessions = pgTable("sessions", {
-  id: text().primaryKey(),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: text().notNull().unique(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: text("user_id").notNull(),
-  activeOrganizationId: text("active_organization_id"),
-  impersonatedBy: text("impersonated_by"),
-  ...timestamps,
-}, (table) => [
-  foreignKey({
-    columns: [table.userId],
-    foreignColumns: [users.id],
-    name: "sessions_user_fk",
-  }).onDelete("cascade"),
-]);
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: text().primaryKey(),
+    expiresAt: timestamp("expires_at").notNull(),
+    token: text().notNull().unique(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id").notNull(),
+    activeOrganizationId: text("active_organization_id"),
+    impersonatedBy: text("impersonated_by"),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "sessions_user_fk",
+    }).onDelete("cascade"),
+  ]
+);
 
-export const accounts = pgTable("accounts", {
-  id: text().primaryKey(),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: text("user_id").notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text(),
-  password: text(),
-  ...timestamps,
-}, (table) => [
-  foreignKey({
-    columns: [table.userId],
-    foreignColumns: [users.id],
-    name: "accounts_user_fk",
-  }).onDelete("cascade"),
-]);
+export const accounts = pgTable(
+  "accounts",
+  {
+    id: text().primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id").notNull(),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    scope: text(),
+    password: text(),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "accounts_user_fk",
+    }).onDelete("cascade"),
+  ]
+);
 
 export const verifications = pgTable("verifications", {
   id: text().primaryKey(),
@@ -120,52 +128,63 @@ export const organization = pgTable("organizations", {
   ...timestamps,
 });
 
-export const member = pgTable("members", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id").notNull(),
-  userId: text("user_id").notNull(),
-  role: text("role").default("member").notNull(),
-  ...timestamps,
-}, (table) => [
-  index("member_organization_idx").on(table.organizationId),
-  index("member_user_idx").on(table.userId),
-  uniqueIndex("member_organization_user_unique").on(table.organizationId, table.userId),
-  foreignKey({
-    columns: [table.organizationId],
-    foreignColumns: [organization.id],
-    name: "member_organization_fk",
-  }).onDelete("cascade"),
-  foreignKey({
-    columns: [table.userId],
-    foreignColumns: [users.id],
-    name: "member_user_fk",
-  }).onDelete("cascade"),
-]);
+export const member = pgTable(
+  "members",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    userId: text("user_id").notNull(),
+    role: text("role").default("member").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("member_organization_idx").on(table.organizationId),
+    index("member_user_idx").on(table.userId),
+    uniqueIndex("member_organization_user_unique").on(
+      table.organizationId,
+      table.userId
+    ),
+    foreignKey({
+      columns: [table.organizationId],
+      foreignColumns: [organization.id],
+      name: "member_organization_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "member_user_fk",
+    }).onDelete("cascade"),
+  ]
+);
 
-export const invitation = pgTable("invitations", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id").notNull(),
-  email: text("email").notNull(),
-  role: text("role"),
-  status: text("status").default("pending").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  inviterId: text("inviter_id").notNull(),
-  ...timestamps,
-}, (table) => [
-  index("invitation_organization_idx").on(table.organizationId),
-  index("invitation_email_idx").on(table.email),
-  index("invitation_status_idx").on(table.status),
-  foreignKey({
-    columns: [table.organizationId],
-    foreignColumns: [organization.id],
-    name: "invitation_organization_fk",
-  }).onDelete("cascade"),
-  foreignKey({
-    columns: [table.inviterId],
-    foreignColumns: [users.id],
-    name: "invitation_inviter_fk",
-  }).onDelete("cascade"),
-]);
+export const invitation = pgTable(
+  "invitations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").notNull(),
+    email: text("email").notNull(),
+    role: text("role"),
+    status: text("status").default("pending").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    inviterId: text("inviter_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("invitation_organization_idx").on(table.organizationId),
+    index("invitation_email_idx").on(table.email),
+    index("invitation_status_idx").on(table.status),
+    foreignKey({
+      columns: [table.organizationId],
+      foreignColumns: [organization.id],
+      name: "invitation_organization_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.inviterId],
+      foreignColumns: [users.id],
+      name: "invitation_inviter_fk",
+    }).onDelete("cascade"),
+  ]
+);
 
 export const exercises = pgTable(
   "exercises",
@@ -183,7 +202,7 @@ export const exercises = pgTable(
   (table) => [
     uniqueIndex("exercises_slug_idx").on(table.slug),
     index("exercises_tags_idx").on(table.tags),
-  ],
+  ]
 );
 
 export const exerciseTemplates = pgTable(
@@ -202,7 +221,7 @@ export const exerciseTemplates = pgTable(
       foreignColumns: [users.id],
       name: "exercise_templates_creator_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const exerciseTemplateItems = pgTable(
@@ -220,11 +239,11 @@ export const exerciseTemplateItems = pgTable(
     index("exercise_template_items_exercise_idx").on(table.exerciseId),
     index("exercise_template_items_template_position_idx").on(
       table.templateId,
-      table.position,
+      table.position
     ),
     uniqueIndex("exercise_template_items_template_position_unique").on(
       table.templateId,
-      table.position,
+      table.position
     ),
     foreignKey({
       columns: [table.templateId],
@@ -236,7 +255,7 @@ export const exerciseTemplateItems = pgTable(
       foreignColumns: [exercises.id],
       name: "exercise_template_items_exercise_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const exerciseLinks = pgTable(
@@ -269,7 +288,7 @@ export const exerciseLinks = pgTable(
       foreignColumns: [users.id],
       name: "exercise_links_target_user_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const exerciseResults = pgTable(
@@ -292,7 +311,7 @@ export const exerciseResults = pgTable(
     // Ensure one result per link+template_item combination
     uniqueIndex("exercise_results_link_template_item_unique").on(
       table.linkId,
-      table.templateItemId,
+      table.templateItemId
     ),
     foreignKey({
       columns: [table.linkId],
@@ -304,18 +323,20 @@ export const exerciseResults = pgTable(
       foreignColumns: [exerciseTemplateItems.id],
       name: "exercise_results_template_item_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const medias = pgTable(
   "medias",
-  (table) => ({
+  (_table) => ({
     id: serial().primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
     tags: text("tags").array().default([]),
     blobKey: varchar("blob_key", { length: 500 }).notNull(),
-    mimeType: varchar("mime_type", { length: 100 }).notNull().default("image/png"),
+    mimeType: varchar("mime_type", { length: 100 })
+      .notNull()
+      .default("image/png"),
     thumbnailKey: varchar("thumbnail_key", { length: 500 }),
     metadata: jsonb("metadata"),
     authorId: text("creator_id").notNull(),
@@ -335,7 +356,7 @@ export const medias = pgTable(
     }),
     index("medias_tags_idx").on(table.tags),
     index("medias_mime_type_idx").on(table.mimeType),
-  ],
+  ]
 );
 
 export const exerciseChatGeneration = pgTable(
@@ -366,7 +387,7 @@ export const exerciseChatGeneration = pgTable(
       foreignColumns: [users.id],
       name: "exercise_chat_generation_user_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 // Materialized view for distinct media tags
@@ -421,7 +442,7 @@ export const exerciseTemplatesRelations = relations(
     }),
     exerciseTemplateItems: many(exerciseTemplateItems),
     exerciseLinks: many(exerciseLinks),
-  }),
+  })
 );
 
 export const exerciseTemplateItemsRelations = relations(
@@ -436,7 +457,7 @@ export const exerciseTemplateItemsRelations = relations(
       references: [exercises.id],
     }),
     exerciseResults: many(exerciseResults),
-  }),
+  })
 );
 
 export const exerciseLinksRelations = relations(
@@ -457,7 +478,7 @@ export const exerciseLinksRelations = relations(
       relationName: "targetedExerciseLinks",
     }),
     exerciseResults: many(exerciseResults),
-  }),
+  })
 );
 
 export const exerciseResultsRelations = relations(
@@ -471,7 +492,7 @@ export const exerciseResultsRelations = relations(
       fields: [exerciseResults.templateItemId],
       references: [exerciseTemplateItems.id],
     }),
-  }),
+  })
 );
 
 export const mediasRelations = relations(medias, ({ one }) => ({
@@ -492,7 +513,7 @@ export const exerciseChatGenerationRelations = relations(
       fields: [exerciseChatGeneration.userId],
       references: [users.id],
     }),
-  }),
+  })
 );
 
 // Speech recognition tables
@@ -513,7 +534,7 @@ export const speechTexts = pgTable(
       foreignColumns: [users.id],
       name: "speech_texts_user_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const transcriptionResults = pgTable(
@@ -544,7 +565,7 @@ export const transcriptionResults = pgTable(
       foreignColumns: [users.id],
       name: "transcription_results_target_user_fk",
     }).onDelete("cascade"),
-  ],
+  ]
 );
 
 export const organizationRelations = relations(organization, ({ many }) => ({
@@ -583,16 +604,19 @@ export const speechTextsRelations = relations(speechTexts, ({ one, many }) => ({
   transcriptionResults: many(transcriptionResults),
 }));
 
-export const transcriptionResultsRelations = relations(transcriptionResults, ({ one }) => ({
-  referenceText: one(speechTexts, {
-    fields: [transcriptionResults.referenceTextId],
-    references: [speechTexts.id],
-  }),
-  targetUser: one(users, {
-    fields: [transcriptionResults.targetUserId],
-    references: [users.id],
-  }),
-}));
+export const transcriptionResultsRelations = relations(
+  transcriptionResults,
+  ({ one }) => ({
+    referenceText: one(speechTexts, {
+      fields: [transcriptionResults.referenceTextId],
+      references: [speechTexts.id],
+    }),
+    targetUser: one(users, {
+      fields: [transcriptionResults.targetUserId],
+      references: [users.id],
+    }),
+  })
+);
 
 // Schemas
 export const exerciseSelectSchema = createSelectSchema(exercises);
@@ -607,13 +631,13 @@ export const exerciseTemplateUpdateSchema =
   createUpdateSchema(exerciseTemplates);
 
 export const exerciseTemplateItemSelectSchema = createSelectSchema(
-  exerciseTemplateItems,
+  exerciseTemplateItems
 );
 export const exerciseTemplateItemInsertSchema = createInsertSchema(
-  exerciseTemplateItems,
+  exerciseTemplateItems
 );
 export const exerciseTemplateItemUpdateSchema = createUpdateSchema(
-  exerciseTemplateItems,
+  exerciseTemplateItems
 );
 
 export const exerciseLinkSelectSchema = createSelectSchema(exerciseLinks);
@@ -625,22 +649,25 @@ export const exerciseResultInsertSchema = createInsertSchema(exerciseResults);
 export const exerciseResultUpdateSchema = createUpdateSchema(exerciseResults);
 
 export const exerciseChatGenerationSelectSchema = createSelectSchema(
-  exerciseChatGeneration,
+  exerciseChatGeneration
 );
 export const exerciseChatGenerationInsertSchema = createInsertSchema(
-  exerciseChatGeneration,
+  exerciseChatGeneration
 );
 export const exerciseChatGenerationUpdateSchema = createUpdateSchema(
-  exerciseChatGeneration,
+  exerciseChatGeneration
 );
 
 export const speechTextSelectSchema = createSelectSchema(speechTexts);
 export const speechTextInsertSchema = createInsertSchema(speechTexts);
 export const speechTextUpdateSchema = createUpdateSchema(speechTexts);
 
-export const transcriptionResultSelectSchema = createSelectSchema(transcriptionResults);
-export const transcriptionResultInsertSchema = createInsertSchema(transcriptionResults);
-export const transcriptionResultUpdateSchema = createUpdateSchema(transcriptionResults);
+export const transcriptionResultSelectSchema =
+  createSelectSchema(transcriptionResults);
+export const transcriptionResultInsertSchema =
+  createInsertSchema(transcriptionResults);
+export const transcriptionResultUpdateSchema =
+  createUpdateSchema(transcriptionResults);
 
 // Types
 export type User = typeof users.$inferSelect;

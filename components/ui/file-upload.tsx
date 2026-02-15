@@ -1,8 +1,8 @@
 "use client";
 
-import { PlusIcon, XIcon, Volume2, Play } from "lucide-react";
+import { Play, PlusIcon, Volume2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SelectableMediaSchema } from "@/lib/schemas/medias";
+import type { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createBlobUrl } from "@/lib/utils";
 
 const MediaFile = ({
@@ -14,41 +14,46 @@ const MediaFile = ({
 }) => {
   const renderMediaContent = () => {
     const blobUrl = createBlobUrl(media.blobKey);
-    const thumbnailUrl = media.thumbnailKey ? createBlobUrl(media.thumbnailKey) : undefined;
+    const _thumbnailUrl = media.thumbnailKey
+      ? createBlobUrl(media.thumbnailKey)
+      : undefined;
 
-    if (media.mimeType.startsWith('audio/')) {
+    if (media.mimeType.startsWith("audio/")) {
       return (
-        <div className="size-full rounded-[inherit] bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+        <div className="flex size-full items-center justify-center rounded-[inherit] bg-gradient-to-br from-blue-500 to-purple-600">
           <Volume2 className="h-8 w-8 text-white" />
         </div>
       );
-    } else if (media.mimeType.startsWith('video/')) {
+    }
+    if (media.mimeType.startsWith("video/")) {
       return (
-        <div className="size-full rounded-[inherit] bg-black flex items-center justify-center">
-          <Play className="h-8 w-8 text-white ml-1" />
+        <div className="flex size-full items-center justify-center rounded-[inherit] bg-black">
+          <Play className="ml-1 h-8 w-8 text-white" />
         </div>
       );
-    } else {
-      // Default to image
-      return (
-        <img
-          src={blobUrl}
-          alt={media.name}
-          className="size-full rounded-[inherit] object-cover"
-        />
-      );
     }
+    // Default to image
+    return (
+      // biome-ignore lint/performance/noImgElement: dynamic blob URL from storage
+      <img
+        alt={media.name}
+        className="size-full rounded-[inherit] object-cover"
+        height={200}
+        src={blobUrl}
+        width={200}
+      />
+    );
   };
 
   return (
-    <div key={media.id} className="bg-accent relative aspect-square rounded-md">
+    <div className="relative aspect-square rounded-md bg-accent" key={media.id}>
       {renderMediaContent()}
       <Button
-        type="button"
+        aria-label="Remove media"
+        className="absolute -top-2 -right-2 size-6 rounded-full border-2 border-background shadow-none focus-visible:border-background"
         onClick={() => removeFile(media.id)}
         size="icon"
-        className="border-background focus-visible:border-background absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none"
-        aria-label="Remove media"
+        type="button"
       >
         <XIcon className="size-3.5" />
       </Button>
@@ -58,8 +63,8 @@ const MediaFile = ({
 
 const AddMediaButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <div className="flex items-center justify-center bg-transparent relative aspect-square rounded-md border-2 border-dashed border-muted-foreground/25">
-      <Button type="button" variant="outline"onClick={onClick}>
+    <div className="relative flex aspect-square items-center justify-center rounded-md border-2 border-muted-foreground/25 border-dashed bg-transparent">
+      <Button onClick={onClick} type="button" variant="outline">
         <PlusIcon />
       </Button>
     </div>
@@ -78,8 +83,8 @@ export default function FileMediaSelector({
   onAddMediaClick,
 }: FileMediaSelectorProps) {
   return (
-    <div className="flex flex-col w-full">
-      <div className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors not-data-[files]:justify-center has-[input:focus]:ring-[3px]">
+    <div className="flex w-full flex-col">
+      <div className="relative flex min-h-52 flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-input border-dashed p-4 transition-colors has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50">
         <div className="flex w-full flex-col gap-3">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             {(medias || []).map((file) => (

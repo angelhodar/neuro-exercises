@@ -1,11 +1,13 @@
+import { Building2, Calendar, Edit, Mail, Users } from "lucide-react";
+import Link from "next/link";
 import { getAllOrganizations } from "@/app/actions/organizations";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   DashboardHeader,
-  DashboardHeaderTitle,
   DashboardHeaderDescription,
+  DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -14,11 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Building2, Users, Mail, Calendar, Edit } from "lucide-react";
-import Link from "next/link";
 import { formatDate } from "@/lib/utils";
-import DeleteOrganizationButton from "./components/delete-organization-button";
 import CreateOrganizationButton from "./components/create-organization-button";
+import DeleteOrganizationButton from "./components/delete-organization-button";
 import EditOrganizationButton from "./components/edit-organization-button";
 
 export const dynamic = "force-dynamic";
@@ -57,10 +57,13 @@ export default async function OrganizationsPage() {
                   <TableCell>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                       {org.logo ? (
+                        // biome-ignore lint/performance/noImgElement: dynamic org logo URL
                         <img
-                          src={org.logo}
                           alt={org.name}
                           className="h-8 w-8 rounded-full object-cover"
+                          height={32}
+                          src={org.logo}
+                          width={32}
                         />
                       ) : (
                         <Building2 className="h-5 w-5 text-primary" />
@@ -88,13 +91,19 @@ export default async function OrganizationsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" render={<Link href={`/dashboard/organizations/${org.id}`} />}>
-                          <Users className="h-4 w-4" />
+                      <Button
+                        render={
+                          <Link href={`/dashboard/organizations/${org.id}`} />
+                        }
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Users className="h-4 w-4" />
                       </Button>
                       <EditOrganizationButton
                         organization={org}
-                        variant="outline"
                         size="sm"
+                        variant="outline"
                       >
                         <Edit className="h-4 w-4" />
                       </EditOrganizationButton>
@@ -108,7 +117,7 @@ export default async function OrganizationsPage() {
               ))}
               {organizations.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell className="py-8 text-center" colSpan={7}>
                     <div className="flex flex-col items-center gap-2">
                       <Building2 className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import MultiSelectTags from "@/components//multiselect-tags";
 import {
   FormControl,
   FormDescription,
@@ -11,15 +12,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import MultiSelectTags from "@/components//multiselect-tags";
 
 interface VisualRecognitionConfigFieldsProps {
   basePath?: string;
 }
 
-export function ConfigFields(
-  props: VisualRecognitionConfigFieldsProps
-) {
+export function ConfigFields(props: VisualRecognitionConfigFieldsProps) {
   const { basePath = "" } = props;
   const { control, watch } = useFormContext();
 
@@ -41,11 +39,11 @@ export function ConfigFields(
               <FormLabel>Imágenes por pregunta</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="6"
+                  type="number"
                   {...field}
                   onChange={(e) =>
-                    field.onChange(parseInt(e.target.value, 10) || 0)
+                    field.onChange(Number.parseInt(e.target.value, 10) || 0)
                   }
                 />
               </FormControl>
@@ -65,11 +63,11 @@ export function ConfigFields(
               <FormLabel>Imágenes correctas</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
                   placeholder="2"
+                  type="number"
                   {...field}
                   onChange={(e) =>
-                    field.onChange(parseInt(e.target.value, 10) || 0)
+                    field.onChange(Number.parseInt(e.target.value, 10) || 0)
                   }
                 />
               </FormControl>
@@ -90,8 +88,8 @@ export function ConfigFields(
             <FormLabel>Etiquetas de las imágenes</FormLabel>
             <FormControl>
               <MultiSelectTags
-                value={field.value ?? []}
                 onChange={(tags: string[]) => field.onChange(tags)}
+                value={field.value ?? []}
               />
             </FormControl>
             <FormDescription>
@@ -124,4 +122,4 @@ export function ConfigFields(
       />
     </div>
   );
-} 
+}

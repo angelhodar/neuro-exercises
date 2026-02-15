@@ -1,12 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth/auth.server";
-import { headers } from "next/headers";
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
-import { type User } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth.server";
+import { db } from "@/lib/db";
+import { type User, users } from "@/lib/db/schema";
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
@@ -14,7 +13,9 @@ export async function getCurrentUser(): Promise<User | null> {
       headers: await headers(),
     });
 
-    if (!session || !session.user) return null;
+    if (!session?.user) {
+      return null;
+    }
 
     return session.user as User;
   } catch (error) {

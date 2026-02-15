@@ -1,12 +1,16 @@
 import { notFound, redirect } from "next/navigation";
 import type { SearchParams } from "nuqs/server";
-import { ExerciseProvider } from "@/hooks/use-exercise-execution";
+import { getExerciseBySlug } from "@/app/actions/exercises";
+import { loadExerciseAssets } from "@/app/exercises/loader";
 import { ExerciseContainer } from "@/components/exercises/exercise-container";
 import { CountdownProvider } from "@/components/exercises/exercise-countdown";
-import { getExerciseBySlug } from "@/app/actions/exercises";
-import { parseConfigFromUrl, exerciseParamsSchema, getExerciseConfigFromLink } from "./parsers";
-import { loadExerciseAssets } from "@/app/exercises/loader";
+import { ExerciseProvider } from "@/hooks/use-exercise-execution";
 import type { BaseExerciseConfig } from "@/lib/schemas/base-schemas";
+import {
+  exerciseParamsSchema,
+  getExerciseConfigFromLink,
+  parseConfigFromUrl,
+} from "./parsers";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -22,19 +26,29 @@ export default async function Page({ params, searchParams }: PageProps) {
   const exercise = await getExerciseBySlug(slug);
   const entry = await loadExerciseAssets(slug);
 
-  if (!exercise || !entry) notFound();
+  if (!(exercise && entry)) {
+    notFound();
+  }
 
-  if (!validationResult.success) redirect(`/exercises/${slug}/config`);
+  if (!validationResult.success) {
+    redirect(`/exercises/${slug}/config`);
+  }
 
   const { configSchema } = entry;
 
   const parsedParams = validationResult.data;
 
-  const config = parsedParams.type === 'config'
-    ? parseConfigFromUrl(parsedParams.config, configSchema)
-    : await getExerciseConfigFromLink(parsedParams.linkId, parsedParams.itemId);
+  const config =
+    parsedParams.type === "config"
+      ? parseConfigFromUrl(parsedParams.config, configSchema)
+      : await getExerciseConfigFromLink(
+          parsedParams.linkId,
+          parsedParams.itemId
+        );
 
-  if (!config) redirect(`/exercises/${slug}/config`);
+  if (!config) {
+    redirect(`/exercises/${slug}/config`);
+  }
 
   const { ExerciseComponent } = entry;
 

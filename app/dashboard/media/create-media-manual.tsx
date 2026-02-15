@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { uploadManualMedia } from "@/app/actions/media";
+import { MediaTagsInput } from "@/components/media/media-tags";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import { useState } from "react";
 import { uploadBlobFromFile } from "@/lib/storage";
-import { uploadManualMedia } from "@/app/actions/media";
-import { MediaTagsInput } from "@/components/media/media-tags";
 
 const schema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
@@ -48,7 +48,7 @@ export default function CreateMediaManual({
     defaultValues: {
       name: "",
       tags: [],
-      description: ""
+      description: "",
     },
   });
 
@@ -56,11 +56,13 @@ export default function CreateMediaManual({
 
   const onSubmit = async (values: FormSchema) => {
     setIsSubmitting(true);
-    
+
     try {
       const [blob, thumbBlob] = await Promise.all([
         uploadBlobFromFile(values.file),
-        values.thumbnail ? uploadBlobFromFile(values.thumbnail) : Promise.resolve(undefined)
+        values.thumbnail
+          ? uploadBlobFromFile(values.thumbnail)
+          : Promise.resolve(undefined),
       ]);
       const thumbnailKey = thumbBlob ? thumbBlob.pathname : undefined;
       await uploadManualMedia({
@@ -74,7 +76,7 @@ export default function CreateMediaManual({
       toast.success("Contenido subido correctamente");
       setOpen(false);
       form.reset();
-    } catch (e) {
+    } catch (_e) {
       toast.error("Error subiendo el contenido");
     } finally {
       setIsSubmitting(false);
@@ -82,15 +84,15 @@ export default function CreateMediaManual({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Subir contenido manualmente</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
+            className="mt-4 flex flex-col gap-4"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 mt-4"
           >
             <FormField
               control={form.control}
@@ -113,9 +115,9 @@ export default function CreateMediaManual({
                   <FormLabel>Etiquetas</FormLabel>
                   <FormControl>
                     <MediaTagsInput
-                      value={field.value}
                       onChange={field.onChange}
                       placeholder="Añadir etiqueta..."
+                      value={field.value}
                     />
                   </FormControl>
                   <FormDescription>
@@ -146,10 +148,10 @@ export default function CreateMediaManual({
                   <FormLabel>Archivo</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
                       accept="image/*,audio/*,video/*"
                       onChange={(e) => field.onChange(e.target.files?.[0])}
                       required
+                      type="file"
                     />
                   </FormControl>
                   <FormMessage />
@@ -164,16 +166,16 @@ export default function CreateMediaManual({
                   <FormLabel>Miniatura (opcional)</FormLabel>
                   <FormControl>
                     <Input
-                      type="file"
                       accept="image/*"
                       onChange={(e) => field.onChange(e.target.files?.[0])}
+                      type="file"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button disabled={isSubmitting} type="submit">
               {isSubmitting ? "Subiendo..." : "Subir"}
             </Button>
           </form>

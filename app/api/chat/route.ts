@@ -5,9 +5,9 @@ import {
   getExerciseGenerations,
   updateExerciseGeneration,
 } from "@/app/actions/generations";
-import { createGenerationPrompt, systemPrompt } from "@/lib/ai/agent/prompts";
+import { systemPrompt } from "@/lib/ai/agent/prompts";
 import { getCodeContext, readFiles, writeFiles } from "@/lib/ai/agent/tools";
-import { extractGenerationData } from "@/lib/ai/agent/utils";
+import { createConversationHistory } from "@/lib/ai/agent/utils";
 
 export async function POST(req: Request) {
   const { messages, slug } = await req.json();
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
     return new Response("Failed to create generation", { status: 500 });
   }
 
-  const { mainGuidelinesPrompt, lastCodeBlobKey, lastUserPrompt } =
-    extractGenerationData(generations);
+  const { messages: conversationMessages, lastCodeBlobKey } =
+    createConversationHistory(generations, slug);
 
   const stream = streamText({
     model: "google/gemini-2.5-pro",
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       readFiles: readFiles(lastCodeBlobKey),
       writeFiles: writeFiles(lastGeneration.id, lastCodeBlobKey),
     },
-    prompt: createGenerationPrompt(mainGuidelinesPrompt, lastUserPrompt, slug),
+    messages: conversationMessages,
     system: systemPrompt,
     stopWhen: stepCountIs(20),
     onStepFinish: (data) => {

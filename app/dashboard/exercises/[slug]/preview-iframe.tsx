@@ -8,7 +8,7 @@ import { useSandbox } from "@/hooks/use-sandbox";
 
 export function PreviewIframe({ slug }: { slug: string }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { sandboxUrl, isLoading, error, initializeSandbox } = useSandbox();
+  const { sandboxUrl, isLoading, error, initializePreview } = useSandbox();
 
   const handleRefresh = () => {
     if (!(iframeRef.current && sandboxUrl)) {
@@ -20,7 +20,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
   };
 
   const handleRetry = () => {
-    initializeSandbox();
+    initializePreview();
   };
 
   // Show message if no sandbox URL available

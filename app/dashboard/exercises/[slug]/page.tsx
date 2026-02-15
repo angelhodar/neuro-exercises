@@ -65,7 +65,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
           <ResizablePanel defaultSize={20} maxSize={50} minSize={20}>
             <div className="flex h-full flex-col border-gray-200/50 border-r bg-white/80 backdrop-blur-sm">
               <div className="flex-shrink-0">
-                <ExerciseHeader exercise={exercise} />
+                <ExerciseHeader exercise={exercise} generations={generations} />
               </div>
               <div className="min-h-0 flex-1">
                 <Chat

@@ -1,19 +1,22 @@
 "use client";
 
+import { parseAsInteger, useQueryState } from "nuqs";
 import {
   createContext,
   type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
 } from "react";
-import { createOrConnectToSandbox } from "@/app/actions/sandbox";
+import { initializeExercisePreview } from "@/app/actions/sandbox";
 
 interface SandboxContextType {
   sandboxUrl: string | null;
   isLoading: boolean;
   error: string | null;
-  initializeSandbox: () => Promise<void>;
+  initializePreview: () => Promise<void>;
 }
 
 const SandboxContext = createContext<SandboxContextType | undefined>(undefined);
@@ -40,8 +43,10 @@ export function SandboxProvider({
   const [sandboxUrl, setSandboxUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gen] = useQueryState("gen", parseAsInteger);
+  const prevGen = useRef(gen);
 
-  const initializeSandbox = useCallback(async () => {
+  const initializePreview = useCallback(async () => {
     if (isLoading) {
       return;
     }
@@ -50,23 +55,33 @@ export function SandboxProvider({
     setError(null);
 
     try {
-      const result = await createOrConnectToSandbox(exerciseId);
+      const result = await initializeExercisePreview(exerciseId, gen);
       setSandboxUrl(result.sandboxUrl);
     } catch (error) {
-      console.error("Error initializing sandbox:", error);
+      console.error("Error initializing preview:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to initialize sandbox"
+        error instanceof Error
+          ? error.message
+          : "No se pudo iniciar la previsualización"
       );
     } finally {
       setIsLoading(false);
     }
-  }, [exerciseId, isLoading]);
+  }, [exerciseId, gen, isLoading]);
+
+  // Auto-trigger preview when the gen query param changes
+  useEffect(() => {
+    if (gen !== prevGen.current) {
+      prevGen.current = gen;
+      initializePreview();
+    }
+  }, [gen, initializePreview]);
 
   const value: SandboxContextType = {
     sandboxUrl,
     isLoading,
     error,
-    initializeSandbox,
+    initializePreview,
   };
 
   return (

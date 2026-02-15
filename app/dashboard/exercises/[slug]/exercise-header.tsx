@@ -1,12 +1,14 @@
-import type { Exercise } from "@/lib/db/schema";
+import type { Exercise, ExerciseChatGeneration } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 import EditExerciseButton from "../edit-exercise";
+import { GenerationHistory } from "./generation-history";
 
 interface ExerciseHeaderProps {
   exercise: Exercise;
+  generations: ExerciseChatGeneration[];
 }
 
-export function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
+export function ExerciseHeader({ exercise, generations }: ExerciseHeaderProps) {
   return (
     <div className="border-gray-200/50 border-b bg-white/50 p-6 backdrop-blur-sm">
       <div className="flex items-center justify-between">
@@ -30,6 +32,7 @@ export function ExerciseHeader({ exercise }: ExerciseHeaderProps) {
           </div>
         </div>
         <div className="flex items-center space-x-3">
+          <GenerationHistory generations={generations} />
           <EditExerciseButton exercise={exercise} />
         </div>
       </div>

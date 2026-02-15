@@ -96,3 +96,18 @@ export async function getLastCompletedGeneration(
     return null;
   }
 }
+
+export async function getGenerationById(
+  id: number
+): Promise<ExerciseChatGeneration | null> {
+  try {
+    const generation = await db.query.exerciseChatGeneration.findFirst({
+      where: eq(exerciseChatGeneration.id, id),
+    });
+
+    return generation || null;
+  } catch (error) {
+    console.error("Error getting generation by id:", error);
+    return null;
+  }
+}

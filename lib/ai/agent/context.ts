@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { Octokit } from "@octokit/rest";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
@@ -31,7 +32,9 @@ export const contextPaths = [
   "hooks/use-exercise-execution.ts",
 ];
 
-export const getFilesContext = async (): Promise<GeneratedFile[]> => {
+const CACHE_TTL_SECONDS = 60 * 60; // 1 hour
+
+async function fetchFilesContext(): Promise<GeneratedFile[]> {
   try {
     const { data: treeData } = await octokit.git.getTree({
       owner,
@@ -79,4 +82,10 @@ export const getFilesContext = async (): Promise<GeneratedFile[]> => {
     console.error("Error fetching files context:", error);
     return [];
   }
-};
+}
+
+export const getFilesContext = unstable_cache(
+  fetchFilesContext,
+  ["agent-context-files"],
+  { revalidate: CACHE_TTL_SECONDS }
+);

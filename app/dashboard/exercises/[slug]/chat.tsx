@@ -132,7 +132,7 @@ export function Chat({
   exercise,
   autoStart,
 }: ChatProps) {
-  const { initializeSandbox } = useSandbox();
+  const { initializePreview } = useSandbox();
   const hasAutoStarted = useRef(false);
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
@@ -146,7 +146,7 @@ export function Chat({
       role: msg.role,
       parts: [{ type: "text" as const, text: msg.content }],
     })),
-    onFinish: () => initializeSandbox(),
+    onFinish: () => initializePreview(),
   });
 
   useEffect(() => {

@@ -12,9 +12,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         allowedContentTypes: ["image/*", "audio/*", "video/*"],
         addRandomSuffix: true,
       }),
-      onUploadCompleted: ({ blob }) => {
-        console.log(blob);
-      },
     });
 
     return NextResponse.json(jsonResponse);

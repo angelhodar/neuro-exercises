@@ -95,7 +95,11 @@ export function ExerciseProvider({
         const numericLinkId = Number.parseInt(linkId, 10);
         const numericItemId = Number.parseInt(itemId, 10);
 
-        await saveExerciseResults(numericLinkId, numericItemId, results);
+        await saveExerciseResults(
+          numericLinkId,
+          numericItemId,
+          results.current as unknown as Record<string, unknown>
+        );
 
         setExerciseState("finished");
 

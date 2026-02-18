@@ -61,7 +61,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
   return (
     <SandboxProvider exerciseId={exercise.id}>
       <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
-        <ResizablePanelGroup className="h-full" direction="horizontal">
+        <ResizablePanelGroup className="h-full" orientation="horizontal">
           <ResizablePanel defaultSize={20} maxSize={50} minSize={20}>
             <div className="flex h-full flex-col border-gray-200/50 border-r bg-white/80 backdrop-blur-sm">
               <div className="flex-shrink-0">

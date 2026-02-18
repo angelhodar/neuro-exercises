@@ -88,8 +88,7 @@ export function Exercise({ config }: SyllablesExerciseProps) {
   useEffect(() => {
     // Select a random word
     const randomIndex = Math.floor(Math.random() * availableWords.length);
-    // @ts-expect-error Its ok
-    const word: SpanishWord = availableWords[randomIndex];
+    const word = availableWords[randomIndex] as SpanishWord;
 
     // Scramble syllables (Fisher-Yates shuffle)
     const scrambled = [...word.syllables];

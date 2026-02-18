@@ -61,7 +61,10 @@ export const exerciseResultsParamsSchema = z.union([
 
 export type ExerciseResultsParams = z.infer<typeof exerciseResultsParamsSchema>;
 
-export function parseConfigFromUrl(configString: string, schema: z.ZodType) {
+export function parseConfigFromUrl(
+  configString: string,
+  schema: z.ZodType<Record<string, unknown>>
+) {
   let parsedJson: unknown;
 
   try {
@@ -81,7 +84,7 @@ export function parseConfigFromUrl(configString: string, schema: z.ZodType) {
 
 export function parseResultsFromUrl(
   resultsString: string,
-  resultsSchema: z.ZodType
+  resultsSchema: z.ZodType<Record<string, unknown>>
 ) {
   let parsedJson: unknown;
 

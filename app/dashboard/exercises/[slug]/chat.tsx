@@ -3,7 +3,14 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { Code, FileText, Loader2, MessageSquare, Settings } from "lucide-react";
+import {
+  CheckCircle,
+  Code,
+  FolderSearch,
+  Loader2,
+  MessageSquare,
+  Settings,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import {
   Conversation,
@@ -42,10 +49,12 @@ interface ChatProps {
 
 function getToolIcon(toolName: string) {
   switch (toolName) {
-    case "getCurrentGeneratedFiles":
-      return <FileText className="h-4 w-4" />;
     case "readFiles":
       return <Code className="h-4 w-4" />;
+    case "listFiles":
+      return <FolderSearch className="h-4 w-4" />;
+    case "verifyFiles":
+      return <CheckCircle className="h-4 w-4" />;
     case "writeFiles":
       return <Settings className="h-4 w-4" />;
     default:
@@ -55,10 +64,12 @@ function getToolIcon(toolName: string) {
 
 function getToolDisplayName(toolName: string) {
   switch (toolName) {
-    case "getCurrentGeneratedFiles":
-      return "Obteniendo archivos de referencia";
     case "readFiles":
-      return "Leyendo archivos existentes";
+      return "Leyendo archivos";
+    case "listFiles":
+      return "Explorando directorio";
+    case "verifyFiles":
+      return "Verificando codigo";
     case "writeFiles":
       return "Escribiendo archivos";
     default:
@@ -217,7 +228,7 @@ export function Chat({
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="flex-shrink-0 border-t p-2">
+      <div className="shrink-0 border-t p-2">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputBody>
             <PromptInputTextarea placeholder="Ask about this exercise..." />

@@ -133,14 +133,41 @@ async function getOrRefreshSnapshot() {
 
 // ─── Sandbox Lifecycle ───────────────────────────────────────────────
 
-async function tryReuseSandbox(sandboxId: string, codeBlobKey: string) {
+async function isDevServerRunning(sandbox: Sandbox) {
+  try {
+    const res = await fetch(sandbox.domain(3000));
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function tryReuseSandbox(
+  sandboxId: string,
+  codeBlobKey: string,
+  exercise: Exercise
+) {
   const sandbox = await Sandbox.get({ sandboxId });
 
   if (sandbox.status !== "running") {
     return null;
   }
 
+  // Refresh code files from blob (may have been updated by multiple writeFiles calls)
   await writeSandboxCodeFiles(sandbox, codeBlobKey);
+
+  // Write .env (agent sandbox may not have it)
+  await sandbox.writeFiles([
+    {
+      path: ".env",
+      content: Buffer.from(createSandboxEnvVars(exercise)),
+    },
+  ]);
+
+  // Start dev server if not already running (agent sandboxes don't start it)
+  if (!(await isDevServerRunning(sandbox))) {
+    await startDevServerAndWait(sandbox);
+  }
 
   return {
     sandboxId: sandbox.sandboxId,
@@ -201,7 +228,8 @@ export async function initializeExercisePreview(
     try {
       const result = await tryReuseSandbox(
         lastGeneration.sandboxId,
-        lastGeneration.codeBlobKey
+        lastGeneration.codeBlobKey,
+        exercise
       );
 
       if (result) {

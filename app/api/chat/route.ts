@@ -1,12 +1,14 @@
-import { stepCountIs, streamText } from "ai";
 import { getExerciseBySlug } from "@/app/actions/exercises";
 import {
   createExerciseGeneration,
   getExerciseGenerations,
-  updateExerciseGeneration,
 } from "@/app/actions/generations";
-import { systemPrompt } from "@/lib/ai/agent/prompts";
-import { getCodeContext, readFiles, writeFiles } from "@/lib/ai/agent/tools";
+import { createExerciseAgent } from "@/lib/ai/agent/agent";
+import { getAgentSandbox } from "@/lib/ai/agent/sandbox";
+import {
+  createAgentTools,
+  writePreviousGenToSandbox,
+} from "@/lib/ai/agent/tools";
 import { createConversationHistory } from "@/lib/ai/agent/utils";
 
 export async function POST(req: Request) {
@@ -50,37 +52,23 @@ export async function POST(req: Request) {
     return new Response("Failed to create generation", { status: 500 });
   }
 
-  const { messages: conversationMessages, lastCodeBlobKey } =
-    createConversationHistory(generations, slug);
-
-  const stream = streamText({
-    model: "google/gemini-2.5-pro",
-    tools: {
-      getCodeContext,
-      readFiles: readFiles(lastCodeBlobKey),
-      writeFiles: writeFiles(lastGeneration.id, lastCodeBlobKey),
-    },
+  const {
     messages: conversationMessages,
-    system: systemPrompt,
-    stopWhen: stepCountIs(20),
-    onStepFinish: (data) => {
-      console.log(data.text);
-    },
-    onFinish: async (data) => {
-      console.log("Stream finished, updating generation...");
-      await updateExerciseGeneration(lastGeneration.id, {
-        status: "COMPLETED",
-        summary: data.text,
-      });
-    },
-    providerOptions: {
-      google: {
-        thinkingConfig: {
-          thinkingBudget: 512,
-        },
-      },
-    },
+    lastCodeBlobKey,
+    lastSandboxId,
+  } = createConversationHistory(generations, slug);
+
+  const sandbox = await getAgentSandbox(lastSandboxId);
+  await writePreviousGenToSandbox(sandbox, lastCodeBlobKey);
+
+  const tools = createAgentTools(sandbox, lastGeneration.id, lastCodeBlobKey);
+  const agent = createExerciseAgent({
+    tools,
+    sandbox,
+    generationId: lastGeneration.id,
   });
 
-  return stream.toUIMessageStreamResponse();
+  const result = await agent.stream({ messages: conversationMessages });
+
+  return result.toUIMessageStreamResponse();
 }

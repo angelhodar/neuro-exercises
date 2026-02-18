@@ -1,9 +1,10 @@
-import type { CoreMessage } from "ai";
+import type { ModelMessage } from "ai";
 import type { ExerciseChatGeneration } from "@/lib/db/schema";
 
 interface ConversationData {
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   lastCodeBlobKey: string | null;
+  lastSandboxId: string | null;
 }
 
 export function createConversationHistory(
@@ -16,8 +17,9 @@ export function createConversationHistory(
     throw new Error("No generations available");
   }
 
-  const messages: CoreMessage[] = [];
+  const messages: ModelMessage[] = [];
   let lastCodeBlobKey: string | null = null;
+  let lastSandboxId: string | null = null;
 
   // First generation's prompt becomes the initial user message with guidelines + slug context
   const initialMessage = `
@@ -40,9 +42,14 @@ ${slug}
   for (let i = 0; i < generations.length; i++) {
     const generation = generations[i];
 
-    // Track the most recent codeBlobKey before the current (last) generation
-    if (i < generations.length - 1 && generation.codeBlobKey) {
-      lastCodeBlobKey = generation.codeBlobKey;
+    // Track the most recent codeBlobKey and sandboxId before the current (last) generation
+    if (i < generations.length - 1) {
+      if (generation.codeBlobKey) {
+        lastCodeBlobKey = generation.codeBlobKey;
+      }
+      if (generation.sandboxId) {
+        lastSandboxId = generation.sandboxId;
+      }
     }
 
     if (generation.summary) {
@@ -57,5 +64,5 @@ ${slug}
     }
   }
 
-  return { messages, lastCodeBlobKey };
+  return { messages, lastCodeBlobKey, lastSandboxId };
 }

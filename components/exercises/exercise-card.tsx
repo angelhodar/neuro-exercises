@@ -12,7 +12,7 @@ export default function ExerciseCard({
   exercise,
   children,
 }: ExerciseCardProps) {
-  const { displayName, tags, thumbnailUrl } = exercise;
+  const { displayName, thumbnailUrl } = exercise;
 
   return (
     <Card className="h-full cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg group-focus:ring-2 group-focus:ring-primary/40">
@@ -22,7 +22,9 @@ export default function ExerciseCard({
           <img
             alt={`Thumbnail de ${displayName}`}
             className="aspect-video w-full object-cover"
+            height={180}
             src={createBlobUrl(thumbnailUrl) || "/placeholder.svg"}
+            width={320}
           />
         </>
       ) : (

@@ -55,12 +55,12 @@ export default async function MediasPage({ searchParams }: Props) {
             <MediaCardContainer>
               <MediaDisplay media={media} />
               <MediaActionsDropdown
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 opacity-0 transition-opacity focus-within:opacity-100 group-hover/card:opacity-100"
                 media={media}
               />
             </MediaCardContainer>
-            <div className="flex flex-1 flex-col gap-3 p-4">
-              <MediaCardTitle className="line-clamp-2 text-center text-sm">
+            <div className="flex flex-1 flex-col gap-2 p-4">
+              <MediaCardTitle className="line-clamp-2">
                 {media.name}
               </MediaCardTitle>
               {media.tags && media.tags.length > 0 && (

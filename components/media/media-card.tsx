@@ -8,7 +8,10 @@ type MediaCardProps = React.HTMLAttributes<HTMLDivElement>;
 export function MediaCard({ children, className, ...props }: MediaCardProps) {
   return (
     <Card
-      className={cn("flex h-full flex-col overflow-hidden", className)}
+      className={cn(
+        "group/card flex h-full flex-col overflow-hidden rounded-2xl border-0 shadow-md ring-0 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl",
+        className
+      )}
       {...props}
     >
       {children}
@@ -26,7 +29,7 @@ export function MediaCardContainer({
   return (
     <div
       className={cn(
-        "group relative h-[340px] min-h-[300px] w-full cursor-pointer overflow-hidden",
+        "relative aspect-[4/3] w-full overflow-hidden bg-muted",
         className
       )}
       {...props}
@@ -45,7 +48,7 @@ export function MediaCardTitle({
 }: MediaCardTitleProps) {
   return (
     <h3
-      className={cn("font-semibold text-lg leading-tight", className)}
+      className={cn("font-semibold text-sm leading-tight", className)}
       {...props}
     >
       {children}
@@ -72,22 +75,28 @@ export function MediaCardDescription({
 
 interface MediaCardBadgesProps extends React.HTMLAttributes<HTMLDivElement> {
   badges: string[];
+  maxVisible?: number;
   variant?: "default" | "secondary" | "destructive" | "outline";
 }
 
 export function MediaCardBadges({
   badges,
+  maxVisible = 3,
   variant = "secondary",
   className,
   ...props
 }: MediaCardBadgesProps) {
+  const visible = badges.slice(0, maxVisible);
+  const overflow = badges.length - maxVisible;
+
   return (
     <div className={cn("flex flex-wrap gap-1", className)} {...props}>
-      {badges.map((badge) => (
+      {visible.map((badge) => (
         <Badge key={badge} variant={variant}>
           {badge}
         </Badge>
       ))}
+      {overflow > 0 && <Badge variant="outline">+{overflow}</Badge>}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { exerciseHasAssets } from "@/app/exercises/loader";
+import { CardActionStop } from "@/components/exercises/card-action-stop";
 import ExerciseCard from "@/components/exercises/exercise-card";
 import { Button } from "@/components/ui/button";
 import EditExerciseButton from "./exercises/edit-exercise";
@@ -34,21 +35,21 @@ export default async function DashboardPage() {
       </DashboardHeader>
       <div className="grid gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
         {exerciseAssetChecks.map((exercise) => (
-          <div className="relative h-full" key={exercise.id}>
-            <Link
-              className="group block h-full focus:outline-none"
-              href={
-                exercise.hasAssets
-                  ? `/exercises/${exercise.slug}`
-                  : `/dashboard/exercises/${exercise.slug}`
-              }
-            >
-              <ExerciseCard exercise={exercise} />
-            </Link>
-            <div className="absolute right-2 bottom-2 z-10">
-              <EditExerciseButton exercise={exercise} />
-            </div>
-          </div>
+          <Link
+            className="group block h-full focus:outline-none"
+            href={
+              exercise.hasAssets
+                ? `/exercises/${exercise.slug}`
+                : `/dashboard/exercises/${exercise.slug}`
+            }
+            key={exercise.id}
+          >
+            <ExerciseCard exercise={exercise}>
+              <CardActionStop>
+                <EditExerciseButton exercise={exercise} />
+              </CardActionStop>
+            </ExerciseCard>
+          </Link>
         ))}
       </div>
     </>

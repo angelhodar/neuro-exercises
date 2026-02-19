@@ -25,7 +25,7 @@ export function MediaImage({
       alt={alt}
       src={src || "/placeholder.svg"}
       {...(useFill ? { fill: true, sizes } : { width, height })}
-      className={cn("object-contain", className)}
+      className={cn("object-cover", className)}
       placeholder={placeholder}
       quality={quality}
       {...props}

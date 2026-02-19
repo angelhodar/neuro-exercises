@@ -156,43 +156,31 @@ export function createAgentTools(
 
         const errors: string[] = [];
 
-        try {
-          const tscResult = await sandbox.runCommand("npx", [
-            "tsc",
-            "--noEmit",
-            "--pretty",
-          ]);
-          const tscOutput =
-            (await tscResult.stderr()) || (await tscResult.stdout());
+        const tscResult = await sandbox.runCommand("npm", ["run", "ts-check"]);
+        const tscOutput = await tscResult.stderr();
 
-          if (tscOutput) {
-            const relevantErrors = tscOutput
-              .split("\n")
-              .filter((line) => line.includes(exerciseDir))
-              .join("\n");
+        if (tscOutput) {
+          const relevantErrors = tscOutput
+            .split("\n")
+            .filter((line) => line.includes(exerciseDir))
+            .join("\n");
 
-            if (relevantErrors.trim()) {
-              errors.push(`TypeScript errors:\n${relevantErrors}`);
-            }
+          if (relevantErrors.trim()) {
+            errors.push(`TypeScript errors:\n${relevantErrors}`);
           }
-        } catch (error) {
-          console.error("tsc check error:", error);
         }
 
-        try {
-          const lintResult = await sandbox.runCommand("npx", [
-            "ultracite",
-            "check",
-            exerciseDir,
-          ]);
-          const lintOutput =
-            (await lintResult.stderr()) || (await lintResult.stdout());
+        const lintResult = await sandbox.runCommand("npm", [
+          "run",
+          "check",
+          "--",
+          exerciseDir,
+        ]);
 
-          if (lintResult.exitCode !== 0 && lintOutput) {
-            errors.push(`Lint errors:\n${lintOutput}`);
-          }
-        } catch (error) {
-          console.error("Lint check error:", error);
+        const lintOutput = await lintResult.stderr();
+
+        if (lintResult.exitCode !== 0 && lintOutput) {
+          errors.push(`Lint errors:\n${lintOutput}`);
         }
 
         if (errors.length > 0) {

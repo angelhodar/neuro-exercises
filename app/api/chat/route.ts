@@ -20,6 +20,14 @@ export async function POST(req: Request) {
     return new Response("No user message found", { status: 400 });
   }
 
+  const lastMessageContent =
+    lastMessage.content ??
+    lastMessage.parts
+      ?.filter((p: { type: string }) => p.type === "text")
+      .map((p: { text: string }) => p.text)
+      .join("\n") ??
+    "";
+
   const exercise = await getExerciseBySlug(slug);
 
   if (!exercise) {
@@ -35,7 +43,7 @@ export async function POST(req: Request) {
   if (generations.at(-1)?.status === "COMPLETED") {
     const newGeneration = await createExerciseGeneration({
       exerciseId: exercise.id,
-      prompt: lastMessage.content,
+      prompt: lastMessageContent,
       status: "GENERATING",
     });
 

@@ -24,7 +24,7 @@ async function generateThumbnail(
 ): Promise<string | null> {
   try {
     const { images } = await generateImage({
-      model: "google/imagen-4",
+      model: "bfl/flux-2-flex",
       prompt: `Generate an image of ${thumbnailPrompt.toLowerCase()}, clear and simple, centered, white background`,
       size: "512x512",
     });

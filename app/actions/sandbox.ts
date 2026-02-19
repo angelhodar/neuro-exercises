@@ -183,7 +183,7 @@ async function createNewSandbox(
   const sandbox = await Sandbox.create({
     source: { type: "snapshot", snapshotId },
     ports: [3000],
-    timeout: 300_000, // 5 min
+    timeout: 900_000, // 15 min
   });
 
   await writeSandboxCodeFiles(sandbox, codeBlobKey);
@@ -216,6 +216,7 @@ export async function initializeExercisePreview(
   if (!lastGeneration?.codeBlobKey) {
     throw new Error("No completed generation found with code blob key");
   }
+  console.log("Called");
 
   const exercise = await getExerciseById(exerciseId);
 

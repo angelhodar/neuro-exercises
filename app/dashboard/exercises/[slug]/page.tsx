@@ -59,7 +59,10 @@ export default async function ExerciseChatPage({ params }: PageProps) {
     generations.length === 1 && generations[0].status === "PENDING";
 
   return (
-    <SandboxProvider exerciseId={exercise.id}>
+    <SandboxProvider
+      exerciseId={exercise.id}
+      hasCompletedGeneration={generations.some((g) => g.status === "COMPLETED")}
+    >
       <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100">
         <ResizablePanelGroup className="h-full" orientation="horizontal">
           <ResizablePanel defaultSize={20} maxSize={50} minSize={20}>

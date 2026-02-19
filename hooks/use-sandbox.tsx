@@ -32,19 +32,20 @@ export function useSandbox() {
 }
 
 interface SandboxProviderProps extends PropsWithChildren {
-  children: React.ReactNode;
   exerciseId: number;
+  hasCompletedGeneration?: boolean;
 }
 
 export function SandboxProvider({
   children,
   exerciseId,
+  hasCompletedGeneration = false,
 }: SandboxProviderProps) {
   const [sandboxUrl, setSandboxUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gen] = useQueryState("gen", parseAsInteger);
-  const prevGen = useRef(gen);
+  const prevGen = useRef<number | null | undefined>(undefined);
 
   const initializePreview = useCallback(async () => {
     if (isLoading) {
@@ -69,13 +70,22 @@ export function SandboxProvider({
     }
   }, [exerciseId, gen, isLoading]);
 
-  // Auto-trigger preview when the gen query param changes
+  // Auto-initialize on mount if there's a completed generation,
+  // and re-initialize when the gen query param changes
   useEffect(() => {
+    if (prevGen.current === undefined) {
+      prevGen.current = gen;
+      if (hasCompletedGeneration) {
+        initializePreview();
+      }
+      return;
+    }
+
     if (gen !== prevGen.current) {
       prevGen.current = gen;
       initializePreview();
     }
-  }, [gen, initializePreview]);
+  }, [gen, hasCompletedGeneration, initializePreview]);
 
   const value: SandboxContextType = {
     sandboxUrl,

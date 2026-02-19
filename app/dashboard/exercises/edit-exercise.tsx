@@ -76,7 +76,7 @@ export default function EditExerciseButton({
         <Pencil className="mr-2 h-4 w-4" />
         Editar
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Editar ejercicio</DialogTitle>
           <p className="text-muted-foreground text-sm">

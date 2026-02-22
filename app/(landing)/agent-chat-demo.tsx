@@ -66,8 +66,12 @@ function ExercisePreview({ visible }: { visible: boolean }) {
         </span>
       </div>
 
-      {visible ? (
-        <div className="fade-in zoom-in-95 flex-1 animate-in duration-700">
+      <div className="relative flex-1">
+        <div
+          className={
+            visible ? "fade-in zoom-in-95 animate-in duration-700" : "invisible"
+          }
+        >
           <div className="rounded-lg border border-slate-200 bg-white p-6">
             <h4 className="mb-1 font-semibold text-base text-slate-900">
               Secuenciacion Visual
@@ -99,13 +103,14 @@ function ExercisePreview({ visible }: { visible: boolean }) {
             </p>
           </div>
         </div>
-      ) : (
-        <div className="flex flex-1 items-center justify-center py-16">
-          <p className="text-slate-400 text-sm">
-            La vista previa aparecera aqui...
-          </p>
-        </div>
-      )}
+        {!visible && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-slate-400 text-sm">
+              La vista previa aparecera aqui...
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

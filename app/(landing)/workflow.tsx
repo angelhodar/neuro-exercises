@@ -69,7 +69,7 @@ export default function WorkflowSection() {
         </motion.div>
 
         <div className="relative grid gap-0 lg:grid-cols-3">
-          <div className="pointer-events-none absolute top-16 left-1/2 hidden h-px w-2/3 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-200 to-transparent lg:block" />
+          <div className="pointer-events-none absolute top-8 left-1/2 hidden h-px w-2/3 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-200 to-transparent lg:block" />
 
           <WorkflowStep icon={MessageSquare} step={1}>
             <WorkflowStepTitle>Describe el ejercicio</WorkflowStepTitle>

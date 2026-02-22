@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export function Nav() {
   return (
     <div className="fixed top-4 right-0 left-0 z-50 flex justify-center px-6">
-      <nav className="flex w-full max-w-5xl items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-8 py-3 shadow-lg shadow-slate-100 backdrop-blur-md">
+      <nav className="flex w-full max-w-5xl items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-lg shadow-slate-100 backdrop-blur-md sm:px-6">
         <Link className="flex items-center gap-2.5" href="/">
           <Image
             alt="NeuroGranada"

@@ -98,7 +98,7 @@ export default async function FeaturesSection() {
           <div className="mb-4 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-blue-500 text-xs uppercase tracking-widest">
             Ejercicios
           </div>
-          <h2 className="font-(family-name:--font-display) mb-4 whitespace-nowrap font-bold text-5xl text-slate-900 leading-tight lg:text-6xl">
+          <h2 className="font-(family-name:--font-display) mb-4 font-bold text-3xl text-slate-900 leading-tight sm:text-4xl md:text-5xl lg:text-6xl">
             Pruébalos ahora{" "}
             <span className="text-blue-500">sin registrarte</span>
           </h2>

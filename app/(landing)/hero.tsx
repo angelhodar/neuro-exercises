@@ -14,7 +14,7 @@ export default function HeroSection() {
         {/* Headline */}
         <motion.h1
           animate={{ opacity: 1 }}
-          className="font-(family-name:--font-display) mb-8 font-bold text-6xl leading-[0.92] tracking-tight xl:text-7xl"
+          className="font-(family-name:--font-display) mb-8 font-bold text-4xl leading-[0.92] tracking-tight sm:text-5xl md:text-6xl xl:text-7xl"
           initial={{ opacity: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
@@ -46,7 +46,7 @@ export default function HeroSection() {
           transition={{ duration: 0.7, delay: 0.5 }}
         >
           <Button
-            className="h-auto bg-blue-600 px-8 py-4 text-lg text-white shadow-blue-200 shadow-lg transition-all hover:bg-blue-700 hover:shadow-blue-200 hover:shadow-xl"
+            className="h-auto bg-blue-600 px-6 py-3 text-base text-white shadow-blue-200 shadow-lg transition-all hover:bg-blue-700 hover:shadow-blue-200 hover:shadow-xl sm:px-8 sm:py-4 sm:text-lg"
             render={<Link href="/login" />}
             size="lg"
           >
@@ -54,7 +54,7 @@ export default function HeroSection() {
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <Button
-            className="h-auto border border-slate-200 bg-white px-8 py-4 text-lg text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50"
+            className="h-auto border border-slate-200 bg-white px-6 py-3 text-base text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 sm:px-8 sm:py-4 sm:text-lg"
             render={<Link href="#ejercicios" />}
             size="lg"
           >

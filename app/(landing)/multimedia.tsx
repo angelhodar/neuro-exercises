@@ -91,7 +91,7 @@ function MockupPanel({ children }: PropsWithChildren) {
 
       <div className="grid grid-cols-3 gap-2">{children}</div>
 
-      <div className="absolute -right-4 -bottom-4 w-52 rounded-xl border border-indigo-100 bg-white p-3 shadow-lg">
+      <div className="absolute -right-4 -bottom-4 hidden w-52 rounded-xl border border-indigo-100 bg-white p-3 shadow-lg sm:block">
         <div className="mb-1.5 flex items-center gap-1.5">
           <Edit3 className="h-3.5 w-3.5 text-indigo-500" />
           <span className="font-mono text-[10px] text-indigo-500 uppercase tracking-widest">
@@ -123,7 +123,7 @@ export default function MultimediaSection() {
             <div className="mb-4 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-blue-500 text-xs uppercase tracking-widest">
               Multimedia
             </div>
-            <h2 className="font-(family-name:--font-display) mb-4 font-bold text-5xl text-slate-900 leading-tight lg:text-6xl">
+            <h2 className="font-(family-name:--font-display) mb-4 font-bold text-3xl text-slate-900 leading-tight sm:text-4xl md:text-5xl lg:text-6xl">
               Todo el contenido
               <br />
               <span className="text-blue-500">que necesitas</span>
@@ -193,7 +193,7 @@ export default function MultimediaSection() {
           </motion.div>
 
           <motion.div
-            className="relative pr-4 pb-8"
+            className="relative pr-8 pb-12 sm:pr-4 sm:pb-8"
             initial={{ opacity: 0, x: 40 }}
             transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}

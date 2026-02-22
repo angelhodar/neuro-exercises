@@ -52,7 +52,7 @@ export default function CtaSection() {
             Empieza hoy
           </div>
 
-          <h2 className="font-(family-name:--font-display) mb-6 font-bold text-5xl text-slate-900 leading-tight lg:text-7xl">
+          <h2 className="font-(family-name:--font-display) mb-6 font-bold text-3xl text-slate-900 leading-tight sm:text-4xl md:text-5xl lg:text-7xl">
             Transforma tu
             <br />
             <span className="bg-linear-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
@@ -60,7 +60,7 @@ export default function CtaSection() {
             </span>
           </h2>
 
-          <p className="mx-auto mb-12 max-w-2xl text-slate-600 text-xl leading-relaxed">
+          <p className="mx-auto mb-12 max-w-2xl text-lg text-slate-600 leading-relaxed sm:text-xl">
             Únete a los profesionales de neurología que ya usan NeuroGranada
             para crear rehabilitación cognitiva de vanguardia. Sin curva de
             aprendizaje, sin límites creativos.

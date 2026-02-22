@@ -13,7 +13,7 @@ type WorkflowStepProps = PropsWithChildren<{
 function WorkflowStep({ step, icon: Icon, children }: WorkflowStepProps) {
   return (
     <motion.div
-      className="group relative flex flex-col items-center px-8 text-center"
+      className="group relative flex flex-col items-center px-4 text-center sm:px-8"
       initial={{ opacity: 0, y: 40 }}
       transition={{ duration: 0.6, delay: step * 0.15, ease: "easeOut" }}
       viewport={{ once: true, margin: "-60px" }}
@@ -61,7 +61,7 @@ export default function WorkflowSection() {
           <div className="mb-4 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-mono text-blue-500 text-xs uppercase tracking-widest">
             Cómo funciona
           </div>
-          <h2 className="font-(family-name:--font-display) mb-4 font-bold text-5xl text-slate-900 lg:text-6xl">
+          <h2 className="font-(family-name:--font-display) mb-4 font-bold text-3xl text-slate-900 sm:text-4xl md:text-5xl lg:text-6xl">
             De idea a terapia
             <br />
             <span className="text-blue-500">en tres pasos</span>

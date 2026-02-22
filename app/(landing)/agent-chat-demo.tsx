@@ -145,7 +145,7 @@ export function AgentChatDemo() {
       </div>
 
       <div className="grid md:grid-cols-2">
-        <div className="flex min-h-[420px] flex-col border-slate-100 border-r bg-white p-5">
+        <div className="flex min-h-[320px] flex-col border-slate-100 border-r bg-white p-5 md:min-h-[420px]">
           <div className="flex flex-1 flex-col gap-4">
             <Message visible={step >= 1}>
               <MessageIcon className="bg-slate-100 text-slate-500">

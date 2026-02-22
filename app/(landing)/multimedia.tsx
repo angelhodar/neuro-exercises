@@ -12,22 +12,19 @@ import {
 } from "lucide-react";
 // biome-ignore lint/performance/noNamespaceImport: motion uses namespace proxy for motion.div, motion.span etc.
 import * as motion from "motion/react-client";
-import type { ElementType, ReactNode } from "react";
+import type { ElementType, PropsWithChildren } from "react";
 
-interface MultimediaFeatureProps {
-  icon: ElementType;
-  title: string;
-  description: string;
-  accent: string;
+type MultimediaFeatureProps = PropsWithChildren<{
   index: number;
-}
+  accent: string;
+  icon: ElementType;
+}>;
 
 function MultimediaFeature({
-  icon: Icon,
-  title,
-  description,
-  accent,
   index,
+  accent,
+  icon: Icon,
+  children,
 }: MultimediaFeatureProps) {
   return (
     <motion.div
@@ -44,14 +41,17 @@ function MultimediaFeature({
       <div className={`mt-0.5 shrink-0 rounded-xl p-2.5 ${accent}`}>
         <Icon className="h-5 w-5" />
       </div>
-      <div>
-        <h3 className="mb-0.5 font-semibold text-slate-900">{title}</h3>
-        <p className="text-base text-slate-500 leading-relaxed">
-          {description}
-        </p>
-      </div>
+      <div>{children}</div>
     </motion.div>
   );
+}
+
+function MultimediaFeatureTitle({ children }: PropsWithChildren) {
+  return <h3 className="mb-0.5 font-semibold text-slate-900">{children}</h3>;
+}
+
+function MultimediaFeatureDescription({ children }: PropsWithChildren) {
+  return <p className="text-base text-slate-500 leading-relaxed">{children}</p>;
 }
 
 interface MockupThumbnailProps {
@@ -76,13 +76,13 @@ function MockupThumbnail({
   );
 }
 
-function MockupPanel({ children }: { children: ReactNode }) {
+function MockupPanel({ children }: PropsWithChildren) {
   return (
     <div className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-slate-100/80 shadow-xl">
       <div className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
         <Search className="h-4 w-4 shrink-0 text-slate-400" />
         <span className="flex-1 text-slate-400 text-sm">
-          Buscar: "animales domésticos con fondo blanco"
+          Buscar: &quot;animales domésticos con fondo blanco&quot;
         </span>
         <span className="rounded-full bg-blue-500 px-2 py-0.5 font-mono text-[10px] text-white">
           IA
@@ -90,22 +90,6 @@ function MockupPanel({ children }: { children: ReactNode }) {
       </div>
 
       <div className="grid grid-cols-3 gap-2">{children}</div>
-
-      <div className="mt-4 flex items-center justify-between border-slate-100 border-t pt-3">
-        <span className="font-mono text-[10px] text-slate-400">
-          47 recursos · 12 generados hoy
-        </span>
-        <div className="flex gap-1">
-          {["IA", "Google", "Todos"].map((filter) => (
-            <span
-              className={`rounded-full px-2 py-0.5 font-mono text-[10px] ${filter === "Todos" ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-500"}`}
-              key={filter}
-            >
-              {filter}
-            </span>
-          ))}
-        </div>
-      </div>
 
       <div className="absolute -right-4 -bottom-4 w-52 rounded-xl border border-indigo-100 bg-white p-3 shadow-lg">
         <div className="mb-1.5 flex items-center gap-1.5">
@@ -115,7 +99,7 @@ function MockupPanel({ children }: { children: ReactNode }) {
           </span>
         </div>
         <p className="text-slate-600 text-xs leading-relaxed">
-          "Cambia el fondo a un jardín y añade un perro"
+          &quot;Cambia el fondo a un jardín y añade un perro&quot;
         </p>
         <div className="mt-2 h-1 rounded-full bg-slate-100">
           <div className="h-1 w-2/3 rounded-full bg-indigo-400" />
@@ -124,70 +108,6 @@ function MockupPanel({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-const FEATURES = [
-  {
-    icon: ImagePlus,
-    title: "Generación por IA",
-    description:
-      "Crea imágenes a partir de un prompt de texto. Genera contenido visual personalizado para cada ejercicio en segundos.",
-    accent: "bg-blue-50 text-blue-600",
-  },
-  {
-    icon: Globe,
-    title: "Búsqueda en Google",
-    description:
-      "Accede al motor de búsqueda de Google para enriquecer tus ejercicios con imágenes reales y relevantes.",
-    accent: "bg-cyan-50 text-cyan-600",
-  },
-  {
-    icon: Edit3,
-    title: "Edición Inteligente",
-    description:
-      "Modifica cualquier imagen ya generada usando comandos de texto. Sin herramientas externas, sin fricción.",
-    accent: "bg-indigo-50 text-indigo-600",
-  },
-  {
-    icon: MessageSquare,
-    title: "Búsqueda Contextual",
-    description:
-      "Describe en lenguaje natural lo que necesitas y la IA encuentra el medio más adecuado de tu biblioteca.",
-    accent: "bg-violet-50 text-violet-600",
-  },
-] as const;
-
-const THUMBNAILS = [
-  {
-    gradient: "from-blue-100 to-blue-200",
-    icon: ImageIcon,
-    iconColor: "text-blue-300",
-  },
-  {
-    gradient: "from-slate-100 to-slate-200",
-    icon: Music,
-    iconColor: "text-slate-300",
-  },
-  {
-    gradient: "from-violet-100 to-violet-200",
-    icon: ImageIcon,
-    iconColor: "text-violet-300",
-  },
-  {
-    gradient: "from-amber-100 to-amber-200",
-    icon: Video,
-    iconColor: "text-amber-300",
-  },
-  {
-    gradient: "from-sky-100 to-sky-200",
-    icon: ImageIcon,
-    iconColor: "text-sky-300",
-  },
-  {
-    gradient: "from-emerald-100 to-emerald-200",
-    icon: Music,
-    iconColor: "text-emerald-300",
-  },
-] as const;
 
 export default function MultimediaSection() {
   return (
@@ -214,16 +134,61 @@ export default function MultimediaSection() {
             </p>
 
             <div className="space-y-6">
-              {FEATURES.map((feature, index) => (
-                <MultimediaFeature
-                  accent={feature.accent}
-                  description={feature.description}
-                  icon={feature.icon}
-                  index={index}
-                  key={feature.title}
-                  title={feature.title}
-                />
-              ))}
+              <MultimediaFeature
+                accent="bg-blue-50 text-blue-600"
+                icon={ImagePlus}
+                index={0}
+              >
+                <MultimediaFeatureTitle>
+                  Generación por IA
+                </MultimediaFeatureTitle>
+                <MultimediaFeatureDescription>
+                  Crea imágenes a partir de un prompt de texto. Genera contenido
+                  visual personalizado para cada ejercicio en segundos.
+                </MultimediaFeatureDescription>
+              </MultimediaFeature>
+
+              <MultimediaFeature
+                accent="bg-cyan-50 text-cyan-600"
+                icon={Globe}
+                index={1}
+              >
+                <MultimediaFeatureTitle>
+                  Búsqueda en Google
+                </MultimediaFeatureTitle>
+                <MultimediaFeatureDescription>
+                  Accede al motor de búsqueda de Google para enriquecer tus
+                  ejercicios con imágenes reales y relevantes.
+                </MultimediaFeatureDescription>
+              </MultimediaFeature>
+
+              <MultimediaFeature
+                accent="bg-indigo-50 text-indigo-600"
+                icon={Edit3}
+                index={2}
+              >
+                <MultimediaFeatureTitle>
+                  Edición Inteligente
+                </MultimediaFeatureTitle>
+                <MultimediaFeatureDescription>
+                  Modifica cualquier imagen ya generada usando comandos de
+                  texto. Sin herramientas externas, sin fricción.
+                </MultimediaFeatureDescription>
+              </MultimediaFeature>
+
+              <MultimediaFeature
+                accent="bg-violet-50 text-violet-600"
+                icon={MessageSquare}
+                index={3}
+              >
+                <MultimediaFeatureTitle>
+                  Búsqueda Contextual
+                </MultimediaFeatureTitle>
+                <MultimediaFeatureDescription>
+                  Describe en lenguaje natural lo que necesitas y la IA
+                  encuentra el medio más adecuado de tu biblioteca.
+                </MultimediaFeatureDescription>
+              </MultimediaFeature>
             </div>
           </motion.div>
 
@@ -235,14 +200,36 @@ export default function MultimediaSection() {
             whileInView={{ opacity: 1, x: 0 }}
           >
             <MockupPanel>
-              {THUMBNAILS.map((thumb) => (
-                <MockupThumbnail
-                  gradient={thumb.gradient}
-                  icon={thumb.icon}
-                  iconColor={thumb.iconColor}
-                  key={thumb.gradient}
-                />
-              ))}
+              <MockupThumbnail
+                gradient="from-blue-100 to-blue-200"
+                icon={ImageIcon}
+                iconColor="text-blue-300"
+              />
+              <MockupThumbnail
+                gradient="from-slate-100 to-slate-200"
+                icon={Music}
+                iconColor="text-slate-300"
+              />
+              <MockupThumbnail
+                gradient="from-violet-100 to-violet-200"
+                icon={ImageIcon}
+                iconColor="text-violet-300"
+              />
+              <MockupThumbnail
+                gradient="from-amber-100 to-amber-200"
+                icon={Video}
+                iconColor="text-amber-300"
+              />
+              <MockupThumbnail
+                gradient="from-sky-100 to-sky-200"
+                icon={ImageIcon}
+                iconColor="text-sky-300"
+              />
+              <MockupThumbnail
+                gradient="from-emerald-100 to-emerald-200"
+                icon={Music}
+                iconColor="text-emerald-300"
+              />
             </MockupPanel>
           </motion.div>
         </div>

@@ -3,26 +3,19 @@
 import { MessageSquare, Play, Send } from "lucide-react";
 // biome-ignore lint/performance/noNamespaceImport: motion uses namespace proxy for motion.div, motion.span etc.
 import * as motion from "motion/react-client";
-import type { ElementType } from "react";
+import type { ElementType, PropsWithChildren } from "react";
 
-interface WorkflowStepProps {
+type WorkflowStepProps = PropsWithChildren<{
+  step: number;
   icon: ElementType;
-  title: string;
-  description: string;
-  index: number;
-}
+}>;
 
-function WorkflowStep({
-  icon: Icon,
-  title,
-  description,
-  index,
-}: WorkflowStepProps) {
+function WorkflowStep({ step, icon: Icon, children }: WorkflowStepProps) {
   return (
     <motion.div
       className="group relative flex flex-col items-center px-8 text-center"
       initial={{ opacity: 0, y: 40 }}
-      transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
+      transition={{ duration: 0.6, delay: step * 0.15, ease: "easeOut" }}
       viewport={{ once: true, margin: "-60px" }}
       whileInView={{ opacity: 1, y: 0 }}
     >
@@ -34,38 +27,25 @@ function WorkflowStep({
       </div>
 
       <div className="mb-4 font-bold font-mono text-2xl text-blue-400">
-        {index + 1}
+        {step}
       </div>
 
-      <h3 className="mb-4 font-semibold text-slate-900 text-xl">{title}</h3>
-
-      <p className="mb-6 text-base text-slate-500 leading-relaxed">
-        {description}
-      </p>
+      {children}
     </motion.div>
   );
 }
 
-const STEPS = [
-  {
-    icon: MessageSquare,
-    title: "Describe el ejercicio",
-    description:
-      'Escribe en lenguaje natural qué quieres: "Un ejercicio de memoria donde el paciente identifique objetos en una imagen durante 5 segundos". Sin formularios complejos.',
-  },
-  {
-    icon: Play,
-    title: "IA genera y previsualiza",
-    description:
-      "El agente configura los parámetros, genera las imágenes necesarias y lanza una vista previa al instante.",
-  },
-  {
-    icon: Send,
-    title: "Comparte con el paciente",
-    description:
-      "Genera un enlace único que el paciente abre desde cualquier dispositivo. Los resultados llegan a tu panel en tiempo real. Sin instalaciones, sin fricciones.",
-  },
-] as const;
+function WorkflowStepTitle({ children }: PropsWithChildren) {
+  return (
+    <h3 className="mb-4 font-semibold text-slate-900 text-xl">{children}</h3>
+  );
+}
+
+function WorkflowStepDescription({ children }: PropsWithChildren) {
+  return (
+    <p className="mb-6 text-base text-slate-500 leading-relaxed">{children}</p>
+  );
+}
 
 export default function WorkflowSection() {
   return (
@@ -90,15 +70,32 @@ export default function WorkflowSection() {
 
         <div className="relative grid gap-0 lg:grid-cols-3">
           <div className="pointer-events-none absolute top-16 left-1/2 hidden h-px w-2/3 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-200 to-transparent lg:block" />
-          {STEPS.map((step, index) => (
-            <WorkflowStep
-              description={step.description}
-              icon={step.icon}
-              index={index}
-              key={step.title}
-              title={step.title}
-            />
-          ))}
+
+          <WorkflowStep icon={MessageSquare} step={1}>
+            <WorkflowStepTitle>Describe el ejercicio</WorkflowStepTitle>
+            <WorkflowStepDescription>
+              Escribe en lenguaje natural qué quieres: &quot;Un ejercicio de
+              memoria donde el paciente identifique objetos en una imagen
+              durante 5 segundos&quot;. Sin formularios complejos.
+            </WorkflowStepDescription>
+          </WorkflowStep>
+
+          <WorkflowStep icon={Play} step={2}>
+            <WorkflowStepTitle>IA genera y previsualiza</WorkflowStepTitle>
+            <WorkflowStepDescription>
+              El agente configura los parámetros, genera las imágenes necesarias
+              y lanza una vista previa al instante.
+            </WorkflowStepDescription>
+          </WorkflowStep>
+
+          <WorkflowStep icon={Send} step={3}>
+            <WorkflowStepTitle>Comparte con el paciente</WorkflowStepTitle>
+            <WorkflowStepDescription>
+              Genera un enlace único que el paciente abre desde cualquier
+              dispositivo. Los resultados llegan a tu panel en tiempo real. Sin
+              instalaciones, sin fricciones.
+            </WorkflowStepDescription>
+          </WorkflowStep>
         </div>
       </div>
     </section>

@@ -1,11 +1,5 @@
 import type { PropsWithChildren } from "react";
 
-export const metadata = {
-  title: "NeuroGranada — Rehabilitación Neurológica con IA",
-  description:
-    "Plataforma clínica avanzada para profesionales de neurología. Genera ejercicios cognitivos personalizados con IA, monitoriza el progreso y adapta la terapia en tiempo real.",
-};
-
 export default function LandingLayout({ children }: PropsWithChildren) {
   return (
     <div className="font-(family-name:--font-body) relative min-h-screen text-slate-900 antialiased selection:bg-blue-100">

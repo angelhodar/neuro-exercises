@@ -22,23 +22,16 @@ const TARGET_SLUGS = [
 
 const getCachedExercises = unstable_cache(async () => {
   const exercises = await getExercises(TARGET_SLUGS);
-  return exercises.filter((exercise) => exercise?.id);
-}, ["landing-v2-exercises"]);
+  return exercises;
+}, ["landing-exercises"]);
 
-function ExerciseCard({
-  exercise,
-  index,
-}: {
-  exercise: Exercise;
-  index: number;
-}) {
+function ExerciseCard({ exercise }: { exercise: Exercise }) {
   return (
     <motion.div
       className="h-full"
       initial={{ opacity: 0, y: 40 }}
       transition={{
         duration: 0.6,
-        delay: index * 0.1,
         ease: "easeOut",
       }}
       viewport={{ once: true, margin: "-60px" }}
@@ -112,12 +105,8 @@ export default async function FeaturesSection() {
         </motion.div>
 
         <div className="grid gap-6 md:grid-cols-3 md:items-stretch">
-          {exercises.map((exercise, index) => (
-            <ExerciseCard
-              exercise={exercise as Exercise}
-              index={index}
-              key={exercise.id}
-            />
+          {exercises.map((exercise) => (
+            <ExerciseCard exercise={exercise} key={exercise.id} />
           ))}
         </div>
       </div>

@@ -1,21 +1,38 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight } from "lucide-react";
 // biome-ignore lint/performance/noNamespaceImport: motion uses namespace proxy for motion.div, motion.span etc.
 import * as motion from "motion/react-client";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+const waitlistSchema = z.object({
+  email: z.email("Introduce un email válido"),
+});
+
+type WaitlistFormValues = z.infer<typeof waitlistSchema>;
+
 export default function CtaSection() {
-  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-    }
+  const form = useForm<WaitlistFormValues>({
+    resolver: zodResolver(waitlistSchema),
+    defaultValues: { email: "" },
+  });
+
+  const onSubmit = (_values: WaitlistFormValues) => {
+    setSubmitted(true);
   };
 
   return (
@@ -59,26 +76,37 @@ export default function CtaSection() {
               </p>
             </div>
           ) : (
-            <form
-              className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
-              onSubmit={handleSubmit}
-            >
-              <Input
-                className="h-auto flex-1 rounded-xl border-slate-200 bg-white px-4 py-3.5 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-blue-400 focus-visible:ring-blue-100"
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                required
-                type="email"
-                value={email}
-              />
-              <Button
-                className="h-auto rounded-xl bg-blue-600 px-6 py-3.5 shadow-blue-200 shadow-lg hover:bg-blue-700 hover:shadow-blue-200 hover:shadow-xl"
-                type="submit"
+            <Form {...form}>
+              <form
+                className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row"
+                onSubmit={form.handleSubmit(onSubmit)}
               >
-                Unirse
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          className="h-auto rounded-xl border-slate-200 bg-white px-4 py-3.5 text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:border-blue-400 focus-visible:ring-blue-100"
+                          placeholder="tu@email.com"
+                          type="email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  className="h-auto rounded-xl bg-blue-600 px-6 py-3.5 shadow-blue-200 shadow-lg hover:bg-blue-700 hover:shadow-blue-200 hover:shadow-xl"
+                  type="submit"
+                >
+                  Unirse
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </form>
+            </Form>
           )}
         </motion.div>
       </div>

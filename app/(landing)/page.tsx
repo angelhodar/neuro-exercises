@@ -1,15 +1,23 @@
-import ExercisesSection from "./exercises";
+import CtaSection from "./cta";
+import FeaturesSection from "./features";
+import { Footer } from "./footer";
 import HeroSection from "./hero";
-import MultimediaFeaturesSection from "./multimedia-features";
-import TemplatesSection from "./templates";
+import MultimediaSection from "./multimedia";
+import { Nav } from "./nav";
+import WorkflowSection from "./workflow";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="flex flex-col gap-2">
-      <HeroSection />
-      <MultimediaFeaturesSection />
-      <ExercisesSection />
-      <TemplatesSection />
-    </div>
+    <>
+      <Nav />
+      <main>
+        <HeroSection />
+        <FeaturesSection />
+        <MultimediaSection />
+        <WorkflowSection />
+        <CtaSection />
+      </main>
+      <Footer />
+    </>
   );
 }

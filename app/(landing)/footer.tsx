@@ -3,40 +3,43 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="flex w-full shrink-0 flex-col items-center gap-2 border-t bg-blue-50 px-4 py-6 sm:flex-row md:px-6">
-      <div className="flex items-center gap-2">
-        <Image
-          alt="NeuroGranada Logo"
-          className="h-5 w-5"
-          height={20}
-          src="/logo.png"
-          width={20}
-        />
-        <p className="text-gray-600 text-xs">
-          © {new Date().getFullYear()} NeuroGranada. Desarrollado con ❤️ en
-          Granada, Andalucía.
-        </p>
+    <footer className="border-slate-200 border-t bg-white px-6 py-10 lg:px-10">
+      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2.5">
+          <Image
+            alt="NeuroGranada"
+            className="h-6 w-6"
+            height={24}
+            src="/logo.png"
+            width={24}
+          />
+          <span className="font-(family-name:--font-display) font-semibold text-slate-700">
+            NeuroGranada
+          </span>
+          <span className="text-slate-400">© {new Date().getFullYear()}</span>
+        </div>
+
+        <nav className="flex items-center gap-6">
+          <Link
+            className="text-slate-500 transition-colors hover:text-slate-800"
+            href="/terminos"
+          >
+            Términos
+          </Link>
+          <Link
+            className="text-slate-500 transition-colors hover:text-slate-800"
+            href="/privacidad"
+          >
+            Privacidad
+          </Link>
+          <Link
+            className="text-slate-500 transition-colors hover:text-slate-800"
+            href="/contacto"
+          >
+            Contacto
+          </Link>
+        </nav>
       </div>
-      <nav className="flex gap-4 sm:ml-auto sm:gap-6">
-        <Link
-          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
-          href="/terminos"
-        >
-          Términos de Servicio
-        </Link>
-        <Link
-          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
-          href="/privacidad"
-        >
-          Privacidad
-        </Link>
-        <Link
-          className="text-gray-600 text-xs underline-offset-4 hover:text-blue-600 hover:underline"
-          href="/contacto"
-        >
-          Contacto
-        </Link>
-      </nav>
     </footer>
   );
 }

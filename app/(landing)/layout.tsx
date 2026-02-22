@@ -1,13 +1,16 @@
 import type { PropsWithChildren } from "react";
-import { Footer } from "./footer";
-import { Header } from "./header";
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export const metadata = {
+  title: "NeuroGranada — Rehabilitación Neurológica con IA",
+  description:
+    "Plataforma clínica avanzada para profesionales de neurología. Genera ejercicios cognitivos personalizados con IA, monitoriza el progreso y adapta la terapia en tiempo real.",
+};
+
+export default function LandingLayout({ children }: PropsWithChildren) {
   return (
-    <div className="flex min-h-screen flex-col bg-blue-50">
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
+    <div className="font-(family-name:--font-body) relative min-h-screen text-slate-900 antialiased selection:bg-blue-100">
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(rgba(59,130,246,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.04)_1px,transparent_1px)] bg-size-[60px_60px]" />
+      {children}
     </div>
   );
 }

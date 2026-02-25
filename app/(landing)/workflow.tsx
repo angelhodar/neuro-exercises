@@ -49,7 +49,7 @@ function WorkflowStepDescription({ children }: PropsWithChildren) {
 
 export default function WorkflowSection() {
   return (
-    <section className="px-6 py-28 lg:px-10" id="como-funciona">
+    <section className="px-6 py-16 md:py-28 lg:px-10" id="como-funciona">
       <div className="mx-auto max-w-7xl">
         <motion.div
           className="mb-20 text-center"
@@ -68,7 +68,7 @@ export default function WorkflowSection() {
           </h2>
         </motion.div>
 
-        <div className="relative grid gap-0 lg:grid-cols-3">
+        <div className="relative grid gap-12 lg:grid-cols-3 lg:gap-0">
           <div className="pointer-events-none absolute top-8 left-1/2 hidden h-px w-2/3 -translate-x-1/2 bg-linear-to-r from-transparent via-blue-200 to-transparent lg:block" />
 
           <WorkflowStep icon={MessageSquare} step={1}>

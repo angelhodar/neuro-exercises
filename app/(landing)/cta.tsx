@@ -36,7 +36,7 @@ export default function CtaSection() {
   };
 
   return (
-    <section className="relative overflow-hidden px-6 py-32 lg:px-10">
+    <section className="relative overflow-hidden px-6 py-20 md:py-32 lg:px-10">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-0 left-1/2 h-[500px] w-[900px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-blue-50 blur-[100px]" />
       </div>

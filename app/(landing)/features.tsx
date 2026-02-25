@@ -86,7 +86,7 @@ export default async function FeaturesSection() {
   const exercises = await getCachedExercises();
 
   return (
-    <section className="px-6 py-28 lg:px-10" id="ejercicios">
+    <section className="px-6 py-16 md:py-28 lg:px-10" id="ejercicios">
       <div className="mx-auto max-w-7xl">
         <motion.div
           className="mb-16"

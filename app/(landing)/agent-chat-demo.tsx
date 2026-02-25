@@ -35,7 +35,7 @@ function MessageLabel({ children }: PropsWithChildren) {
 }
 
 function MessageText({ children }: PropsWithChildren) {
-  return <p className="text-slate-700 text-sm leading-relaxed">{children}</p>;
+  return <p className="break-words text-slate-700 text-sm leading-relaxed">{children}</p>;
 }
 
 function TypingBubble({ visible }: { visible: boolean }) {
@@ -72,18 +72,18 @@ function ExercisePreview({ visible }: { visible: boolean }) {
             visible ? "fade-in zoom-in-95 animate-in duration-700" : "invisible"
           }
         >
-          <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
             <h4 className="mb-1 font-semibold text-base text-slate-900">
               Secuenciacion Visual
             </h4>
             <p className="mb-6 text-slate-500 text-sm">
               Nivel 1 - Memoriza la secuencia
             </p>
-            <div className="flex items-center justify-center gap-6 py-10">
-              <div className="zoom-in h-16 w-16 animate-in rounded-full border-2 border-blue-400 bg-blue-100 duration-300 [animation-delay:200ms]" />
-              <div className="zoom-in h-16 w-16 rotate-45 animate-in border-2 border-blue-300 bg-blue-50 duration-300 [animation-delay:400ms]" />
+            <div className="flex items-center justify-center gap-4 py-6 sm:gap-6 sm:py-10">
+              <div className="zoom-in h-12 w-12 animate-in rounded-full border-2 border-blue-400 bg-blue-100 duration-300 sm:h-16 sm:w-16 [animation-delay:200ms]" />
+              <div className="zoom-in h-12 w-12 rotate-45 animate-in border-2 border-blue-300 bg-blue-50 duration-300 sm:h-16 sm:w-16 [animation-delay:400ms]" />
               <div
-                className="zoom-in animate-in duration-300 [animation-delay:600ms]"
+                className="zoom-in scale-75 animate-in duration-300 sm:scale-100 [animation-delay:600ms]"
                 style={{
                   width: 0,
                   height: 0,
@@ -145,7 +145,7 @@ export function AgentChatDemo() {
       </div>
 
       <div className="grid md:grid-cols-2">
-        <div className="flex min-h-[320px] flex-col border-slate-100 border-r bg-white p-5 md:min-h-[420px]">
+        <div className="flex min-h-[320px] flex-col overflow-hidden border-slate-100 border-r bg-white p-5 md:min-h-[420px]">
           <div className="flex flex-1 flex-col gap-4">
             <Message visible={step >= 1}>
               <MessageIcon className="bg-slate-100 text-slate-500">

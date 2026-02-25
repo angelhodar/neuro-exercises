@@ -111,9 +111,9 @@ function MockupPanel({ children }: PropsWithChildren) {
 
 export default function MultimediaSection() {
   return (
-    <section className="overflow-hidden px-6 py-28 lg:px-10" id="multimedia">
+    <section className="overflow-hidden px-6 py-16 md:py-28 lg:px-10" id="multimedia">
       <div className="mx-auto max-w-7xl">
-        <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -193,7 +193,7 @@ export default function MultimediaSection() {
           </motion.div>
 
           <motion.div
-            className="relative pr-8 pb-12 sm:pr-4 sm:pb-8"
+            className="relative px-4 pb-8 sm:pr-4 sm:pb-8"
             initial={{ opacity: 0, x: 40 }}
             transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}

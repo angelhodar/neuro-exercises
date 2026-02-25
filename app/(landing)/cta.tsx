@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { joinWaitlist } from "@/app/actions/waitlist";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,24 +34,14 @@ export default function CtaSection() {
   });
 
   const onSubmit = async (values: WaitlistFormValues) => {
-    try {
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email }),
-      });
+    const result = await joinWaitlist(values.email);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error ?? "Error al registrar el email");
-      }
-
-      setSubmitted(true);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Error al registrar el email"
-      );
+    if (result.error) {
+      toast.error(result.error);
+      return;
     }
+
+    setSubmitted(true);
   };
 
   return (

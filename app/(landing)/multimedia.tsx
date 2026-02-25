@@ -111,7 +111,10 @@ function MockupPanel({ children }: PropsWithChildren) {
 
 export default function MultimediaSection() {
   return (
-    <section className="overflow-hidden px-6 py-16 md:py-28 lg:px-10" id="multimedia">
+    <section
+      className="overflow-hidden px-6 py-16 md:py-28 lg:px-10"
+      id="multimedia"
+    >
       <div className="mx-auto max-w-7xl">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
           <motion.div

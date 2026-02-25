@@ -14,6 +14,7 @@ import {
   Plus,
   ScanSearch,
   Upload,
+  UserRound,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -75,6 +76,11 @@ const data = {
     },
   ],
   management: [
+    {
+      title: "Pacientes",
+      url: "/dashboard/patients",
+      icon: UserRound,
+    },
     {
       title: "Organizaciones",
       url: "/dashboard/organizations",

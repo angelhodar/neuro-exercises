@@ -10,11 +10,11 @@ import { AgentChatDemo } from "./agent-chat-demo";
 export default function HeroSection() {
   return (
     <section className="pt-24">
-      <div className="mx-auto flex max-w-5xl flex-col items-center px-6 py-24 text-center lg:px-10">
+      <div className="mx-auto flex max-w-5xl flex-col items-center px-6 py-16 text-center md:py-24 lg:px-10">
         {/* Headline */}
         <motion.h1
           animate={{ opacity: 1 }}
-          className="font-(family-name:--font-display) mb-8 font-bold text-4xl leading-[0.92] tracking-tight sm:text-5xl md:text-6xl xl:text-7xl"
+          className="font-(family-name:--font-display) mb-8 font-bold text-5xl leading-[0.92] tracking-tight md:text-6xl xl:text-7xl"
           initial={{ opacity: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >

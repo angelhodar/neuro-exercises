@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -7,7 +8,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -63,100 +70,104 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 font-bold text-3xl text-blue-900">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-md shadow-2xl">
+        <CardHeader className="flex flex-col items-center text-center">
+          <Image
+            alt="NeuroGranada"
+            className="mb-2"
+            height={120}
+            src="/logo.png"
+            width={120}
+          />
+          <CardTitle className="text-2xl text-blue-900">
             Iniciar Sesión
-          </h1>
-          <p className="text-gray-600">
+          </CardTitle>
+          <CardDescription>
             Accede a tu plataforma de ejercicios neurológicos
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        <Card className="border-blue-100 shadow-lg">
-          <CardContent className="mt-4 space-y-4">
-            <Form {...loginForm}>
-              <form
-                className="space-y-4"
-                onSubmit={loginForm.handleSubmit(onLoginSubmit)}
-              >
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
+        <CardContent>
+          <Form {...loginForm}>
+            <form
+              className="space-y-4"
+              onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+            >
+              <FormField
+                control={loginForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        placeholder="tu@email.com"
+                        type="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={loginForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
-                          className="border-blue-200 focus:border-blue-500"
+                          className="pr-10"
                           disabled={isLoading}
-                          placeholder="tu@email.com"
-                          type="email"
+                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            className="border-blue-200 pr-10 focus:border-blue-500"
-                            disabled={isLoading}
-                            placeholder="••••••••"
-                            type={showPassword ? "text" : "password"}
-                            {...field}
-                          />
-                          <Button
-                            className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                            disabled={isLoading}
-                            onClick={() => setShowPassword(!showPassword)}
-                            size="sm"
-                            type="button"
-                            variant="ghost"
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4 text-gray-400" />
-                            ) : (
-                              <Eye className="h-4 w-4 text-gray-400" />
-                            )}
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                  disabled={isLoading}
-                  type="submit"
-                >
-                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
-                </Button>
-              </form>
-            </Form>
-
-            <div className="space-y-2 text-center">
+                        <Button
+                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                          disabled={isLoading}
+                          onClick={() => setShowPassword(!showPassword)}
+                          size="sm"
+                          type="button"
+                          variant="ghost"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button
-                className="text-gray-500 text-sm hover:text-blue-600"
+                className="w-full bg-blue-600 hover:bg-blue-700"
                 disabled={isLoading}
-                variant="link"
+                type="submit"
               >
-                ¿Olvidaste tu contraseña?
+                {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </form>
+          </Form>
+
+          <div className="mt-4 text-center">
+            <Button
+              className="text-gray-500 text-sm hover:text-blue-600"
+              disabled={isLoading}
+              variant="link"
+            >
+              ¿Olvidaste tu contraseña?
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

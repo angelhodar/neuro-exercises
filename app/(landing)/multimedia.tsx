@@ -193,7 +193,7 @@ export default function MultimediaSection() {
           </motion.div>
 
           <motion.div
-            className="relative px-4 pb-8 sm:pr-4 sm:pb-8"
+            className="relative pb-8 sm:pr-4 sm:pb-8"
             initial={{ opacity: 0, x: 40 }}
             transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
             viewport={{ once: true }}

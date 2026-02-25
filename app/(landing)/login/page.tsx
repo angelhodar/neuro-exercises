@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -73,19 +73,19 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="flex flex-col items-center text-center">
-          <Image
-            alt="NeuroGranada"
-            className="mb-2"
-            height={120}
-            src="/logo.png"
-            width={120}
-          />
+          <Link href="/">
+            <Image
+              alt="NeuroGranada"
+              className="mb-2"
+              height={120}
+              src="/logo.png"
+              width={120}
+            />
+          </Link>
           <CardTitle className="text-2xl text-blue-900">
             Iniciar Sesión
           </CardTitle>
-          <CardDescription>
-            Accede a tu plataforma de ejercicios neurológicos
-          </CardDescription>
+
         </CardHeader>
 
         <CardContent>

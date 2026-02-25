@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import * as motion from "motion/react-client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,8 +32,25 @@ export default function CtaSection() {
     defaultValues: { email: "" },
   });
 
-  const onSubmit = (_values: WaitlistFormValues) => {
-    setSubmitted(true);
+  const onSubmit = async (values: WaitlistFormValues) => {
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error ?? "Error al registrar el email");
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error al registrar el email"
+      );
+    }
   };
 
   return (

@@ -157,15 +157,6 @@ export default function LoginPage() {
             </form>
           </Form>
 
-          <div className="mt-4 text-center">
-            <Button
-              className="text-gray-500 text-sm hover:text-blue-600"
-              disabled={isLoading}
-              variant="link"
-            >
-              ¿Olvidaste tu contraseña?
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

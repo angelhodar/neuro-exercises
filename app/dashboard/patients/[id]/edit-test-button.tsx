@@ -123,6 +123,10 @@ export default function EditTestButton({
                     <FormLabel>Proceso evaluado *</FormLabel>
                     <Select
                       disabled={isLoading}
+                      items={EVALUATED_PROCESSES.map((process) => ({
+                        value: process,
+                        label: EVALUATED_PROCESS_LABELS[process],
+                      }))}
                       onValueChange={field.onChange}
                       value={field.value}
                     >

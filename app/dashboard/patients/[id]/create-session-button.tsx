@@ -126,6 +126,10 @@ export default function CreateSessionButton({
                       <FormLabel>Tipo de sesión *</FormLabel>
                       <Select
                         disabled={isLoading}
+                        items={SESSION_TYPES.map((type) => ({
+                          value: type,
+                          label: SESSION_TYPE_LABELS[type],
+                        }))}
                         onValueChange={field.onChange}
                         value={field.value}
                       >
@@ -159,6 +163,10 @@ export default function CreateSessionButton({
                       <FormLabel>Disciplina *</FormLabel>
                       <Select
                         disabled={isLoading}
+                        items={DISCIPLINES.map((discipline) => ({
+                          value: discipline,
+                          label: DISCIPLINE_LABELS[discipline],
+                        }))}
                         onValueChange={field.onChange}
                         value={field.value}
                       >

@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 
 interface SelectableProps extends React.HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
-  children: React.ReactNode;
 }
 
 export function Selectable({

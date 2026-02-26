@@ -1,6 +1,11 @@
 "use client";
 
-import { createContext, type ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useState,
+} from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +35,7 @@ const ConfirmContext = createContext<ConfirmContextProps | undefined>(
   undefined
 );
 
-export function ConfirmProvider({ children }: { children: ReactNode }) {
+export function ConfirmProvider({ children }: PropsWithChildren) {
   const [options, setOptions] = useState<ConfirmOptions>({
     title: "",
     description: "",

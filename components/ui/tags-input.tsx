@@ -58,13 +58,16 @@ function TagsInput({
         inputValue === "" &&
         value.length > 0
       ) {
-        removeTag(value[value.length - 1]);
+        removeTag(value.at(-1) as string);
       }
     },
     [inputValue, value, addTag, removeTag]
   );
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: wrapper div delegates focus to input
+    // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard input handled by the inner input element
+    // biome-ignore lint/a11y/noNoninteractiveElementInteractions: wrapper div delegates focus to input
     <div
       className={cn(
         "flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",

@@ -1,4 +1,4 @@
-import type React from "react";
+import type { PropsWithChildren } from "react";
 import {
   SidebarInset,
   SidebarProvider,
@@ -7,11 +7,7 @@ import {
 import { AppSidebar } from "./app-sidebar";
 import Providers from "./providers";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: PropsWithChildren) {
   return (
     <Providers>
       <SidebarProvider>

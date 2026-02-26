@@ -2,7 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -20,11 +20,7 @@ export const metadata: Metadata = {
     "Ejercicios interactivos para personas con problemas neurológicos",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<PropsWithChildren>) {
   return (
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>

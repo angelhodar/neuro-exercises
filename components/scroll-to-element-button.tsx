@@ -3,7 +3,6 @@
 import { Button, type ButtonProps } from "@/components/ui/button";
 
 interface ScrollToElementButtonProps extends ButtonProps {
-  children: React.ReactNode;
   elementId: string;
 }
 

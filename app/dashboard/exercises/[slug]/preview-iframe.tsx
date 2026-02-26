@@ -21,7 +21,9 @@ export function PreviewIframe({ slug }: { slug: string }) {
   };
 
   const handleCopyUrl = () => {
-    if (!sandboxUrl) return;
+    if (!sandboxUrl) {
+      return;
+    }
     navigator.clipboard.writeText(`${sandboxUrl}/exercises/${slug}`);
     toast.success("URL copiada al portapapeles");
   };
@@ -74,7 +76,9 @@ export function PreviewIframe({ slug }: { slug: string }) {
             size="sm"
             variant="outline"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
           </Button>
         </div>
       )}

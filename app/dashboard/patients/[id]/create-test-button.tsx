@@ -121,12 +121,12 @@ export default function CreateTestButton({ patientId }: CreateTestButtonProps) {
                   <FormItem>
                     <FormLabel>Proceso evaluado *</FormLabel>
                     <Select
-                      defaultValue={field.value}
                       disabled={isLoading}
                       onValueChange={field.onChange}
+                      value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Seleccionar proceso" />
                         </SelectTrigger>
                       </FormControl>

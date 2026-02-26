@@ -125,12 +125,12 @@ export default function EditSessionButton({
                     <FormItem>
                       <FormLabel>Tipo de sesión *</FormLabel>
                       <Select
-                        defaultValue={field.value}
                         disabled={isLoading}
                         onValueChange={field.onChange}
+                        value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Seleccionar tipo" />
                           </SelectTrigger>
                         </FormControl>
@@ -154,12 +154,12 @@ export default function EditSessionButton({
                     <FormItem>
                       <FormLabel>Disciplina *</FormLabel>
                       <Select
-                        defaultValue={field.value}
                         disabled={isLoading}
                         onValueChange={field.onChange}
+                        value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Seleccionar disciplina" />
                           </SelectTrigger>
                         </FormControl>

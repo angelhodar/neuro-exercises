@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import MultiSelectTags from "@/components//multiselect-tags";
+import MultiSelectTags from "@/components/multiselect-tags";
 import {
   FormControl,
   FormDescription,

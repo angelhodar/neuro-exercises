@@ -11,6 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { tagVariants } from "@/components/ui/tag";
 import { cn } from "@/lib/utils";
 
 const Combobox = ComboboxPrimitive.Root;
@@ -243,7 +244,8 @@ function ComboboxChip({
   return (
     <ComboboxPrimitive.Chip
       className={cn(
-        "flex h-[calc(--spacing(5.5))] w-fit items-center justify-center gap-1 whitespace-nowrap rounded-sm bg-muted px-1.5 font-medium text-foreground text-xs has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-data-[slot=combobox-chip-remove]:pr-0 has-disabled:opacity-50",
+        tagVariants(),
+        "has-disabled:pointer-events-none has-disabled:cursor-not-allowed has-data-[slot=combobox-chip-remove]:pr-0 has-disabled:opacity-50",
         className
       )}
       data-slot="combobox-chip"

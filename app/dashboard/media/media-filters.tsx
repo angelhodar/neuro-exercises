@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import MultiSelectTags from "@/components//multiselect-tags";
+import MultiSelectTags from "@/components/multiselect-tags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

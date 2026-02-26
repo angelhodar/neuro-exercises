@@ -403,6 +403,17 @@ export const sandboxSnapshots = pgTable(
   (table) => [index("sandbox_snapshots_expires_at_idx").on(table.expiresAt)]
 );
 
+// Waitlist emails
+export const waitlistEmails = pgTable(
+  "waitlist_emails",
+  {
+    id: serial().primaryKey(),
+    email: text().notNull().unique(),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("waitlist_emails_email_idx").on(table.email)]
+);
+
 // Materialized view for distinct media tags
 export const mediaTagsView = pgMaterializedView("media_tags", {
   tag: text("tag").primaryKey(),
@@ -685,6 +696,9 @@ export const transcriptionResultUpdateSchema =
 export const sandboxSnapshotSelectSchema = createSelectSchema(sandboxSnapshots);
 export const sandboxSnapshotInsertSchema = createInsertSchema(sandboxSnapshots);
 
+export const waitlistEmailSelectSchema = createSelectSchema(waitlistEmails);
+export const waitlistEmailInsertSchema = createInsertSchema(waitlistEmails);
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -738,3 +752,6 @@ export type NewTranscriptionResult = typeof transcriptionResults.$inferInsert;
 
 export type SandboxSnapshot = typeof sandboxSnapshots.$inferSelect;
 export type NewSandboxSnapshot = typeof sandboxSnapshots.$inferInsert;
+
+export type WaitlistEmail = typeof waitlistEmails.$inferSelect;
+export type NewWaitlistEmail = typeof waitlistEmails.$inferInsert;

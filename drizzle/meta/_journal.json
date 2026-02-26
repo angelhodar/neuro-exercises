@@ -8,6 +8,13 @@
       "when": 1772091066547,
       "tag": "0000_sudden_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772091509621,
+      "tag": "0001_charming_aaron_stack",
+      "breakpoints": true
     }
   ]
 }

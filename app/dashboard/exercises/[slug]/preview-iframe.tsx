@@ -1,7 +1,8 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { Copy, RefreshCw } from "lucide-react";
 import { useRef } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useSandbox } from "@/hooks/use-sandbox";
@@ -17,6 +18,12 @@ export function PreviewIframe({ slug }: { slug: string }) {
     const currentSrc = iframeRef.current.src;
     iframeRef.current.src = "";
     iframeRef.current.src = currentSrc;
+  };
+
+  const handleCopyUrl = () => {
+    if (!sandboxUrl) return;
+    navigator.clipboard.writeText(`${sandboxUrl}/exercises/${slug}`);
+    toast.success("URL copiada al portapapeles");
   };
 
   const handleRetry = () => {
@@ -49,17 +56,27 @@ export function PreviewIframe({ slug }: { slug: string }) {
 
   return (
     <>
-      {/* Absolute Refresh Button */}
+      {/* Absolute Action Buttons */}
       {sandboxUrl && (
-        <Button
-          className="absolute top-4 right-4 z-10 rounded-xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
-          disabled={isLoading}
-          onClick={handleRefresh}
-          size="sm"
-          variant="outline"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-        </Button>
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <Button
+            className="rounded-xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+            onClick={handleCopyUrl}
+            size="sm"
+            variant="outline"
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+          <Button
+            className="rounded-xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+            disabled={isLoading}
+            onClick={handleRefresh}
+            size="sm"
+            variant="outline"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
       )}
 
       {/* Preview Content */}

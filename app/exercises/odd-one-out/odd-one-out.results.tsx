@@ -1,4 +1,7 @@
+"use client";
+
 import { CheckCircle, XCircle } from "lucide-react";
+import { AccuracyDonutChart } from "@/components/exercises/charts/result-chart-card";
 import {
   Card,
   CardContent,
@@ -15,6 +18,7 @@ interface OddOneOutResultsProps {
 export function Results({ results }: OddOneOutResultsProps) {
   const totalQuestions = results.length;
   const correctAnswers = results.filter((r) => r.isCorrect).length;
+  const incorrectAnswers = totalQuestions - correctAnswers;
   const accuracy =
     totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
 
@@ -27,24 +31,34 @@ export function Results({ results }: OddOneOutResultsProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex justify-around rounded-lg bg-gray-50 p-4 text-center dark:bg-gray-800">
-          <div>
-            <p className="text-muted-foreground text-sm">Precisión</p>
-            <p className="font-bold text-2xl">{accuracy.toFixed(0)}%</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-sm">
-              Respuestas Correctas
-            </p>
-            <p className="font-bold text-2xl">
-              {correctAnswers} / {totalQuestions}
-            </p>
+        <div className="grid items-center gap-6 md:grid-cols-[1fr_1fr]">
+          <AccuracyDonutChart
+            accuracy={accuracy}
+            correct={correctAnswers}
+            incorrect={incorrectAnswers}
+          />
+
+          <div className="grid gap-3">
+            <div className="rounded-lg border p-4 text-center">
+              <p className="text-muted-foreground text-sm">Precisión</p>
+              <p className="font-semibold text-2xl tracking-tight">
+                {accuracy.toFixed(0)}%
+              </p>
+            </div>
+            <div className="rounded-lg border p-4 text-center">
+              <p className="text-muted-foreground text-sm">
+                Respuestas Correctas
+              </p>
+              <p className="font-semibold text-2xl tracking-tight">
+                {correctAnswers} / {totalQuestions}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="space-y-2">
           <h3 className="font-semibold">Resumen por pregunta:</h3>
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul className="divide-y">
             {results.map((result) => (
               <li
                 className="flex items-center justify-between py-3"

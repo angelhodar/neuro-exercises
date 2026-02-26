@@ -77,11 +77,6 @@ const data = {
   ],
   management: [
     {
-      title: "Pacientes",
-      url: "/dashboard/patients",
-      icon: UserRound,
-    },
-    {
       title: "Organizaciones",
       url: "/dashboard/organizations",
       icon: Building2,
@@ -90,6 +85,11 @@ const data = {
       title: "Usuarios",
       url: "/dashboard/users",
       icon: Users,
+    },
+    {
+      title: "Pacientes",
+      url: "/dashboard/patients",
+      icon: UserRound,
     },
   ],
   library: [

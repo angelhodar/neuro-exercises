@@ -1,20 +1,41 @@
+"use client";
+
+import {
+  ResultBarChart,
+  StatRow,
+} from "@/components/exercises/charts/result-chart-card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { ChartConfig } from "@/components/ui/chart";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableCell as TCell,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { VisualRecognitionQuestionResult } from "./visual-recognition.schema";
+
+const visualRecognitionChartConfig = {
+  tiempo: { label: "Tiempo (s)" },
+  perfecto: { label: "Perfecto", color: "var(--chart-2)" },
+  parcial: { label: "Parcial", color: "var(--chart-3)" },
+  bajo: { label: "Bajo", color: "var(--chart-1)" },
+} satisfies ChartConfig;
 
 interface VisualRecognitionResultsProps {
   results: VisualRecognitionQuestionResult[];
 }
 
 export function Results({ results }: VisualRecognitionResultsProps) {
-  // Helper function to calculate accuracy for a result
   function calculateAccuracy(result: VisualRecognitionQuestionResult): number {
     const correctSelections = result.selectedImages.filter((id) =>
       result.correctImages.includes(id)
@@ -31,7 +52,6 @@ export function Results({ results }: VisualRecognitionResultsProps) {
       : 0;
   }
 
-  // Helper function to check if a result is perfect
   function isPerfectMatch(result: VisualRecognitionQuestionResult): boolean {
     return (
       result.selectedImages.length === result.correctImages.length &&
@@ -39,7 +59,6 @@ export function Results({ results }: VisualRecognitionResultsProps) {
     );
   }
 
-  // Calculate statistics
   const totalQuestions = results.length;
   const perfectMatches = results.filter(isPerfectMatch).length;
   const overallAccuracy =
@@ -48,7 +67,6 @@ export function Results({ results }: VisualRecognitionResultsProps) {
         results.length
       : 0;
 
-  // Calculate average time spent for completed answers
   const completedResults = results.filter((result) => !result.timeExpired);
   const avgTimeSpent =
     completedResults.length > 0
@@ -56,119 +74,148 @@ export function Results({ results }: VisualRecognitionResultsProps) {
         completedResults.length
       : 0;
 
+  const chartData = results.map((r, i) => {
+    const acc = calculateAccuracy(r);
+    let fill = "var(--color-bajo)";
+    if (isPerfectMatch(r)) {
+      fill = "var(--color-perfecto)";
+    } else if (acc >= 50) {
+      fill = "var(--color-parcial)";
+    }
+    return {
+      question: `${i + 1}`,
+      tiempo: r.timeSpent,
+      fill,
+    };
+  });
+
   return (
-    <div className="w-full max-w-5xl">
-      <h2 className="mb-4 font-bold text-2xl">Resultados del Ejercicio</h2>
+    <Card className="mx-auto w-full max-w-5xl">
+      <CardHeader>
+        <CardTitle>Resultados: Reconocimiento Visual</CardTitle>
+        <CardDescription>
+          Aquí tienes un resumen de tu rendimiento en el ejercicio.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <StatRow
+          items={[
+            {
+              label: "Precisión Promedio",
+              value: `${overallAccuracy.toFixed(1)}%`,
+            },
+            {
+              label: "Tiempo Promedio",
+              value: `${(avgTimeSpent / 1000).toFixed(1)}s`,
+            },
+            {
+              label: "Respuestas Perfectas",
+              value: `${perfectMatches}/${totalQuestions}`,
+            },
+          ]}
+        />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-          <p className="text-gray-500 text-sm dark:text-gray-400">
-            Precisión Promedio
-          </p>
-          <p className="font-bold text-2xl">{overallAccuracy.toFixed(1)}%</p>
-        </div>
-        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-          <p className="text-gray-500 text-sm dark:text-gray-400">
-            Tiempo Promedio
-          </p>
-          <p className="font-bold text-2xl">
-            {(avgTimeSpent / 1000).toFixed(1)}s
-          </p>
-        </div>
-        <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-          <p className="text-gray-500 text-sm dark:text-gray-400">
-            Respuestas Perfectas
-          </p>
-          <p className="font-bold text-2xl">
-            {perfectMatches}/{totalQuestions}
-          </p>
-        </div>
-      </div>
+        <Tabs defaultValue="grafico">
+          <TabsList>
+            <TabsTrigger value="grafico">Gráfico</TabsTrigger>
+            <TabsTrigger value="tabla">Tabla</TabsTrigger>
+          </TabsList>
+          <TabsContent value="grafico">
+            <ResultBarChart
+              config={visualRecognitionChartConfig}
+              data={chartData}
+            />
+          </TabsContent>
+          <TabsContent value="tabla">
+            <div className="h-96 overflow-y-auto rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Etiqueta Objetivo</TableHead>
+                    <TableHead>Correctas</TableHead>
+                    <TableHead>Seleccionadas</TableHead>
+                    <TableHead>Tiempo</TableHead>
+                    <TableHead>Precisión</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results.map((result, index) => {
+                    const accuracy = calculateAccuracy(result);
+                    const perfect = isPerfectMatch(result);
+                    const correctSelections = result.selectedImages.filter(
+                      (id) => result.correctImages.includes(id)
+                    ).length;
+                    const incorrectSelections =
+                      result.selectedImages.length - correctSelections;
 
-      <div className="mb-6 h-96 overflow-y-auto rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Etiqueta Objetivo</TableHead>
-              <TableHead>Correctas</TableHead>
-              <TableHead>Seleccionadas</TableHead>
-              <TableHead>Tiempo</TableHead>
-              <TableHead>Precisión</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {results.map((result, index) => {
-              const accuracy = calculateAccuracy(result);
-              const perfect = isPerfectMatch(result);
-              const correctSelections = result.selectedImages.filter((id) =>
-                result.correctImages.includes(id)
-              ).length;
-              const incorrectSelections =
-                result.selectedImages.length - correctSelections;
-
-              return (
-                <TableRow key={`${result.targetTag}-${index}`}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <Badge className="capitalize" variant="outline">
-                      {result.targetTag}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {result.correctImages.length} imágenes
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="text-sm">
-                        {result.selectedImages.length} total
-                      </div>
-                      <div className="text-muted-foreground text-xs">
-                        {correctSelections} correctas, {incorrectSelections}{" "}
-                        incorrectas
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {result.timeExpired ? (
-                      <span className="text-red-600">Tiempo agotado</span>
-                    ) : (
-                      `${(result.timeSpent / 1000).toFixed(1)}s`
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        let badgeClass: string;
-                        if (perfect) {
-                          badgeClass =
-                            "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-                        } else if (accuracy >= 50) {
-                          badgeClass =
-                            "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-                        } else {
-                          badgeClass =
-                            "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-                        }
-                        return (
-                          <span
-                            className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
-                          >
-                            {accuracy.toFixed(0)}%
-                          </span>
-                        );
-                      })()}
-                      {perfect && <span className="text-green-600">✓</span>}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+                    return (
+                      <TableRow key={`${result.targetTag}-${index}`}>
+                        <TCell>{index + 1}</TCell>
+                        <TCell>
+                          <Badge className="capitalize" variant="outline">
+                            {result.targetTag}
+                          </Badge>
+                        </TCell>
+                        <TCell>
+                          <div className="text-sm">
+                            {result.correctImages.length} imágenes
+                          </div>
+                        </TCell>
+                        <TCell>
+                          <div className="space-y-1">
+                            <div className="text-sm">
+                              {result.selectedImages.length} total
+                            </div>
+                            <div className="text-muted-foreground text-xs">
+                              {correctSelections} correctas,{" "}
+                              {incorrectSelections} incorrectas
+                            </div>
+                          </div>
+                        </TCell>
+                        <TCell>
+                          {result.timeExpired ? (
+                            <span className="text-red-600">Tiempo agotado</span>
+                          ) : (
+                            `${(result.timeSpent / 1000).toFixed(1)}s`
+                          )}
+                        </TCell>
+                        <TCell>
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              let badgeClass: string;
+                              if (perfect) {
+                                badgeClass =
+                                  "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+                              } else if (accuracy >= 50) {
+                                badgeClass =
+                                  "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+                              } else {
+                                badgeClass =
+                                  "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                              }
+                              return (
+                                <span
+                                  className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
+                                >
+                                  {accuracy.toFixed(0)}%
+                                </span>
+                              );
+                            })()}
+                            {perfect && (
+                              <span className="text-green-600">✓</span>
+                            )}
+                          </div>
+                        </TCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

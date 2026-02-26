@@ -1,16 +1,37 @@
+"use client";
+
+import {
+  ResultBarChart,
+  StatRow,
+} from "@/components/exercises/charts/result-chart-card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { ChartConfig } from "@/components/ui/chart";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  TableCell as TCell,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
   ReactionTimeGridConfig,
   ReactionTimeQuestionResult,
 } from "./reaction-time-grid.schema";
+
+const reactionTimeChartConfig = {
+  tiempo: { label: "Tiempo medio (s)" },
+  correcto: { label: "Correcto", color: "var(--chart-2)" },
+  parcial: { label: "Parcial", color: "var(--chart-3)" },
+  incorrecto: { label: "Incorrecto", color: "var(--chart-1)" },
+} satisfies ChartConfig;
 
 interface ExerciseResultsProps {
   results: ReactionTimeQuestionResult[];
@@ -24,8 +45,8 @@ function ReactionTimeHeatmap({
   cellAverages: Record<number, number>;
   gridSize: number;
 }) {
-  let min = Number.POSITIVE_INFINITY,
-    max = Number.NEGATIVE_INFINITY;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
 
   for (let i = 0; i < gridSize * gridSize; i++) {
     const avg = cellAverages[i];
@@ -51,47 +72,43 @@ function ReactionTimeHeatmap({
   }
 
   return (
-    <div>
-      <h3 className="mb-2 font-semibold">Heatmap de tiempo de reacción</h3>
-      <div
-        className="grid overflow-hidden rounded border"
-        style={{
-          gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-          gridTemplateRows: `repeat(${gridSize}, 1fr)`,
-          gap: 1,
-        }}
-      >
-        {Array.from({ length: gridSize * gridSize }, (_, n) => n).map(
-          (cellIndex) => (
-            <div
-              className="flex aspect-square items-center justify-center border border-white font-bold"
-              key={`heatmap-cell-${cellIndex}`}
-              style={{
-                background: getHeatColor(cellAverages[cellIndex]),
-                color: Number.isNaN(cellAverages[cellIndex])
-                  ? "#7dd3fc"
-                  : "#134e4a",
-                fontSize: "1.25rem",
-              }}
-              title={
-                Number.isNaN(cellAverages[cellIndex])
-                  ? "Sin datos"
-                  : `${cellAverages[cellIndex].toFixed(0)} ms`
-              }
-            >
-              {Number.isNaN(cellAverages[cellIndex])
-                ? "-"
-                : `${cellAverages[cellIndex].toFixed(0)} ms`}
-            </div>
-          )
-        )}
-      </div>
+    <div
+      className="grid overflow-hidden rounded border"
+      style={{
+        gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+        gridTemplateRows: `repeat(${gridSize}, 1fr)`,
+        gap: 1,
+      }}
+    >
+      {Array.from({ length: gridSize * gridSize }, (_, n) => n).map(
+        (cellIndex) => (
+          <div
+            className="flex aspect-square items-center justify-center border border-white font-bold"
+            key={`heatmap-cell-${cellIndex}`}
+            style={{
+              background: getHeatColor(cellAverages[cellIndex]),
+              color: Number.isNaN(cellAverages[cellIndex])
+                ? "#7dd3fc"
+                : "#134e4a",
+              fontSize: "1.25rem",
+            }}
+            title={
+              Number.isNaN(cellAverages[cellIndex])
+                ? "Sin datos"
+                : `${cellAverages[cellIndex].toFixed(0)} ms`
+            }
+          >
+            {Number.isNaN(cellAverages[cellIndex])
+              ? "-"
+              : `${cellAverages[cellIndex].toFixed(0)} ms`}
+          </div>
+        )
+      )}
     </div>
   );
 }
 
 export function Results({ results, config }: ExerciseResultsProps) {
-  // Helper function to check if a result is correct
   function calculateCorrectSelections(
     result: ReactionTimeQuestionResult
   ): number {
@@ -100,14 +117,12 @@ export function Results({ results, config }: ExerciseResultsProps) {
     ).length;
   }
 
-  // Helper function to convert index to [row, col] format for display
   function indexToCoordinates(index: number): string {
     const row = Math.floor(index / config.gridSize);
     const col = index % config.gridSize;
     return `[${row}, ${col}]`;
   }
 
-  // Calculate statistics
   const correctSelections = results.reduce(
     (total, result) => total + calculateCorrectSelections(result),
     0
@@ -119,7 +134,6 @@ export function Results({ results, config }: ExerciseResultsProps) {
   const accuracy =
     totalTargets > 0 ? (correctSelections / totalTargets) * 100 : 0;
 
-  // Calculate average reaction time for correct selections
   let totalCorrectReactionTime = 0;
   let totalCorrectSelections = 0;
 
@@ -137,7 +151,6 @@ export function Results({ results, config }: ExerciseResultsProps) {
       ? totalCorrectReactionTime / totalCorrectSelections
       : 0;
 
-  // Calcular heatmap: promedio de tiempo de reacción por celda
   const cellReactionTimes: Record<number, number[]> = {};
   for (const result of results) {
     for (const [i, cell] of result.selectedCells.entries()) {
@@ -155,122 +168,142 @@ export function Results({ results, config }: ExerciseResultsProps) {
       : Number.NaN;
   }
 
-  return (
-    <div className="w-full max-w-3xl">
-      <h2 className="mb-4 font-bold text-2xl">Resultados del Ejercicio</h2>
+  const chartData = results.map((result, i) => {
+    const avgTime =
+      result.reactionTimes.length > 0
+        ? result.reactionTimes.reduce((a, b) => a + b, 0) /
+          result.reactionTimes.length
+        : 0;
+    const correctCount = calculateCorrectSelections(result);
+    let fill = "var(--color-incorrecto)";
+    if (correctCount === result.targetCells.length) {
+      fill = "var(--color-correcto)";
+    } else if (correctCount > 0) {
+      fill = "var(--color-parcial)";
+    }
+    return {
+      question: `${i + 1}`,
+      tiempo: Math.round(avgTime),
+      fill,
+    };
+  });
 
-      <Tabs className="mb-6" defaultValue="tabla">
-        <TabsList className="mb-4">
-          <TabsTrigger value="tabla">Tabla</TabsTrigger>
-          <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
-        </TabsList>
-        <TabsContent value="tabla">
-          <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-              <p className="text-gray-500 text-sm dark:text-gray-400">
-                Precisión
-              </p>
-              <p className="font-bold text-2xl">{accuracy.toFixed(1)}%</p>
-            </div>
-            <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-              <p className="text-gray-500 text-sm dark:text-gray-400">
-                Tiempo de Reacción Promedio
-              </p>
-              <p className="font-bold text-2xl">
-                {avgReactionTime.toFixed(0)} ms
-              </p>
-            </div>
-            <div className="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-800">
-              <p className="text-gray-500 text-sm dark:text-gray-400">
-                Puntuación
-              </p>
-              <p className="font-bold text-2xl">
-                {correctSelections}/{totalTargets}
-              </p>
-            </div>
-          </div>
-          <div className="mb-6 overflow-hidden rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  <TableHead>Celdas Objetivo</TableHead>
-                  <TableHead>Celdas Seleccionadas</TableHead>
-                  <TableHead>Tiempos de Reacción</TableHead>
-                  <TableHead>Correcto</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {results.map((result, index) => {
-                  const correctCount = calculateCorrectSelections(result);
-                  return (
-                    <TableRow
-                      key={`result-${result.targetCells.join("-")}-${index}`}
-                    >
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        {result.targetCells.map((cell) => (
-                          <span className="block" key={`target-${cell}`}>
-                            {indexToCoordinates(cell)}
-                          </span>
-                        ))}
-                      </TableCell>
-                      <TableCell>
-                        {result.selectedCells.map((cell, cellPos) => (
-                          <span
-                            className={`block ${result.targetCells.includes(cell) ? "text-green-600" : "text-red-600"}`}
-                            key={`selected-${cell}-${result.reactionTimes[cellPos]}`}
-                          >
-                            {indexToCoordinates(cell)}
-                          </span>
-                        ))}
-                      </TableCell>
-                      <TableCell>
-                        {result.reactionTimes.map((time, timePos) => (
-                          <span
-                            className="block"
-                            key={`time-${time}-${result.selectedCells[timePos]}`}
-                          >
-                            {time} ms
-                          </span>
-                        ))}
-                      </TableCell>
-                      <TableCell>
-                        {(() => {
-                          let badgeClass: string;
-                          if (correctCount === result.targetCells.length) {
-                            badgeClass =
-                              "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-                          } else if (correctCount > 0) {
-                            badgeClass =
-                              "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-                          } else {
-                            badgeClass =
-                              "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-                          }
-                          return (
-                            <span
-                              className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
-                            >
-                              {correctCount}/{result.targetCells.length}
+  return (
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Resultados: Tiempo de Reacción</CardTitle>
+        <CardDescription>
+          Aquí tienes un resumen de tu rendimiento en el ejercicio.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <StatRow
+          items={[
+            { label: "Precisión", value: `${accuracy.toFixed(1)}%` },
+            {
+              label: "Tiempo Promedio",
+              value: `${avgReactionTime.toFixed(0)} ms`,
+            },
+            {
+              label: "Puntuación",
+              value: `${correctSelections}/${totalTargets}`,
+            },
+          ]}
+        />
+
+        <Tabs defaultValue="grafico">
+          <TabsList>
+            <TabsTrigger value="grafico">Gráfico</TabsTrigger>
+            <TabsTrigger value="tabla">Tabla</TabsTrigger>
+            <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
+          </TabsList>
+          <TabsContent value="grafico">
+            <ResultBarChart config={reactionTimeChartConfig} data={chartData} />
+          </TabsContent>
+          <TabsContent value="tabla">
+            <div className="overflow-hidden rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Celdas Objetivo</TableHead>
+                    <TableHead>Celdas Seleccionadas</TableHead>
+                    <TableHead>Tiempos de Reacción</TableHead>
+                    <TableHead>Correcto</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {results.map((result, index) => {
+                    const correctCount = calculateCorrectSelections(result);
+                    return (
+                      <TableRow
+                        key={`result-${result.targetCells.join("-")}-${index}`}
+                      >
+                        <TCell>{index + 1}</TCell>
+                        <TCell>
+                          {result.targetCells.map((cell) => (
+                            <span className="block" key={`target-${cell}`}>
+                              {indexToCoordinates(cell)}
                             </span>
-                          );
-                        })()}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        <TabsContent value="heatmap">
-          <ReactionTimeHeatmap
-            cellAverages={cellAverages}
-            gridSize={config.gridSize}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+                          ))}
+                        </TCell>
+                        <TCell>
+                          {result.selectedCells.map((cell, cellPos) => (
+                            <span
+                              className={`block ${result.targetCells.includes(cell) ? "text-green-600" : "text-red-600"}`}
+                              key={`selected-${cell}-${result.reactionTimes[cellPos]}`}
+                            >
+                              {indexToCoordinates(cell)}
+                            </span>
+                          ))}
+                        </TCell>
+                        <TCell>
+                          {result.reactionTimes.map((time, timePos) => (
+                            <span
+                              className="block"
+                              key={`time-${time}-${result.selectedCells[timePos]}`}
+                            >
+                              {time} ms
+                            </span>
+                          ))}
+                        </TCell>
+                        <TCell>
+                          {(() => {
+                            let badgeClass: string;
+                            if (correctCount === result.targetCells.length) {
+                              badgeClass =
+                                "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+                            } else if (correctCount > 0) {
+                              badgeClass =
+                                "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+                            } else {
+                              badgeClass =
+                                "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                            }
+                            return (
+                              <span
+                                className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
+                              >
+                                {correctCount}/{result.targetCells.length}
+                              </span>
+                            );
+                          })()}
+                        </TCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+          <TabsContent value="heatmap">
+            <ReactionTimeHeatmap
+              cellAverages={cellAverages}
+              gridSize={config.gridSize}
+            />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

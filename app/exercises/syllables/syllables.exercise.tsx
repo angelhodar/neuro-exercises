@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
@@ -27,6 +27,8 @@ export function Exercise({ config }: SyllablesExerciseProps) {
   const { syllablesCount } = config;
   const { currentQuestionIndex, addResult } = useExerciseExecution();
 
+  const questionStartTime = useRef(Date.now());
+
   const [questionState, setQuestionState] = useState<QuestionState>({
     currentWord: null,
     scrambledSyllables: [],
@@ -34,8 +36,9 @@ export function Exercise({ config }: SyllablesExerciseProps) {
   });
 
   // Get available words for the selected syllable count
-  const availableWords = getWordsBySyllableCount(
-    syllablesCount as 3 | 4 | 5 | 6
+  const availableWords = useMemo(
+    () => getWordsBySyllableCount(syllablesCount as 3 | 4 | 5 | 6),
+    [syllablesCount]
   );
 
   // Handle syllable click
@@ -57,12 +60,12 @@ export function Exercise({ config }: SyllablesExerciseProps) {
 
     // Check if word is complete
     if (updatedSelected.length === questionState.currentWord.syllables.length) {
-      // Submit answer inline
+      const timeSpent = Date.now() - questionStartTime.current;
       const result: SyllablesQuestionResult = {
         targetWord: questionState.currentWord.word,
         targetSyllables: questionState.currentWord.syllables,
         selectedSyllables: updatedSelected,
-        timeSpent: 0,
+        timeSpent,
         timeExpired: false,
       };
       addResult(result);
@@ -97,6 +100,7 @@ export function Exercise({ config }: SyllablesExerciseProps) {
       [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
     }
 
+    questionStartTime.current = Date.now();
     setQuestionState({
       currentWord: word,
       scrambledSyllables: scrambled,

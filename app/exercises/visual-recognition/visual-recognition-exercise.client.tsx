@@ -42,6 +42,7 @@ export function VisualRecognitionExerciseClient({
 
   // Use ref to prevent multiple submissions for the same question
   const hasSubmittedRef = useRef(false);
+  const questionStartTime = useRef(Date.now());
 
   const [questionState, setQuestionState] = useState<QuestionState>({
     targetTag: null,
@@ -76,7 +77,7 @@ export function VisualRecognitionExerciseClient({
         targetTag: questionState.targetTag ?? "",
         correctImages: questionState.correctImageIds,
         selectedImages: updatedSelected,
-        timeSpent: 0,
+        timeSpent: Date.now() - questionStartTime.current,
         timeExpired: false,
       } as VisualRecognitionQuestionResult;
 
@@ -111,6 +112,7 @@ export function VisualRecognitionExerciseClient({
   // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
   useEffect(() => {
     hasSubmittedRef.current = false;
+    questionStartTime.current = Date.now();
 
     if (tags.length < 2) {
       console.error(

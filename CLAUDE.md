@@ -4,6 +4,8 @@
 
 NeuroGranada — a neurological rehabilitation platform built with Next.js 16, featuring AI-powered cognitive exercises, speech recognition, and media management. Professionals can define exercises via natural language through a chat agent; the generated code runs in an isolated Vercel Sandbox for preview.
 
+When starting work on a Next.js project, ALWAYS call the `init` tool from next-devtools-mcp FIRST to set up proper context.   
+
 ## Commands
 
 ```bash

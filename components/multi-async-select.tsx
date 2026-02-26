@@ -225,8 +225,6 @@ export const MultiAsyncSelect = forwardRef<HTMLButtonElement, Props>(
       }
     };
 
-    console.log(currentValues);
-
     return (
       <Popover
         modal={modalPopover}
@@ -259,33 +257,48 @@ export const MultiAsyncSelect = forwardRef<HTMLButtonElement, Props>(
                   return (
                     <Badge className="capitalize" key={value}>
                       <span>{option?.label}</span>
-                      <button
+                      {/* biome-ignore lint/a11y/useSemanticElements: can't use <button> inside PopoverTrigger <button> */}
+                      <span
                         className="ml-2 size-4 cursor-pointer"
                         onClick={(event) => {
                           event.stopPropagation();
                           toggleOption(value);
                         }}
-                        type="button"
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.stopPropagation();
+                            toggleOption(value);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
                       >
                         <XIcon />
-                      </button>
+                      </span>
                     </Badge>
                   );
                 })}
                 {currentValues.length > maxCount && (
                   <Badge>
                     <span>{`+ ${currentValues.length - maxCount}`}</span>
-
-                    <button
+                    {/* biome-ignore lint/a11y/useSemanticElements: can't use <button> inside PopoverTrigger <button> */}
+                    <span
                       className="ml-2 size-4 cursor-pointer"
                       onClick={(event) => {
                         event.stopPropagation();
                         clearExtraOptions();
                       }}
-                      type="button"
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.stopPropagation();
+                          clearExtraOptions();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <XIcon />
-                    </button>
+                    </span>
                   </Badge>
                 )}
               </div>

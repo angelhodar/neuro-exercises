@@ -1,20 +1,15 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -85,7 +80,6 @@ export default function LoginPage() {
           <CardTitle className="text-2xl text-blue-900">
             Iniciar Sesión
           </CardTitle>
-
         </CardHeader>
 
         <CardContent>
@@ -156,7 +150,6 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
-
         </CardContent>
       </Card>
     </div>

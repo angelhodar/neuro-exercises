@@ -403,6 +403,98 @@ export const sandboxSnapshots = pgTable(
   (table) => [index("sandbox_snapshots_expires_at_idx").on(table.expiresAt)]
 );
 
+// Patient management tables
+export const patients = pgTable(
+  "patients",
+  {
+    id: serial().primaryKey(),
+    firstName: varchar("first_name", { length: 255 }).notNull(),
+    lastName: varchar("last_name", { length: 255 }).notNull(),
+    dateOfBirth: timestamp("date_of_birth", { withTimezone: true }),
+    phone: varchar("phone", { length: 50 }),
+    email: varchar("email", { length: 255 }),
+    diagnosis: text("diagnosis"),
+    notes: text("notes"),
+    creatorId: text("creator_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("patients_creator_idx").on(table.creatorId),
+    index("patients_last_name_idx").on(table.lastName),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "patients_creator_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const patientSessions = pgTable(
+  "patient_sessions",
+  {
+    id: serial().primaryKey(),
+    patientId: integer("patient_id").notNull(),
+    date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
+    type: varchar("type", { length: 50 }).notNull(),
+    discipline: varchar("discipline", { length: 50 }).notNull(),
+    observations: text("observations"),
+    creatorId: text("creator_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("patient_sessions_patient_idx").on(table.patientId),
+    index("patient_sessions_creator_idx").on(table.creatorId),
+    index("patient_sessions_date_idx").on(table.date),
+    foreignKey({
+      columns: [table.patientId],
+      foreignColumns: [patients.id],
+      name: "patient_sessions_patient_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "patient_sessions_creator_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const patientTests = pgTable(
+  "patient_tests",
+  {
+    id: serial().primaryKey(),
+    patientId: integer("patient_id").notNull(),
+    sessionId: integer("session_id"),
+    date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
+    evaluatedProcess: varchar("evaluated_process", { length: 100 }).notNull(),
+    testName: varchar("test_name", { length: 255 }),
+    score: varchar("score", { length: 100 }),
+    observations: text("observations"),
+    creatorId: text("creator_id").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("patient_tests_patient_idx").on(table.patientId),
+    index("patient_tests_session_idx").on(table.sessionId),
+    index("patient_tests_creator_idx").on(table.creatorId),
+    index("patient_tests_evaluated_process_idx").on(table.evaluatedProcess),
+    foreignKey({
+      columns: [table.patientId],
+      foreignColumns: [patients.id],
+      name: "patient_tests_patient_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.sessionId],
+      foreignColumns: [patientSessions.id],
+      name: "patient_tests_session_fk",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "patient_tests_creator_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
 // Waitlist emails
 export const waitlistEmails = pgTable(
   "waitlist_emails",
@@ -436,6 +528,9 @@ export const userRelations = relations(users, ({ many }) => ({
   sentInvitations: many(invitation, { relationName: "sentInvitations" }),
   referenceTexts: many(speechTexts),
   transcriptionResults: many(transcriptionResults),
+  createdPatients: many(patients),
+  createdPatientSessions: many(patientSessions),
+  createdPatientTests: many(patientTests),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -642,6 +737,46 @@ export const transcriptionResultsRelations = relations(
   })
 );
 
+// Patient relations
+export const patientsRelations = relations(patients, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [patients.creatorId],
+    references: [users.id],
+  }),
+  patientSessions: many(patientSessions),
+  patientTests: many(patientTests),
+}));
+
+export const patientSessionsRelations = relations(
+  patientSessions,
+  ({ one, many }) => ({
+    patient: one(patients, {
+      fields: [patientSessions.patientId],
+      references: [patients.id],
+    }),
+    creator: one(users, {
+      fields: [patientSessions.creatorId],
+      references: [users.id],
+    }),
+    patientTests: many(patientTests),
+  })
+);
+
+export const patientTestsRelations = relations(patientTests, ({ one }) => ({
+  patient: one(patients, {
+    fields: [patientTests.patientId],
+    references: [patients.id],
+  }),
+  session: one(patientSessions, {
+    fields: [patientTests.sessionId],
+    references: [patientSessions.id],
+  }),
+  creator: one(users, {
+    fields: [patientTests.creatorId],
+    references: [users.id],
+  }),
+}));
+
 // Schemas
 export const exerciseSelectSchema = createSelectSchema(exercises);
 export const exerciseInsertSchema = createInsertSchema(exercises);
@@ -696,6 +831,17 @@ export const transcriptionResultUpdateSchema =
 export const sandboxSnapshotSelectSchema = createSelectSchema(sandboxSnapshots);
 export const sandboxSnapshotInsertSchema = createInsertSchema(sandboxSnapshots);
 
+export const patientSelectSchema = createSelectSchema(patients);
+export const patientInsertSchema = createInsertSchema(patients);
+export const patientUpdateSchema = createUpdateSchema(patients);
+
+export const patientSessionSelectSchema = createSelectSchema(patientSessions);
+export const patientSessionInsertSchema = createInsertSchema(patientSessions);
+export const patientSessionUpdateSchema = createUpdateSchema(patientSessions);
+
+export const patientTestSelectSchema = createSelectSchema(patientTests);
+export const patientTestInsertSchema = createInsertSchema(patientTests);
+export const patientTestUpdateSchema = createUpdateSchema(patientTests);
 export const waitlistEmailSelectSchema = createSelectSchema(waitlistEmails);
 export const waitlistEmailInsertSchema = createInsertSchema(waitlistEmails);
 
@@ -753,5 +899,13 @@ export type NewTranscriptionResult = typeof transcriptionResults.$inferInsert;
 export type SandboxSnapshot = typeof sandboxSnapshots.$inferSelect;
 export type NewSandboxSnapshot = typeof sandboxSnapshots.$inferInsert;
 
+export type Patient = typeof patients.$inferSelect;
+export type NewPatient = typeof patients.$inferInsert;
+
+export type PatientSession = typeof patientSessions.$inferSelect;
+export type NewPatientSession = typeof patientSessions.$inferInsert;
+
+export type PatientTest = typeof patientTests.$inferSelect;
+export type NewPatientTest = typeof patientTests.$inferInsert;
 export type WaitlistEmail = typeof waitlistEmails.$inferSelect;
 export type NewWaitlistEmail = typeof waitlistEmails.$inferInsert;

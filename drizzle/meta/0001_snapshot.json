@@ -95,12 +95,8 @@
           "name": "accounts_user_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -246,12 +242,8 @@
           "name": "exercise_chat_generation_exercise_fk",
           "tableFrom": "exercise_chat_generation",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -259,12 +251,8 @@
           "name": "exercise_chat_generation_user_fk",
           "tableFrom": "exercise_chat_generation",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -391,12 +379,8 @@
           "name": "exercise_links_creator_fk",
           "tableFrom": "exercise_links",
           "tableTo": "users",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["creator_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -404,12 +388,8 @@
           "name": "exercise_links_template_fk",
           "tableFrom": "exercise_links",
           "tableTo": "exercise_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -417,12 +397,8 @@
           "name": "exercise_links_target_user_fk",
           "tableFrom": "exercise_links",
           "tableTo": "users",
-          "columnsFrom": [
-            "target_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -432,9 +408,7 @@
         "exercise_links_token_unique": {
           "name": "exercise_links_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -570,12 +544,8 @@
           "name": "exercise_results_link_fk",
           "tableFrom": "exercise_results",
           "tableTo": "exercise_links",
-          "columnsFrom": [
-            "link_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["link_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -583,12 +553,8 @@
           "name": "exercise_results_template_item_fk",
           "tableFrom": "exercise_results",
           "tableTo": "exercise_template_items",
-          "columnsFrom": [
-            "template_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -727,12 +693,8 @@
           "name": "exercise_template_items_template_fk",
           "tableFrom": "exercise_template_items",
           "tableTo": "exercise_templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -740,12 +702,8 @@
           "name": "exercise_template_items_exercise_fk",
           "tableFrom": "exercise_template_items",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -821,12 +779,8 @@
           "name": "exercise_templates_creator_fk",
           "tableFrom": "exercise_templates",
           "tableTo": "users",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["creator_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -943,9 +897,7 @@
         "exercises_slug_unique": {
           "name": "exercises_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1066,12 +1018,8 @@
           "name": "invitation_organization_fk",
           "tableFrom": "invitations",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1079,12 +1027,8 @@
           "name": "invitation_inviter_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1213,12 +1157,8 @@
           "name": "medias_creator_fk",
           "tableFrom": "medias",
           "tableTo": "users",
-          "columnsFrom": [
-            "creator_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["creator_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1226,12 +1166,8 @@
           "name": "medias_derived_from_fk",
           "tableFrom": "medias",
           "tableTo": "medias",
-          "columnsFrom": [
-            "derived_from"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["derived_from"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1344,12 +1280,8 @@
           "name": "member_organization_fk",
           "tableFrom": "members",
           "tableTo": "organizations",
-          "columnsFrom": [
-            "organization_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1357,12 +1289,8 @@
           "name": "member_user_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1429,9 +1357,7 @@
         "organizations_slug_unique": {
           "name": "organizations_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1578,12 +1504,8 @@
           "name": "sessions_user_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1593,9 +1515,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1682,12 +1602,8 @@
           "name": "speech_texts_user_fk",
           "tableFrom": "speech_texts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1832,12 +1748,8 @@
           "name": "transcription_results_reference_text_fk",
           "tableFrom": "transcription_results",
           "tableTo": "speech_texts",
-          "columnsFrom": [
-            "reference_text_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reference_text_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1845,12 +1757,8 @@
           "name": "transcription_results_target_user_fk",
           "tableFrom": "transcription_results",
           "tableTo": "users",
-          "columnsFrom": [
-            "target_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1973,9 +1881,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -2087,9 +1993,7 @@
         "waitlist_emails_email_unique": {
           "name": "waitlist_emails_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -2101,12 +2005,7 @@
     "public.generation_status": {
       "name": "generation_status",
       "schema": "public",
-      "values": [
-        "PENDING",
-        "GENERATING",
-        "COMPLETED",
-        "ERROR"
-      ]
+      "values": ["PENDING", "GENERATING", "COMPLETED", "ERROR"]
     }
   },
   "schemas": {},

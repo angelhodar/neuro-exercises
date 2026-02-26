@@ -35,7 +35,11 @@ function MessageLabel({ children }: PropsWithChildren) {
 }
 
 function MessageText({ children }: PropsWithChildren) {
-  return <p className="break-words text-slate-700 text-sm leading-relaxed">{children}</p>;
+  return (
+    <p className="break-words text-slate-700 text-sm leading-relaxed">
+      {children}
+    </p>
+  );
 }
 
 function TypingBubble({ visible }: { visible: boolean }) {
@@ -80,10 +84,10 @@ function ExercisePreview({ visible }: { visible: boolean }) {
               Nivel 1 - Memoriza la secuencia
             </p>
             <div className="flex items-center justify-center gap-4 py-6 sm:gap-6 sm:py-10">
-              <div className="zoom-in h-12 w-12 animate-in rounded-full border-2 border-blue-400 bg-blue-100 duration-300 sm:h-16 sm:w-16 [animation-delay:200ms]" />
-              <div className="zoom-in h-12 w-12 rotate-45 animate-in border-2 border-blue-300 bg-blue-50 duration-300 sm:h-16 sm:w-16 [animation-delay:400ms]" />
+              <div className="zoom-in h-12 w-12 animate-in rounded-full border-2 border-blue-400 bg-blue-100 duration-300 [animation-delay:200ms] sm:h-16 sm:w-16" />
+              <div className="zoom-in h-12 w-12 rotate-45 animate-in border-2 border-blue-300 bg-blue-50 duration-300 [animation-delay:400ms] sm:h-16 sm:w-16" />
               <div
-                className="zoom-in scale-75 animate-in duration-300 sm:scale-100 [animation-delay:600ms]"
+                className="zoom-in scale-75 animate-in duration-300 [animation-delay:600ms] sm:scale-100"
                 style={{
                   width: 0,
                   height: 0,

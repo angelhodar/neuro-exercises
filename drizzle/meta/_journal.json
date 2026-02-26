@@ -15,6 +15,13 @@
       "when": 1772091509621,
       "tag": "0001_charming_aaron_stack",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772091939621,
+      "tag": "0002_romantic_frog_thor",
+      "breakpoints": true
     }
   ]
 }

@@ -132,7 +132,14 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
           <FormItem>
             <FormLabel>Condición de finalización</FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                items={[
+                  { value: "questions", label: "Número de ensayos" },
+                  { value: "time", label: "Tiempo límite" },
+                ]}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecciona una opción" />
                 </SelectTrigger>

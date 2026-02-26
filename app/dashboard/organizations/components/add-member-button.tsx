@@ -148,6 +148,11 @@ export default function AddMemberButton({
                     <Select
                       defaultValue={field.value}
                       disabled={isLoading}
+                      items={[
+                        { value: "member", label: "Miembro" },
+                        { value: "admin", label: "Administrador" },
+                        { value: "owner", label: "Propietario" },
+                      ]}
                       onValueChange={field.onChange}
                     >
                       <FormControl>

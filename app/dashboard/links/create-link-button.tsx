@@ -103,6 +103,10 @@ export default function CreateLinkButton({
                   <FormLabel>Para</FormLabel>
                   <FormControl>
                     <Select
+                      items={users.map((u) => ({
+                        value: u.id,
+                        label: u.name || u.email,
+                      }))}
                       onValueChange={field.onChange}
                       required
                       value={field.value}
@@ -134,6 +138,10 @@ export default function CreateLinkButton({
                   <FormLabel>Plantilla</FormLabel>
                   <FormControl>
                     <Select
+                      items={templates.map((t) => ({
+                        value: t.id.toString(),
+                        label: t.title,
+                      }))}
                       onValueChange={field.onChange}
                       required
                       value={field.value}

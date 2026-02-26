@@ -123,7 +123,7 @@ function SelectItem({
         className
       )}
       data-slot="select-item"
-      label={label ?? (typeof children === "string" ? children : undefined)}
+      label={label}
       {...props}
     >
       <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">

@@ -36,6 +36,12 @@ export function ConfigFields(props: SyllablesConfigFieldsProps) {
           <FormItem>
             <FormLabel>Número de Sílabas</FormLabel>
             <Select
+              items={[
+                { value: "3", label: "3 sílabas" },
+                { value: "4", label: "4 sílabas" },
+                { value: "5", label: "5 sílabas" },
+                { value: "6", label: "6 sílabas" },
+              ]}
               onValueChange={(value) =>
                 field.onChange(Number.parseInt(value, 10))
               }

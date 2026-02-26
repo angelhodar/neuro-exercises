@@ -177,6 +177,10 @@ export default function AddUserButton() {
                       <Select
                         defaultValue={field.value}
                         disabled={isLoading}
+                        items={[
+                          { value: "user", label: "Usuario" },
+                          { value: "admin", label: "Administrador" },
+                        ]}
                         onValueChange={field.onChange}
                       >
                         <FormControl>

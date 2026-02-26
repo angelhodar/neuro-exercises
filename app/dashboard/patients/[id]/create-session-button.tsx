@@ -136,7 +136,11 @@ export default function CreateSessionButton({
                         </FormControl>
                         <SelectContent>
                           {SESSION_TYPES.map((type) => (
-                            <SelectItem key={type} value={type}>
+                            <SelectItem
+                              key={type}
+                              label={SESSION_TYPE_LABELS[type]}
+                              value={type}
+                            >
                               {SESSION_TYPE_LABELS[type]}
                             </SelectItem>
                           ))}
@@ -165,7 +169,11 @@ export default function CreateSessionButton({
                         </FormControl>
                         <SelectContent>
                           {DISCIPLINES.map((discipline) => (
-                            <SelectItem key={discipline} value={discipline}>
+                            <SelectItem
+                              key={discipline}
+                              label={DISCIPLINE_LABELS[discipline]}
+                              value={discipline}
+                            >
                               {DISCIPLINE_LABELS[discipline]}
                             </SelectItem>
                           ))}

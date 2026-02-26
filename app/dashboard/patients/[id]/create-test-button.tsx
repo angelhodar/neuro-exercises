@@ -132,7 +132,11 @@ export default function CreateTestButton({ patientId }: CreateTestButtonProps) {
                       </FormControl>
                       <SelectContent>
                         {EVALUATED_PROCESSES.map((process) => (
-                          <SelectItem key={process} value={process}>
+                          <SelectItem
+                            key={process}
+                            label={EVALUATED_PROCESS_LABELS[process]}
+                            value={process}
+                          >
                             {EVALUATED_PROCESS_LABELS[process]}
                           </SelectItem>
                         ))}

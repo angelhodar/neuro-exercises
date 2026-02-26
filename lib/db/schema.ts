@@ -495,6 +495,17 @@ export const patientTests = pgTable(
   ]
 );
 
+// Waitlist emails
+export const waitlistEmails = pgTable(
+  "waitlist_emails",
+  {
+    id: serial().primaryKey(),
+    email: text().notNull().unique(),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("waitlist_emails_email_idx").on(table.email)]
+);
+
 // Materialized view for distinct media tags
 export const mediaTagsView = pgMaterializedView("media_tags", {
   tag: text("tag").primaryKey(),
@@ -831,6 +842,8 @@ export const patientSessionUpdateSchema = createUpdateSchema(patientSessions);
 export const patientTestSelectSchema = createSelectSchema(patientTests);
 export const patientTestInsertSchema = createInsertSchema(patientTests);
 export const patientTestUpdateSchema = createUpdateSchema(patientTests);
+export const waitlistEmailSelectSchema = createSelectSchema(waitlistEmails);
+export const waitlistEmailInsertSchema = createInsertSchema(waitlistEmails);
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -894,3 +907,5 @@ export type NewPatientSession = typeof patientSessions.$inferInsert;
 
 export type PatientTest = typeof patientTests.$inferSelect;
 export type NewPatientTest = typeof patientTests.$inferInsert;
+export type WaitlistEmail = typeof waitlistEmails.$inferSelect;
+export type NewWaitlistEmail = typeof waitlistEmails.$inferInsert;

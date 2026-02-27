@@ -39,6 +39,12 @@ export const configSchema = baseExerciseConfigSchema
   .merge(wordMatchingSpecificConfigSchema)
   .superRefine(wordMatchingConfigRefinements);
 
+// Schema for each individual match attempt
+const matchAttemptSchema = z.object({
+  words: z.array(z.string()),
+  isCorrect: z.boolean(),
+});
+
 // Result schema for a single round
 export const resultSchema = z.object({
   expectedGroups: z.array(
@@ -49,6 +55,7 @@ export const resultSchema = z.object({
       action: z.string(),
     })
   ),
+  matchAttempts: z.array(matchAttemptSchema),
   correctMatches: z.number().int().min(0),
   incorrectAttempts: z.number().int().min(0),
   totalAttempts: z.number().int().min(0),
@@ -62,6 +69,8 @@ export const resultSchema = z.object({
     )
     .optional(),
 });
+
+export type MatchAttempt = z.infer<typeof matchAttemptSchema>;
 
 export type WordMatchingSpecificConfig = z.infer<
   typeof wordMatchingSpecificConfigSchema

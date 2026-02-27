@@ -12,6 +12,7 @@ import {
   type WordGroup,
 } from "./word-groups-dataset";
 import type {
+  MatchAttempt,
   WordMatchingConfig,
   WordMatchingQuestionResult,
 } from "./word-matching.schema";
@@ -85,6 +86,7 @@ interface QuestionState {
   feedbackState: "none" | "correct" | "incorrect";
   /** The column index the user must pick next (sequential flow: 0 → 1 → 2 → ...) */
   currentStep: number;
+  matchAttempts: MatchAttempt[];
   // Phrase input state
   pendingPhraseGroup: WordGroup | null;
   phraseInput: string;
@@ -120,6 +122,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     totalAttempts: 0,
     feedbackState: "none",
     currentStep: 0,
+    matchAttempts: [],
     pendingPhraseGroup: null,
     phraseInput: "",
     phrases: [],
@@ -150,6 +153,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       totalAttempts: 0,
       feedbackState: "none",
       currentStep: 0,
+      matchAttempts: [],
       pendingPhraseGroup: null,
       phraseInput: "",
       phrases: [],
@@ -170,6 +174,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     const timeSpent = Date.now() - questionStartTime.current;
     const result: WordMatchingQuestionResult = {
       expectedGroups: state.groups,
+      matchAttempts: state.matchAttempts,
       correctMatches: newMatchedCount,
       totalAttempts: newTotalAttempts,
       incorrectAttempts: state.incorrectAttempts,
@@ -192,7 +197,8 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     newMatchedWords: Map<string, number>,
     newMatchedCount: number,
     newTotalAttempts: number,
-    matchedGroup: WordGroup
+    matchedGroup: WordGroup,
+    attempt: MatchAttempt
   ) {
     const emptySelections = new Array(numberOfColumns).fill(null);
 
@@ -203,6 +209,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         matchedWords: newMatchedWords,
         matchedCount: newMatchedCount,
         totalAttempts: newTotalAttempts,
+        matchAttempts: [...prev.matchAttempts, attempt],
         feedbackState: "correct",
         currentStep: 0,
         pendingPhraseGroup: matchedGroup,
@@ -217,12 +224,15 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         phraseInputRef.current?.focus();
       }, 600);
     } else {
+      const newAttempts = [...questionState.matchAttempts, attempt];
+
       setQuestionState((prev) => ({
         ...prev,
         selections: emptySelections,
         matchedWords: newMatchedWords,
         matchedCount: newMatchedCount,
         totalAttempts: newTotalAttempts,
+        matchAttempts: newAttempts,
         feedbackState: "correct",
         currentStep: 0,
       }));
@@ -230,7 +240,11 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       clearFeedbackAfterDelay();
 
       if (newMatchedCount === questionState.groups.length) {
-        completeRound(questionState, newMatchedCount, newTotalAttempts);
+        const stateForResult = {
+          ...questionState,
+          matchAttempts: newAttempts,
+        };
+        completeRound(stateForResult, newMatchedCount, newTotalAttempts);
       }
     }
   }
@@ -248,6 +262,11 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       activeKeys.every((key, i) => g[key] === selectedWords[i])
     );
 
+    const attempt: MatchAttempt = {
+      words: selectedWords,
+      isCorrect: groupIdx !== -1,
+    };
+
     if (groupIdx !== -1) {
       const colorIdx = questionState.matchedCount;
       const newMatchedWords = new Map(questionState.matchedWords);
@@ -259,12 +278,14 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         newMatchedWords,
         questionState.matchedCount + 1,
         questionState.totalAttempts + 1,
-        questionState.groups[groupIdx]
+        questionState.groups[groupIdx],
+        attempt
       );
     } else {
       setQuestionState((prev) => ({
         ...prev,
         selections: new Array(numberOfColumns).fill(null),
+        matchAttempts: [...prev.matchAttempts, attempt],
         incorrectAttempts: prev.incorrectAttempts + 1,
         totalAttempts: prev.totalAttempts + 1,
         feedbackState: "incorrect",

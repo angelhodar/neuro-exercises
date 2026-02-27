@@ -49,6 +49,17 @@ export const generatedExerciseSchema = z.object({
     ),
 });
 
+// Schema para registrar ejercicios con código existente (sin generación AI)
+export const registerExerciseSchema = z.object({
+  slug: z.string().min(1, "El slug es obligatorio"),
+  displayName: z.string().min(1, "El nombre es obligatorio"),
+  description: z.string().optional(),
+  tags: z.array(z.string()),
+  thumbnailPrompt: z.string().optional(),
+  file: z.instanceof(File).optional(),
+});
+
 export type CreateExerciseSchema = z.infer<typeof createExerciseSchema>;
 export type UpdateExerciseSchema = z.infer<typeof updateExerciseSchema>;
 export type GeneratedExerciseSchema = z.infer<typeof generatedExerciseSchema>;
+export type RegisterExerciseSchema = z.infer<typeof registerExerciseSchema>;

@@ -11,6 +11,8 @@ import {
   type CreateExerciseSchema,
   createExerciseSchema,
   generatedExerciseSchema,
+  type RegisterExerciseSchema,
+  registerExerciseSchema,
   type UpdateExerciseSchema,
   updateExerciseSchema,
 } from "@/lib/schemas/exercises";
@@ -163,6 +165,58 @@ export async function createExercise(
     return created || null;
   } catch (error) {
     console.error("Error al crear el ejercicio:", error);
+    return null;
+  }
+}
+
+export async function getUnregisteredExerciseSlugs(): Promise<string[]> {
+  try {
+    const { getImplementedExerciseSlugs } = await import(
+      "@/app/exercises/scanner"
+    );
+    const [implementedSlugs, dbExercises] = await Promise.all([
+      getImplementedExerciseSlugs(),
+      db.query.exercises.findMany({ columns: { slug: true } }),
+    ]);
+    const registeredSlugs = new Set(dbExercises.map((e) => e.slug));
+    return implementedSlugs.filter((slug) => !registeredSlugs.has(slug));
+  } catch (error) {
+    console.error("Error getting unregistered exercise slugs:", error);
+    return [];
+  }
+}
+
+export async function registerExercise(
+  data: RegisterExerciseSchema
+): Promise<Exercise | null> {
+  try {
+    const parsed = registerExerciseSchema.parse(data);
+    const { slug, displayName, description, tags, thumbnailPrompt, file } =
+      parsed;
+
+    let thumbnailUrl: string | null = null;
+
+    if (file) {
+      thumbnailUrl = await uploadThumbnail(file, slug);
+    } else if (thumbnailPrompt) {
+      thumbnailUrl = await generateThumbnail(thumbnailPrompt, slug);
+    }
+
+    const [created] = await db
+      .insert(exercises)
+      .values({
+        slug,
+        displayName,
+        description: description || null,
+        tags,
+        thumbnailUrl,
+      })
+      .returning();
+
+    revalidatePath("/dashboard");
+    return created || null;
+  } catch (error) {
+    console.error("Error al registrar el ejercicio:", error);
     return null;
   }
 }

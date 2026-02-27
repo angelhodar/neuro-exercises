@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { getExercises } from "@/app/actions/exercises";
+import {
+  getExercises,
+  getUnregisteredExerciseSlugs,
+} from "@/app/actions/exercises";
 import {
   DashboardHeader,
   DashboardHeaderActions,
@@ -10,11 +13,15 @@ import { CardActionStop } from "@/components/exercises/card-action-stop";
 import ExerciseCard from "@/components/exercises/exercise-card";
 import { Button } from "@/components/ui/button";
 import EditExerciseButton from "./exercises/edit-exercise";
+import RegisterExerciseButton from "./exercises/register-exercise-button";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const exercises = await getExercises();
+  const [exercises, unregisteredSlugs] = await Promise.all([
+    getExercises(),
+    getUnregisteredExerciseSlugs(),
+  ]);
 
   const exerciseAssetChecks = await Promise.all(
     exercises.map(async (exercise) => ({
@@ -28,6 +35,7 @@ export default async function DashboardPage() {
       <DashboardHeader>
         <DashboardHeaderTitle>Ejercicios</DashboardHeaderTitle>
         <DashboardHeaderActions>
+          <RegisterExerciseButton unregisteredSlugs={unregisteredSlugs} />
           <Button render={<Link href="/dashboard/exercises/create" />}>
             Crear nuevo ejercicio
           </Button>

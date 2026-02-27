@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getExerciseBySlug } from "@/app/actions/exercises";
+import { exerciseHasAssets } from "@/app/exercises/loader";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
 
 interface PageProps {
@@ -9,9 +10,12 @@ interface PageProps {
 export default async function ExerciseConfigPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const exercise = await getExerciseBySlug(slug);
+  const [exercise, hasAssets] = await Promise.all([
+    getExerciseBySlug(slug),
+    exerciseHasAssets(slug),
+  ]);
 
-  if (!exercise) {
+  if (!(exercise && hasAssets)) {
     notFound();
   }
 

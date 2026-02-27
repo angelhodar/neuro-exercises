@@ -83,7 +83,8 @@ interface QuestionState {
   incorrectAttempts: number;
   totalAttempts: number;
   feedbackState: "none" | "correct" | "incorrect";
-  activeColumnIndex: number | null;
+  /** The column index the user must pick next (sequential flow: 0 → 1 → 2 → ...) */
+  currentStep: number;
   // Phrase input state
   pendingPhraseGroup: WordGroup | null;
   phraseInput: string;
@@ -118,7 +119,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     incorrectAttempts: 0,
     totalAttempts: 0,
     feedbackState: "none",
-    activeColumnIndex: null,
+    currentStep: 0,
     pendingPhraseGroup: null,
     phraseInput: "",
     phrases: [],
@@ -148,7 +149,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       incorrectAttempts: 0,
       totalAttempts: 0,
       feedbackState: "none",
-      activeColumnIndex: null,
+      currentStep: 0,
       pendingPhraseGroup: null,
       phraseInput: "",
       phrases: [],
@@ -203,7 +204,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         matchedCount: newMatchedCount,
         totalAttempts: newTotalAttempts,
         feedbackState: "correct",
-        activeColumnIndex: null,
+        currentStep: 0,
         pendingPhraseGroup: matchedGroup,
         phraseInput: "",
       }));
@@ -223,7 +224,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         matchedCount: newMatchedCount,
         totalAttempts: newTotalAttempts,
         feedbackState: "correct",
-        activeColumnIndex: null,
+        currentStep: 0,
       }));
 
       clearFeedbackAfterDelay();
@@ -267,7 +268,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         incorrectAttempts: prev.incorrectAttempts + 1,
         totalAttempts: prev.totalAttempts + 1,
         feedbackState: "incorrect",
-        activeColumnIndex: null,
+        currentStep: 0, // Reset back to first column
       }));
 
       clearFeedbackAfterDelay();
@@ -282,20 +283,38 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     if (questionState.pendingPhraseGroup) {
       return;
     }
+    // Only allow selecting from the current step column
+    if (columnIndex !== questionState.currentStep) {
+      return;
+    }
 
     const newSelections = [...questionState.selections];
-    newSelections[columnIndex] =
-      newSelections[columnIndex] === wordIndex ? null : wordIndex;
+    // Toggle: deselect if clicking the same word
+    if (newSelections[columnIndex] === wordIndex) {
+      newSelections[columnIndex] = null;
+      setQuestionState((prev) => ({ ...prev, selections: newSelections }));
+      return;
+    }
 
-    const newActiveColumn =
-      newSelections[columnIndex] === null ? null : columnIndex;
+    newSelections[columnIndex] = wordIndex;
+    const nextStep = questionState.currentStep + 1;
 
-    setQuestionState((prev) => ({
-      ...prev,
-      selections: newSelections,
-      activeColumnIndex: newActiveColumn,
-    }));
-    tryMatch(newSelections);
+    // If all columns have a selection, try the match
+    if (nextStep >= numberOfColumns) {
+      setQuestionState((prev) => ({
+        ...prev,
+        selections: newSelections,
+        currentStep: nextStep,
+      }));
+      tryMatch(newSelections);
+    } else {
+      // Advance to next column
+      setQuestionState((prev) => ({
+        ...prev,
+        selections: newSelections,
+        currentStep: nextStep,
+      }));
+    }
   }
 
   function handlePhraseSubmit() {
@@ -335,8 +354,8 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     }
   }
 
-  // Determine which words are in the active column
-  const hasActiveSelection = questionState.selections.some((s) => s !== null);
+  // The highlighted column is the one the user needs to pick next
+  const currentStep = questionState.currentStep;
 
   const GRID_COLS_MAP: Record<number, string> = {
     2: "grid-cols-2",
@@ -350,13 +369,11 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       {/* Column headers */}
       <div className={`grid w-full gap-3 ${gridColsClass}`}>
         {activeKeys.map((key, colIdx) => {
-          const isColumnActive =
-            questionState.activeColumnIndex === colIdx || !hasActiveSelection;
-          const isColumnDimmed = hasActiveSelection && !isColumnActive;
+          const isHighlighted = colIdx === currentStep;
 
           return (
             <div
-              className={`rounded-xl px-4 py-2.5 text-center font-bold text-base tracking-wide transition-opacity duration-300 ${COLUMN_HEADER_COLORS[colIdx]} ${isColumnDimmed ? "opacity-30" : "opacity-100"}`}
+              className={`rounded-xl px-4 py-2.5 text-center font-bold text-base tracking-wide transition-opacity duration-300 ${COLUMN_HEADER_COLORS[colIdx]} ${isHighlighted ? "opacity-100" : "opacity-30"}`}
               key={key}
             >
               {COLUMN_LABELS[key]}
@@ -369,14 +386,12 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       <div className={`grid w-full gap-3 ${gridColsClass}`}>
         {activeKeys.map((key, colIdx) => {
           const columnWords = questionState.shuffledColumns[colIdx] ?? [];
-          const isColumnActive =
-            questionState.activeColumnIndex === colIdx || !hasActiveSelection;
-          const isColumnDimmed = hasActiveSelection && !isColumnActive;
+          const isHighlighted = colIdx === currentStep;
           const colors = COLUMN_CARD_COLORS[colIdx];
 
           return (
             <div
-              className={`flex flex-col gap-2 transition-opacity duration-300 ${isColumnDimmed ? "opacity-30" : "opacity-100"}`}
+              className={`flex flex-col gap-2 transition-opacity duration-300 ${isHighlighted ? "opacity-100" : "opacity-30"}`}
               key={key}
             >
               {columnWords.map((word, idx) => {

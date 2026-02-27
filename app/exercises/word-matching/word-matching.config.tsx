@@ -31,74 +31,64 @@ export function ConfigFields({ basePath = "" }: WordMatchingConfigFieldsProps) {
 
   return (
     <div className="space-y-4">
-      <FormField
-        control={control}
-        name={groupsPerRoundPath}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Grupos por ronda</FormLabel>
-            <Select
-              onValueChange={(value) =>
-                field.onChange(Number.parseInt(value, 10))
-              }
-              value={field.value?.toString()}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el número de grupos" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="3">3 grupos</SelectItem>
-                <SelectItem value="4">4 grupos</SelectItem>
-                <SelectItem value="5">5 grupos</SelectItem>
-                <SelectItem value="6">6 grupos</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              Número de grupos de palabras que se muestran en cada ronda
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={control}
+          name={groupsPerRoundPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Grupos por ronda</FormLabel>
+              <Select
+                onValueChange={(value) =>
+                  field.onChange(Number.parseInt(value, 10))
+                }
+                value={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nº de grupos" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="3">3 grupos</SelectItem>
+                  <SelectItem value="4">4 grupos</SelectItem>
+                  <SelectItem value="5">5 grupos</SelectItem>
+                  <SelectItem value="6">6 grupos</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={control}
-        name={numberOfColumnsPath}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Número de columnas</FormLabel>
-            <Select
-              onValueChange={(value) =>
-                field.onChange(Number.parseInt(value, 10))
-              }
-              value={field.value?.toString()}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el número de columnas" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="2">
-                  2 columnas (Objeto, Categoría)
-                </SelectItem>
-                <SelectItem value="3">
-                  3 columnas (Objeto, Categoría, Característica)
-                </SelectItem>
-                <SelectItem value="4">
-                  4 columnas (Objeto, Categoría, Característica, Acción)
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormDescription>
-              Número de columnas de palabras a emparejar
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={control}
+          name={numberOfColumnsPath}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Columnas</FormLabel>
+              <Select
+                onValueChange={(value) =>
+                  field.onChange(Number.parseInt(value, 10))
+                }
+                value={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Nº de columnas" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="min-w-[280px]">
+                  <SelectItem value="2">2 — Objeto, Categoría</SelectItem>
+                  <SelectItem value="3">3 — + Característica</SelectItem>
+                  <SelectItem value="4">4 — + Acción</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <FormField
         control={control}

@@ -16,7 +16,7 @@ const TARGET_SLUGS = [
   "syllables",
   "color-sequence",
   "visual-recognition",
-  "odd-one-out",
+  "word-matching",
   "stimulus-count",
 ];
 

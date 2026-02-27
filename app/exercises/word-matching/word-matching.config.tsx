@@ -56,6 +56,9 @@ export function ConfigFields({ basePath = "" }: WordMatchingConfigFieldsProps) {
                   <SelectItem value="6">6 grupos</SelectItem>
                 </SelectContent>
               </Select>
+              <FormDescription>
+                Número de asociaciones de palabras que aparecen en cada ronda
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -84,6 +87,9 @@ export function ConfigFields({ basePath = "" }: WordMatchingConfigFieldsProps) {
                   <SelectItem value="4">4 — + Acción</SelectItem>
                 </SelectContent>
               </Select>
+              <FormDescription>
+                Dimensiones semánticas visibles para emparejar
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

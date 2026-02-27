@@ -22,7 +22,8 @@ export const wordMatchingSpecificConfigSchema = z.object({
 
 // Reusable refinement function for word matching configurations
 export function wordMatchingConfigRefinements(
-  data: z.infer<typeof wordMatchingSpecificConfigSchema>,
+  data: z.infer<typeof baseExerciseConfigSchema> &
+    z.infer<typeof wordMatchingSpecificConfigSchema>,
   ctx: z.RefinementCtx
 ) {
   if (data.groupsPerRound > wordGroups.length) {
@@ -30,6 +31,18 @@ export function wordMatchingConfigRefinements(
       code: z.ZodIssueCode.custom,
       message: `No hay suficientes grupos de palabras disponibles (necesarios: ${data.groupsPerRound}, disponibles: ${wordGroups.length})`,
       path: ["groupsPerRound"],
+    });
+  }
+
+  if (
+    data.endConditionType === "time" &&
+    (!data.timeLimitSeconds || data.timeLimitSeconds <= 0)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message:
+        "El tiempo límite debe ser mayor que 0 cuando la condición de finalización es por tiempo",
+      path: ["timeLimitSeconds"],
     });
   }
 }
@@ -102,9 +115,9 @@ export const presets: Record<ExercisePreset, WordMatchingSpecificConfig> = {
 };
 
 export const defaultConfig: WordMatchingConfig = {
-  endConditionType: "time",
+  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 0,
-  timeLimitSeconds: 120,
+  totalQuestions: 5,
+  timeLimitSeconds: 0,
   ...presets.easy,
 };

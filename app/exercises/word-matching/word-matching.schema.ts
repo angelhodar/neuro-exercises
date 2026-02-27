@@ -12,6 +12,12 @@ export const wordMatchingSpecificConfigSchema = z.object({
     .min(3, "Mínimo 3 grupos por ronda")
     .max(6, "Máximo 6 grupos por ronda")
     .int("El número de grupos debe ser un número entero"),
+  numberOfColumns: z.coerce
+    .number()
+    .min(2, "Mínimo 2 columnas")
+    .max(4, "Máximo 4 columnas")
+    .int("El número de columnas debe ser un número entero"),
+  requirePhrase: z.boolean().default(false),
 });
 
 // Reusable refinement function for word matching configurations
@@ -40,12 +46,21 @@ export const resultSchema = z.object({
       object: z.string(),
       category: z.string(),
       characteristic: z.string(),
+      action: z.string(),
     })
   ),
   correctMatches: z.number().int().min(0),
   incorrectAttempts: z.number().int().min(0),
   totalAttempts: z.number().int().min(0),
   timeSpent: z.number().min(0),
+  phrases: z
+    .array(
+      z.object({
+        expected: z.string(),
+        entered: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export type WordMatchingSpecificConfig = z.infer<
@@ -57,15 +72,23 @@ export type WordMatchingQuestionResult = z.infer<typeof resultSchema>;
 export const presets: Record<ExercisePreset, WordMatchingSpecificConfig> = {
   easy: {
     groupsPerRound: 3,
+    numberOfColumns: 2,
+    requirePhrase: false,
   },
   medium: {
     groupsPerRound: 4,
+    numberOfColumns: 3,
+    requirePhrase: false,
   },
   hard: {
     groupsPerRound: 5,
+    numberOfColumns: 3,
+    requirePhrase: true,
   },
   expert: {
     groupsPerRound: 6,
+    numberOfColumns: 4,
+    requirePhrase: true,
   },
 };
 

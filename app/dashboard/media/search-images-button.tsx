@@ -145,7 +145,7 @@ export default function SearchImagesDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogContent className="max-h-[90vh] sm:max-w-7xl">
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-7xl">
         <DialogHeader>
           <DialogTitle>Buscar imágenes</DialogTitle>
           <DialogDescription>
@@ -186,8 +186,8 @@ export default function SearchImagesDialog({
         </Form>
 
         {searchResults.length > 0 && (
-          <div className="mt-6 flex h-full flex-col">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="mb-2 flex items-center justify-between">
               <span className="text-muted-foreground text-sm">
                 {selectedImages.size} de {searchResults.length} seleccionadas
               </span>
@@ -206,7 +206,7 @@ export default function SearchImagesDialog({
                 </Button>
               )}
             </div>
-            <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto p-2 md:grid-cols-3">
+            <div className="grid flex-1 grid-cols-2 gap-4 overflow-y-auto p-2 md:grid-cols-3">
               {searchResults.map((image) => (
                 <Selectable
                   key={image.position}

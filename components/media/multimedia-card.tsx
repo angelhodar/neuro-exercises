@@ -61,8 +61,10 @@ function MultimediaCard({
         </div>
         <DialogContent
           className={cn(
-            "w-fit overflow-hidden p-0 gap-0",
-            type === "audio" ? "sm:max-w-md p-6" : "sm:max-w-3xl"
+            "overflow-hidden gap-0",
+            type === "audio"
+              ? "sm:max-w-md p-6"
+              : "w-fit p-0 sm:max-w-3xl"
           )}
         >
           <DialogTitle className="sr-only">Media preview</DialogTitle>

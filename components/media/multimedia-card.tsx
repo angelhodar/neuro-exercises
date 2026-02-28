@@ -54,7 +54,7 @@ function MultimediaCard({
   className,
 }: MultimediaCardProps) {
   const content = (
-    <div data-slot="multimedia-card" className={cn("flex flex-col", className)}>
+    <div data-slot="multimedia-card" className={cn("flex flex-col overflow-hidden rounded-lg border bg-white", className)}>
       {children}
     </div>
   );
@@ -97,7 +97,7 @@ function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
     return (
       <div
         className={cn(
-          "group/audio relative aspect-video w-full overflow-hidden rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500",
+          "group/audio relative aspect-video w-full overflow-hidden bg-gradient-to-br from-violet-500 to-fuchsia-500",
           className
         )}
       >
@@ -120,7 +120,7 @@ function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
   return (
     <DialogTrigger
       className={cn(
-        "relative aspect-video w-full cursor-pointer overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-90",
+        "relative aspect-video w-full cursor-pointer overflow-hidden bg-muted transition-opacity hover:opacity-90",
         className
       )}
     >
@@ -172,12 +172,35 @@ function MultimediaCardTitle({
 }: MultimediaCardTitleProps) {
   return (
     <p
-      className={cn("mt-1.5 truncate text-sm font-medium", className)}
+      className={cn("truncate px-3 pt-2 pb-2 text-sm font-medium", className)}
       data-slot="multimedia-card-title"
       {...props}
     >
       {children}
     </p>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Actions – slot for buttons at the bottom of the card
+// ---------------------------------------------------------------------------
+
+interface MultimediaCardActionsProps
+  extends React.HTMLAttributes<HTMLDivElement> {}
+
+function MultimediaCardActions({
+  children,
+  className,
+  ...props
+}: MultimediaCardActionsProps) {
+  return (
+    <div
+      className={cn("flex items-center gap-2 px-3 pb-3", className)}
+      data-slot="multimedia-card-actions"
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -215,6 +238,7 @@ function MediaPreview({ type, src }: { type: "image" | "video"; src: string }) {
 
 export {
   MultimediaCard,
+  MultimediaCardActions,
   MultimediaCardThumbnail,
   MultimediaCardTitle,
   type MediaType,

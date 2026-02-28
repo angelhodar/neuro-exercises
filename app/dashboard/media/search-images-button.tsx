@@ -8,12 +8,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { searchImages, transferImagesToLibrary } from "@/app/actions/media";
 import {
-  MediaCard,
-  MediaCardContainer,
-  MediaCardDescription,
-  MediaCardTitle,
-} from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+  MultimediaCard,
+  MultimediaCardThumbnail,
+  MultimediaCardTitle,
+} from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
 import { Button } from "@/components/ui/button";
 import {
@@ -213,25 +211,22 @@ export default function SearchImagesDialog({
                   onClick={() => handleImageClick(image)}
                   selected={selectedImages.has(image.position)}
                 >
-                  <MediaCard>
-                    <MediaCardContainer>
-                      <MediaImage
-                        alt={image.title}
-                        fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        src={image.thumbnailUrl}
-                        unoptimized
-                      />
-                    </MediaCardContainer>
-                    <div className="space-y-1 p-2">
-                      <MediaCardTitle className="line-clamp-2 text-sm">
+                  <MultimediaCard
+                    alt={image.title}
+                    preview={false}
+                    src={image.thumbnailUrl}
+                    type="image"
+                  >
+                    <MultimediaCardThumbnail />
+                    <div className="space-y-1 px-3 py-2">
+                      <MultimediaCardTitle className="line-clamp-2 whitespace-normal">
                         {image.title}
-                      </MediaCardTitle>
-                      <MediaCardDescription className="text-xs">
+                      </MultimediaCardTitle>
+                      <p className="text-muted-foreground text-xs">
                         {image.source}
-                      </MediaCardDescription>
+                      </p>
                     </div>
-                  </MediaCard>
+                  </MultimediaCard>
                 </Selectable>
               ))}
             </div>

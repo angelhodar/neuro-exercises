@@ -20,6 +20,7 @@ interface MultimediaCardContextValue {
   src: string;
   alt: string;
   thumbnailSrc?: string;
+  previewEnabled: boolean;
 }
 
 const MultimediaCardContext = createContext<MultimediaCardContextValue | null>(
@@ -36,18 +37,23 @@ function useMultimediaCard() {
   return ctx;
 }
 
-type MultimediaCardProps = MultimediaCardContextValue &
-  React.ComponentProps<typeof Card>;
+type MultimediaCardProps = Omit<MultimediaCardContextValue, "previewEnabled"> &
+  React.ComponentProps<typeof Card> & {
+    preview?: boolean;
+  };
 
 function MultimediaCard({
   type,
   src,
   alt,
   thumbnailSrc,
+  preview = true,
   children,
   className,
   ...props
 }: MultimediaCardProps) {
+  const previewEnabled = preview && type !== "audio";
+
   const content = (
     <Card
       className={cn("gap-0 rounded-lg py-0", className)}
@@ -58,16 +64,20 @@ function MultimediaCard({
     </Card>
   );
 
-  if (type === "audio") {
+  if (!previewEnabled) {
     return (
-      <MultimediaCardContext value={{ type, src, alt, thumbnailSrc }}>
+      <MultimediaCardContext
+        value={{ type, src, alt, thumbnailSrc, previewEnabled: false }}
+      >
         {content}
       </MultimediaCardContext>
     );
   }
 
   return (
-    <MultimediaCardContext value={{ type, src, alt, thumbnailSrc }}>
+    <MultimediaCardContext
+      value={{ type, src, alt, thumbnailSrc, previewEnabled: true }}
+    >
       <Dialog>
         {content}
         <DialogContent className="w-fit gap-0 overflow-hidden p-0 sm:max-w-3xl">
@@ -101,34 +111,40 @@ function MediaPlaceholder({ type }: { type: MediaType }) {
 }
 
 function MultimediaCardImageThumbnail(props: MultimediaCardThumbnailProps) {
-  const { src, alt } = useMultimediaCard();
+  const { src, alt, previewEnabled } = useMultimediaCard();
+
+  const className = cn(
+    THUMBNAIL_BASE,
+    previewEnabled && "cursor-pointer hover:opacity-90",
+    props.className
+  );
+
+  if (!previewEnabled) {
+    return (
+      <div className={className} data-slot="multimedia-card-thumbnail">
+        <MediaImage alt={alt} src={src} />
+      </div>
+    );
+  }
 
   return (
-    <DialogTrigger
-      className={cn(
-        THUMBNAIL_BASE,
-        "cursor-pointer hover:opacity-90",
-        props.className
-      )}
-      data-slot="multimedia-card-thumbnail"
-    >
+    <DialogTrigger className={className} data-slot="multimedia-card-thumbnail">
       <MediaImage alt={alt} src={src} />
     </DialogTrigger>
   );
 }
 
 function MultimediaCardVideoThumbnail(props: MultimediaCardThumbnailProps) {
-  const { alt, thumbnailSrc } = useMultimediaCard();
+  const { alt, thumbnailSrc, previewEnabled } = useMultimediaCard();
 
-  return (
-    <DialogTrigger
-      className={cn(
-        THUMBNAIL_BASE,
-        "cursor-pointer hover:opacity-90",
-        props.className
-      )}
-      data-slot="multimedia-card-thumbnail"
-    >
+  const className = cn(
+    THUMBNAIL_BASE,
+    previewEnabled && "cursor-pointer hover:opacity-90",
+    props.className
+  );
+
+  const inner = (
+    <>
       {thumbnailSrc ? (
         <MediaImage alt={alt} src={thumbnailSrc} />
       ) : (
@@ -139,6 +155,20 @@ function MultimediaCardVideoThumbnail(props: MultimediaCardThumbnailProps) {
           <PlayIcon className="size-5 fill-white text-white" />
         </div>
       </div>
+    </>
+  );
+
+  if (!previewEnabled) {
+    return (
+      <div className={className} data-slot="multimedia-card-thumbnail">
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <DialogTrigger className={className} data-slot="multimedia-card-thumbnail">
+      {inner}
     </DialogTrigger>
   );
 }

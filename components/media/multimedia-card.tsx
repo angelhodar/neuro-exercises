@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type React from "react";
 import { createContext, useContext } from "react";
-import { PlayIcon } from "lucide-react";
+import { ImageIcon, MusicIcon, PlayIcon, VideoIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -81,81 +81,127 @@ function MultimediaCard({
 }
 
 // ---------------------------------------------------------------------------
-// Thumbnail – dialog trigger for image/video, inline player for audio
+// Shared thumbnail helpers
 // ---------------------------------------------------------------------------
 
-const WAVE_HEIGHTS = [35, 55, 30, 70, 45, 80, 60, 90, 50, 75, 40, 85, 55, 65, 45, 70, 35, 60, 50, 80];
+const THUMBNAIL_BASE = "relative aspect-video w-full overflow-hidden";
+
+const MEDIA_ICONS = {
+  audio: MusicIcon,
+  video: VideoIcon,
+  image: ImageIcon,
+};
 
 interface MultimediaCardThumbnailProps {
   className?: string;
 }
 
-function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
-  const { type, src, thumbnailSrc } = useMultimediaCard();
+/** Blue placeholder with a centered media-type icon. Used when no visual thumbnail is available. */
+function MediaPlaceholder({ type }: { type: MediaType }) {
+  const Icon = MEDIA_ICONS[type];
+  return (
+    <div className="flex h-full items-center justify-center bg-blue-500">
+      <Icon className="size-10 text-white/70" />
+    </div>
+  );
+}
 
-  if (type === "audio") {
-    return (
-      <div
-        className={cn(
-          "group/audio relative aspect-video w-full overflow-hidden bg-gradient-to-br from-violet-500 to-fuchsia-500",
-          className
-        )}
-      >
-        <div className="flex h-full items-center justify-center gap-[3px] px-6">
-          {WAVE_HEIGHTS.map((h, i) => (
-            <div
-              key={`wave-${i}`}
-              className="w-1 rounded-full bg-white/30"
-              style={{ height: `${h}%` }}
-            />
-          ))}
-        </div>
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6 opacity-0 transition-opacity group-hover/audio:opacity-100">
-          <audio className="w-full" controls src={src} />
-        </div>
-      </div>
-    );
-  }
+// ---------------------------------------------------------------------------
+// Image Thumbnail
+// ---------------------------------------------------------------------------
+
+function MultimediaCardImageThumbnail({
+  className,
+}: MultimediaCardThumbnailProps) {
+  const { src } = useMultimediaCard();
 
   return (
     <DialogTrigger
-      className={cn(
-        "relative aspect-video w-full cursor-pointer overflow-hidden bg-muted transition-opacity hover:opacity-90",
-        className
-      )}
+      className={cn(THUMBNAIL_BASE, "cursor-pointer hover:opacity-90", className)}
     >
-      {type === "image" && (
+      <Image
+        alt=""
+        className="object-cover"
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
+        src={src}
+      />
+    </DialogTrigger>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Video Thumbnail
+// ---------------------------------------------------------------------------
+
+function MultimediaCardVideoThumbnail({
+  className,
+}: MultimediaCardThumbnailProps) {
+  const { thumbnailSrc } = useMultimediaCard();
+
+  return (
+    <DialogTrigger
+      className={cn(THUMBNAIL_BASE, "cursor-pointer hover:opacity-90", className)}
+    >
+      {thumbnailSrc ? (
         <Image
           alt=""
           className="object-cover"
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
-          src={src}
+          src={thumbnailSrc}
         />
+      ) : (
+        <MediaPlaceholder type="video" />
       )}
-
-      {type === "video" && (
-        <>
-          {thumbnailSrc ? (
-            <Image
-              alt=""
-              className="object-cover"
-              fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              src={thumbnailSrc}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-muted" />
-          )}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="rounded-full bg-black/60 p-2.5">
-              <PlayIcon className="size-5 fill-white text-white" />
-            </div>
-          </div>
-        </>
-      )}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="rounded-full bg-black/60 p-2.5">
+          <PlayIcon className="size-5 fill-white text-white" />
+        </div>
+      </div>
     </DialogTrigger>
   );
+}
+
+// ---------------------------------------------------------------------------
+// Audio Thumbnail
+// ---------------------------------------------------------------------------
+
+function MultimediaCardAudioThumbnail({
+  className,
+}: MultimediaCardThumbnailProps) {
+  const { src, thumbnailSrc } = useMultimediaCard();
+
+  return (
+    <div className={cn(THUMBNAIL_BASE, "group/audio", className)}>
+      {thumbnailSrc ? (
+        <Image
+          alt=""
+          className="object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          src={thumbnailSrc}
+        />
+      ) : (
+        <MediaPlaceholder type="audio" />
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6 opacity-0 transition-opacity group-hover/audio:opacity-100">
+        <audio className="w-full" controls src={src} />
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Auto-selecting Thumbnail (convenience)
+// ---------------------------------------------------------------------------
+
+function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
+  const { type } = useMultimediaCard();
+
+  if (type === "audio") return <MultimediaCardAudioThumbnail className={className} />;
+  if (type === "video") return <MultimediaCardVideoThumbnail className={className} />;
+  return <MultimediaCardImageThumbnail className={className} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -239,7 +285,10 @@ function MediaPreview({ type, src }: { type: "image" | "video"; src: string }) {
 export {
   MultimediaCard,
   MultimediaCardActions,
+  MultimediaCardAudioThumbnail,
+  MultimediaCardImageThumbnail,
   MultimediaCardThumbnail,
   MultimediaCardTitle,
+  MultimediaCardVideoThumbnail,
   type MediaType,
 };

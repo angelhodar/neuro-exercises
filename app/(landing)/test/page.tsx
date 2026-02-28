@@ -1,8 +1,11 @@
+import { DownloadIcon, Share2Icon, Trash2Icon } from "lucide-react";
 import {
   MultimediaCard,
+  MultimediaCardActions,
   MultimediaCardThumbnail,
   MultimediaCardTitle,
 } from "@/components/media/multimedia-card";
+import { Button } from "@/components/ui/button";
 
 const SAMPLE_MEDIA = [
   {
@@ -52,7 +55,7 @@ export default function TestMultimediaPage() {
       </p>
 
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
-        {SAMPLE_MEDIA.map((media) => (
+        {SAMPLE_MEDIA.map((media, index) => (
           <MultimediaCard
             key={media.title}
             src={media.src}
@@ -61,6 +64,26 @@ export default function TestMultimediaPage() {
           >
             <MultimediaCardThumbnail />
             <MultimediaCardTitle>{media.title}</MultimediaCardTitle>
+            {index === 0 && (
+              <MultimediaCardActions>
+                <Button size="sm" variant="ghost">
+                  <DownloadIcon />
+                  Download
+                </Button>
+                <Button size="sm" variant="ghost">
+                  <Share2Icon />
+                  Share
+                </Button>
+              </MultimediaCardActions>
+            )}
+            {index === 5 && (
+              <MultimediaCardActions>
+                <Button size="sm" variant="ghost" className="text-destructive">
+                  <Trash2Icon />
+                  Delete
+                </Button>
+              </MultimediaCardActions>
+            )}
           </MultimediaCard>
         ))}
       </div>

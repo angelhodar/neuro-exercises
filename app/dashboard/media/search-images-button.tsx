@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, Loader2, Search } from "lucide-react";
-import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,7 +22,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -45,11 +43,15 @@ const searchSchema = z.object({
 
 type SearchSchema = z.infer<typeof searchSchema>;
 
-export default function SearchImagesButton() {
-  const [open, setOpen] = useQueryState(
-    "search-dialog",
-    parseAsBoolean.withDefault(false)
-  );
+interface SearchImagesDialogProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export default function SearchImagesDialog({
+  open,
+  setOpen,
+}: SearchImagesDialogProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [searchResults, setSearchResults] = useState<ImageResult[]>([]);
@@ -128,10 +130,8 @@ export default function SearchImagesButton() {
         );
       }
 
-      // Clear selection after successful download
       setSelectedImages(new Set());
 
-      // Close dialog if all downloads were successful
       if (errorCount === 0) {
         setOpen(false);
       }
@@ -145,10 +145,6 @@ export default function SearchImagesButton() {
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger render={<Button />}>
-        <Search className="h-4 w-4" />
-        Buscar en internet
-      </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-7xl">
         <DialogHeader>
           <DialogTitle>Buscar imágenes</DialogTitle>

@@ -15,7 +15,6 @@ import {
 import { MediaDisplay } from "@/components/media/media-display";
 import CreateMediaDropdownButton from "./create-media-dropdown-button";
 import MediaSearch from "./media-filters";
-import SearchImagesButton from "./search-images-button";
 
 interface Props {
   searchParams: Promise<{ q?: string }>;
@@ -36,7 +35,6 @@ export default async function MediasPage({ searchParams }: Props) {
         </div>
         <DashboardHeaderActions>
           <MediaSearch />
-          <SearchImagesButton />
           <CreateMediaDropdownButton />
         </DashboardHeaderActions>
       </DashboardHeader>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type React from "react";
 import { createContext, useContext } from "react";
-import { FileAudioIcon, PlayIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -53,20 +53,25 @@ function MultimediaCard({
   children,
   className,
 }: MultimediaCardProps) {
+  const content = (
+    <div data-slot="multimedia-card" className={cn("flex flex-col", className)}>
+      {children}
+    </div>
+  );
+
+  if (type === "audio") {
+    return (
+      <MultimediaCardContext value={{ type, src, thumbnailSrc }}>
+        {content}
+      </MultimediaCardContext>
+    );
+  }
+
   return (
     <MultimediaCardContext value={{ type, src, thumbnailSrc }}>
       <Dialog>
-        <div data-slot="multimedia-card" className={cn("flex flex-col", className)}>
-          {children}
-        </div>
-        <DialogContent
-          className={cn(
-            "overflow-hidden gap-0",
-            type === "audio"
-              ? "sm:max-w-md p-6"
-              : "w-fit p-0 sm:max-w-3xl"
-          )}
-        >
+        {content}
+        <DialogContent className="w-fit overflow-hidden gap-0 p-0 sm:max-w-3xl">
           <DialogTitle className="sr-only">Media preview</DialogTitle>
           <MediaPreview src={src} type={type} />
         </DialogContent>
@@ -76,8 +81,10 @@ function MultimediaCard({
 }
 
 // ---------------------------------------------------------------------------
-// Thumbnail – acts as the dialog trigger
+// Thumbnail – dialog trigger for image/video, inline player for audio
 // ---------------------------------------------------------------------------
+
+const WAVE_HEIGHTS = [35, 55, 30, 70, 45, 80, 60, 90, 50, 75, 40, 85, 55, 65, 45, 70, 35, 60, 50, 80];
 
 interface MultimediaCardThumbnailProps {
   className?: string;
@@ -85,6 +92,30 @@ interface MultimediaCardThumbnailProps {
 
 function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
   const { type, src, thumbnailSrc } = useMultimediaCard();
+
+  if (type === "audio") {
+    return (
+      <div
+        className={cn(
+          "group/audio relative aspect-video w-full overflow-hidden rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500",
+          className
+        )}
+      >
+        <div className="flex h-full items-center justify-center gap-[3px] px-6">
+          {WAVE_HEIGHTS.map((h, i) => (
+            <div
+              key={`wave-${i}`}
+              className="w-1 rounded-full bg-white/30"
+              style={{ height: `${h}%` }}
+            />
+          ))}
+        </div>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6 opacity-0 transition-opacity group-hover/audio:opacity-100">
+          <audio className="w-full" controls src={src} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DialogTrigger
@@ -123,12 +154,6 @@ function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
           </div>
         </>
       )}
-
-      {type === "audio" && (
-        <div className="flex h-full items-center justify-center">
-          <FileAudioIcon className="size-8 text-muted-foreground" />
-        </div>
-      )}
     </DialogTrigger>
   );
 }
@@ -160,7 +185,7 @@ function MultimediaCardTitle({
 // Internal – media preview rendered inside the dialog
 // ---------------------------------------------------------------------------
 
-function MediaPreview({ type, src }: { type: MediaType; src: string }) {
+function MediaPreview({ type, src }: { type: "image" | "video"; src: string }) {
   if (type === "video") {
     return (
       <video
@@ -172,10 +197,6 @@ function MediaPreview({ type, src }: { type: MediaType; src: string }) {
         <track kind="captions" />
       </video>
     );
-  }
-
-  if (type === "audio") {
-    return <audio className="w-full" controls src={src} />;
   }
 
   return (

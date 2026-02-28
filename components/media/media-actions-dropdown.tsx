@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Copy, MoreVertical, Trash2, ZoomIn } from "lucide-react";
+import { Copy, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -28,8 +28,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useConfirm } from "@/hooks/use-confirm";
 import type { Media } from "@/lib/db/schema";
-import { createBlobUrl } from "@/lib/utils";
-import { MediaImage } from "./media-image";
 
 interface MediaActionsDropdownProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -45,8 +43,6 @@ export function MediaActionsDropdown({
   const { confirm } = useConfirm();
   const [openVariantDialog, setOpenVariantDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [openImageDialog, setOpenImageDialog] = useState(false);
-
   // Infer mediaType from mimeType
   const getMediaType = (mimeType: string): "image" | "audio" | "video" => {
     if (mimeType.startsWith("image/")) {
@@ -62,10 +58,6 @@ export function MediaActionsDropdown({
   };
 
   const mediaType = getMediaType(media.mimeType);
-
-  const imageUrl = media.thumbnailKey
-    ? createBlobUrl(media.thumbnailKey)
-    : createBlobUrl(media.blobKey);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -100,7 +92,6 @@ export function MediaActionsDropdown({
   });
 
   const handleCreateVariant = () => setOpenVariantDialog(true);
-  const handleOpenImage = () => setOpenImageDialog(true);
 
   const onSubmit = async (values: FormSchema) => {
     setIsSubmitting(true);
@@ -121,59 +112,39 @@ export function MediaActionsDropdown({
 
   return (
     <div className={className}>
-      {/* Dialog para ver imagen ampliada */}
-      <Dialog onOpenChange={setOpenImageDialog} open={openImageDialog}>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <button
-                aria-label="Media actions"
-                className="rounded-full bg-white/80 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/90"
-                onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
-                type="button"
-              />
-            }
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <button
+              aria-label="Media actions"
+              className="rounded-full bg-white/80 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/90"
+              onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
+              type="button"
+            />
+          }
+        >
+          <MoreVertical className="h-4 w-4 text-gray-700" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-62">
+          {showImageActions && (
+            <>
+              <DropdownMenuItem onClick={handleCreateVariant}>
+                <Copy className="mr-3 h-4 w-4" />
+                Crear variante
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem
+            className="text-red-600 focus:bg-red-50 focus:text-red-600"
+            disabled={isPending}
+            onClick={handleDelete}
           >
-            <MoreVertical className="h-4 w-4 text-gray-700" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-62">
-            {showImageActions && (
-              <>
-                <DropdownMenuItem onClick={handleOpenImage}>
-                  <ZoomIn className="mr-3 h-4 w-4" />
-                  Ver imagen completa
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCreateVariant}>
-                  <Copy className="mr-3 h-4 w-4" />
-                  Crear variante
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            )}
-            <DropdownMenuItem
-              className="text-red-600 focus:bg-red-50 focus:text-red-600"
-              disabled={isPending}
-              onClick={handleDelete}
-            >
-              <Trash2 className="mr-3 h-4 w-4" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {showImageActions && imageUrl && (
-          <DialogContent className="max-w-4xl p-4 sm:max-w-4xl">
-            <DialogTitle>{media.name}</DialogTitle>
-            <div className="relative h-[60vh] w-full">
-              <MediaImage
-                alt={media.name}
-                className="object-contain"
-                fill
-                src={imageUrl}
-              />
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+            <Trash2 className="mr-3 h-4 w-4" />
+            Eliminar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       {/* Dialog para crear variante, independiente */}
       <Dialog onOpenChange={setOpenVariantDialog} open={openVariantDialog}>
         <DialogContent>

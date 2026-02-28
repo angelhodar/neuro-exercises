@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 export interface ImageData {
   id: string;
@@ -75,39 +72,13 @@ export type VisualRecognitionSpecificConfig = z.infer<
 export type VisualRecognitionConfig = z.infer<typeof configSchema>;
 export type VisualRecognitionQuestionResult = z.infer<typeof resultSchema>;
 
-// Preset configurations - exported as presets
-export const presets: Record<ExercisePreset, VisualRecognitionSpecificConfig> =
-  {
-    easy: {
-      imagesPerQuestion: 4,
-      correctImagesCount: 2,
-      tags: ["animal", "comida"],
-      showImageNames: true,
-    },
-    medium: {
-      imagesPerQuestion: 6,
-      correctImagesCount: 2,
-      tags: ["animal", "comida", "ropa"],
-      showImageNames: true,
-    },
-    hard: {
-      imagesPerQuestion: 8,
-      correctImagesCount: 3,
-      tags: ["animal", "comida", "ropa"],
-      showImageNames: false,
-    },
-    expert: {
-      imagesPerQuestion: 10,
-      correctImagesCount: 4,
-      tags: ["animal", "comida", "ropa", "mueble"],
-      showImageNames: false,
-    },
-  };
-
 export const defaultConfig: VisualRecognitionConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  imagesPerQuestion: 4,
+  correctImagesCount: 2,
+  tags: ["animal", "comida"],
+  showImageNames: true,
 };

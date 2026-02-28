@@ -20,6 +20,7 @@ import {
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
   title: string;
+  exerciseId?: number;
   onSubmit?: (config: Record<string, unknown>) => void;
 }
 
@@ -31,13 +32,13 @@ interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
 function ExerciseConfigFormContent({
   slug,
   title,
+  exerciseId,
   assets,
   onSubmit,
   children,
 }: ExerciseConfigFormContentProps) {
   const router = useRouter();
-  const { configSchema, presets, defaultConfig, ConfigFieldsComponent } =
-    assets;
+  const { configSchema, defaultConfig, ConfigFieldsComponent } = assets;
 
   const form = useForm<z.infer<typeof configSchema>>({
     resolver: zodResolver(configSchema),
@@ -70,9 +71,9 @@ function ExerciseConfigFormContent({
             className="space-y-6"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            {presets && (
+            {exerciseId && (
               <>
-                <ExerciseConfigPresetSelector presets={presets} />
+                <ExerciseConfigPresetSelector exerciseId={exerciseId} />
                 <Separator />
               </>
             )}

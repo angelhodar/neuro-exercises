@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 export const reactionTimeSpecificConfigSchema = z.object({
   gridSize: z.coerce
@@ -69,41 +66,14 @@ export type ReactionTimeSpecificConfig = z.infer<
 export type ReactionTimeGridConfig = z.infer<typeof configSchema>;
 export type ReactionTimeQuestionResult = z.infer<typeof resultSchema>;
 
-export const presets: Record<ExercisePreset, ReactionTimeSpecificConfig> = {
-  easy: {
-    gridSize: 6,
-    delayMin: 2000,
-    delayMax: 4000,
-    cells: 1,
-    cellDisplayDuration: 3000,
-  },
-  medium: {
-    gridSize: 10,
-    delayMin: 1000,
-    delayMax: 3000,
-    cells: 1,
-    cellDisplayDuration: 2000,
-  },
-  hard: {
-    gridSize: 15,
-    delayMin: 500,
-    delayMax: 1500,
-    cells: 2,
-    cellDisplayDuration: 1500,
-  },
-  expert: {
-    gridSize: 20,
-    delayMin: 300,
-    delayMax: 1000,
-    cells: 3,
-    cellDisplayDuration: 1000,
-  },
-};
-
 export const defaultConfig: ReactionTimeGridConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  gridSize: 6,
+  delayMin: 2000,
+  delayMax: 4000,
+  cells: 1,
+  cellDisplayDuration: 3000,
 };

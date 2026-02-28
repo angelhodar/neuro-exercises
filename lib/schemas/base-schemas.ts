@@ -16,6 +16,4 @@ export const baseExerciseConfigSchema = z.object({
   automaticNextQuestion: z.boolean().default(true),
 });
 
-export type ExercisePreset = "easy" | "medium" | "hard" | "expert";
-
 export type BaseExerciseConfig = z.infer<typeof baseExerciseConfigSchema>;

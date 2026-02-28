@@ -396,6 +396,38 @@ export const exerciseChatGeneration = pgTable(
   ]
 );
 
+// Exercise config presets (user-created)
+export const exerciseConfigPresets = pgTable(
+  "exercise_config_presets",
+  {
+    id: serial().primaryKey(),
+    exerciseId: integer("exercise_id").notNull(),
+    creatorId: text("creator_id").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    config: jsonb().$type<ConfigSchema>().notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("exercise_config_presets_exercise_idx").on(table.exerciseId),
+    index("exercise_config_presets_creator_idx").on(table.creatorId),
+    uniqueIndex("exercise_config_presets_exercise_creator_name_unique").on(
+      table.exerciseId,
+      table.creatorId,
+      table.name
+    ),
+    foreignKey({
+      columns: [table.exerciseId],
+      foreignColumns: [exercises.id],
+      name: "exercise_config_presets_exercise_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "exercise_config_presets_creator_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
 // Sandbox snapshots
 export const sandboxSnapshots = pgTable(
   "sandbox_snapshots",
@@ -537,6 +569,7 @@ export const userRelations = relations(users, ({ many }) => ({
   createdPatients: many(patients),
   createdPatientSessions: many(patientSessions),
   createdPatientTests: many(patientTests),
+  exerciseConfigPresets: many(exerciseConfigPresets),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -556,6 +589,7 @@ export const accountRelations = relations(accounts, ({ one }) => ({
 export const exercisesRelations = relations(exercises, ({ many }) => ({
   exerciseTemplateItems: many(exerciseTemplateItems),
   exerciseChatGenerations: many(exerciseChatGeneration),
+  exerciseConfigPresets: many(exerciseConfigPresets),
 }));
 
 export const exerciseTemplatesRelations = relations(
@@ -636,6 +670,20 @@ export const exerciseChatGenerationRelations = relations(
     }),
     user: one(users, {
       fields: [exerciseChatGeneration.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const exerciseConfigPresetsRelations = relations(
+  exerciseConfigPresets,
+  ({ one }) => ({
+    exercise: one(exercises, {
+      fields: [exerciseConfigPresets.exerciseId],
+      references: [exercises.id],
+    }),
+    creator: one(users, {
+      fields: [exerciseConfigPresets.creatorId],
       references: [users.id],
     }),
   })
@@ -834,6 +882,16 @@ export const transcriptionResultInsertSchema =
 export const transcriptionResultUpdateSchema =
   createUpdateSchema(transcriptionResults);
 
+export const exerciseConfigPresetSelectSchema = createSelectSchema(
+  exerciseConfigPresets
+);
+export const exerciseConfigPresetInsertSchema = createInsertSchema(
+  exerciseConfigPresets
+);
+export const exerciseConfigPresetUpdateSchema = createUpdateSchema(
+  exerciseConfigPresets
+);
+
 export const sandboxSnapshotSelectSchema = createSelectSchema(sandboxSnapshots);
 export const sandboxSnapshotInsertSchema = createInsertSchema(sandboxSnapshots);
 
@@ -915,3 +973,6 @@ export type PatientTest = typeof patientTests.$inferSelect;
 export type NewPatientTest = typeof patientTests.$inferInsert;
 export type WaitlistEmail = typeof waitlistEmails.$inferSelect;
 export type NewWaitlistEmail = typeof waitlistEmails.$inferInsert;
+
+export type ExerciseConfigPreset = typeof exerciseConfigPresets.$inferSelect;
+export type NewExerciseConfigPreset = typeof exerciseConfigPresets.$inferInsert;

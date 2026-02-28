@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 const stimulusCountRangeSchema = z.object({
   minStimuli: z.coerce
@@ -59,24 +56,15 @@ export const stimulusSchema = z.object({
 
 export type Stimulus = z.infer<typeof stimulusSchema>;
 
-export const stimulusCountPresets: Record<
-  ExercisePreset,
-  StimulusCountSpecificConfig
-> = {
-  easy: { minStimuli: 3, maxStimuli: 5, allowOverlap: false },
-  medium: { minStimuli: 5, maxStimuli: 10, allowOverlap: false },
-  hard: { minStimuli: 10, maxStimuli: 20, allowOverlap: true },
-  expert: { minStimuli: 15, maxStimuli: 30, allowOverlap: true },
-};
-
 export const defaultConfig: StimulusCountConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...stimulusCountPresets.easy,
+  minStimuli: 3,
+  maxStimuli: 5,
+  allowOverlap: false,
 };
 
 export const configSchema = stimulusCountConfigSchema;
 export const resultSchema = stimulusCountQuestionResultSchema;
-export const presets = stimulusCountPresets;

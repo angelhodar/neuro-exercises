@@ -86,7 +86,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
 
     try {
       const assets = await loadClientAssets(selectedExercise.slug);
-      const defaultConfig = assets?.presets?.easy ?? {};
+      const defaultConfig = assets?.defaultConfig ?? {};
 
       append({
         exerciseId: selectedExercise.id,

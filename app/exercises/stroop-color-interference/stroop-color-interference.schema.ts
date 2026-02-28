@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 // Lista de colores disponibles para el ejercicio
 export const STROOP_COLORS = [
@@ -51,28 +48,10 @@ export type StroopColorInterferenceQuestionResult = z.infer<
   typeof resultSchema
 >;
 
-export const presets: Record<
-  ExercisePreset,
-  StroopColorInterferenceSpecificConfig
-> = {
-  easy: {
-    numOptions: 3,
-  },
-  medium: {
-    numOptions: 4,
-  },
-  hard: {
-    numOptions: 6,
-  },
-  expert: {
-    numOptions: 8,
-  },
-};
-
 export const defaultConfig: StroopColorInterferenceConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  numOptions: 3,
 };

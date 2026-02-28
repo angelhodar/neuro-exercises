@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 import { wordGroups } from "./word-groups-dataset";
 
 // Word matching specific configuration schema
@@ -91,33 +88,12 @@ export type WordMatchingSpecificConfig = z.infer<
 export type WordMatchingConfig = z.infer<typeof configSchema>;
 export type WordMatchingQuestionResult = z.infer<typeof resultSchema>;
 
-export const presets: Record<ExercisePreset, WordMatchingSpecificConfig> = {
-  easy: {
-    groupsPerRound: 3,
-    numberOfColumns: 2,
-    requirePhrase: false,
-  },
-  medium: {
-    groupsPerRound: 4,
-    numberOfColumns: 3,
-    requirePhrase: false,
-  },
-  hard: {
-    groupsPerRound: 5,
-    numberOfColumns: 3,
-    requirePhrase: true,
-  },
-  expert: {
-    groupsPerRound: 6,
-    numberOfColumns: 4,
-    requirePhrase: true,
-  },
-};
-
 export const defaultConfig: WordMatchingConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  groupsPerRound: 3,
+  numberOfColumns: 2,
+  requirePhrase: false,
 };

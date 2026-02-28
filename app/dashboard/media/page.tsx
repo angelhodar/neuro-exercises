@@ -6,7 +6,6 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
-import { MediaCardBadges } from "@/components/media/media-card";
 import {
   type MediaType,
   MultimediaCard,
@@ -71,11 +70,6 @@ export default async function MediasPage({ searchParams }: Props) {
             <MultimediaCardTitle className="line-clamp-2">
               {media.name}
             </MultimediaCardTitle>
-            {media.tags && media.tags.length > 0 && (
-              <div className="px-3 pb-3">
-                <MediaCardBadges badges={media.tags} />
-              </div>
-            )}
           </MultimediaCard>
         ))}
       </div>

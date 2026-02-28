@@ -179,10 +179,8 @@ export async function deleteMedia(media: Media) {
     Boolean
   ) as string[];
 
-  await db.transaction(async (tx) => {
-    await tx.delete(medias).where(eq(medias.id, media.id));
-    await deleteBlobs(blobKeys);
-  });
+  await db.delete(medias).where(eq(medias.id, media.id));
+  await deleteBlobs(blobKeys);
 
   revalidatePath("/dashboard/medias");
 }

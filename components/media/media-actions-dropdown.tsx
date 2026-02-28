@@ -180,7 +180,7 @@ export function MediaActionsDropdown({
           <DialogTitle>Crear variante de imagen</DialogTitle>
           <Form {...form}>
             <form
-              className="mt-4 flex flex-col gap-4"
+              className="flex flex-col gap-4"
               onSubmit={form.handleSubmit(onSubmit)}
             >
               <FormField

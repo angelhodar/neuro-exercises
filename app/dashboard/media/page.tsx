@@ -14,24 +14,16 @@ import {
 } from "@/components/media/media-card";
 import { MediaDisplay } from "@/components/media/media-display";
 import CreateMediaDropdownButton from "./create-media-dropdown-button";
-import MediaFilters from "./media-filters";
+import MediaSearch from "./media-filters";
 import SearchImagesButton from "./search-images-button";
 
 interface Props {
-  searchParams: Promise<{ q?: string; tags?: string | string[] }>;
+  searchParams: Promise<{ q?: string }>;
 }
 
 export default async function MediasPage({ searchParams }: Props) {
-  const { q, tags } = await searchParams;
-  let tagsArray: string[];
-  if (Array.isArray(tags)) {
-    tagsArray = tags;
-  } else if (tags) {
-    tagsArray = [tags];
-  } else {
-    tagsArray = [];
-  }
-  const medias = await getMedias(q, tagsArray);
+  const { q } = await searchParams;
+  const medias = await getMedias(q);
 
   return (
     <div className="p-6">
@@ -43,7 +35,7 @@ export default async function MediasPage({ searchParams }: Props) {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <MediaFilters key={tagsArray.join(",")} />
+          <MediaSearch />
           <SearchImagesButton />
           <CreateMediaDropdownButton />
         </DashboardHeaderActions>

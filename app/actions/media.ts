@@ -2,15 +2,7 @@
 
 import { Buffer } from "node:buffer";
 import { generateImage, generateText, Output } from "ai";
-import {
-  and,
-  arrayOverlaps,
-  cosineDistance,
-  desc,
-  eq,
-  gt,
-  sql,
-} from "drizzle-orm";
+import { arrayOverlaps, cosineDistance, desc, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/actions/users";
 import { generateEmbedding, generateQueryEmbedding } from "@/lib/ai/embedding";
@@ -57,22 +49,12 @@ async function generateImageMetadata(imageUrl: string) {
   return output;
 }
 
-export async function getMedias(
-  searchTerm?: string,
-  tags?: string[],
-  limit?: number
-) {
+export async function getMedias(searchTerm?: string, limit?: number) {
   if (searchTerm?.trim()) {
-    return searchMediasSemantic(searchTerm.trim(), tags, limit ?? 20);
+    return searchMediasSemantic(searchTerm.trim(), limit ?? 20);
   }
 
   const result = await db.query.medias.findMany({
-    where: (fields) => {
-      if (tags && tags.length > 0) {
-        return arrayOverlaps(fields.tags, tags);
-      }
-      return undefined;
-    },
     with: {
       author: {
         columns: {
@@ -89,18 +71,9 @@ export async function getMedias(
   return result;
 }
 
-export async function searchMediasSemantic(
-  query: string,
-  tags?: string[],
-  limit = 20
-) {
+export async function searchMediasSemantic(query: string, limit = 20) {
   const queryEmbedding = await generateQueryEmbedding(query);
   const similarity = sql<number>`1 - (${cosineDistance(medias.embedding, queryEmbedding)})`;
-
-  const conditions = [gt(similarity, 0.3)];
-  if (tags && tags.length > 0) {
-    conditions.push(arrayOverlaps(medias.tags, tags));
-  }
 
   const results = await db
     .select({
@@ -120,7 +93,7 @@ export async function searchMediasSemantic(
       similarity,
     })
     .from(medias)
-    .where(and(...conditions))
+    .where(gt(similarity, 0.3))
     .orderBy(desc(similarity))
     .limit(limit);
 

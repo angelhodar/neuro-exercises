@@ -13,6 +13,7 @@ import {
   timestamp,
   uniqueIndex,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
@@ -341,6 +342,7 @@ export const medias = pgTable(
     metadata: jsonb("metadata"),
     authorId: text("creator_id").notNull(),
     derivedFrom: integer("derived_from"),
+    embedding: vector("embedding", { dimensions: 768 }),
     ...timestamps,
   }),
   (table) => [
@@ -356,6 +358,10 @@ export const medias = pgTable(
     }),
     index("medias_tags_idx").on(table.tags),
     index("medias_mime_type_idx").on(table.mimeType),
+    index("medias_embedding_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops")
+    ),
   ]
 );
 

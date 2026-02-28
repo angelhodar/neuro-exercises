@@ -2,10 +2,19 @@
 
 import { Buffer } from "node:buffer";
 import { generateImage, generateText, Output } from "ai";
-import { arrayOverlaps, desc, eq, ilike } from "drizzle-orm";
+import {
+  arrayOverlaps,
+  cosineDistance,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  sql,
+} from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/app/actions/users";
+import { generateEmbedding, generateQueryEmbedding } from "@/lib/ai/embedding";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { type Media, medias } from "@/lib/db/schema";
 import { optimizeImage } from "@/lib/media/optimize";
@@ -48,48 +57,71 @@ async function generateImageMetadata(imageUrl: string) {
   return output;
 }
 
-export async function getMedias(
-  searchTerm?: string,
-  tags?: string[],
-  limit?: number
+async function generateAndInsertMedia(
+  prompt: string,
+  authorId: string,
+  options?: { sourceImage?: Buffer; derivedFrom?: number }
 ) {
-  const result = await db.query.medias.findMany({
-    where: (fields) => {
-      const conditions: ReturnType<typeof ilike>[] = [];
+  const translatedPrompt = await translatePromptToEnglish(prompt);
 
-      if (searchTerm?.trim()) {
-        conditions.push(ilike(fields.name, `%${searchTerm.trim()}%`));
-      }
+  const imagePrompt = options?.sourceImage
+    ? { text: translatedPrompt, images: [options.sourceImage] }
+    : `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`;
 
-      if (tags && tags.length > 0) {
-        conditions.push(arrayOverlaps(fields.tags, tags));
-      }
-
-      if (conditions.length === 0) {
-        return undefined;
-      }
-      if (conditions.length === 1) {
-        return conditions[0];
-      }
-
-      return conditions.reduce((acc, condition) => {
-        return acc ? acc && condition : condition;
-      });
-    },
-    with: {
-      author: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: desc(medias.createdAt),
-    limit,
+  const { images } = await generateImage({
+    model: IMAGE_MODEL,
+    prompt: imagePrompt,
+    size: "512x512",
   });
 
-  return result;
+  const [image] = images;
+  if (!image) {
+    throw new Error("Error generating image");
+  }
+
+  const optimized = await optimizeImage(Buffer.from(image.uint8Array));
+  const blob = await uploadBlob(
+    `library/${crypto.randomUUID()}.webp`,
+    optimized
+  );
+
+  const metadata = await generateImageMetadata(blob.url);
+  const embedding = metadata.description
+    ? await generateEmbedding(metadata.description)
+    : undefined;
+
+  await db.insert(medias).values({
+    name:
+      metadata.name.charAt(0).toUpperCase() +
+      metadata.name.slice(1).toLowerCase(),
+    description: metadata.description,
+    tags: metadata.tags.map((tag) => tag.toLowerCase()),
+    blobKey: blob.pathname,
+    mimeType: "image/webp",
+    thumbnailKey: null,
+    metadata: { prompt, model: IMAGE_MODEL },
+    authorId,
+    derivedFrom: options?.derivedFrom ?? null,
+    embedding,
+  });
+}
+
+export async function getMedias(searchTerm?: string, limit = 20) {
+  const columns = getTableColumns(medias);
+  const trimmed = searchTerm?.trim();
+
+  const queryEmbedding = trimmed ? await generateQueryEmbedding(trimmed) : null;
+
+  const similarity = queryEmbedding
+    ? sql<number>`1 - (${cosineDistance(medias.embedding, queryEmbedding)})`
+    : null;
+
+  return db
+    .select({ ...columns, ...(similarity ? { similarity } : {}) })
+    .from(medias)
+    .where(similarity ? gt(similarity, 0.3) : undefined)
+    .orderBy(similarity ? desc(similarity) : desc(medias.createdAt))
+    .limit(limit);
 }
 
 export async function getMediasByTags(tags: string[]): Promise<Media[]> {
@@ -97,61 +129,20 @@ export async function getMediasByTags(tags: string[]): Promise<Media[]> {
     return [];
   }
 
-  const result = await db.query.medias.findMany({
+  return await db.query.medias.findMany({
     where: arrayOverlaps(medias.tags, tags),
   });
-
-  return result;
 }
 
 export async function generateDerivedMedia(media: Media, prompt: string) {
-  const user = await getCurrentUser();
+  const user = await requireAuth();
 
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
+  const sourceImage = await fetch(createBlobUrl(media.blobKey))
+    .then((r) => r.arrayBuffer())
+    .then((b) => Buffer.from(b));
 
-  const translatedPrompt = await translatePromptToEnglish(prompt);
-
-  const { images } = await generateImage({
-    model: IMAGE_MODEL,
-    prompt: {
-      text: translatedPrompt,
-      images: [
-        await fetch(createBlobUrl(media.blobKey))
-          .then((r) => r.arrayBuffer())
-          .then((b) => Buffer.from(b)),
-      ],
-    },
-    size: "512x512",
-  });
-
-  const [image] = images;
-
-  if (!image) {
-    throw new Error("Error generating image");
-  }
-
-  const imageBuffer = Buffer.from(image.uint8Array);
-  const optimized = await optimizeImage(imageBuffer);
-  const blob = await uploadBlob(
-    `library/${crypto.randomUUID()}.webp`,
-    optimized
-  );
-
-  const metadata = await generateImageMetadata(blob.url);
-
-  await db.insert(medias).values({
-    name:
-      metadata.name.charAt(0).toUpperCase() +
-      metadata.name.slice(1).toLowerCase(),
-    description: metadata.description,
-    tags: metadata.tags.map((tag) => tag.toLowerCase()),
-    blobKey: blob.pathname,
-    mimeType: "image/webp",
-    thumbnailKey: null,
-    metadata: { prompt, model: IMAGE_MODEL },
-    authorId: user.id,
+  await generateAndInsertMedia(prompt, user.id, {
+    sourceImage,
     derivedFrom: media.id,
   });
 
@@ -159,86 +150,39 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
 }
 
 export async function generateMediaFromPrompt(prompt: string) {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  const translatedPrompt = await translatePromptToEnglish(prompt);
-
-  const { images } = await generateImage({
-    model: IMAGE_MODEL,
-    prompt: `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`,
-    size: "512x512",
-  });
-
-  const [image] = images;
-
-  if (!image) {
-    throw new Error("Error generating image");
-  }
-
-  const imageBuffer = Buffer.from(image.uint8Array);
-  const optimized = await optimizeImage(imageBuffer);
-  const blob = await uploadBlob(
-    `library/${crypto.randomUUID()}.webp`,
-    optimized
-  );
-
-  const metadata = await generateImageMetadata(blob.url);
-
-  await db.insert(medias).values({
-    name:
-      metadata.name.charAt(0).toUpperCase() +
-      metadata.name.slice(1).toLowerCase(),
-    description: metadata.description,
-    tags: metadata.tags.map((tag) => tag.toLowerCase()),
-    blobKey: blob.pathname,
-    mimeType: "image/webp",
-    thumbnailKey: null,
-    metadata: { prompt, model: IMAGE_MODEL },
-    authorId: user.id,
-    derivedFrom: null,
-  });
-
+  const user = await requireAuth();
+  await generateAndInsertMedia(prompt, user.id);
   revalidatePath("/dashboard/media");
 }
 
 export async function uploadManualMedia(data: CreateManualMediaSchema) {
+  const user = await requireAuth();
   const { fileKey, ...rest } = data;
 
-  const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error("No hay usuario autenticado");
-  }
+  const embedding = rest.description
+    ? await generateEmbedding(rest.description)
+    : undefined;
 
   await db.insert(medias).values({
     ...rest,
     tags: rest.tags.map((tag) => tag.toLowerCase()),
     blobKey: fileKey,
     authorId: user.id,
+    embedding,
   });
 
   revalidatePath("/dashboard/medias");
 }
 
 export async function deleteMedia(media: Media) {
-  const mediasToDelete = [media.blobKey, media.thumbnailKey].filter(
+  const blobKeys = [media.blobKey, media.thumbnailKey].filter(
     Boolean
   ) as string[];
-  try {
-    await Promise.all([
-      deleteBlobs(mediasToDelete),
-      db.delete(medias).where(eq(medias.id, media.id)),
-    ]);
-    revalidatePath("/dashboard/medias");
-    return { success: true };
-  } catch (error) {
-    console.error("Delete error:", error);
-    throw new Error("Failed to delete media");
-  }
+
+  await db.delete(medias).where(eq(medias.id, media.id));
+  await deleteBlobs(blobKeys);
+
+  revalidatePath("/dashboard/medias");
 }
 
 export async function searchImages(query: string, numResults?: number) {
@@ -246,54 +190,50 @@ export async function searchImages(query: string, numResults?: number) {
 }
 
 export async function transferImagesToLibrary(images: DownloadableImage[]) {
-  try {
-    const user = await getCurrentUser();
+  const user = await requireAuth();
 
-    if (!user) {
-      throw new Error("No hay usuario autenticado");
-    }
+  const results = await Promise.all(
+    images.map(async (image) => {
+      try {
+        const [metadata, imageBuffer] = await Promise.all([
+          generateImageMetadata(image.imageUrl),
+          downloadFromUrl(image.imageUrl).then((arrayBuffer) =>
+            optimizeImage(Buffer.from(arrayBuffer))
+          ),
+        ]);
 
-    const results = await Promise.all(
-      images.map(async (image) => {
-        try {
-          const [metadata, imageBuffer] = await Promise.all([
-            generateImageMetadata(image.imageUrl),
-            downloadFromUrl(image.imageUrl).then((arrayBuffer) =>
-              optimizeImage(Buffer.from(arrayBuffer))
-            ),
-          ]);
+        const fileName = `library/${crypto.randomUUID()}.webp`;
+        const blob = await uploadBlob(fileName, imageBuffer);
 
-          const fileName = `library/${crypto.randomUUID()}.webp`;
-          const blob = await uploadBlob(fileName, imageBuffer);
+        const embedding = metadata.description
+          ? await generateEmbedding(metadata.description)
+          : undefined;
 
-          await db.insert(medias).values({
-            name:
-              metadata.name.charAt(0).toUpperCase() +
-              metadata.name.slice(1).toLowerCase(),
-            description: metadata.description,
-            tags: metadata.tags.map((tag) => tag.toLowerCase()),
-            blobKey: blob.pathname,
-            authorId: user.id,
-            mimeType: "image/webp",
-            metadata: { originalImageUrl: image.imageUrl },
-          });
+        await db.insert(medias).values({
+          name:
+            metadata.name.charAt(0).toUpperCase() +
+            metadata.name.slice(1).toLowerCase(),
+          description: metadata.description,
+          tags: metadata.tags.map((tag) => tag.toLowerCase()),
+          blobKey: blob.pathname,
+          authorId: user.id,
+          mimeType: "image/webp",
+          metadata: { originalImageUrl: image.imageUrl },
+          embedding,
+        });
 
-          return { success: true, name: metadata.name, url: blob.url };
-        } catch (error) {
-          console.error(`Error processing image ${image.title}:`, error);
-          return {
-            success: false,
-            name: image.title,
-            error: error instanceof Error ? error.message : "Unknown error",
-          };
-        }
-      })
-    );
+        return { success: true, name: metadata.name, url: blob.url };
+      } catch (error) {
+        console.error(`Error processing image ${image.title}:`, error);
+        return {
+          success: false,
+          name: image.title,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    })
+  );
 
-    revalidatePath("/dashboard/media");
-    return results;
-  } catch (error) {
-    console.error("Error downloading and uploading images:", error);
-    throw new Error("No se pudieron descargar las imágenes");
-  }
+  revalidatePath("/dashboard/media");
+  return results;
 }

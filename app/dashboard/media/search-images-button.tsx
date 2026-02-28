@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, Loader2, Search } from "lucide-react";
-import { parseAsBoolean, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,7 +22,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -45,11 +43,15 @@ const searchSchema = z.object({
 
 type SearchSchema = z.infer<typeof searchSchema>;
 
-export default function SearchImagesButton() {
-  const [open, setOpen] = useQueryState(
-    "search-dialog",
-    parseAsBoolean.withDefault(false)
-  );
+interface SearchImagesDialogProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export default function SearchImagesDialog({
+  open,
+  setOpen,
+}: SearchImagesDialogProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [searchResults, setSearchResults] = useState<ImageResult[]>([]);
@@ -128,10 +130,8 @@ export default function SearchImagesButton() {
         );
       }
 
-      // Clear selection after successful download
       setSelectedImages(new Set());
 
-      // Close dialog if all downloads were successful
       if (errorCount === 0) {
         setOpen(false);
       }
@@ -145,11 +145,7 @@ export default function SearchImagesButton() {
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger render={<Button />}>
-        <Search className="h-4 w-4" />
-        Buscar en internet
-      </DialogTrigger>
-      <DialogContent className="max-h-[90vh] max-w-7xl">
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-7xl">
         <DialogHeader>
           <DialogTitle>Buscar imágenes</DialogTitle>
           <DialogDescription>
@@ -160,10 +156,7 @@ export default function SearchImagesButton() {
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            className="mt-4 space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="query"
@@ -193,8 +186,8 @@ export default function SearchImagesButton() {
         </Form>
 
         {searchResults.length > 0 && (
-          <div className="mt-6 flex h-full flex-col">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <div className="mb-2 flex items-center justify-between">
               <span className="text-muted-foreground text-sm">
                 {selectedImages.size} de {searchResults.length} seleccionadas
               </span>
@@ -213,7 +206,7 @@ export default function SearchImagesButton() {
                 </Button>
               )}
             </div>
-            <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto p-2 md:grid-cols-3">
+            <div className="grid flex-1 grid-cols-2 gap-4 overflow-y-auto p-2 md:grid-cols-3">
               {searchResults.map((image) => (
                 <Selectable
                   key={image.position}

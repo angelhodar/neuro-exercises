@@ -15,7 +15,8 @@
     "db:push": "npx drizzle-kit push",
     "agent:generate-exercise": "npx tsx scripts/agent/run.ts",
     "generate-media-metadata": "npx tsx scripts/populate-media-metadata.ts",
-    "sandbox": "npx tsx scripts/sandbox.ts"
+    "sandbox": "npx tsx scripts/sandbox.ts",
+    "db:backfill-embeddings": "npx tsx scripts/backfill-media-embeddings.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.0",

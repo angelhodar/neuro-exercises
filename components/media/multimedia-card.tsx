@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import { ImageIcon, MusicIcon, PlayIcon, VideoIcon } from "lucide-react";
 import type React from "react";
 import { createContext, useContext } from "react";
-import { ImageIcon, MusicIcon, PlayIcon, VideoIcon } from "lucide-react";
+import { MediaImage } from "@/components/media/media-image";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ type MediaType = "image" | "video" | "audio";
 interface MultimediaCardContextValue {
   type: MediaType;
   src: string;
+  alt: string;
   thumbnailSrc?: string;
 }
 
@@ -34,55 +36,48 @@ function useMultimediaCard() {
   return ctx;
 }
 
-// ---------------------------------------------------------------------------
-// Root
-// ---------------------------------------------------------------------------
-
-interface MultimediaCardProps {
-  type: MediaType;
-  src: string;
-  thumbnailSrc?: string;
-  children: React.ReactNode;
-  className?: string;
-}
+type MultimediaCardProps = MultimediaCardContextValue &
+  React.ComponentProps<typeof Card>;
 
 function MultimediaCard({
   type,
   src,
+  alt,
   thumbnailSrc,
   children,
   className,
+  ...props
 }: MultimediaCardProps) {
   const content = (
-    <div data-slot="multimedia-card" className={cn("flex flex-col overflow-hidden rounded-lg border bg-white", className)}>
+    <Card
+      className={cn("gap-0 rounded-lg py-0", className)}
+      data-slot="multimedia-card"
+      {...props}
+    >
       {children}
-    </div>
+    </Card>
   );
 
   if (type === "audio") {
     return (
-      <MultimediaCardContext value={{ type, src, thumbnailSrc }}>
+      <MultimediaCardContext value={{ type, src, alt, thumbnailSrc }}>
         {content}
       </MultimediaCardContext>
     );
   }
 
   return (
-    <MultimediaCardContext value={{ type, src, thumbnailSrc }}>
+    <MultimediaCardContext value={{ type, src, alt, thumbnailSrc }}>
       <Dialog>
         {content}
-        <DialogContent className="w-fit overflow-hidden gap-0 p-0 sm:max-w-3xl">
+        <DialogContent className="w-fit gap-0 overflow-hidden p-0 sm:max-w-3xl">
           <DialogTitle className="sr-only">Media preview</DialogTitle>
-          <MediaPreview src={src} type={type} />
+          <MediaPreview alt={alt} src={src} type={type} />
         </DialogContent>
       </Dialog>
     </MultimediaCardContext>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Shared thumbnail helpers
-// ---------------------------------------------------------------------------
 
 const THUMBNAIL_BASE = "relative aspect-video w-full overflow-hidden";
 
@@ -96,7 +91,6 @@ interface MultimediaCardThumbnailProps {
   className?: string;
 }
 
-/** Blue placeholder with a centered media-type icon. Used when no visual thumbnail is available. */
 function MediaPlaceholder({ type }: { type: MediaType }) {
   const Icon = MEDIA_ICONS[type];
   return (
@@ -106,51 +100,37 @@ function MediaPlaceholder({ type }: { type: MediaType }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Image Thumbnail
-// ---------------------------------------------------------------------------
-
-function MultimediaCardImageThumbnail({
-  className,
-}: MultimediaCardThumbnailProps) {
-  const { src } = useMultimediaCard();
+function MultimediaCardImageThumbnail(props: MultimediaCardThumbnailProps) {
+  const { src, alt } = useMultimediaCard();
 
   return (
     <DialogTrigger
-      className={cn(THUMBNAIL_BASE, "cursor-pointer hover:opacity-90", className)}
+      className={cn(
+        THUMBNAIL_BASE,
+        "cursor-pointer hover:opacity-90",
+        props.className
+      )}
+      data-slot="multimedia-card-thumbnail"
     >
-      <Image
-        alt=""
-        className="object-cover"
-        fill
-        sizes="(max-width: 768px) 100vw, 33vw"
-        src={src}
-      />
+      <MediaImage alt={alt} src={src} />
     </DialogTrigger>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Video Thumbnail
-// ---------------------------------------------------------------------------
-
-function MultimediaCardVideoThumbnail({
-  className,
-}: MultimediaCardThumbnailProps) {
-  const { thumbnailSrc } = useMultimediaCard();
+function MultimediaCardVideoThumbnail(props: MultimediaCardThumbnailProps) {
+  const { alt, thumbnailSrc } = useMultimediaCard();
 
   return (
     <DialogTrigger
-      className={cn(THUMBNAIL_BASE, "cursor-pointer hover:opacity-90", className)}
+      className={cn(
+        THUMBNAIL_BASE,
+        "cursor-pointer hover:opacity-90",
+        props.className
+      )}
+      data-slot="multimedia-card-thumbnail"
     >
       {thumbnailSrc ? (
-        <Image
-          alt=""
-          className="object-cover"
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          src={thumbnailSrc}
-        />
+        <MediaImage alt={alt} src={thumbnailSrc} />
       ) : (
         <MediaPlaceholder type="video" />
       )}
@@ -163,124 +143,93 @@ function MultimediaCardVideoThumbnail({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Audio Thumbnail
-// ---------------------------------------------------------------------------
-
-function MultimediaCardAudioThumbnail({
-  className,
-}: MultimediaCardThumbnailProps) {
-  const { src, thumbnailSrc } = useMultimediaCard();
+function MultimediaCardAudioThumbnail(props: MultimediaCardThumbnailProps) {
+  const { src, alt, thumbnailSrc } = useMultimediaCard();
 
   return (
-    <div className={cn(THUMBNAIL_BASE, "group/audio", className)}>
+    <div
+      className={cn(THUMBNAIL_BASE, "group/audio", props.className)}
+      data-slot="multimedia-card-thumbnail"
+    >
       {thumbnailSrc ? (
-        <Image
-          alt=""
-          className="object-cover"
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          src={thumbnailSrc}
-        />
+        <MediaImage alt={alt} src={thumbnailSrc} />
       ) : (
         <MediaPlaceholder type="audio" />
       )}
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-6 opacity-0 transition-opacity group-hover/audio:opacity-100">
-        <audio className="w-full" controls src={src} />
+        <audio className="w-full" controls preload="none" src={src}>
+          <track kind="captions" />
+        </audio>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Auto-selecting Thumbnail (convenience)
-// ---------------------------------------------------------------------------
-
-function MultimediaCardThumbnail({ className }: MultimediaCardThumbnailProps) {
+function MultimediaCardThumbnail(props: MultimediaCardThumbnailProps) {
   const { type } = useMultimediaCard();
 
-  if (type === "audio") return <MultimediaCardAudioThumbnail className={className} />;
-  if (type === "video") return <MultimediaCardVideoThumbnail className={className} />;
-  return <MultimediaCardImageThumbnail className={className} />;
+  if (type === "audio") {
+    return <MultimediaCardAudioThumbnail {...props} />;
+  }
+  if (type === "video") {
+    return <MultimediaCardVideoThumbnail {...props} />;
+  }
+  return <MultimediaCardImageThumbnail {...props} />;
 }
 
-// ---------------------------------------------------------------------------
-// Title
-// ---------------------------------------------------------------------------
-
-interface MultimediaCardTitleProps
-  extends React.HTMLAttributes<HTMLParagraphElement> {}
-
 function MultimediaCardTitle({
-  children,
   className,
   ...props
-}: MultimediaCardTitleProps) {
+}: React.ComponentProps<"p">) {
   return (
     <p
-      className={cn("truncate px-3 pt-2 pb-2 text-sm font-medium", className)}
+      className={cn("truncate px-3 pt-2 pb-2 font-medium text-sm", className)}
       data-slot="multimedia-card-title"
       {...props}
-    >
-      {children}
-    </p>
+    />
   );
 }
 
-// ---------------------------------------------------------------------------
-// Actions – slot for buttons at the bottom of the card
-// ---------------------------------------------------------------------------
-
-interface MultimediaCardActionsProps
-  extends React.HTMLAttributes<HTMLDivElement> {}
-
 function MultimediaCardActions({
-  children,
   className,
   ...props
-}: MultimediaCardActionsProps) {
+}: React.ComponentProps<"div">) {
   return (
     <div
       className={cn("flex items-center gap-2 px-3 pb-3", className)}
       data-slot="multimedia-card-actions"
       {...props}
-    >
-      {children}
-    </div>
+    />
   );
 }
 
-// ---------------------------------------------------------------------------
-// Internal – media preview rendered inside the dialog
-// ---------------------------------------------------------------------------
-
-function MediaPreview({ type, src }: { type: "image" | "video"; src: string }) {
+function MediaPreview({
+  type,
+  src,
+  alt,
+}: {
+  type: "image" | "video";
+  src: string;
+  alt: string;
+}) {
   if (type === "video") {
     return (
-      <video
-        autoPlay
-        className="max-h-[80vh] max-w-full"
-        controls
-        src={src}
-      >
+      <video autoPlay className="max-h-[80vh] max-w-full" controls src={src}>
         <track kind="captions" />
       </video>
     );
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- natural sizing needed for unknown aspect ratios
+    // biome-ignore lint/performance/noImgElement: natural sizing needed for unknown aspect ratios
+    // biome-ignore lint/correctness/useImageSize: fill not applicable for native img
     <img
-      alt=""
+      alt={alt}
       className="max-h-[80vh] max-w-full object-contain"
       src={src}
     />
   );
 }
-
-// ---------------------------------------------------------------------------
-// Exports
-// ---------------------------------------------------------------------------
 
 export {
   MultimediaCard,

@@ -3,6 +3,8 @@ import { embed, embedMany } from "ai";
 const EMBEDDING_MODEL = "google/gemini-embedding-001";
 const EMBEDDING_DIMENSIONS = 768;
 
+const queryEmbeddingCache = new Map<string, number[]>();
+
 export async function generateEmbedding(text: string): Promise<number[]> {
   const { embedding } = await embed({
     model: EMBEDDING_MODEL,
@@ -18,6 +20,12 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 export async function generateQueryEmbedding(query: string): Promise<number[]> {
+  const cached = queryEmbeddingCache.get(query);
+  
+  if (cached) {
+    return cached;
+  }
+
   const { embedding } = await embed({
     model: EMBEDDING_MODEL,
     value: query,
@@ -28,6 +36,8 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
       },
     },
   });
+
+  queryEmbeddingCache.set(query, embedding);
   return embedding;
 }
 

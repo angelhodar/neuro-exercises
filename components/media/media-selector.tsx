@@ -69,11 +69,11 @@ export default function MediaSelector(props: MediaSelectorProps) {
               />
             }
           />
-          <DialogContent className="min-w-[800px]">
+          <DialogContent className="min-w-[1000px]">
             <DialogHeader>
               <DialogTitle>Buscar y seleccionar imágenes</DialogTitle>
             </DialogHeader>
-            <div className="mt-4 flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
               <div className="relative">
                 <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                 <Input

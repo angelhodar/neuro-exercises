@@ -145,7 +145,7 @@ export default function SearchImagesDialog({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogContent className="max-h-[90vh] max-w-7xl">
+      <DialogContent className="max-h-[90vh] sm:max-w-7xl">
         <DialogHeader>
           <DialogTitle>Buscar imágenes</DialogTitle>
           <DialogDescription>
@@ -156,10 +156,7 @@ export default function SearchImagesDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            className="mt-4 space-y-4"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="query"

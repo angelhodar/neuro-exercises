@@ -65,7 +65,7 @@ export default function CreateMediaWithAI({
         </DialogHeader>
         <Form {...form}>
           <form
-            className="mt-4 flex flex-col gap-4"
+            className="flex flex-col gap-4"
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <FormField

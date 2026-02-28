@@ -222,7 +222,7 @@ export default function SearchImagesDialog({
                     <MultimediaCardTitle className="line-clamp-2 whitespace-normal pb-1">
                       {image.title}
                     </MultimediaCardTitle>
-                    <p className="text-muted-foreground truncate px-3 pb-2 text-xs">
+                    <p className="truncate px-3 pb-2 text-muted-foreground text-xs">
                       {image.source}
                     </p>
                   </MultimediaCard>

@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  MediaCard,
-  MediaCardContainer,
-  MediaCardTitle,
-} from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+  MultimediaCard,
+  MultimediaCardThumbnail,
+  MultimediaCardTitle,
+} from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
 import { Badge } from "@/components/ui/badge";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
@@ -228,23 +227,20 @@ export function VisualRecognitionExerciseClient({
               onClick={() => handleImageClick(image.id)}
               selected={isSelected}
             >
-              <MediaCard>
-                <MediaCardContainer>
-                  <MediaImage
-                    alt={showImageNames ? image.name : "Imagen del ejercicio"}
-                    height={300}
-                    src={createBlobUrl(image.url)}
-                    width={300}
-                  />
-                </MediaCardContainer>
+              <MultimediaCard
+                alt={showImageNames ? image.name : "Imagen del ejercicio"}
+                className="h-full"
+                preview={false}
+                src={createBlobUrl(image.url)}
+                type="image"
+              >
+                <MultimediaCardThumbnail />
                 {showImageNames && (
-                  <div className="p-2">
-                    <MediaCardTitle className="line-clamp-2 text-center text-sm">
-                      {image.name}
-                    </MediaCardTitle>
-                  </div>
+                  <MultimediaCardTitle className="line-clamp-2 whitespace-normal text-center">
+                    {image.name}
+                  </MultimediaCardTitle>
                 )}
-              </MediaCard>
+              </MultimediaCard>
             </Selectable>
           );
         })}

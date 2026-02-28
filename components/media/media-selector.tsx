@@ -3,13 +3,12 @@
 import { Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import {
-  MediaCard,
-  MediaCardBadges,
-  MediaCardContainer,
-  MediaCardTitle,
-} from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+  MultimediaCard,
+  MultimediaCardThumbnail,
+  MultimediaCardTitle,
+} from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -121,25 +120,32 @@ export default function MediaSelector(props: MediaSelectorProps) {
                         onClick={() => addMedia(media)}
                         selected={isSelected}
                       >
-                        <MediaCard className="max-w-sm">
-                          <MediaCardContainer>
-                            <MediaImage
-                              alt={media.name}
-                              src={createBlobUrl(media.blobKey)}
-                            />
-                          </MediaCardContainer>
-                          <div className="p-2">
-                            <MediaCardTitle className="text-center text-lg">
-                              {media.name}
-                            </MediaCardTitle>
-                            {media.tags && media.tags.length > 0 && (
-                              <MediaCardBadges
-                                badges={media.tags}
-                                className="justify-center"
-                              />
-                            )}
-                          </div>
-                        </MediaCard>
+                        <MultimediaCard
+                          alt={media.name}
+                          className="h-full max-w-sm"
+                          preview={false}
+                          src={createBlobUrl(media.blobKey)}
+                          type="image"
+                        >
+                          <MultimediaCardThumbnail />
+                          <MultimediaCardTitle className="whitespace-normal text-center text-lg">
+                            {media.name}
+                          </MultimediaCardTitle>
+                          {media.tags && media.tags.length > 0 && (
+                            <div className="flex flex-wrap justify-center gap-1 px-3 pb-2">
+                              {media.tags.slice(0, 3).map((tag) => (
+                                <Badge key={tag} variant="secondary">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {media.tags.length > 3 && (
+                                <Badge variant="outline">
+                                  +{media.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </MultimediaCard>
                       </Selectable>
                     );
                   })}

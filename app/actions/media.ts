@@ -2,7 +2,15 @@
 
 import { Buffer } from "node:buffer";
 import { generateImage, generateText, Output } from "ai";
-import { arrayOverlaps, cosineDistance, desc, eq, gt, sql } from "drizzle-orm";
+import {
+  arrayOverlaps,
+  cosineDistance,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  sql,
+} from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateEmbedding, generateQueryEmbedding } from "@/lib/ai/embedding";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
@@ -49,9 +57,10 @@ async function generateImageMetadata(imageUrl: string) {
   return output;
 }
 
-async function generateAndUploadImage(
+async function generateAndInsertMedia(
   prompt: string,
-  options?: { sourceImage?: Buffer }
+  authorId: string,
+  options?: { sourceImage?: Buffer; derivedFrom?: number }
 ) {
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
@@ -81,35 +90,38 @@ async function generateAndUploadImage(
     ? await generateEmbedding(metadata.description)
     : undefined;
 
-  return { blob, metadata, embedding };
+  await db.insert(medias).values({
+    name:
+      metadata.name.charAt(0).toUpperCase() +
+      metadata.name.slice(1).toLowerCase(),
+    description: metadata.description,
+    tags: metadata.tags.map((tag) => tag.toLowerCase()),
+    blobKey: blob.pathname,
+    mimeType: "image/webp",
+    thumbnailKey: null,
+    metadata: { prompt, model: IMAGE_MODEL },
+    authorId,
+    derivedFrom: options?.derivedFrom ?? null,
+    embedding,
+  });
 }
 
-export async function getMedias(searchTerm?: string, limit?: number) {
-  if (searchTerm?.trim()) {
-    const queryEmbedding = await generateQueryEmbedding(searchTerm.trim());
-    const similarity = sql<number>`1 - (${cosineDistance(medias.embedding, queryEmbedding)})`;
+export async function getMedias(searchTerm?: string, limit = 20) {
+  const columns = getTableColumns(medias);
+  const trimmed = searchTerm?.trim();
 
-    return db
-      .select({ ...medias._.columns, similarity })
-      .from(medias)
-      .where(gt(similarity, 0.3))
-      .orderBy(desc(similarity))
-      .limit(limit ?? 20);
-  }
+  const queryEmbedding = trimmed ? await generateQueryEmbedding(trimmed) : null;
 
-  return db.query.medias.findMany({
-    with: {
-      author: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: desc(medias.createdAt),
-    limit,
-  });
+  const similarity = queryEmbedding
+    ? sql<number>`1 - (${cosineDistance(medias.embedding, queryEmbedding)})`
+    : null;
+
+  return db
+    .select({ ...columns, ...(similarity ? { similarity } : {}) })
+    .from(medias)
+    .where(similarity ? gt(similarity, 0.3) : undefined)
+    .orderBy(similarity ? desc(similarity) : desc(medias.createdAt))
+    .limit(limit);
 }
 
 export async function getMediasByTags(tags: string[]): Promise<Media[]> {
@@ -129,23 +141,9 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
     .then((r) => r.arrayBuffer())
     .then((b) => Buffer.from(b));
 
-  const { blob, metadata, embedding } = await generateAndUploadImage(prompt, {
+  await generateAndInsertMedia(prompt, user.id, {
     sourceImage,
-  });
-
-  await db.insert(medias).values({
-    name:
-      metadata.name.charAt(0).toUpperCase() +
-      metadata.name.slice(1).toLowerCase(),
-    description: metadata.description,
-    tags: metadata.tags.map((tag) => tag.toLowerCase()),
-    blobKey: blob.pathname,
-    mimeType: "image/webp",
-    thumbnailKey: null,
-    metadata: { prompt, model: IMAGE_MODEL },
-    authorId: user.id,
     derivedFrom: media.id,
-    embedding,
   });
 
   revalidatePath("/dashboard/media");
@@ -153,24 +151,7 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
 
 export async function generateMediaFromPrompt(prompt: string) {
   const user = await requireAuth();
-
-  const { blob, metadata, embedding } = await generateAndUploadImage(prompt);
-
-  await db.insert(medias).values({
-    name:
-      metadata.name.charAt(0).toUpperCase() +
-      metadata.name.slice(1).toLowerCase(),
-    description: metadata.description,
-    tags: metadata.tags.map((tag) => tag.toLowerCase()),
-    blobKey: blob.pathname,
-    mimeType: "image/webp",
-    thumbnailKey: null,
-    metadata: { prompt, model: IMAGE_MODEL },
-    authorId: user.id,
-    derivedFrom: null,
-    embedding,
-  });
-
+  await generateAndInsertMedia(prompt, user.id);
   revalidatePath("/dashboard/media");
 }
 

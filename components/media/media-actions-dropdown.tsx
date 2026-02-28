@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Copy, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -145,7 +146,12 @@ export function MediaActionsDropdown({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {/* Dialog para crear variante, independiente */}
+      {/* Manual backdrop since this Dialog is nested inside MultimediaCard's Dialog (base-ui suppresses backdrops for nested dialogs) */}
+      {openVariantDialog &&
+        createPortal(
+          <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs" />,
+          document.body
+        )}
       <Dialog onOpenChange={setOpenVariantDialog} open={openVariantDialog}>
         <DialogContent>
           <DialogTitle>Crear variante de imagen</DialogTitle>

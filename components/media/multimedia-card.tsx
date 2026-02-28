@@ -79,7 +79,7 @@ function MultimediaCard({
   );
 }
 
-const THUMBNAIL_BASE = "relative aspect-video w-full overflow-hidden";
+const THUMBNAIL_BASE = "relative aspect-[4/3] w-full overflow-hidden";
 
 const MEDIA_ICONS = {
   audio: MusicIcon,

@@ -8,7 +8,6 @@ import {
   MultimediaCardTitle,
 } from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -131,20 +130,6 @@ export default function MediaSelector(props: MediaSelectorProps) {
                           <MultimediaCardTitle className="whitespace-normal text-center text-lg">
                             {media.name}
                           </MultimediaCardTitle>
-                          {media.tags && media.tags.length > 0 && (
-                            <div className="flex flex-wrap justify-center gap-1 px-3 pb-2">
-                              {media.tags.slice(0, 3).map((tag) => (
-                                <Badge key={tag} variant="secondary">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {media.tags.length > 3 && (
-                                <Badge variant="outline">
-                                  +{media.tags.length - 3}
-                                </Badge>
-                              )}
-                            </div>
-                          )}
                         </MultimediaCard>
                       </Selectable>
                     );

@@ -2,9 +2,18 @@
 
 import { Buffer } from "node:buffer";
 import { generateImage, generateText, Output } from "ai";
-import { arrayOverlaps, desc, eq, ilike } from "drizzle-orm";
+import {
+  and,
+  arrayOverlaps,
+  cosineDistance,
+  desc,
+  eq,
+  gt,
+  sql,
+} from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/actions/users";
+import { generateEmbedding, generateQueryEmbedding } from "@/lib/ai/embedding";
 import { translatePromptToEnglish } from "@/lib/ai/translate";
 import { db } from "@/lib/db";
 import { type Media, medias } from "@/lib/db/schema";
@@ -53,28 +62,16 @@ export async function getMedias(
   tags?: string[],
   limit?: number
 ) {
+  if (searchTerm?.trim()) {
+    return searchMediasSemantic(searchTerm.trim(), tags, limit ?? 20);
+  }
+
   const result = await db.query.medias.findMany({
     where: (fields) => {
-      const conditions: ReturnType<typeof ilike>[] = [];
-
-      if (searchTerm?.trim()) {
-        conditions.push(ilike(fields.name, `%${searchTerm.trim()}%`));
-      }
-
       if (tags && tags.length > 0) {
-        conditions.push(arrayOverlaps(fields.tags, tags));
+        return arrayOverlaps(fields.tags, tags);
       }
-
-      if (conditions.length === 0) {
-        return undefined;
-      }
-      if (conditions.length === 1) {
-        return conditions[0];
-      }
-
-      return conditions.reduce((acc, condition) => {
-        return acc ? acc && condition : condition;
-      });
+      return undefined;
     },
     with: {
       author: {
@@ -90,6 +87,44 @@ export async function getMedias(
   });
 
   return result;
+}
+
+export async function searchMediasSemantic(
+  query: string,
+  tags?: string[],
+  limit = 20
+) {
+  const queryEmbedding = await generateQueryEmbedding(query);
+  const similarity = sql<number>`1 - (${cosineDistance(medias.embedding, queryEmbedding)})`;
+
+  const conditions = [gt(similarity, 0.3)];
+  if (tags && tags.length > 0) {
+    conditions.push(arrayOverlaps(medias.tags, tags));
+  }
+
+  const results = await db
+    .select({
+      id: medias.id,
+      name: medias.name,
+      description: medias.description,
+      tags: medias.tags,
+      blobKey: medias.blobKey,
+      mimeType: medias.mimeType,
+      thumbnailKey: medias.thumbnailKey,
+      metadata: medias.metadata,
+      authorId: medias.authorId,
+      derivedFrom: medias.derivedFrom,
+      embedding: medias.embedding,
+      createdAt: medias.createdAt,
+      updatedAt: medias.updatedAt,
+      similarity,
+    })
+    .from(medias)
+    .where(and(...conditions))
+    .orderBy(desc(similarity))
+    .limit(limit);
+
+  return results;
 }
 
 export async function getMediasByTags(tags: string[]): Promise<Media[]> {
@@ -141,6 +176,15 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
 
   const metadata = await generateImageMetadata(blob.url);
 
+  let embedding: number[] | undefined;
+  try {
+    if (metadata.description) {
+      embedding = await generateEmbedding(metadata.description);
+    }
+  } catch (error) {
+    console.error("Failed to generate embedding for derived media:", error);
+  }
+
   await db.insert(medias).values({
     name:
       metadata.name.charAt(0).toUpperCase() +
@@ -153,6 +197,7 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
     metadata: { prompt, model: IMAGE_MODEL },
     authorId: user.id,
     derivedFrom: media.id,
+    embedding,
   });
 
   revalidatePath("/dashboard/media");
@@ -188,6 +233,15 @@ export async function generateMediaFromPrompt(prompt: string) {
 
   const metadata = await generateImageMetadata(blob.url);
 
+  let embedding: number[] | undefined;
+  try {
+    if (metadata.description) {
+      embedding = await generateEmbedding(metadata.description);
+    }
+  } catch (error) {
+    console.error("Failed to generate embedding for generated media:", error);
+  }
+
   await db.insert(medias).values({
     name:
       metadata.name.charAt(0).toUpperCase() +
@@ -200,6 +254,7 @@ export async function generateMediaFromPrompt(prompt: string) {
     metadata: { prompt, model: IMAGE_MODEL },
     authorId: user.id,
     derivedFrom: null,
+    embedding,
   });
 
   revalidatePath("/dashboard/media");
@@ -214,11 +269,21 @@ export async function uploadManualMedia(data: CreateManualMediaSchema) {
     throw new Error("No hay usuario autenticado");
   }
 
+  let embedding: number[] | undefined;
+  try {
+    if (rest.description) {
+      embedding = await generateEmbedding(rest.description);
+    }
+  } catch (error) {
+    console.error("Failed to generate embedding for manual media:", error);
+  }
+
   await db.insert(medias).values({
     ...rest,
     tags: rest.tags.map((tag) => tag.toLowerCase()),
     blobKey: fileKey,
     authorId: user.id,
+    embedding,
   });
 
   revalidatePath("/dashboard/medias");
@@ -266,6 +331,18 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
           const fileName = `library/${crypto.randomUUID()}.webp`;
           const blob = await uploadBlob(fileName, imageBuffer);
 
+          let embedding: number[] | undefined;
+          try {
+            if (metadata.description) {
+              embedding = await generateEmbedding(metadata.description);
+            }
+          } catch (error) {
+            console.error(
+              `Failed to generate embedding for transferred image ${image.title}:`,
+              error
+            );
+          }
+
           await db.insert(medias).values({
             name:
               metadata.name.charAt(0).toUpperCase() +
@@ -276,6 +353,7 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
             authorId: user.id,
             mimeType: "image/webp",
             metadata: { originalImageUrl: image.imageUrl },
+            embedding,
           });
 
           return { success: true, name: metadata.name, url: blob.url };

@@ -21,7 +21,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
 export async function generateQueryEmbedding(query: string): Promise<number[]> {
   const cached = queryEmbeddingCache.get(query);
-  
+
   if (cached) {
     return cached;
   }

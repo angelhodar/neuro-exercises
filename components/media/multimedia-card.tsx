@@ -61,7 +61,7 @@ function MultimediaCard({
         </div>
         <DialogContent
           className={cn(
-            "p-0 overflow-hidden gap-0",
+            "w-fit overflow-hidden p-0 gap-0",
             type === "audio" ? "sm:max-w-md p-6" : "sm:max-w-3xl"
           )}
         >
@@ -161,7 +161,12 @@ function MultimediaCardTitle({
 function MediaPreview({ type, src }: { type: MediaType; src: string }) {
   if (type === "video") {
     return (
-      <video className="w-full" controls src={src}>
+      <video
+        autoPlay
+        className="max-h-[80vh] max-w-full"
+        controls
+        src={src}
+      >
         <track kind="captions" />
       </video>
     );
@@ -172,12 +177,11 @@ function MediaPreview({ type, src }: { type: MediaType; src: string }) {
   }
 
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element -- natural sizing needed for unknown aspect ratios
+    <img
       alt=""
-      className="w-full object-contain"
-      height={900}
+      className="max-h-[80vh] max-w-full object-contain"
       src={src}
-      width={1200}
     />
   );
 }

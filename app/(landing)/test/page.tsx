@@ -16,6 +16,11 @@ const SAMPLE_MEDIA = [
     title: "Coastal Sunrise",
   },
   {
+    type: "image" as const,
+    src: "https://picsum.photos/id/237/600/900",
+    title: "Portrait Photo",
+  },
+  {
     type: "video" as const,
     src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     thumbnailSrc: "https://picsum.photos/id/180/800/450",

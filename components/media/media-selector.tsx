@@ -3,12 +3,10 @@
 import { Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import {
-  MediaCard,
-  MediaCardBadges,
-  MediaCardContainer,
-  MediaCardTitle,
-} from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+  MultimediaCard,
+  MultimediaCardThumbnail,
+  MultimediaCardTitle,
+} from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
 import {
   Dialog,
@@ -71,11 +69,11 @@ export default function MediaSelector(props: MediaSelectorProps) {
               />
             }
           />
-          <DialogContent className="min-w-[800px]">
+          <DialogContent className="min-w-[1000px]">
             <DialogHeader>
               <DialogTitle>Buscar y seleccionar imágenes</DialogTitle>
             </DialogHeader>
-            <div className="mt-4 flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
               <div className="relative">
                 <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                 <Input
@@ -121,25 +119,18 @@ export default function MediaSelector(props: MediaSelectorProps) {
                         onClick={() => addMedia(media)}
                         selected={isSelected}
                       >
-                        <MediaCard className="max-w-sm">
-                          <MediaCardContainer>
-                            <MediaImage
-                              alt={media.name}
-                              src={createBlobUrl(media.blobKey)}
-                            />
-                          </MediaCardContainer>
-                          <div className="p-2">
-                            <MediaCardTitle className="text-center text-lg">
-                              {media.name}
-                            </MediaCardTitle>
-                            {media.tags && media.tags.length > 0 && (
-                              <MediaCardBadges
-                                badges={media.tags}
-                                className="justify-center"
-                              />
-                            )}
-                          </div>
-                        </MediaCard>
+                        <MultimediaCard
+                          alt={media.name}
+                          className="h-full max-w-sm"
+                          preview={false}
+                          src={createBlobUrl(media.blobKey)}
+                          type="image"
+                        >
+                          <MultimediaCardThumbnail />
+                          <MultimediaCardTitle className="whitespace-normal text-center text-lg">
+                            {media.name}
+                          </MultimediaCardTitle>
+                        </MultimediaCard>
                       </Selectable>
                     );
                   })}

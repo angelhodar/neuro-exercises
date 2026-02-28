@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import {
-  MediaCard,
-  MediaCardContainer,
-  MediaCardTitle,
-} from "@/components/media/media-card";
-import { MediaImage } from "@/components/media/media-image";
+  MultimediaCard,
+  MultimediaCardThumbnail,
+  MultimediaCardTitle,
+} from "@/components/media/multimedia-card";
 import { Selectable } from "@/components/selectable";
 import { useExerciseExecution } from "@/hooks/use-exercise-execution";
 import type { SelectableMediaSchema } from "@/lib/schemas/medias";
@@ -103,21 +102,18 @@ export function OddOneOutExerciseClient({
               onClick={() => handleSelectAnswer(media.id)}
               selected={isSelected}
             >
-              <MediaCard>
-                <MediaCardContainer>
-                  <MediaImage
-                    alt={media.name}
-                    height={300}
-                    src={createBlobUrl(media.blobKey)}
-                    width={300}
-                  />
-                </MediaCardContainer>
-                <div className="p-2">
-                  <MediaCardTitle className="line-clamp-2 text-center text-sm">
-                    {media.name}
-                  </MediaCardTitle>
-                </div>
-              </MediaCard>
+              <MultimediaCard
+                alt={media.name}
+                className="h-full"
+                preview={false}
+                src={createBlobUrl(media.blobKey)}
+                type="image"
+              >
+                <MultimediaCardThumbnail />
+                <MultimediaCardTitle className="line-clamp-2 whitespace-normal text-center">
+                  {media.name}
+                </MultimediaCardTitle>
+              </MultimediaCard>
             </Selectable>
           );
         })}

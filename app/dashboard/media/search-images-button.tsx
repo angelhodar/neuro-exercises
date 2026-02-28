@@ -213,19 +213,18 @@ export default function SearchImagesDialog({
                 >
                   <MultimediaCard
                     alt={image.title}
+                    className="h-full"
                     preview={false}
                     src={image.thumbnailUrl}
                     type="image"
                   >
                     <MultimediaCardThumbnail />
-                    <div className="space-y-1 px-3 py-2">
-                      <MultimediaCardTitle className="line-clamp-2 whitespace-normal">
-                        {image.title}
-                      </MultimediaCardTitle>
-                      <p className="text-muted-foreground text-xs">
-                        {image.source}
-                      </p>
-                    </div>
+                    <MultimediaCardTitle className="line-clamp-2 whitespace-normal pb-1">
+                      {image.title}
+                    </MultimediaCardTitle>
+                    <p className="text-muted-foreground truncate px-3 pb-2 text-xs">
+                      {image.source}
+                    </p>
                   </MultimediaCard>
                 </Selectable>
               ))}

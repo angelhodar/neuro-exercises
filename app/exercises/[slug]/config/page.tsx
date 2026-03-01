@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getExerciseBySlug } from "@/app/actions/exercises";
+import { getCurrentUser } from "@/app/actions/users";
 import { exerciseHasAssets } from "@/app/exercises/loader";
 import { ExerciseConfigForm } from "@/components/exercises/exercise-config-form";
 
@@ -10,9 +11,10 @@ interface PageProps {
 export default async function ExerciseConfigPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [exercise, hasAssets] = await Promise.all([
+  const [exercise, hasAssets, user] = await Promise.all([
     getExerciseBySlug(slug),
     exerciseHasAssets(slug),
+    getCurrentUser(),
   ]);
 
   if (!(exercise && hasAssets)) {
@@ -22,7 +24,7 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
   return (
     <div className="container mx-auto flex min-h-full flex-1 items-center justify-center py-8">
       <ExerciseConfigForm
-        exerciseId={exercise.id}
+        exerciseId={user ? exercise.id : undefined}
         slug={slug}
         title={exercise.displayName}
       />

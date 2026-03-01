@@ -13,7 +13,7 @@ export async function getExercisePresets(exerciseId: number) {
   const user = await getCurrentUser();
 
   if (!user) {
-    throw new Error("No autenticado");
+    return [];
   }
 
   return db.query.exerciseConfigPresets.findMany({

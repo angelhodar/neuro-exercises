@@ -69,7 +69,7 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
                   <FormItem>
                     <FormControl>
                       <MediaSelector
-                        className="border-green-500/50"
+                        className="border-success"
                         compact
                         onMediasChange={field.onChange}
                         selectedMedias={field.value ?? []}
@@ -86,7 +86,7 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
                   <FormItem>
                     <FormControl>
                       <MediaSelector
-                        className="border-red-500/50"
+                        className="border-destructive"
                         compact
                         onMediasChange={field.onChange}
                         selectedMedias={field.value ?? []}

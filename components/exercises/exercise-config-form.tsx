@@ -21,7 +21,7 @@ import type { ExerciseConfigPreset } from "@/lib/db/schema";
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
   title: string;
-  exerciseId?: number;
+  exerciseId: number;
   presets?: ExerciseConfigPreset[];
   onSubmit?: (config: Record<string, unknown>) => void;
 }
@@ -74,7 +74,7 @@ function ExerciseConfigFormContent({
             className="space-y-6"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            {exerciseId && presets && (
+            {presets && (
               <>
                 <ExerciseConfigPresetSelector
                   exerciseId={exerciseId}

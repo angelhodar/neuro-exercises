@@ -55,15 +55,15 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
       </Button>
 
       <Dialog onOpenChange={handleOpenChange} open={isOpen}>
-        <DialogContent className="lg:max-w-5xl">
+        <DialogContent className="gap-3 lg:max-w-5xl">
           <DialogHeader>
-            <DialogTitle>Añadir ejercicio</DialogTitle>
+            <DialogTitle className="text-2xl">Añadir ejercicio</DialogTitle>
             <DialogDescription>
               Elige un ejercicio para añadir a tu plantilla
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="mt-4 space-y-2">
+          <div className="space-y-2">
+            <div>
               <Input
                 className="w-full"
                 id="search"
@@ -72,7 +72,7 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
                 value={searchTerm}
               />
             </div>
-            <div className="grid max-h-[600px] grid-cols-1 gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid max-h-[600px] grid-cols-1 gap-4 overflow-y-auto p-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredExercises.map((exercise) => (
                 <ExerciseCard exercise={exercise} key={exercise.id}>
                   <Button

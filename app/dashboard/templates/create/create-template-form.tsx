@@ -239,20 +239,24 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                           exercise={exercise}
                           key={field.exerciseId}
                         >
-                          <Button
-                            className="absolute -top-2 right-1 z-10 h-8 w-8 p-0 text-destructive hover:text-destructive"
-                            onClick={() => removeExercise(index)}
-                            size="sm"
-                            type="button"
-                            variant="ghost"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <ConfigureExerciseButton
-                            exerciseId={field.exerciseId}
-                            index={index}
-                            slug={field.slug}
-                          />
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <ConfigureExerciseButton
+                                exerciseId={field.exerciseId}
+                                index={index}
+                                slug={field.slug}
+                              />
+                            </div>
+                            <Button
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => removeExercise(index)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </ExerciseCard>
                       );
                     })}

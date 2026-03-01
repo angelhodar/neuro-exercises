@@ -3,7 +3,7 @@
 import { Play, PlusIcon, Volume2, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { SelectableMediaSchema } from "@/lib/schemas/medias";
-import { createBlobUrl } from "@/lib/utils";
+import { cn, createBlobUrl } from "@/lib/utils";
 
 const MediaFile = ({
   media,
@@ -75,18 +75,35 @@ interface FileMediaSelectorProps {
   medias: SelectableMediaSchema[];
   removeFile: (id: number) => void;
   onAddMediaClick: () => void;
+  compact?: boolean;
+  className?: string;
 }
 
 export default function FileMediaSelector({
   medias,
   removeFile,
   onAddMediaClick,
+  compact,
+  className,
 }: FileMediaSelectorProps) {
   return (
     <div className="flex w-full flex-col">
-      <div className="relative flex min-h-52 flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-input border-dashed p-4 transition-colors has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50">
+      <div
+        className={cn(
+          "relative flex flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-dashed transition-colors has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50",
+          compact ? "p-2" : "min-h-52 p-4",
+          className ?? "border-input has-[input:focus]:border-ring"
+        )}
+      >
         <div className="flex w-full flex-col gap-3">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <div
+            className={cn(
+              "grid",
+              compact
+                ? "grid-cols-4 gap-2 md:grid-cols-5"
+                : "grid-cols-2 gap-4 md:grid-cols-3"
+            )}
+          >
             {(medias || []).map((file) => (
               <MediaFile key={file.id} media={file} removeFile={removeFile} />
             ))}

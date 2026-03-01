@@ -91,8 +91,8 @@ export function OddOneOutExerciseClient({
   };
 
   return (
-    <div className="flex h-full w-full flex-col items-center gap-6 p-4">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6 p-4">
+      <div className="grid w-full max-w-5xl grid-cols-2 gap-6 lg:grid-cols-3">
         {currentQuestion.options.map((media) => {
           const isSelected = questionState.selectedAnswerId === media.id;
 

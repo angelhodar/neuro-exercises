@@ -21,7 +21,9 @@ export default function MediasPage() {
           </DashboardHeaderDescription>
         </div>
         <DashboardHeaderActions>
-          <MediaSearch />
+          <Suspense>
+            <MediaSearch />
+          </Suspense>
           <CreateMediaDropdownButton />
         </DashboardHeaderActions>
       </DashboardHeader>

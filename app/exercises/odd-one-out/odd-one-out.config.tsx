@@ -53,7 +53,7 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
     <Accordion className="h-96 space-y-2 overflow-y-auto" type="multiple">
       {fields.map((field, index) => (
         <AccordionItem
-          className="rounded-md border-none"
+          className="rounded-md border"
           key={field.id}
           value={`pregunta-${index}`}
         >
@@ -61,7 +61,7 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
             Pregunta {index + 1}
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-3 p-2">
+            <div className="space-y-3 px-3">
               <FormField
                 control={control}
                 name={`${basePath}questions.${index}.patternMedias`}

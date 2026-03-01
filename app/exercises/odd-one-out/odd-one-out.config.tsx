@@ -13,7 +13,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
@@ -62,15 +61,15 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
             Pregunta {index + 1}
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4 p-2">
+            <div className="space-y-3 p-2">
               <FormField
                 control={control}
                 name={`${basePath}questions.${index}.patternMedias`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Imágenes del patrón</FormLabel>
                     <FormControl>
                       <MediaSelector
+                        className="border-green-500/50"
                         compact
                         onMediasChange={field.onChange}
                         selectedMedias={field.value ?? []}
@@ -85,9 +84,9 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
                 name={`${basePath}questions.${index}.outlierMedia`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Imagen diferente</FormLabel>
                     <FormControl>
                       <MediaSelector
+                        className="border-red-500/50"
                         compact
                         onMediasChange={field.onChange}
                         selectedMedias={field.value ?? []}

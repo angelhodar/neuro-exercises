@@ -76,6 +76,7 @@ interface FileMediaSelectorProps {
   removeFile: (id: number) => void;
   onAddMediaClick: () => void;
   compact?: boolean;
+  className?: string;
 }
 
 export default function FileMediaSelector({
@@ -83,13 +84,15 @@ export default function FileMediaSelector({
   removeFile,
   onAddMediaClick,
   compact,
+  className,
 }: FileMediaSelectorProps) {
   return (
     <div className="flex w-full flex-col">
       <div
         className={cn(
-          "relative flex flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-input border-dashed transition-colors has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50",
-          compact ? "p-2" : "min-h-52 p-4"
+          "relative flex flex-col items-center not-data-[files]:justify-center overflow-hidden rounded-xl border border-dashed transition-colors has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50",
+          compact ? "p-2" : "min-h-52 p-4",
+          className ?? "border-input has-[input:focus]:border-ring"
         )}
       >
         <div className="flex w-full flex-col gap-3">

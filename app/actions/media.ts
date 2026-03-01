@@ -106,7 +106,7 @@ async function generateAndInsertMedia(
   });
 }
 
-export async function getMedias(searchTerm?: string, limit = 20) {
+export async function getMedias(searchTerm?: string, limit = 20, offset = 0) {
   const columns = getTableColumns(medias);
   const trimmed = searchTerm?.trim();
 
@@ -121,7 +121,8 @@ export async function getMedias(searchTerm?: string, limit = 20) {
     .from(medias)
     .where(similarity ? gt(similarity, 0.3) : undefined)
     .orderBy(similarity ? desc(similarity) : desc(medias.createdAt))
-    .limit(limit);
+    .limit(limit)
+    .offset(offset);
 }
 
 export async function getMediasByTags(tags: string[]): Promise<Media[]> {

@@ -3,6 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
+import { getMedias } from "@/app/actions/media";
 import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
 import {
   type MediaType,
@@ -11,8 +12,9 @@ import {
   MultimediaCardTitle,
 } from "@/components/media/multimedia-card";
 import { Spinner } from "@/components/ui/spinner";
-import type { Media } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
+
+const PAGE_SIZE = 20;
 
 function getMediaType(mimeType: string): MediaType {
   if (mimeType.startsWith("audio/")) {
@@ -24,31 +26,6 @@ function getMediaType(mimeType: string): MediaType {
   return "image";
 }
 
-interface MediaPage {
-  media: Media[];
-  nextOffset: number | null;
-}
-
-async function fetchMediaPage({
-  pageParam,
-  query,
-}: {
-  pageParam: number;
-  query?: string;
-}): Promise<MediaPage> {
-  const params = new URLSearchParams();
-  params.set("offset", String(pageParam));
-  if (query) {
-    params.set("q", query);
-  }
-
-  const response = await fetch(`/api/media?${params}`);
-  if (!response.ok) {
-    throw new Error("Error fetching media");
-  }
-  return response.json();
-}
-
 export function MediaGrid() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || undefined;
@@ -57,9 +34,10 @@ export function MediaGrid() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: ["media", "list", query],
-      queryFn: ({ pageParam }) => fetchMediaPage({ pageParam, query }),
+      queryFn: ({ pageParam }) => getMedias(query, PAGE_SIZE, pageParam),
       initialPageParam: 0,
-      getNextPageParam: (lastPage) => lastPage.nextOffset,
+      getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+        lastPage.length < PAGE_SIZE ? undefined : lastPageParam + PAGE_SIZE,
     });
 
   const handleIntersect = useCallback(
@@ -84,7 +62,7 @@ export function MediaGrid() {
     return () => observer.disconnect();
   }, [handleIntersect]);
 
-  const allMedia = data?.pages.flatMap((page) => page.media) ?? [];
+  const allMedia = data?.pages.flat() ?? [];
 
   if (status === "pending") {
     return (

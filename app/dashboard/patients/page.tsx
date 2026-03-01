@@ -86,7 +86,7 @@ export default async function PatientsPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button
                         render={
                           <Link href={`/dashboard/patients/${patient.id}`} />

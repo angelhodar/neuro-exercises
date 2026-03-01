@@ -81,7 +81,7 @@ export default async function SpeechTextsPage() {
                     </TableCell>
                     <TableCell>{formatDate(String(text.createdAt))}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <EditSpeechTextButton speechText={text} />
                         <DeleteSpeechTextButton id={text.id} name={text.name} />
                       </div>

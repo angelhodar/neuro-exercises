@@ -98,7 +98,7 @@ export default async function OrganizationInvitationsPage({
                     {formatDate(String(invitation.createdAt))}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button size="sm" variant="outline">
                         Reenviar
                       </Button>

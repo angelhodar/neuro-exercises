@@ -90,7 +90,7 @@ export default async function OrganizationsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button
                         render={
                           <Link href={`/dashboard/organizations/${org.id}`} />

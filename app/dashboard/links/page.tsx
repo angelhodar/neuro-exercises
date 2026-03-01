@@ -128,7 +128,7 @@ export default async function LinksPage() {
                     </time>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-3">
                       <CopyLinkButton token={link.token} />
                       <Button
                         className="h-8 w-8 p-0"

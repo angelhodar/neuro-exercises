@@ -122,7 +122,7 @@ export default async function PatientDetailPage({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <EditSessionButton
                             patientId={patient.id}
                             session={session}
@@ -203,7 +203,7 @@ export default async function PatientDetailPage({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <EditTestButton patientId={patient.id} test={test} />
                           <DeleteTestButton
                             patientId={patient.id}

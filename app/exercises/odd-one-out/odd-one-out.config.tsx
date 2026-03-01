@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import MediaSelector from "@/components/media/media-selector";
 import {
   Accordion,
@@ -22,39 +21,15 @@ interface OddOneOutConfigFieldsProps {
 
 export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
   const { control, watch } = useFormContext();
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "questions",
-  });
-
-  const totalQuestions = watch(`${basePath}totalQuestions`);
-
-  // Sync the field array with the totalQuestions value
-  useEffect(() => {
-    const currentLength = fields.length;
-    const targetLength = totalQuestions || 0;
-
-    if (currentLength < targetLength) {
-      for (let i = currentLength; i < targetLength; i++) {
-        append({
-          patternMedias: [],
-          outlierMedia: [],
-        });
-      }
-    } else if (currentLength > targetLength) {
-      for (let i = currentLength; i > targetLength; i--) {
-        remove(i - 1);
-      }
-    }
-  }, [totalQuestions, fields.length, append, remove]);
+  const totalQuestions: number = watch(`${basePath}totalQuestions`) || 0;
 
   return (
     <Accordion className="h-96 space-y-2 overflow-y-auto" type="multiple">
-      {fields.map((field, index) => (
+      {Array.from({ length: totalQuestions }, (_, index) => (
         <AccordionItem
           className="rounded-md border"
-          key={field.id}
+          // biome-ignore lint/suspicious/noArrayIndexKey: positional slots derived from a count
+          key={index}
           value={`pregunta-${index}`}
         >
           <AccordionTrigger className="px-3 py-2 text-sm">

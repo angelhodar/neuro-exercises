@@ -9,7 +9,7 @@ interface ExerciseCardProps extends PropsWithChildren {
 
 export const ExerciseCard = ({ exercise, children }: ExerciseCardProps) => {
   return (
-    <Card className="cursor-pointer transition-shadow hover:shadow-md">
+    <Card className="cursor-pointer gap-2 pt-0 pb-4 transition-shadow hover:shadow-md">
       <div className="aspect-video overflow-hidden rounded-t-xl bg-muted">
         {/* biome-ignore lint/performance/noImgElement: dynamic blob URL from storage */}
         <img
@@ -20,7 +20,7 @@ export const ExerciseCard = ({ exercise, children }: ExerciseCardProps) => {
           width={320}
         />
       </div>
-      <CardHeader className="pb-2">
+      <CardHeader>
         <CardTitle className="text-lg">{exercise.displayName}</CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>

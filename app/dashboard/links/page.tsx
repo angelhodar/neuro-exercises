@@ -77,8 +77,7 @@ export default async function LinksPage() {
           <CreateLinkButton templates={templates} users={users} />
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
@@ -147,8 +146,7 @@ export default async function LinksPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       )}
     </div>
   );

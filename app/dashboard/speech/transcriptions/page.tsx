@@ -5,7 +5,6 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -47,15 +46,13 @@ export default async function SpeechTranscriptionsPage() {
         </div>
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-4">
-          {transcriptions.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No hay transcripciones registradas. Realiza un ejercicio de
-              reconocimiento de voz para empezar.
-            </div>
-          ) : (
-            <Table>
+      {transcriptions.length === 0 ? (
+        <div className="py-8 text-center text-muted-foreground">
+          No hay transcripciones registradas. Realiza un ejercicio de
+          reconocimiento de voz para empezar.
+        </div>
+      ) : (
+        <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Texto</TableHead>
@@ -139,10 +136,8 @@ export default async function SpeechTranscriptionsPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        </Table>
+      )}
     </div>
   );
 }

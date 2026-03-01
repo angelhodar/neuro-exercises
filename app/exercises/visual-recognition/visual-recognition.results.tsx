@@ -127,7 +127,7 @@ export function Results({ results }: VisualRecognitionResultsProps) {
             />
           </TabsContent>
           <TabsContent value="tabla">
-            <div className="h-96 overflow-y-auto rounded-md border">
+            <div className="h-96 overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

@@ -101,8 +101,7 @@ export function Results({ results }: SyllablesResultsProps) {
             <ResultBarChart config={syllablesChartConfig} data={chartData} />
           </TabsContent>
           <TabsContent value="tabla">
-            <div className="overflow-hidden rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">#</TableHead>
@@ -157,8 +156,7 @@ export function Results({ results }: SyllablesResultsProps) {
                     );
                   })}
                 </TableBody>
-              </Table>
-            </div>
+            </Table>
           </TabsContent>
         </Tabs>
       </CardContent>

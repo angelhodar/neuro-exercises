@@ -12,7 +12,6 @@ import {
 } from "@/app/dashboard/dashboard-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -65,9 +64,7 @@ export default async function OrganizationPage({
         </div>
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-3">
-          <Table>
+      <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Avatar</TableHead>
@@ -120,9 +117,7 @@ export default async function OrganizationPage({
                 </TableRow>
               )}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      </Table>
     </div>
   );
 }

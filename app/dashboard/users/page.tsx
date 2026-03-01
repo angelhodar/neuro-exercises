@@ -6,7 +6,6 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -37,9 +36,7 @@ export default async function UsersPage() {
         </div>
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-6">
-          <Table>
+      <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Avatar</TableHead>
@@ -75,9 +72,7 @@ export default async function UsersPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      </Table>
     </div>
   );
 }

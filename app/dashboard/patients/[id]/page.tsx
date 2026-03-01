@@ -8,7 +8,6 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -82,13 +81,12 @@ export default async function PatientDetailPage({
         </TabsList>
 
         <TabsContent value="sessions">
-          <Card className="mt-4">
-            <CardContent className="mt-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold text-lg">Sesiones</h3>
-                <CreateSessionButton patientId={patient.id} />
-              </div>
-              <Table>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg">Sesiones</h3>
+              <CreateSessionButton patientId={patient.id} />
+            </div>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fecha</TableHead>
@@ -149,19 +147,17 @@ export default async function PatientDetailPage({
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+            </Table>
+          </div>
         </TabsContent>
 
         <TabsContent value="tests">
-          <Card className="mt-4">
-            <CardContent className="mt-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="font-semibold text-lg">Tests</h3>
-                <CreateTestButton patientId={patient.id} />
-              </div>
-              <Table>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg">Tests</h3>
+              <CreateTestButton patientId={patient.id} />
+            </div>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fecha</TableHead>
@@ -227,9 +223,8 @@ export default async function PatientDetailPage({
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+            </Table>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

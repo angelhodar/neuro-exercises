@@ -33,16 +33,20 @@ import type {
   NewExerciseConfigPreset,
 } from "@/lib/db/schema";
 
+const TRAILING_DOT = /\.$/;
+
 interface ExerciseConfigPresetSelectorProps {
   exerciseId: number;
   initialPresets: ExerciseConfigPreset[];
+  basePath?: string;
 }
 
 export function ExerciseConfigPresetSelector({
   exerciseId,
   initialPresets,
+  basePath,
 }: ExerciseConfigPresetSelectorProps) {
-  const { reset, getValues } = useFormContext();
+  const { reset, getValues, setValue } = useFormContext();
   const [presets, setPresets] = useState(initialPresets);
   const [selectedPreset, setSelectedPreset] =
     useState<ExerciseConfigPreset | null>(null);
@@ -56,7 +60,13 @@ export function ExerciseConfigPresetSelector({
     setSelectedPreset(preset);
     if (preset) {
       const config = preset.config as Record<string, unknown>;
-      reset({ automaticNextQuestion: true, ...config });
+      if (basePath) {
+        for (const [key, val] of Object.entries(config)) {
+          setValue(`${basePath}${key}`, val);
+        }
+      } else {
+        reset({ automaticNextQuestion: true, ...config });
+      }
     }
   }
 
@@ -66,7 +76,8 @@ export function ExerciseConfigPresetSelector({
       return;
     }
 
-    const currentValues = getValues();
+    const configPath = basePath?.replace(TRAILING_DOT, "");
+    const currentValues = configPath ? getValues(configPath) : getValues();
 
     startTransition(async () => {
       try {
@@ -112,27 +123,28 @@ export function ExerciseConfigPresetSelector({
   return (
     <div className="space-y-2">
       <span className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-        Configuraciones Guardadas
+        Configuraciones guardadas
       </span>
-      <div className="flex items-center gap-2">
+      <div className="mt-1 flex items-center gap-2">
         <Combobox
+          items={presets.map((p) => p.name)}
           onValueChange={handlePresetChange}
           value={selectedPreset?.name ?? null}
         >
           <ComboboxInput
             className="flex-1"
-            placeholder="Buscar preset..."
+            placeholder="Buscar configuración..."
             showClear={!!selectedPreset}
             showTrigger={false}
           />
           <ComboboxContent>
+            <ComboboxEmpty>No se encontraron presets</ComboboxEmpty>
             <ComboboxList>
-              <ComboboxEmpty>No se encontraron presets</ComboboxEmpty>
-              {presets.map((preset) => (
-                <ComboboxItem key={preset.id} value={preset.name}>
-                  {preset.name}
+              {(name: string) => (
+                <ComboboxItem key={name} value={name}>
+                  {name}
                 </ComboboxItem>
-              ))}
+              )}
             </ComboboxList>
           </ComboboxContent>
         </Combobox>

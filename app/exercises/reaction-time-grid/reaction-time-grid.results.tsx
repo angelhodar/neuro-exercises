@@ -222,76 +222,76 @@ export function Results({ results, config }: ExerciseResultsProps) {
           </TabsContent>
           <TabsContent value="tabla">
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Celdas Objetivo</TableHead>
-                    <TableHead>Celdas Seleccionadas</TableHead>
-                    <TableHead>Tiempos de Reacción</TableHead>
-                    <TableHead>Correcto</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((result, index) => {
-                    const correctCount = calculateCorrectSelections(result);
-                    return (
-                      <TableRow
-                        key={`result-${result.targetCells.join("-")}-${index}`}
-                      >
-                        <TCell>{index + 1}</TCell>
-                        <TCell>
-                          {result.targetCells.map((cell) => (
-                            <span className="block" key={`target-${cell}`}>
-                              {indexToCoordinates(cell)}
-                            </span>
-                          ))}
-                        </TCell>
-                        <TCell>
-                          {result.selectedCells.map((cell, cellPos) => (
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Celdas Objetivo</TableHead>
+                  <TableHead>Celdas Seleccionadas</TableHead>
+                  <TableHead>Tiempos de Reacción</TableHead>
+                  <TableHead>Correcto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {results.map((result, index) => {
+                  const correctCount = calculateCorrectSelections(result);
+                  return (
+                    <TableRow
+                      key={`result-${result.targetCells.join("-")}-${index}`}
+                    >
+                      <TCell>{index + 1}</TCell>
+                      <TCell>
+                        {result.targetCells.map((cell) => (
+                          <span className="block" key={`target-${cell}`}>
+                            {indexToCoordinates(cell)}
+                          </span>
+                        ))}
+                      </TCell>
+                      <TCell>
+                        {result.selectedCells.map((cell, cellPos) => (
+                          <span
+                            className={`block ${result.targetCells.includes(cell) ? "text-green-600" : "text-red-600"}`}
+                            key={`selected-${cell}-${result.reactionTimes[cellPos]}`}
+                          >
+                            {indexToCoordinates(cell)}
+                          </span>
+                        ))}
+                      </TCell>
+                      <TCell>
+                        {result.reactionTimes.map((time, timePos) => (
+                          <span
+                            className="block"
+                            key={`time-${time}-${result.selectedCells[timePos]}`}
+                          >
+                            {time} ms
+                          </span>
+                        ))}
+                      </TCell>
+                      <TCell>
+                        {(() => {
+                          let badgeClass: string;
+                          if (correctCount === result.targetCells.length) {
+                            badgeClass =
+                              "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+                          } else if (correctCount > 0) {
+                            badgeClass =
+                              "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+                          } else {
+                            badgeClass =
+                              "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+                          }
+                          return (
                             <span
-                              className={`block ${result.targetCells.includes(cell) ? "text-green-600" : "text-red-600"}`}
-                              key={`selected-${cell}-${result.reactionTimes[cellPos]}`}
+                              className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
                             >
-                              {indexToCoordinates(cell)}
+                              {correctCount}/{result.targetCells.length}
                             </span>
-                          ))}
-                        </TCell>
-                        <TCell>
-                          {result.reactionTimes.map((time, timePos) => (
-                            <span
-                              className="block"
-                              key={`time-${time}-${result.selectedCells[timePos]}`}
-                            >
-                              {time} ms
-                            </span>
-                          ))}
-                        </TCell>
-                        <TCell>
-                          {(() => {
-                            let badgeClass: string;
-                            if (correctCount === result.targetCells.length) {
-                              badgeClass =
-                                "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-                            } else if (correctCount > 0) {
-                              badgeClass =
-                                "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-                            } else {
-                              badgeClass =
-                                "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-                            }
-                            return (
-                              <span
-                                className={`inline-block rounded-full px-2 py-1 text-xs ${badgeClass}`}
-                              >
-                                {correctCount}/{result.targetCells.length}
-                              </span>
-                            );
-                          })()}
-                        </TCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
+                          );
+                        })()}
+                      </TCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
             </Table>
           </TabsContent>
           <TabsContent value="heatmap">

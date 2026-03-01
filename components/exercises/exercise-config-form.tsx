@@ -66,7 +66,7 @@ function ExerciseConfigFormContent({
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-2xl">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>

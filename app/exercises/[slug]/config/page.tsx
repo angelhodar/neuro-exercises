@@ -28,7 +28,7 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
     <div className="container mx-auto flex min-h-full flex-1 items-center justify-center py-8">
       <ExerciseConfigForm
         exerciseId={exercise.id}
-        presets={presets}
+        presets={user ? presets : undefined}
         slug={slug}
         title={exercise.displayName}
       />

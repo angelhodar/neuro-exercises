@@ -53,89 +53,87 @@ export default async function SpeechTranscriptionsPage() {
         </div>
       ) : (
         <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Texto</TableHead>
-                  <TableHead>Transcripción</TableHead>
-                  <TableHead>Precisión</TableHead>
-                  <TableHead>Palabras</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Audio</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transcriptions.map((transcription) => (
-                  <TableRow key={transcription.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {transcription.referenceText.name}
-                        </div>
-                        {transcription.referenceText.referenceText && (
-                          <Tooltip>
-                            <TooltipTrigger
-                              render={
-                                <div className="max-w-xs truncate text-muted-foreground text-sm" />
-                              }
-                            >
-                              {transcription.referenceText.referenceText}
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-xs">
-                                {transcription.referenceText.referenceText}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Texto</TableHead>
+              <TableHead>Transcripción</TableHead>
+              <TableHead>Precisión</TableHead>
+              <TableHead>Palabras</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Audio</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transcriptions.map((transcription) => (
+              <TableRow key={transcription.id}>
+                <TableCell>
+                  <div>
+                    <div className="font-medium">
+                      {transcription.referenceText.name}
+                    </div>
+                    {transcription.referenceText.referenceText && (
                       <Tooltip>
                         <TooltipTrigger
-                          render={<div className="max-w-xs truncate" />}
+                          render={
+                            <div className="max-w-xs truncate text-muted-foreground text-sm" />
+                          }
                         >
-                          {transcription.transcribedText}
+                          {transcription.referenceText.referenceText}
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">
-                            {transcription.transcribedText}
+                            {transcription.referenceText.referenceText}
                           </p>
                         </TooltipContent>
                       </Tooltip>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        className={getAccuracyColor(transcription.accuracy)}
-                      >
-                        {transcription.accuracy}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-row gap-2 text-sm">
-                        <div className="text-green-600">
-                          ✓ {transcription.matchingWords}
-                        </div>
-                        <div className="text-red-600">
-                          ✗ {transcription.nonMatchingWords}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(String(transcription.createdAt))}
-                    </TableCell>
-                    <TableCell>
-                      {/* biome-ignore lint/a11y/useMediaCaption: captions not available */}
-                      <audio
-                        className="h-10"
-                        controls
-                        src={createBlobUrl(transcription.audioBlobKey)}
-                      >
-                        Tu navegador no soporta el elemento de audio.
-                      </audio>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<div className="max-w-xs truncate" />}
+                    >
+                      {transcription.transcribedText}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">
+                        {transcription.transcribedText}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <Badge className={getAccuracyColor(transcription.accuracy)}>
+                    {transcription.accuracy}%
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-row gap-2 text-sm">
+                    <div className="text-green-600">
+                      ✓ {transcription.matchingWords}
+                    </div>
+                    <div className="text-red-600">
+                      ✗ {transcription.nonMatchingWords}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {formatDate(String(transcription.createdAt))}
+                </TableCell>
+                <TableCell>
+                  {/* biome-ignore lint/a11y/useMediaCaption: captions not available */}
+                  <audio
+                    className="h-10"
+                    controls
+                    src={createBlobUrl(transcription.audioBlobKey)}
+                  >
+                    Tu navegador no soporta el elemento de audio.
+                  </audio>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       )}
     </div>

@@ -38,81 +38,77 @@ export default async function PatientsPage() {
       </DashboardHeader>
 
       <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Apellidos</TableHead>
-                <TableHead>Fecha de nacimiento</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>Diagnóstico</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {patientList.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell className="font-medium">
-                    {patient.firstName}
-                  </TableCell>
-                  <TableCell>{patient.lastName}</TableCell>
-                  <TableCell>
-                    {patient.dateOfBirth ? (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{formatDate(String(patient.dateOfBirth))}</span>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {patient.phone ? (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span>{patient.phone}</span>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className="line-clamp-1 max-w-xs">
-                      {patient.diagnosis || (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        render={
-                          <Link href={`/dashboard/patients/${patient.id}`} />
-                        }
-                        size="sm"
-                        variant="outline"
-                      >
-                        <UserRound className="h-4 w-4" />
-                      </Button>
-                      <EditPatientButton patient={patient} />
-                      <DeletePatientButton patient={patient} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {patientList.length === 0 && (
-                <TableRow>
-                  <TableCell className="py-8 text-center" colSpan={6}>
-                    <div className="flex flex-col items-center gap-2">
-                      <UserRound className="h-8 w-8 text-muted-foreground" />
-                      <p className="text-muted-foreground">
-                        No hay pacientes registrados
-                      </p>
-                      <CreatePatientButton />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Apellidos</TableHead>
+            <TableHead>Fecha de nacimiento</TableHead>
+            <TableHead>Teléfono</TableHead>
+            <TableHead>Diagnóstico</TableHead>
+            <TableHead>Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {patientList.map((patient) => (
+            <TableRow key={patient.id}>
+              <TableCell className="font-medium">{patient.firstName}</TableCell>
+              <TableCell>{patient.lastName}</TableCell>
+              <TableCell>
+                {patient.dateOfBirth ? (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{formatDate(String(patient.dateOfBirth))}</span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {patient.phone ? (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{patient.phone}</span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <span className="line-clamp-1 max-w-xs">
+                  {patient.diagnosis || (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </span>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <Button
+                    render={<Link href={`/dashboard/patients/${patient.id}`} />}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <UserRound className="h-4 w-4" />
+                  </Button>
+                  <EditPatientButton patient={patient} />
+                  <DeletePatientButton patient={patient} />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+          {patientList.length === 0 && (
+            <TableRow>
+              <TableCell className="py-8 text-center" colSpan={6}>
+                <div className="flex flex-col items-center gap-2">
+                  <UserRound className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    No hay pacientes registrados
+                  </p>
+                  <CreatePatientButton />
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
       </Table>
     </div>
   );

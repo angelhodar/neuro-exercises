@@ -87,66 +87,66 @@ export default async function PatientDetailPage({
               <CreateSessionButton patientId={patient.id} />
             </div>
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Disciplina</TableHead>
-                    <TableHead>Observaciones</TableHead>
-                    <TableHead>Acciones</TableHead>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Disciplina</TableHead>
+                  <TableHead>Observaciones</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {patient.patientSessions.map((session) => (
+                  <TableRow key={session.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatDate(String(session.date))}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {SESSION_TYPE_LABELS[session.type] || session.type}
+                    </TableCell>
+                    <TableCell>
+                      {DISCIPLINE_LABELS[session.discipline] ||
+                        session.discipline}
+                    </TableCell>
+                    <TableCell>
+                      <span className="line-clamp-1 max-w-xs">
+                        {session.observations || (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <EditSessionButton
+                          patientId={patient.id}
+                          session={session}
+                        />
+                        <DeleteSessionButton
+                          patientId={patient.id}
+                          session={session}
+                        />
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {patient.patientSessions.map((session) => (
-                    <TableRow key={session.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDate(String(session.date))}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {SESSION_TYPE_LABELS[session.type] || session.type}
-                      </TableCell>
-                      <TableCell>
-                        {DISCIPLINE_LABELS[session.discipline] ||
-                          session.discipline}
-                      </TableCell>
-                      <TableCell>
-                        <span className="line-clamp-1 max-w-xs">
-                          {session.observations || (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <EditSessionButton
-                            patientId={patient.id}
-                            session={session}
-                          />
-                          <DeleteSessionButton
-                            patientId={patient.id}
-                            session={session}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {patient.patientSessions.length === 0 && (
-                    <TableRow>
-                      <TableCell className="py-8 text-center" colSpan={5}>
-                        <div className="flex flex-col items-center gap-2">
-                          <ClipboardList className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">
-                            No hay sesiones registradas
-                          </p>
-                          <CreateSessionButton patientId={patient.id} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
+                ))}
+                {patient.patientSessions.length === 0 && (
+                  <TableRow>
+                    <TableCell className="py-8 text-center" colSpan={5}>
+                      <div className="flex flex-col items-center gap-2">
+                        <ClipboardList className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                          No hay sesiones registradas
+                        </p>
+                        <CreateSessionButton patientId={patient.id} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             </Table>
           </div>
         </TabsContent>
@@ -158,71 +158,68 @@ export default async function PatientDetailPage({
               <CreateTestButton patientId={patient.id} />
             </div>
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Proceso evaluado</TableHead>
-                    <TableHead>Test</TableHead>
-                    <TableHead>Puntuación</TableHead>
-                    <TableHead>Observaciones</TableHead>
-                    <TableHead>Acciones</TableHead>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Proceso evaluado</TableHead>
+                  <TableHead>Test</TableHead>
+                  <TableHead>Puntuación</TableHead>
+                  <TableHead>Observaciones</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {patient.patientTests.map((test) => (
+                  <TableRow key={test.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatDate(String(test.date))}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {EVALUATED_PROCESS_LABELS[test.evaluatedProcess] ||
+                        test.evaluatedProcess}
+                    </TableCell>
+                    <TableCell>
+                      {test.testName || (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {test.score || (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="line-clamp-1 max-w-xs">
+                        {test.observations || (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <EditTestButton patientId={patient.id} test={test} />
+                        <DeleteTestButton patientId={patient.id} test={test} />
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {patient.patientTests.map((test) => (
-                    <TableRow key={test.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDate(String(test.date))}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {EVALUATED_PROCESS_LABELS[test.evaluatedProcess] ||
-                          test.evaluatedProcess}
-                      </TableCell>
-                      <TableCell>
-                        {test.testName || (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {test.score || (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="line-clamp-1 max-w-xs">
-                          {test.observations || (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <EditTestButton patientId={patient.id} test={test} />
-                          <DeleteTestButton
-                            patientId={patient.id}
-                            test={test}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {patient.patientTests.length === 0 && (
-                    <TableRow>
-                      <TableCell className="py-8 text-center" colSpan={6}>
-                        <div className="flex flex-col items-center gap-2">
-                          <TestTube2 className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">
-                            No hay tests registrados
-                          </p>
-                          <CreateTestButton patientId={patient.id} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
+                ))}
+                {patient.patientTests.length === 0 && (
+                  <TableRow>
+                    <TableCell className="py-8 text-center" colSpan={6}>
+                      <div className="flex flex-col items-center gap-2">
+                        <TestTube2 className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                          No hay tests registrados
+                        </p>
+                        <CreateTestButton patientId={patient.id} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             </Table>
           </div>
         </TabsContent>

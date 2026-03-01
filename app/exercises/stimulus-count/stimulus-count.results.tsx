@@ -71,38 +71,38 @@ export function Results({ results }: StimulusCountResultsProps) {
           </TabsContent>
           <TabsContent value="tabla">
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Estímulos Mostrados</TableHead>
-                    <TableHead>Respuesta del Usuario</TableHead>
-                    <TableHead>Correcto</TableHead>
-                    <TableHead>Tiempo (s)</TableHead>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Estímulos Mostrados</TableHead>
+                  <TableHead>Respuesta del Usuario</TableHead>
+                  <TableHead>Correcto</TableHead>
+                  <TableHead>Tiempo (s)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {results.map((result, index) => (
+                  <TableRow
+                    key={`${result.shownStimuli}-${result.userAnswer}-${index}`}
+                  >
+                    <TCell>{index + 1}</TCell>
+                    <TCell>{result.shownStimuli}</TCell>
+                    <TCell>{result.userAnswer}</TCell>
+                    <TCell>
+                      <span
+                        className={`inline-block rounded-full px-2 py-1 text-xs ${
+                          result.isCorrect
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        }`}
+                      >
+                        {result.isCorrect ? "Sí" : "No"}
+                      </span>
+                    </TCell>
+                    <TCell>{(result.timeSpent / 1000).toFixed(1)}s</TCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((result, index) => (
-                    <TableRow
-                      key={`${result.shownStimuli}-${result.userAnswer}-${index}`}
-                    >
-                      <TCell>{index + 1}</TCell>
-                      <TCell>{result.shownStimuli}</TCell>
-                      <TCell>{result.userAnswer}</TCell>
-                      <TCell>
-                        <span
-                          className={`inline-block rounded-full px-2 py-1 text-xs ${
-                            result.isCorrect
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                          }`}
-                        >
-                          {result.isCorrect ? "Sí" : "No"}
-                        </span>
-                      </TCell>
-                      <TCell>{(result.timeSpent / 1000).toFixed(1)}s</TCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                ))}
+              </TableBody>
             </Table>
           </TabsContent>
         </Tabs>

@@ -222,43 +222,43 @@ export function Results({ results }: WordMatchingResultsProps) {
 
           <TabsContent value="tabla">
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Grupos</TableHead>
-                    <TableHead>Aciertos</TableHead>
-                    <TableHead>Errores</TableHead>
-                    <TableHead>Tiempo</TableHead>
-                    <TableHead>Resultado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((result, index) => {
-                    const isPerfect = result.incorrectAttempts === 0;
-                    return (
-                      <TableRow
-                        key={`table-${result.timeSpent}-${result.correctMatches}-${index}`}
-                      >
-                        <TCell>{index + 1}</TCell>
-                        <TCell>{result.expectedGroups.length}</TCell>
-                        <TCell>{result.correctMatches}</TCell>
-                        <TCell>{result.incorrectAttempts}</TCell>
-                        <TCell>{(result.timeSpent / 1000).toFixed(1)}s</TCell>
-                        <TCell>
-                          <span
-                            className={`inline-block rounded-full px-2 py-1 text-xs ${
-                              isPerfect
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                            }`}
-                          >
-                            {isPerfect ? "Perfecto" : "Con errores"}
-                          </span>
-                        </TCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Grupos</TableHead>
+                  <TableHead>Aciertos</TableHead>
+                  <TableHead>Errores</TableHead>
+                  <TableHead>Tiempo</TableHead>
+                  <TableHead>Resultado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {results.map((result, index) => {
+                  const isPerfect = result.incorrectAttempts === 0;
+                  return (
+                    <TableRow
+                      key={`table-${result.timeSpent}-${result.correctMatches}-${index}`}
+                    >
+                      <TCell>{index + 1}</TCell>
+                      <TCell>{result.expectedGroups.length}</TCell>
+                      <TCell>{result.correctMatches}</TCell>
+                      <TCell>{result.incorrectAttempts}</TCell>
+                      <TCell>{(result.timeSpent / 1000).toFixed(1)}s</TCell>
+                      <TCell>
+                        <span
+                          className={`inline-block rounded-full px-2 py-1 text-xs ${
+                            isPerfect
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                          }`}
+                        >
+                          {isPerfect ? "Perfecto" : "Con errores"}
+                        </span>
+                      </TCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
             </Table>
           </TabsContent>
         </Tabs>

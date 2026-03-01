@@ -26,10 +26,16 @@ interface MediaSelectorProps {
   selectedMedias: SelectableMediaSchema[];
   onMediasChange: (medias: SelectableMediaSchema[]) => void;
   selectionMode?: "single" | "multiple";
+  compact?: boolean;
 }
 
 export default function MediaSelector(props: MediaSelectorProps) {
-  const { selectedMedias, onMediasChange, selectionMode = "multiple" } = props;
+  const {
+    selectedMedias,
+    onMediasChange,
+    selectionMode = "multiple",
+    compact,
+  } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,6 +69,7 @@ export default function MediaSelector(props: MediaSelectorProps) {
           <DialogTrigger
             render={
               <FileMediaSelector
+                compact={compact}
                 medias={selectedMedias}
                 onAddMediaClick={() => setIsOpen(true)}
                 removeFile={removeMedia}

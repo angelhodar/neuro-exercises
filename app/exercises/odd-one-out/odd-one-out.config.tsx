@@ -9,7 +9,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   FormControl,
   FormField,
@@ -52,54 +51,54 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
   }, [totalQuestions, fields.length, append, remove]);
 
   return (
-    <Accordion className="h-96 space-y-6 overflow-y-auto" type="multiple">
+    <Accordion className="h-96 space-y-2 overflow-y-auto" type="multiple">
       {fields.map((field, index) => (
         <AccordionItem
-          className="rounded-md bg-gray-50/50 dark:bg-gray-900/50"
+          className="rounded-md border-none"
           key={field.id}
           value={`pregunta-${index}`}
         >
-          <AccordionTrigger className="px-4 text-lg">
+          <AccordionTrigger className="px-3 py-2 text-sm">
             Pregunta {index + 1}
           </AccordionTrigger>
           <AccordionContent>
-            <Card className="border-none bg-transparent p-0 shadow-none">
-              <CardContent className="space-y-4 p-2">
-                <FormField
-                  control={control}
-                  name={`${basePath}questions.${index}.patternMedias`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Imágenes del patrón</FormLabel>
-                      <FormControl>
-                        <MediaSelector
-                          onMediasChange={field.onChange}
-                          selectedMedias={field.value ?? []}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name={`${basePath}questions.${index}.outlierMedia`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Imagen diferente</FormLabel>
-                      <FormControl>
-                        <MediaSelector
-                          onMediasChange={field.onChange}
-                          selectedMedias={field.value ?? []}
-                          selectionMode="single"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
+            <div className="space-y-4 p-2">
+              <FormField
+                control={control}
+                name={`${basePath}questions.${index}.patternMedias`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Imágenes del patrón</FormLabel>
+                    <FormControl>
+                      <MediaSelector
+                        compact
+                        onMediasChange={field.onChange}
+                        selectedMedias={field.value ?? []}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`${basePath}questions.${index}.outlierMedia`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Imagen diferente</FormLabel>
+                    <FormControl>
+                      <MediaSelector
+                        compact
+                        onMediasChange={field.onChange}
+                        selectedMedias={field.value ?? []}
+                        selectionMode="single"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </AccordionContent>
         </AccordionItem>
       ))}

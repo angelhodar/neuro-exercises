@@ -11,6 +11,14 @@ import {
 } from "@/app/actions/presets";
 import { Button } from "@/components/ui/button";
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -35,6 +43,8 @@ export function ExerciseConfigPresetSelector({
 }: ExerciseConfigPresetSelectorProps) {
   const { reset, getValues } = useFormContext();
   const [presets, setPresets] = useState<ExerciseConfigPreset[]>([]);
+  const [selectedPreset, setSelectedPreset] =
+    useState<ExerciseConfigPreset | null>(null);
   const [presetName, setPresetName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -43,9 +53,14 @@ export function ExerciseConfigPresetSelector({
     getExercisePresets(exerciseId).then(setPresets).catch(console.error);
   }, [exerciseId]);
 
-  function handlePresetSelect(preset: ExerciseConfigPreset) {
-    const config = preset.config as Record<string, unknown>;
-    reset({ automaticNextQuestion: true, ...config });
+  function handlePresetChange(value: unknown) {
+    const id = value as number;
+    const preset = presets.find((p) => p.id === id) ?? null;
+    setSelectedPreset(preset);
+    if (preset) {
+      const config = preset.config as Record<string, unknown>;
+      reset({ automaticNextQuestion: true, ...config });
+    }
   }
 
   function handleSavePreset() {
@@ -65,6 +80,7 @@ export function ExerciseConfigPresetSelector({
         });
         if (preset) {
           setPresets((prev) => [...prev, preset]);
+          setSelectedPreset(preset);
         }
         setPresetName("");
         setDialogOpen(false);
@@ -76,11 +92,18 @@ export function ExerciseConfigPresetSelector({
     });
   }
 
-  function handleDeletePreset(presetId: number) {
+  function handleDeletePreset() {
+    if (!selectedPreset) {
+      return;
+    }
+
+    const presetId = selectedPreset.id;
+
     startTransition(async () => {
       try {
         await deleteExercisePreset(presetId);
         setPresets((prev) => prev.filter((p) => p.id !== presetId));
+        setSelectedPreset(null);
         toast.success("Preset eliminado");
       } catch (error) {
         console.error("Error deleting preset:", error);
@@ -91,16 +114,45 @@ export function ExerciseConfigPresetSelector({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Configuraciones Guardadas
-        </span>
+      <span className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+        Configuraciones Guardadas
+      </span>
+      <div className="flex items-center gap-2">
+        <Combobox
+          onValueChange={handlePresetChange}
+          value={selectedPreset?.id ?? null}
+        >
+          <ComboboxInput
+            className="flex-1"
+            placeholder="Buscar preset..."
+            showClear={!!selectedPreset}
+          />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxEmpty>No se encontraron presets</ComboboxEmpty>
+              {presets.map((preset) => (
+                <ComboboxItem
+                  key={preset.id}
+                  text={preset.name}
+                  value={preset.id}
+                >
+                  {preset.name}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+
         <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
           <DialogTrigger
             render={
-              <Button size="sm" type="button" variant="outline">
-                <Plus className="mr-1 h-4 w-4" />
-                Guardar actual
+              <Button
+                size="icon"
+                title="Guardar actual"
+                type="button"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4" />
               </Button>
             }
           />
@@ -140,37 +192,18 @@ export function ExerciseConfigPresetSelector({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <Button
+          disabled={!selectedPreset || isPending}
+          onClick={handleDeletePreset}
+          size="icon"
+          title="Eliminar preset"
+          type="button"
+          variant="outline"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
-      {presets.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No hay presets guardados. Configura los parámetros y guarda la
-          configuración actual.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-          {presets.map((preset) => (
-            <div className="group relative" key={preset.id}>
-              <Button
-                className="w-full"
-                onClick={() => handlePresetSelect(preset)}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                {preset.name}
-              </Button>
-              <button
-                className="absolute -top-2 -right-2 hidden rounded-full bg-destructive p-1 text-destructive-foreground group-hover:block"
-                disabled={isPending}
-                onClick={() => handleDeletePreset(preset.id)}
-                type="button"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

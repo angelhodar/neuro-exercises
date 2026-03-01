@@ -3,7 +3,10 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { exerciseConfigPresets } from "@/lib/db/schema";
+import {
+  exerciseConfigPresets,
+  type NewExerciseConfigPreset,
+} from "@/lib/db/schema";
 import { getCurrentUser } from "./users";
 
 export async function getExercisePresets(exerciseId: number) {
@@ -25,7 +28,7 @@ export async function getExercisePresets(exerciseId: number) {
 export async function createExercisePreset(data: {
   exerciseId: number;
   name: string;
-  config: Record<string, unknown>;
+  config: NewExerciseConfigPreset["config"];
 }) {
   const user = await getCurrentUser();
 

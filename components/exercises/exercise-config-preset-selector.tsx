@@ -21,7 +21,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import type { ExerciseConfigPreset } from "@/lib/db/schema";
+import type {
+  ExerciseConfigPreset,
+  NewExerciseConfigPreset,
+} from "@/lib/db/schema";
 
 interface ExerciseConfigPresetSelectorProps {
   exerciseId: number;
@@ -58,7 +61,7 @@ export function ExerciseConfigPresetSelector({
         const preset = await createExercisePreset({
           exerciseId,
           name,
-          config: currentValues,
+          config: currentValues as NewExerciseConfigPreset["config"],
         });
         if (preset) {
           setPresets((prev) => [...prev, preset]);

@@ -1,13 +1,12 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import {
   createExercisePreset,
   deleteExercisePreset,
-  getExercisePresets,
 } from "@/app/actions/presets";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,22 +35,20 @@ import type {
 
 interface ExerciseConfigPresetSelectorProps {
   exerciseId: number;
+  initialPresets: ExerciseConfigPreset[];
 }
 
 export function ExerciseConfigPresetSelector({
   exerciseId,
+  initialPresets,
 }: ExerciseConfigPresetSelectorProps) {
   const { reset, getValues } = useFormContext();
-  const [presets, setPresets] = useState<ExerciseConfigPreset[]>([]);
+  const [presets, setPresets] = useState(initialPresets);
   const [selectedPreset, setSelectedPreset] =
     useState<ExerciseConfigPreset | null>(null);
   const [presetName, setPresetName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    getExercisePresets(exerciseId).then(setPresets).catch(console.error);
-  }, [exerciseId]);
 
   function handlePresetChange(value: unknown) {
     const id = value as number;

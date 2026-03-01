@@ -16,11 +16,13 @@ import {
   type ClientAssets,
   useExerciseAssetsLoader,
 } from "@/hooks/use-exercise-assets-loader";
+import type { ExerciseConfigPreset } from "@/lib/db/schema";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
   title: string;
   exerciseId?: number;
+  presets?: ExerciseConfigPreset[];
   onSubmit?: (config: Record<string, unknown>) => void;
 }
 
@@ -33,6 +35,7 @@ function ExerciseConfigFormContent({
   slug,
   title,
   exerciseId,
+  presets,
   assets,
   onSubmit,
   children,
@@ -71,9 +74,12 @@ function ExerciseConfigFormContent({
             className="space-y-6"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            {exerciseId && (
+            {exerciseId && presets && (
               <>
-                <ExerciseConfigPresetSelector exerciseId={exerciseId} />
+                <ExerciseConfigPresetSelector
+                  exerciseId={exerciseId}
+                  initialPresets={presets}
+                />
                 <Separator />
               </>
             )}

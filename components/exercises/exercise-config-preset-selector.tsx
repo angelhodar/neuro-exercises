@@ -128,11 +128,7 @@ export function ExerciseConfigPresetSelector({
             <ComboboxList>
               <ComboboxEmpty>No se encontraron presets</ComboboxEmpty>
               {presets.map((preset) => (
-                <ComboboxItem
-                  key={preset.id}
-                  text={preset.name}
-                  value={preset.id}
-                >
+                <ComboboxItem key={preset.id} value={preset.id}>
                   {preset.name}
                 </ComboboxItem>
               ))}

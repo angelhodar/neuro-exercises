@@ -2,7 +2,6 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
 import { getMedias } from "@/app/actions/media";
 import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
 import {
@@ -12,6 +11,7 @@ import {
   MultimediaCardTitle,
 } from "@/components/media/multimedia-card";
 import { Spinner } from "@/components/ui/spinner";
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { createBlobUrl } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -29,7 +29,6 @@ function getMediaType(mimeType: string): MediaType {
 export function MediaGrid() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || undefined;
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
@@ -40,27 +39,14 @@ export function MediaGrid() {
         lastPage.length < PAGE_SIZE ? undefined : lastPageParam + PAGE_SIZE,
     });
 
-  const handleIntersect = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
+  const sentinelRef = useIntersectionObserver(
+    (entries) => {
       if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
+    { rootMargin: "200px" }
   );
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(handleIntersect, {
-      rootMargin: "200px",
-    });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [handleIntersect]);
 
   const allMedia = data?.pages.flat() ?? [];
 

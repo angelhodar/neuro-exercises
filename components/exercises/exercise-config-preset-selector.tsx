@@ -51,7 +51,7 @@ export function ExerciseConfigPresetSelector({
   const [isPending, startTransition] = useTransition();
 
   function handlePresetChange(value: unknown) {
-    const id = value as number;
+    const id = Number(value);
     const preset = presets.find((p) => p.id === id) ?? null;
     setSelectedPreset(preset);
     if (preset) {
@@ -110,25 +110,26 @@ export function ExerciseConfigPresetSelector({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <span className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         Configuraciones Guardadas
       </span>
       <div className="flex items-center gap-2">
         <Combobox
           onValueChange={handlePresetChange}
-          value={selectedPreset?.id ?? null}
+          value={selectedPreset ? String(selectedPreset.id) : null}
         >
           <ComboboxInput
             className="flex-1"
             placeholder="Buscar preset..."
             showClear={!!selectedPreset}
+            showTrigger={false}
           />
           <ComboboxContent>
             <ComboboxList>
               <ComboboxEmpty>No se encontraron presets</ComboboxEmpty>
               {presets.map((preset) => (
-                <ComboboxItem key={preset.id} value={preset.id}>
+                <ComboboxItem key={preset.id} value={String(preset.id)}>
                   {preset.name}
                 </ComboboxItem>
               ))}

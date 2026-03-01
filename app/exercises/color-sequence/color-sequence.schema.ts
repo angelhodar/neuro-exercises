@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 export const colorSequenceSpecificConfigSchema = z.object({
   numCells: z.coerce
@@ -39,35 +36,14 @@ export const configSchema = baseExerciseConfigSchema
   .merge(colorSequenceSpecificConfigSchema)
   .superRefine(colorSequenceConfigRefinements);
 
-export const presets: Record<ExercisePreset, ColorSequenceSpecificConfig> = {
-  easy: {
-    numCells: 4,
-    sequenceLength: 2,
-    highlightInterval: 1200,
-  },
-  medium: {
-    numCells: 6,
-    sequenceLength: 3,
-    highlightInterval: 1000,
-  },
-  hard: {
-    numCells: 8,
-    sequenceLength: 4,
-    highlightInterval: 800,
-  },
-  expert: {
-    numCells: 12,
-    sequenceLength: 6,
-    highlightInterval: 600,
-  },
-};
-
 export const defaultConfig: ColorSequenceConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  numCells: 4,
+  sequenceLength: 2,
+  highlightInterval: 1200,
 };
 
 export const resultSchema = z.object({
@@ -81,7 +57,4 @@ export type ColorSequenceSpecificConfig = z.infer<
 >;
 export type ColorSequenceConfig = z.infer<typeof configSchema>;
 export type ColorSequenceQuestionResult = z.infer<typeof resultSchema>;
-export type {
-  BaseExerciseConfig,
-  ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+export type { BaseExerciseConfig } from "@/lib/schemas/base-schemas";

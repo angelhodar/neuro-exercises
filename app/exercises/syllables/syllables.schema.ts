@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 import {
   getWordsBySyllableCount,
   type SyllableCount,
@@ -64,25 +61,10 @@ export type SyllablesSpecificConfig = z.infer<
 export type SyllablesConfig = z.infer<typeof configSchema>;
 export type SyllablesQuestionResult = z.infer<typeof resultSchema>;
 
-export const presets: Record<ExercisePreset, SyllablesSpecificConfig> = {
-  easy: {
-    syllablesCount: 3,
-  },
-  medium: {
-    syllablesCount: 4,
-  },
-  hard: {
-    syllablesCount: 5,
-  },
-  expert: {
-    syllablesCount: 6,
-  },
-};
-
 export const defaultConfig: SyllablesConfig = {
   endConditionType: "questions",
   automaticNextQuestion: true,
   totalQuestions: 5,
   timeLimitSeconds: 0,
-  ...presets.easy,
+  syllablesCount: 3,
 };

@@ -75,54 +75,52 @@ export function Results({ results }: ColorSequenceResultsProps) {
         </div>
 
         <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">#</TableHead>
-                <TableHead>Secuencia Objetivo</TableHead>
-                <TableHead>Secuencia Usuario</TableHead>
-                <TableHead>Correcto</TableHead>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">#</TableHead>
+              <TableHead>Secuencia Objetivo</TableHead>
+              <TableHead>Secuencia Usuario</TableHead>
+              <TableHead>Correcto</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {results.map((result, index) => (
+              <TableRow key={`row-${result.targetSequence.join("-")}-${index}`}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    {result.targetSequence.map((c: number, i: number) => (
+                      <span
+                        className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]}`}
+                        key={`target-${i}-${c}`}
+                      />
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    {result.userSequence.map((c: number, i: number) => (
+                      <span
+                        className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]} ${
+                          c !== result.targetSequence[i]
+                            ? "ring-2 ring-red-500 ring-offset-1"
+                            : ""
+                        }`}
+                        key={`user-${i}-${c}`}
+                      />
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {result.isCorrect ? (
+                    <span className="font-semibold text-green-600">Sí</span>
+                  ) : (
+                    <span className="font-semibold text-red-600">No</span>
+                  )}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.map((result, index) => (
-                <TableRow
-                  key={`row-${result.targetSequence.join("-")}-${index}`}
-                >
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {result.targetSequence.map((c: number, i: number) => (
-                        <span
-                          className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]}`}
-                          key={`target-${i}-${c}`}
-                        />
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {result.userSequence.map((c: number, i: number) => (
-                        <span
-                          className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]} ${
-                            c !== result.targetSequence[i]
-                              ? "ring-2 ring-red-500 ring-offset-1"
-                              : ""
-                          }`}
-                          key={`user-${i}-${c}`}
-                        />
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {result.isCorrect ? (
-                      <span className="font-semibold text-green-600">Sí</span>
-                    ) : (
-                      <span className="font-semibold text-red-600">No</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+            ))}
+          </TableBody>
         </Table>
       </CardContent>
     </Card>

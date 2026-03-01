@@ -4,7 +4,6 @@ import type { z } from "zod";
 export interface ExerciseAssets {
   configSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
   resultSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
-  presets?: Record<string, Record<string, unknown>>;
   defaultConfig: Record<string, unknown>;
   ExerciseComponent: ComponentType<{ config: Record<string, unknown> }>;
   ResultsComponent: ComponentType<Record<string, unknown>>;
@@ -24,7 +23,7 @@ export async function loadExerciseAssets(
       { Exercise },
       { Results },
       { ConfigFields },
-      { configSchema, resultSchema, defaultConfig, presets },
+      { configSchema, resultSchema, defaultConfig },
     ] = await Promise.all([
       import(`./${slug}/${slug}.exercise`),
       import(`./${slug}/${slug}.results`),
@@ -36,7 +35,6 @@ export async function loadExerciseAssets(
       configSchema,
       resultSchema,
       defaultConfig,
-      presets,
       ExerciseComponent: Exercise,
       ResultsComponent: Results,
       ConfigFieldsComponent: ConfigFields,
@@ -51,18 +49,15 @@ export async function loadClientAssets(
   slug: string
 ): Promise<ClientAssets | null> {
   try {
-    const [
-      { ConfigFields },
-      { configSchema, resultSchema, defaultConfig, presets },
-    ] = await Promise.all([
-      import(`./${slug}/${slug}.config`),
-      import(`./${slug}/${slug}.schema`),
-    ]);
+    const [{ ConfigFields }, { configSchema, resultSchema, defaultConfig }] =
+      await Promise.all([
+        import(`./${slug}/${slug}.config`),
+        import(`./${slug}/${slug}.schema`),
+      ]);
 
     return {
       configSchema,
       resultSchema,
-      presets,
       defaultConfig,
       ConfigFieldsComponent: ConfigFields,
     };

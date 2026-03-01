@@ -78,74 +78,74 @@ export default async function LinksPage() {
         </div>
       ) : (
         <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Para</TableHead>
-                <TableHead>Ejercicios</TableHead>
-                <TableHead>Creado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {links.map((link) => (
-                <TableRow key={link.id}>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-medium leading-none">
-                        {link.template?.title}
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Para</TableHead>
+              <TableHead>Ejercicios</TableHead>
+              <TableHead>Creado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {links.map((link) => (
+              <TableRow key={link.id}>
+                <TableCell>
+                  <div className="space-y-1">
+                    <p className="font-medium leading-none">
+                      {link.template?.title}
+                    </p>
+                    {link.template?.description && (
+                      <p className="line-clamp-2 text-muted-foreground text-sm">
+                        {link.template.description}
                       </p>
-                      {link.template?.description && (
-                        <p className="line-clamp-2 text-muted-foreground text-sm">
-                          {link.template.description}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <TargetUserInfo
-                      email={link.targetUser?.email || ""}
-                      name={link.targetUser?.name || ""}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {link.template?.exerciseTemplateItems?.length || 0}{" "}
-                        ejercicios
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <time
-                      className="text-muted-foreground text-sm"
-                      dateTime={link.createdAt.toString()}
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <TargetUserInfo
+                    email={link.targetUser?.email || ""}
+                    name={link.targetUser?.name || ""}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">
+                      {link.template?.exerciseTemplateItems?.length || 0}{" "}
+                      ejercicios
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <time
+                    className="text-muted-foreground text-sm"
+                    dateTime={link.createdAt.toString()}
+                  >
+                    {format(new Date(link.createdAt), "dd MMM yyyy", {
+                      locale: es,
+                    })}
+                  </time>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-3">
+                    <CopyLinkButton token={link.token} />
+                    <Button
+                      className="h-8 w-8 p-0"
+                      render={
+                        <Link href={`/s/${link.token}`} target="_blank" />
+                      }
+                      size="sm"
+                      variant="ghost"
                     >
-                      {format(new Date(link.createdAt), "dd MMM yyyy", {
-                        locale: es,
-                      })}
-                    </time>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <CopyLinkButton token={link.token} />
-                      <Button
-                        className="h-8 w-8 p-0"
-                        render={
-                          <Link href={`/s/${link.token}`} target="_blank" />
-                        }
-                        size="sm"
-                        variant="ghost"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        <span className="sr-only">Abrir enlace</span>
-                      </Button>
-                      <DeleteLinkButton linkId={link.id} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+                      <ExternalLink className="h-4 w-4" />
+                      <span className="sr-only">Abrir enlace</span>
+                    </Button>
+                    <DeleteLinkButton linkId={link.id} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       )}
     </div>

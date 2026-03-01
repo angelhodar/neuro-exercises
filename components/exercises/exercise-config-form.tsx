@@ -16,10 +16,13 @@ import {
   type ClientAssets,
   useExerciseAssetsLoader,
 } from "@/hooks/use-exercise-assets-loader";
+import type { ExerciseConfigPreset } from "@/lib/db/schema";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
   slug: string;
   title: string;
+  exerciseId: number;
+  presets?: ExerciseConfigPreset[];
   onSubmit?: (config: Record<string, unknown>) => void;
 }
 
@@ -31,13 +34,14 @@ interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
 function ExerciseConfigFormContent({
   slug,
   title,
+  exerciseId,
+  presets,
   assets,
   onSubmit,
   children,
 }: ExerciseConfigFormContentProps) {
   const router = useRouter();
-  const { configSchema, presets, defaultConfig, ConfigFieldsComponent } =
-    assets;
+  const { configSchema, defaultConfig, ConfigFieldsComponent } = assets;
 
   const form = useForm<z.infer<typeof configSchema>>({
     resolver: zodResolver(configSchema),
@@ -62,7 +66,7 @@ function ExerciseConfigFormContent({
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="text-2xl">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <Form {...form}>
@@ -72,7 +76,10 @@ function ExerciseConfigFormContent({
           >
             {presets && (
               <>
-                <ExerciseConfigPresetSelector presets={presets} />
+                <ExerciseConfigPresetSelector
+                  exerciseId={exerciseId}
+                  initialPresets={presets}
+                />
                 <Separator />
               </>
             )}

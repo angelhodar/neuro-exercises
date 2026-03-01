@@ -48,44 +48,42 @@ export default async function SpeechTextsPage() {
         </div>
       ) : (
         <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Texto</TableHead>
-                  <TableHead>Creado</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {speechTexts.map((text) => (
-                  <TableRow key={text.id}>
-                    <TableCell className="font-medium">{text.name}</TableCell>
-                    <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <div className="max-w-xs cursor-help truncate" />
-                          }
-                        >
-                          {text.referenceText}
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-md">
-                          <p className="whitespace-pre-wrap">
-                            {text.referenceText}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell>{formatDate(String(text.createdAt))}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-3">
-                        <EditSpeechTextButton speechText={text} />
-                        <DeleteSpeechTextButton id={text.id} name={text.name} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Texto</TableHead>
+              <TableHead>Creado</TableHead>
+              <TableHead>Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {speechTexts.map((text) => (
+              <TableRow key={text.id}>
+                <TableCell className="font-medium">{text.name}</TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={<div className="max-w-xs cursor-help truncate" />}
+                    >
+                      {text.referenceText}
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md">
+                      <p className="whitespace-pre-wrap">
+                        {text.referenceText}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>{formatDate(String(text.createdAt))}</TableCell>
+                <TableCell>
+                  <div className="flex gap-3">
+                    <EditSpeechTextButton speechText={text} />
+                    <DeleteSpeechTextButton id={text.id} name={text.name} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       )}
     </div>

@@ -60,54 +60,54 @@ export default async function TemplatesPage() {
         </div>
       ) : (
         <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead>Creador</TableHead>
-                <TableHead>Ejercicios</TableHead>
-                <TableHead>Creado</TableHead>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Título</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Creador</TableHead>
+              <TableHead>Ejercicios</TableHead>
+              <TableHead>Creado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {templates.map((template) => (
+              <TableRow key={template.id}>
+                <TableCell>
+                  <div className="font-medium leading-none">
+                    {template.title}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="line-clamp-2 text-muted-foreground text-sm">
+                    {template.description || "Sin descripción"}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="truncate font-medium text-sm">
+                      {template.creator?.name || template.creator?.email}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {template.exerciseTemplateItems?.length || 0} ejercicios
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <time
+                    className="text-muted-foreground text-sm"
+                    dateTime={template.createdAt.toString()}
+                  >
+                    {format(new Date(template.createdAt), "dd MMM yyyy", {
+                      locale: es,
+                    })}
+                  </time>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {templates.map((template) => (
-                <TableRow key={template.id}>
-                  <TableCell>
-                    <div className="font-medium leading-none">
-                      {template.title}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="line-clamp-2 text-muted-foreground text-sm">
-                      {template.description || "Sin descripción"}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-primary" />
-                      <span className="truncate font-medium text-sm">
-                        {template.creator?.name || template.creator?.email}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {template.exerciseTemplateItems?.length || 0} ejercicios
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <time
-                      className="text-muted-foreground text-sm"
-                      dateTime={template.createdAt.toString()}
-                    >
-                      {format(new Date(template.createdAt), "dd MMM yyyy", {
-                        locale: es,
-                      })}
-                    </time>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
+            ))}
+          </TableBody>
         </Table>
       )}
     </div>

@@ -86,7 +86,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
 
     try {
       const assets = await loadClientAssets(selectedExercise.slug);
-      const defaultConfig = assets?.presets?.easy ?? {};
+      const defaultConfig = assets?.defaultConfig ?? {};
 
       append({
         exerciseId: selectedExercise.id,
@@ -249,6 +249,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                           <ConfigureExerciseButton
+                            exerciseId={field.exerciseId}
                             index={index}
                             slug={field.slug}
                           />

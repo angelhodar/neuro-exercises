@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  baseExerciseConfigSchema,
-  type ExercisePreset,
-} from "@/lib/schemas/base-schemas";
+import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 import { selectableMediaSchema } from "@/lib/schemas/medias";
 
 // Schema for a single question configuration
@@ -76,14 +73,6 @@ export const defaultConfig: OddOneOutConfig = {
   ],
 };
 
-export const oddOneOutPresets: Record<ExercisePreset, OddOneOutConfig> = {
-  easy: defaultConfig,
-  medium: defaultConfig,
-  hard: defaultConfig,
-  expert: defaultConfig,
-};
-
 // Exports required by the loader
 export const configSchema = oddOneOutConfigSchema;
 export const resultSchema = oddOneOutResultSchema;
-export const presets = oddOneOutPresets;

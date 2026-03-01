@@ -76,38 +76,38 @@ export function Results({ results }: StroopColorInterferenceResultsProps) {
           </TabsContent>
           <TabsContent value="tabla">
             <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Palabra</TableHead>
-                    <TableHead>Color Tinta</TableHead>
-                    <TableHead>Tu Respuesta</TableHead>
-                    <TableHead className="text-right">Resultado</TableHead>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Palabra</TableHead>
+                  <TableHead>Color Tinta</TableHead>
+                  <TableHead>Tu Respuesta</TableHead>
+                  <TableHead className="text-right">Resultado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {results.map((result, index) => (
+                  <TableRow key={`${result.word}-${result.color}-${index}`}>
+                    <TCell>{index + 1}</TCell>
+                    <TCell>{result.word}</TCell>
+                    <TCell>{result.color}</TCell>
+                    <TCell
+                      className={
+                        result.isCorrect ? "text-green-600" : "text-red-600"
+                      }
+                    >
+                      {result.userAnswer}
+                    </TCell>
+                    <TCell className="text-right">
+                      {result.isCorrect ? (
+                        <CheckCircle className="inline-block h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="inline-block h-5 w-5 text-red-600" />
+                      )}
+                    </TCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {results.map((result, index) => (
-                    <TableRow key={`${result.word}-${result.color}-${index}`}>
-                      <TCell>{index + 1}</TCell>
-                      <TCell>{result.word}</TCell>
-                      <TCell>{result.color}</TCell>
-                      <TCell
-                        className={
-                          result.isCorrect ? "text-green-600" : "text-red-600"
-                        }
-                      >
-                        {result.userAnswer}
-                      </TCell>
-                      <TCell className="text-right">
-                        {result.isCorrect ? (
-                          <CheckCircle className="inline-block h-5 w-5 text-green-600" />
-                        ) : (
-                          <XCircle className="inline-block h-5 w-5 text-red-600" />
-                        )}
-                      </TCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                ))}
+              </TableBody>
             </Table>
           </TabsContent>
         </Tabs>

@@ -21,7 +21,11 @@ export default async function ExerciseConfigPage({ params }: PageProps) {
 
   return (
     <div className="container mx-auto flex min-h-full flex-1 items-center justify-center py-8">
-      <ExerciseConfigForm slug={slug} title={exercise.displayName}>
+      <ExerciseConfigForm
+        exerciseId={exercise.id}
+        slug={slug}
+        title={exercise.displayName}
+      >
         <ConfigFieldsComponent />
       </ExerciseConfigForm>
     </div>

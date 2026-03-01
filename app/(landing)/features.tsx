@@ -5,6 +5,10 @@ import { unstable_cache } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { getExercises } from "@/app/actions/exercises";
+import {
+  ExerciseCard,
+  ExerciseCardThumbnail,
+} from "@/components/exercises/exercise-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createBlobUrl } from "@/lib/utils";
@@ -25,7 +29,7 @@ const getCachedExercises = unstable_cache(async () => {
   return exercises;
 }, ["landing-exercises"]);
 
-function ExerciseCard({ exercise }: { exercise: Exercise }) {
+function LandingExerciseCard({ exercise }: { exercise: Exercise }) {
   return (
     <motion.div
       className="h-full"
@@ -38,46 +42,41 @@ function ExerciseCard({ exercise }: { exercise: Exercise }) {
       whileHover={{ y: -4 }}
       whileInView={{ opacity: 1, y: 0 }}
     >
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-        <div className="relative h-[300px] w-full">
+      <ExerciseCard
+        className="h-full gap-0 rounded-2xl border border-slate-200 bg-white py-0 shadow-sm ring-0 transition-shadow hover:shadow-md"
+        exercise={exercise}
+      >
+        <ExerciseCardThumbnail className="relative h-[300px]">
           <Image
             alt={exercise.displayName}
             className="rounded-lg object-cover"
             fill
             src={createBlobUrl(exercise.thumbnailUrl ?? "")}
           />
-        </div>
+          {exercise.tags[0] && (
+            <Badge
+              className="absolute top-3 right-3 border-blue-300 bg-blue-50 p-3 text-blue-700 text-sm capitalize"
+              variant="outline"
+            >
+              {exercise.tags[0]}
+            </Badge>
+          )}
+        </ExerciseCardThumbnail>
 
         <div className="flex flex-1 flex-col p-5">
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {exercise.tags.slice(0, 2).map((tag) => (
-              <Badge
-                className="border-blue-100 bg-blue-50 text-blue-700 capitalize"
-                key={tag}
-                variant="outline"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-
-          <h3 className="font-(family-name:--font-display) mb-2 font-bold text-slate-900 text-xl">
+          <h3 className="font-(family-name:--font-display) mb-3 font-bold text-slate-900 text-xl">
             {exercise.displayName}
           </h3>
 
-          <p className="mb-5 flex-1 text-slate-500 text-sm leading-relaxed">
-            {exercise.description}
-          </p>
-
           <Button
-            className="w-full bg-blue-600 py-3 text-white hover:bg-blue-700"
+            className="w-full bg-blue-600 py-4 text-base text-white hover:bg-blue-700"
             render={<Link href={`/exercises/${exercise.slug}`} />}
           >
             <Play className="mr-2 h-4 w-4" />
             Probar ejercicio
           </Button>
         </div>
-      </div>
+      </ExerciseCard>
     </motion.div>
   );
 }
@@ -106,7 +105,7 @@ export default async function FeaturesSection() {
 
         <div className="grid gap-6 md:grid-cols-3 md:items-stretch">
           {exercises.map((exercise) => (
-            <ExerciseCard exercise={exercise} key={exercise.id} />
+            <LandingExerciseCard exercise={exercise} key={exercise.id} />
           ))}
         </div>
       </div>

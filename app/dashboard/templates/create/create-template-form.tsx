@@ -9,6 +9,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { createExerciseTemplate } from "@/app/actions/templates";
 import { loadClientAssets } from "@/app/exercises/loader";
+import {
+  ExerciseCard,
+  ExerciseCardActions,
+  ExerciseCardThumbnail,
+  ExerciseCardTitle,
+} from "@/components/exercises/exercise-card";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,7 +37,6 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Exercise } from "@/lib/db/schema";
 import { AddExerciseButton } from "./add-exercise-button";
 import ConfigureExerciseButton from "./configure-exercise-button";
-import { ExerciseCard } from "./exercise-card";
 
 const templateSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -236,27 +241,32 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
 
                       return (
                         <ExerciseCard
+                          className="transition-shadow hover:shadow-md"
                           exercise={exercise}
                           key={field.exerciseId}
                         >
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <ConfigureExerciseButton
-                                exerciseId={field.exerciseId}
-                                index={index}
-                                slug={field.slug}
-                              />
+                          <ExerciseCardThumbnail />
+                          <ExerciseCardTitle className="px-3" />
+                          <ExerciseCardActions className="px-3 pb-3">
+                            <div className="flex w-full gap-2">
+                              <div className="flex-1">
+                                <ConfigureExerciseButton
+                                  exerciseId={field.exerciseId}
+                                  index={index}
+                                  slug={field.slug}
+                                />
+                              </div>
+                              <Button
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => removeExercise(index)}
+                                size="icon"
+                                type="button"
+                                variant="ghost"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <Button
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => removeExercise(index)}
-                              size="icon"
-                              type="button"
-                              variant="ghost"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          </ExerciseCardActions>
                         </ExerciseCard>
                       );
                     })}

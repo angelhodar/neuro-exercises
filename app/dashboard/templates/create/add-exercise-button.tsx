@@ -55,7 +55,7 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
       </Button>
 
       <Dialog onOpenChange={handleOpenChange} open={isOpen}>
-        <DialogContent className="lg:max-w-5xl">
+        <DialogContent className="gap-3 lg:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="text-2xl">Añadir ejercicio</DialogTitle>
             <DialogDescription>

@@ -20,10 +20,10 @@ export const ExerciseCard = ({ exercise, children }: ExerciseCardProps) => {
           width={320}
         />
       </div>
-      <CardHeader>
+      <CardHeader className="px-3">
         <CardTitle className="text-lg">{exercise.displayName}</CardTitle>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="px-3">{children}</CardContent>
     </Card>
   );
 };

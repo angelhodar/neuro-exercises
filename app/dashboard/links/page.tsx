@@ -77,8 +77,7 @@ export default async function LinksPage() {
           <CreateLinkButton templates={templates} users={users} />
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
@@ -128,7 +127,7 @@ export default async function LinksPage() {
                     </time>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-3">
                       <CopyLinkButton token={link.token} />
                       <Button
                         className="h-8 w-8 p-0"
@@ -147,8 +146,7 @@ export default async function LinksPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       )}
     </div>
   );

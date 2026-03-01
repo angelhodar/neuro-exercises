@@ -7,7 +7,6 @@ import {
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -38,9 +37,7 @@ export default async function PatientsPage() {
         <CreatePatientButton />
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-6">
-          <Table>
+      <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
@@ -86,7 +83,7 @@ export default async function PatientsPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button
                         render={
                           <Link href={`/dashboard/patients/${patient.id}`} />
@@ -116,9 +113,7 @@ export default async function PatientsPage() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      </Table>
     </div>
   );
 }

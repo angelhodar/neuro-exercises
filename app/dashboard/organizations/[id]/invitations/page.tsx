@@ -9,7 +9,6 @@ import {
 } from "@/app/dashboard/dashboard-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -53,9 +52,7 @@ export default async function OrganizationInvitationsPage({
         </Button>
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-3">
-          <Table>
+      <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Email</TableHead>
@@ -98,7 +95,7 @@ export default async function OrganizationInvitationsPage({
                     {formatDate(String(invitation.createdAt))}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button size="sm" variant="outline">
                         Reenviar
                       </Button>
@@ -133,9 +130,7 @@ export default async function OrganizationInvitationsPage({
                 </TableRow>
               )}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      </Table>
     </div>
   );
 }

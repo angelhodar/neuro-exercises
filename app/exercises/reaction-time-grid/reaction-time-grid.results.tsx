@@ -221,8 +221,7 @@ export function Results({ results, config }: ExerciseResultsProps) {
             <ResultBarChart config={reactionTimeChartConfig} data={chartData} />
           </TabsContent>
           <TabsContent value="tabla">
-            <div className="overflow-hidden rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">#</TableHead>
@@ -293,8 +292,7 @@ export function Results({ results, config }: ExerciseResultsProps) {
                     );
                   })}
                 </TableBody>
-              </Table>
-            </div>
+            </Table>
           </TabsContent>
           <TabsContent value="heatmap">
             <ReactionTimeHeatmap

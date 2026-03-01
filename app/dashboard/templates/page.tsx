@@ -59,8 +59,7 @@ export default async function TemplatesPage() {
           </Link>
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Título</TableHead>
@@ -109,8 +108,7 @@ export default async function TemplatesPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       )}
     </div>
   );

@@ -4,7 +4,6 @@ import {
   DashboardHeaderDescription,
   DashboardHeaderTitle,
 } from "@/app/dashboard/dashboard-header";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -43,14 +42,12 @@ export default async function SpeechTextsPage() {
         </div>
       </DashboardHeader>
 
-      <Card>
-        <CardContent className="mt-4">
-          {speechTexts.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No hay textos de referencia. Crea uno nuevo para empezar.
-            </div>
-          ) : (
-            <Table>
+      {speechTexts.length === 0 ? (
+        <div className="py-8 text-center text-muted-foreground">
+          No hay textos de referencia. Crea uno nuevo para empezar.
+        </div>
+      ) : (
+        <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
@@ -81,7 +78,7 @@ export default async function SpeechTextsPage() {
                     </TableCell>
                     <TableCell>{formatDate(String(text.createdAt))}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <EditSpeechTextButton speechText={text} />
                         <DeleteSpeechTextButton id={text.id} name={text.name} />
                       </div>
@@ -89,10 +86,8 @@ export default async function SpeechTextsPage() {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        </Table>
+      )}
     </div>
   );
 }

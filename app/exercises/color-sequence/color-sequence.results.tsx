@@ -74,8 +74,7 @@ export function Results({ results }: ColorSequenceResultsProps) {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md border">
-          <Table>
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
@@ -124,8 +123,7 @@ export function Results({ results }: ColorSequenceResultsProps) {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </div>
+        </Table>
       </CardContent>
     </Card>
   );

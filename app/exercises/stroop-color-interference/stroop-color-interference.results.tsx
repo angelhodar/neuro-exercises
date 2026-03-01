@@ -75,8 +75,7 @@ export function Results({ results }: StroopColorInterferenceResultsProps) {
             />
           </TabsContent>
           <TabsContent value="tabla">
-            <div className="overflow-hidden rounded-md border">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">#</TableHead>
@@ -109,8 +108,7 @@ export function Results({ results }: StroopColorInterferenceResultsProps) {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
-            </div>
+            </Table>
           </TabsContent>
         </Tabs>
       </CardContent>

@@ -2,6 +2,12 @@
 
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import {
+  ExerciseCard,
+  ExerciseCardActions,
+  ExerciseCardThumbnail,
+  ExerciseCardTitle,
+} from "@/components/exercises/exercise-card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import type { Exercise } from "@/lib/db/schema";
-import { ExerciseCard } from "./exercise-card";
 
 interface AddExerciseButtonProps {
   exercises: Exercise[];
@@ -74,16 +79,24 @@ export function AddExerciseButton(props: AddExerciseButtonProps) {
             </div>
             <div className="grid max-h-[600px] grid-cols-1 gap-4 overflow-y-auto p-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredExercises.map((exercise) => (
-                <ExerciseCard exercise={exercise} key={exercise.id}>
-                  <Button
-                    className="w-full"
-                    onClick={() => handleAddExercise(exercise)}
-                    size="sm"
-                    type="button"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Añadir
-                  </Button>
+                <ExerciseCard
+                  className="transition-shadow hover:shadow-md"
+                  exercise={exercise}
+                  key={exercise.id}
+                >
+                  <ExerciseCardThumbnail />
+                  <ExerciseCardTitle className="px-3" />
+                  <ExerciseCardActions className="px-3 pb-3">
+                    <Button
+                      className="w-full"
+                      onClick={() => handleAddExercise(exercise)}
+                      size="sm"
+                      type="button"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Añadir
+                    </Button>
+                  </ExerciseCardActions>
                 </ExerciseCard>
               ))}
             </div>

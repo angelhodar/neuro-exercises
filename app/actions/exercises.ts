@@ -73,7 +73,7 @@ async function generateAudioInstructions(
   }
 }
 
-export async function getExercises(slugs?: string[]) {
+export async function getExercises(slugs?: string[], query?: string) {
   if (slugs && slugs.length > 0) {
     const filteredExercises = await db.query.exercises.findMany({
       where: (exercises, { inArray }) => inArray(exercises.slug, slugs),
@@ -82,7 +82,11 @@ export async function getExercises(slugs?: string[]) {
     return filteredExercises;
   }
 
-  const allExercises = await db.query.exercises.findMany();
+  const allExercises = await db.query.exercises.findMany({
+    where: query
+      ? (exercises, { ilike }) => ilike(exercises.displayName, `%${query}%`)
+      : undefined,
+  });
   return allExercises;
 }
 

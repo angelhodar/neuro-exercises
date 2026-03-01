@@ -120,8 +120,8 @@ function ExerciseCardTitle({
   const { exercise } = useExerciseCard();
 
   return (
-    <CardHeader className={cn("px-4", className)} {...props}>
-      <CardTitle>{exercise.displayName}</CardTitle>
+    <CardHeader className={cn("px-4 pb-4", className)} {...props}>
+      <CardTitle className="text-lg">{exercise.displayName}</CardTitle>
     </CardHeader>
   );
 }

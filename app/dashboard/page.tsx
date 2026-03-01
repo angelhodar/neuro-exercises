@@ -13,7 +13,6 @@ import { exerciseHasAssets } from "@/app/exercises/loader";
 import { CardActionStop } from "@/components/exercises/card-action-stop";
 import {
   ExerciseCard,
-  ExerciseCardActions,
   ExerciseCardThumbnail,
   ExerciseCardTitle,
 } from "@/components/exercises/exercise-card";
@@ -76,13 +75,13 @@ export default async function DashboardPage({
                 className="h-full transition-all hover:-translate-y-0.5 hover:shadow-lg group-focus:ring-2 group-focus:ring-primary/40"
                 exercise={exercise}
               >
-                <ExerciseCardThumbnail />
-                <ExerciseCardTitle />
-                <ExerciseCardActions>
-                  <CardActionStop>
+                <div className="relative">
+                  <ExerciseCardThumbnail />
+                  <CardActionStop className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
                     <EditExerciseButton exercise={exercise} />
                   </CardActionStop>
-                </ExerciseCardActions>
+                </div>
+                <ExerciseCardTitle />
               </ExerciseCard>
             </Link>
           ))}

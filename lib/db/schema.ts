@@ -428,19 +428,6 @@ export const exerciseConfigPresets = pgTable(
   ]
 );
 
-// Sandbox snapshots
-export const sandboxSnapshots = pgTable(
-  "sandbox_snapshots",
-  {
-    id: serial().primaryKey(),
-    snapshotId: varchar("snapshot_id", { length: 255 }).notNull(),
-    gitRevision: varchar("git_revision", { length: 100 }),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    ...timestamps,
-  },
-  (table) => [index("sandbox_snapshots_expires_at_idx").on(table.expiresAt)]
-);
-
 // Patient management tables
 export const patients = pgTable(
   "patients",
@@ -892,9 +879,6 @@ export const exerciseConfigPresetUpdateSchema = createUpdateSchema(
   exerciseConfigPresets
 );
 
-export const sandboxSnapshotSelectSchema = createSelectSchema(sandboxSnapshots);
-export const sandboxSnapshotInsertSchema = createInsertSchema(sandboxSnapshots);
-
 export const patientSelectSchema = createSelectSchema(patients);
 export const patientInsertSchema = createInsertSchema(patients);
 export const patientUpdateSchema = createUpdateSchema(patients);
@@ -959,9 +943,6 @@ export type NewSpeechText = typeof speechTexts.$inferInsert;
 
 export type TranscriptionResult = typeof transcriptionResults.$inferSelect;
 export type NewTranscriptionResult = typeof transcriptionResults.$inferInsert;
-
-export type SandboxSnapshot = typeof sandboxSnapshots.$inferSelect;
-export type NewSandboxSnapshot = typeof sandboxSnapshots.$inferInsert;
 
 export type Patient = typeof patients.$inferSelect;
 export type NewPatient = typeof patients.$inferInsert;

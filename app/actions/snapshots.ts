@@ -1,44 +1,53 @@
-"use server";
+import { Snapshot } from "@vercel/sandbox";
 
-import { desc, gt } from "drizzle-orm";
-import { db } from "@/lib/db";
-import type { SandboxSnapshot } from "@/lib/db/schema";
-import { sandboxSnapshots } from "@/lib/db/schema";
+export interface SnapshotInfo {
+  snapshotId: string;
+  expiresAt: Date | undefined;
+}
 
-export async function getLatestSnapshot(): Promise<SandboxSnapshot | null> {
+export async function getLatestSnapshot(): Promise<SnapshotInfo | null> {
   try {
-    const snapshot = await db.query.sandboxSnapshots.findFirst({
-      where: gt(sandboxSnapshots.expiresAt, new Date()),
-      orderBy: desc(sandboxSnapshots.createdAt),
-    });
+    const { snapshots } = await Snapshot.list({ limit: 1 });
 
-    return snapshot ?? null;
+    const latest = snapshots.find((s) => s.status === "created");
+
+    if (!latest) {
+      return null;
+    }
+
+    const expiresAt = latest.expiresAt ? new Date(latest.expiresAt) : undefined;
+
+    if (expiresAt && expiresAt.getTime() < Date.now()) {
+      return null;
+    }
+
+    return { snapshotId: latest.id, expiresAt };
   } catch (error) {
     console.error("Error getting latest snapshot:", error);
     return null;
   }
 }
 
-export async function saveSnapshot(
-  snapshotId: string,
-  gitRevision?: string
-): Promise<SandboxSnapshot | null> {
+export async function deleteOldSnapshots(
+  currentSnapshotId: string
+): Promise<void> {
   try {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
+    const { snapshots } = await Snapshot.list();
 
-    const [snapshot] = await db
-      .insert(sandboxSnapshots)
-      .values({
-        snapshotId,
-        gitRevision,
-        expiresAt,
-      })
-      .returning();
+    const toDelete = snapshots.filter(
+      (s) => s.id !== currentSnapshotId && s.status === "created"
+    );
 
-    return snapshot;
+    for (const s of toDelete) {
+      const snapshot = await Snapshot.get({ snapshotId: s.id });
+      await snapshot.delete();
+      console.log(`Deleted old snapshot: ${s.id}`);
+    }
+
+    if (toDelete.length > 0) {
+      console.log(`Cleaned up ${toDelete.length} old snapshot(s)`);
+    }
   } catch (error) {
-    console.error("Error saving snapshot:", error);
-    return null;
+    console.error("Error deleting old snapshots:", error);
   }
 }

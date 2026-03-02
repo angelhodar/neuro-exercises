@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx drizzle-kit migrate && next build",
+    "build": "npx drizzle-kit migrate && next build && npx tsx scripts/deploy-snapshot.ts",
     "start": "next start",
     "check": "ultracite check",
     "ts-check": "tsc --noEmit --pretty",

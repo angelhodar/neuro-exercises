@@ -2,24 +2,14 @@ import { Sandbox } from "@vercel/sandbox";
 import { getLatestSnapshot } from "@/app/actions/snapshots";
 import { createSnapshot } from "@/lib/sandbox";
 
-const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-
 async function getOrRefreshSnapshot() {
   const snapshot = await getLatestSnapshot();
 
-  if (
-    snapshot &&
-    new Date(snapshot.expiresAt).getTime() - Date.now() > TWO_DAYS_MS
-  ) {
+  if (snapshot) {
     return snapshot;
   }
 
-  console.log(
-    snapshot
-      ? "Snapshot expiring soon. Creating fresh snapshot..."
-      : "No valid snapshot found. Creating fresh snapshot..."
-  );
-
+  console.log("No valid snapshot found. Creating fresh snapshot...");
   return createSnapshot();
 }
 

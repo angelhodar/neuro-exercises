@@ -13,8 +13,6 @@ import { createBlobUrl } from "@/lib/utils";
 import { extractFiles } from "@/lib/zip";
 import { getExerciseById } from "./exercises";
 
-const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 function createSandboxEnvVars(exercise: Exercise) {
@@ -115,19 +113,11 @@ async function startDevServerAndWait(sandbox: Sandbox) {
 async function getOrRefreshSnapshot() {
   const snapshot = await getLatestSnapshot();
 
-  if (
-    snapshot &&
-    new Date(snapshot.expiresAt).getTime() - Date.now() > TWO_DAYS_MS
-  ) {
+  if (snapshot) {
     return snapshot;
   }
 
-  console.log(
-    snapshot
-      ? "Snapshot expiring soon. Creating fresh snapshot..."
-      : "No valid snapshot found. Creating fresh snapshot..."
-  );
-
+  console.log("No valid snapshot found. Creating fresh snapshot...");
   return createSnapshot();
 }
 

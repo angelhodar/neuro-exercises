@@ -1,6 +1,5 @@
 import { Sandbox } from "@vercel/sandbox";
-import { saveSnapshot } from "@/app/actions/snapshots";
-import type { SandboxSnapshot } from "@/lib/db/schema";
+import type { SnapshotInfo } from "@/app/actions/snapshots";
 
 const REPO_URL = "https://github.com/angelhodar/neuro-exercises.git";
 const BRANCH = "main";
@@ -32,7 +31,7 @@ async function copySandboxVariants(sandbox: Sandbox) {
 
 export async function createSnapshot(
   existingSandboxId?: string
-): Promise<SandboxSnapshot> {
+): Promise<SnapshotInfo> {
   let sandbox: Sandbox;
 
   if (existingSandboxId) {
@@ -67,12 +66,8 @@ export async function createSnapshot(
   const snap = await sandbox.snapshot();
   console.log(`Snapshot created: ${snap.snapshotId}`);
 
-  const saved = await saveSnapshot(snap.snapshotId, BRANCH);
-
-  if (!saved) {
-    throw new Error("Failed to save snapshot to database");
-  }
-
-  console.log(`Saved to database (id: ${saved.id})`);
-  return saved;
+  return {
+    snapshotId: snap.snapshotId,
+    expiresAt: snap.expiresAt,
+  };
 }

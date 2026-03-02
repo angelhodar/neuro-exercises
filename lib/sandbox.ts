@@ -1,5 +1,5 @@
 import { Sandbox } from "@vercel/sandbox";
-import { deleteOldSnapshots, type SnapshotInfo } from "@/app/actions/snapshots";
+import type { SnapshotInfo } from "@/app/actions/snapshots";
 
 const REPO_URL = "https://github.com/angelhodar/neuro-exercises.git";
 const BRANCH = "main";
@@ -66,13 +66,8 @@ export async function createSnapshot(
   const snap = await sandbox.snapshot();
   console.log(`Snapshot created: ${snap.snapshotId}`);
 
-  const snapshotInfo: SnapshotInfo = {
+  return {
     snapshotId: snap.snapshotId,
     expiresAt: snap.expiresAt,
   };
-
-  // Clean up old snapshots
-  await deleteOldSnapshots(snap.snapshotId);
-
-  return snapshotInfo;
 }

@@ -27,27 +27,3 @@ export async function getLatestSnapshot(): Promise<SnapshotInfo | null> {
     return null;
   }
 }
-
-export async function deleteOldSnapshots(
-  currentSnapshotId: string
-): Promise<void> {
-  try {
-    const { snapshots } = await Snapshot.list();
-
-    const toDelete = snapshots.filter(
-      (s) => s.id !== currentSnapshotId && s.status === "created"
-    );
-
-    for (const s of toDelete) {
-      const snapshot = await Snapshot.get({ snapshotId: s.id });
-      await snapshot.delete();
-      console.log(`Deleted old snapshot: ${s.id}`);
-    }
-
-    if (toDelete.length > 0) {
-      console.log(`Cleaned up ${toDelete.length} old snapshot(s)`);
-    }
-  } catch (error) {
-    console.error("Error deleting old snapshots:", error);
-  }
-}

@@ -15,7 +15,10 @@ async function main() {
     return;
   }
 
-  console.log("[deploy-snapshot] Creating fresh sandbox snapshot...");
+  const commitSha = process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown";
+  console.log(
+    `[deploy-snapshot] Creating fresh sandbox snapshot for commit ${commitSha.slice(0, 7)}...`
+  );
   const startTime = Date.now();
 
   const snapshot = await createSnapshot();
@@ -23,6 +26,7 @@ async function main() {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`[deploy-snapshot] Snapshot created successfully in ${elapsed}s`);
   console.log(`[deploy-snapshot] Snapshot ID: ${snapshot.snapshotId}`);
+  console.log(`[deploy-snapshot] Commit: ${commitSha}`);
   console.log(
     `[deploy-snapshot] Expires at: ${snapshot.expiresAt?.toISOString() ?? "no expiration"}`
   );

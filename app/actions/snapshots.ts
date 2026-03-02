@@ -7,7 +7,8 @@ export interface SnapshotInfo {
 
 export async function getLatestSnapshot(): Promise<SnapshotInfo | null> {
   try {
-    const { snapshots } = await Snapshot.list({ limit: 1 });
+    const result = await Snapshot.list({ limit: 1 });
+    const { snapshots } = result.json;
 
     const latest = snapshots.find((s) => s.status === "created");
 

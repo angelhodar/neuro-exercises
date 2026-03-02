@@ -2,26 +2,14 @@ import { Sandbox } from "@vercel/sandbox";
 import { getLatestSnapshot } from "@/app/actions/snapshots";
 import { createSnapshot } from "@/lib/sandbox";
 
-const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
 async function getOrRefreshSnapshot() {
   const snapshot = await getLatestSnapshot();
 
   if (snapshot) {
-    const ttl = snapshot.expiresAt
-      ? new Date(snapshot.expiresAt).getTime() - Date.now()
-      : SEVEN_DAYS_MS;
-
-    if (ttl > TWO_DAYS_MS) {
-      return snapshot;
-    }
-
-    console.log("Snapshot expiring soon. Creating fresh snapshot...");
-  } else {
-    console.log("No valid snapshot found. Creating fresh snapshot...");
+    return snapshot;
   }
 
+  console.log("No valid snapshot found. Creating fresh snapshot...");
   return createSnapshot();
 }
 

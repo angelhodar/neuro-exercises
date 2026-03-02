@@ -7,7 +7,7 @@ async function main() {
   const sandboxId = arg ?? process.env.SANDBOX_ID;
   const saved = await createSnapshot(sandboxId || undefined);
   console.log(`\nSnapshot ID: ${saved.snapshotId}`);
-  console.log(`Expires at: ${saved.expiresAt.toISOString()}`);
+  console.log(`Expires at: ${saved.expiresAt?.toISOString() ?? "unknown"}`);
 }
 
 main().catch((error) => {

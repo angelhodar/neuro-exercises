@@ -1,7 +1,7 @@
 "use client";
 
 import { ImageIcon, Loader2, SaveIcon } from "lucide-react";
-import { useCallback, useReducer } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   commitGeneratedImage,
@@ -38,111 +38,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Media } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
 interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   imageBase64?: string;
 }
-
-interface CreatorState {
-  messages: ChatMessage[];
-  latestImageBase64: string | null;
-  isGenerating: boolean;
-  isCommitting: boolean;
-  error: string | null;
-  firstPrompt: string | null;
-}
-
-type CreatorAction =
-  | { type: "ADD_USER_MESSAGE"; prompt: string }
-  | { type: "GENERATION_START" }
-  | { type: "GENERATION_SUCCESS"; imageBase64: string }
-  | { type: "GENERATION_ERROR"; error: string }
-  | { type: "COMMIT_START" }
-  | { type: "COMMIT_SUCCESS" }
-  | { type: "COMMIT_ERROR"; error: string }
-  | { type: "RESET" };
-
-const initialState: CreatorState = {
-  messages: [],
-  latestImageBase64: null,
-  isGenerating: false,
-  isCommitting: false,
-  error: null,
-  firstPrompt: null,
-};
-
-function creatorReducer(
-  state: CreatorState,
-  action: CreatorAction
-): CreatorState {
-  switch (action.type) {
-    case "ADD_USER_MESSAGE":
-      return {
-        ...state,
-        messages: [
-          ...state.messages,
-          {
-            id: crypto.randomUUID(),
-            role: "user",
-            content: action.prompt,
-          },
-        ],
-        firstPrompt: state.firstPrompt ?? action.prompt,
-        error: null,
-      };
-    case "GENERATION_START":
-      return { ...state, isGenerating: true, error: null };
-    case "GENERATION_SUCCESS":
-      return {
-        ...state,
-        isGenerating: false,
-        latestImageBase64: action.imageBase64,
-        messages: [
-          ...state.messages,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: "Imagen generada",
-            imageBase64: action.imageBase64,
-          },
-        ],
-      };
-    case "GENERATION_ERROR":
-      return {
-        ...state,
-        isGenerating: false,
-        error: action.error,
-        messages: [
-          ...state.messages,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: `Error: ${action.error}`,
-          },
-        ],
-      };
-    case "COMMIT_START":
-      return { ...state, isCommitting: true, error: null };
-    case "COMMIT_SUCCESS":
-      return { ...state, isCommitting: false };
-    case "COMMIT_ERROR":
-      return { ...state, isCommitting: false, error: action.error };
-    case "RESET":
-      return initialState;
-    default:
-      return state;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
 
 function ImagePreview({
   imageUrl,
@@ -188,10 +89,6 @@ function ImagePreview({
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main component
-// ---------------------------------------------------------------------------
-
 export default function CreateMediaWithAI({
   open,
   setOpen,
@@ -201,95 +98,112 @@ export default function CreateMediaWithAI({
   setOpen: (v: boolean) => void;
   sourceMedia?: Media;
 }) {
-  const [state, dispatch] = useReducer(creatorReducer, initialState);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isCommitting, setIsCommitting] = useState(false);
+  const firstPromptRef = useRef<string | null>(null);
+  const latestImageRef = useRef<string | null>(null);
 
   const sourceImageUrl = sourceMedia
     ? createBlobUrl(sourceMedia.blobKey)
     : null;
+  const previewUrl = latestImageRef.current ?? sourceImageUrl;
+  const busy = isGenerating || isCommitting;
 
-  const previewUrl = state.latestImageBase64 ?? sourceImageUrl;
+  function reset() {
+    setMessages([]);
+    setIsGenerating(false);
+    setIsCommitting(false);
+    firstPromptRef.current = null;
+    latestImageRef.current = null;
+  }
 
-  const handleClose = useCallback(
-    (isOpen: boolean) => {
-      if (!isOpen) {
-        dispatch({ type: "RESET" });
-      }
-      setOpen(isOpen);
-    },
-    [setOpen]
-  );
+  function handleClose(isOpen: boolean) {
+    if (!isOpen) {
+      reset();
+    }
+    setOpen(isOpen);
+  }
 
-  const handleSendPrompt = useCallback(
-    async (message: PromptInputMessage) => {
-      const prompt = message.text.trim();
-      if (!prompt) {
-        return;
-      }
-
-      dispatch({ type: "ADD_USER_MESSAGE", prompt });
-      dispatch({ type: "GENERATION_START" });
-
-      try {
-        // For image-to-image: use latest generated image, or source media for variants
-        const sourceBase64 =
-          state.latestImageBase64 ??
-          (sourceMedia
-            ? await fetch(createBlobUrl(sourceMedia.blobKey))
-                .then((r) => r.blob())
-                .then(
-                  (blob) =>
-                    new Promise<string>((resolve) => {
-                      const reader = new FileReader();
-                      reader.onloadend = () => resolve(reader.result as string);
-                      reader.readAsDataURL(blob);
-                    })
-                )
-            : undefined);
-
-        const result = await generateImagePreview(
-          prompt,
-          sourceBase64 ?? undefined
-        );
-        dispatch({
-          type: "GENERATION_SUCCESS",
-          imageBase64: result.imageBase64,
-        });
-      } catch (e) {
-        dispatch({
-          type: "GENERATION_ERROR",
-          error: e instanceof Error ? e.message : "Error generando la imagen",
-        });
-      }
-    },
-    [state.latestImageBase64, sourceMedia]
-  );
-
-  const handleCommit = useCallback(async () => {
-    if (!(state.latestImageBase64 && state.firstPrompt)) {
+  async function handleSendPrompt(message: PromptInputMessage) {
+    const prompt = message.text.trim();
+    if (!prompt) {
       return;
     }
 
-    dispatch({ type: "COMMIT_START" });
+    if (!firstPromptRef.current) {
+      firstPromptRef.current = prompt;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "user", content: prompt },
+    ]);
+    setIsGenerating(true);
+
+    try {
+      // For image-to-image: use latest generated image, or source media for variants
+      let sourceBase64 = latestImageRef.current;
+      if (!sourceBase64 && sourceMedia) {
+        const res = await fetch(createBlobUrl(sourceMedia.blobKey));
+        const blob = await res.blob();
+        sourceBase64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      const result = await generateImagePreview(
+        prompt,
+        sourceBase64 ?? undefined
+      );
+
+      latestImageRef.current = result.imageBase64;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "Imagen generada",
+          imageBase64: result.imageBase64,
+        },
+      ]);
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: `Error: ${e instanceof Error ? e.message : "Error generando la imagen"}`,
+        },
+      ]);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function handleCommit() {
+    if (!(latestImageRef.current && firstPromptRef.current)) {
+      return;
+    }
+
+    setIsCommitting(true);
     try {
       await commitGeneratedImage(
-        state.latestImageBase64,
-        state.firstPrompt,
+        latestImageRef.current,
+        firstPromptRef.current,
         sourceMedia?.id
       );
-      dispatch({ type: "COMMIT_SUCCESS" });
       toast.success("Imagen guardada correctamente");
-      dispatch({ type: "RESET" });
+      reset();
       setOpen(false);
     } catch (_e) {
-      dispatch({
-        type: "COMMIT_ERROR",
-        error: "Error guardando la imagen",
-      });
       toast.error("Error guardando la imagen");
+    } finally {
+      setIsCommitting(false);
     }
-  }, [state.latestImageBase64, state.firstPrompt, sourceMedia?.id, setOpen]);
-
-  const chatStatus = state.isGenerating ? ("submitted" as const) : undefined;
+  }
 
   return (
     <Dialog onOpenChange={handleClose} open={open}>
@@ -306,28 +220,21 @@ export default function CreateMediaWithAI({
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 md:h-[500px] md:flex-row">
-          {/* Left: Chat panel */}
+          {/* Chat panel */}
           <div className="flex min-h-64 flex-1 flex-col overflow-hidden rounded-lg border md:min-h-0">
             <Conversation className="min-h-0 flex-1">
               <ConversationContent className="gap-4 p-4">
-                {state.messages.length === 0 ? (
+                {messages.length === 0 ? (
                   <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
                     <ImageIcon className="size-8 text-muted-foreground" />
-                    <div className="space-y-1">
-                      <h3 className="font-medium text-sm">
-                        {sourceMedia
-                          ? "Describe los cambios"
-                          : "Describe la imagen"}
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        {sourceMedia
-                          ? "Indica qué cambios quieres hacer sobre la imagen original"
-                          : "Escribe un prompt para generar tu primera imagen"}
-                      </p>
-                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      {sourceMedia
+                        ? "Indica qué cambios quieres hacer sobre la imagen original"
+                        : "Escribe un prompt para generar tu primera imagen"}
+                    </p>
                   </div>
                 ) : (
-                  state.messages.map((m) => (
+                  messages.map((m) => (
                     <Message from={m.role} key={m.id}>
                       <MessageContent>
                         {m.imageBase64 ? (
@@ -346,13 +253,6 @@ export default function CreateMediaWithAI({
                     </Message>
                   ))
                 )}
-
-                {state.isGenerating && (
-                  <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3 text-blue-600">
-                    <Loader2 className="size-4 animate-spin" />
-                    <span className="text-sm">Generando imagen...</span>
-                  </div>
-                )}
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
@@ -361,27 +261,24 @@ export default function CreateMediaWithAI({
               <PromptInput onSubmit={handleSendPrompt}>
                 <PromptInputBody>
                   <PromptInputTextarea
-                    disabled={state.isGenerating || state.isCommitting}
+                    disabled={busy}
                     placeholder="Describe la imagen que quieres generar..."
                   />
                 </PromptInputBody>
                 <PromptInputFooter>
                   <div />
                   <PromptInputSubmit
-                    disabled={state.isGenerating || state.isCommitting}
-                    status={chatStatus}
+                    disabled={busy}
+                    status={isGenerating ? "submitted" : undefined}
                   />
                 </PromptInputFooter>
               </PromptInput>
             </div>
           </div>
 
-          {/* Right: Image preview */}
+          {/* Image preview */}
           <div className="flex w-full shrink-0 flex-col md:w-[400px]">
-            <ImagePreview
-              imageUrl={previewUrl}
-              isGenerating={state.isGenerating}
-            />
+            <ImagePreview imageUrl={previewUrl} isGenerating={isGenerating} />
           </div>
         </div>
 
@@ -394,15 +291,11 @@ export default function CreateMediaWithAI({
             Cancelar
           </Button>
           <Button
-            disabled={
-              !state.latestImageBase64 ||
-              state.isCommitting ||
-              state.isGenerating
-            }
+            disabled={!latestImageRef.current || busy}
             onClick={handleCommit}
             type="button"
           >
-            {state.isCommitting ? (
+            {isCommitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
                 Guardando...

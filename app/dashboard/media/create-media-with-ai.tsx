@@ -153,7 +153,7 @@ function ImagePreview({
 }) {
   if (isGenerating) {
     return (
-      <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed">
+      <div className="flex size-full items-center justify-center rounded-lg border border-dashed">
         <div className="flex flex-col items-center gap-3">
           <Skeleton className="size-48 rounded-lg" />
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -167,7 +167,7 @@ function ImagePreview({
 
   if (imageUrl) {
     return (
-      <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border">
+      <div className="flex size-full items-center justify-center overflow-hidden rounded-lg border">
         {/* biome-ignore lint/performance/noImgElement: base64 data URLs cannot use next/image */}
         <img
           alt="Vista previa de imagen generada"
@@ -181,7 +181,7 @@ function ImagePreview({
   }
 
   return (
-    <div className="flex aspect-square w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed text-muted-foreground">
+    <div className="flex size-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed text-muted-foreground">
       <ImageIcon className="size-12" />
       <p className="text-sm">La imagen aparecerá aquí</p>
     </div>
@@ -305,9 +305,9 @@ export default function CreateMediaWithAI({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 md:flex-row">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 md:h-[500px] md:flex-row">
           {/* Left: Chat panel */}
-          <div className="flex min-h-0 flex-1 flex-col rounded-lg border">
+          <div className="flex min-h-64 flex-1 flex-col overflow-hidden rounded-lg border md:min-h-0">
             <Conversation className="min-h-0 flex-1">
               <ConversationContent className="gap-4 p-4">
                 {state.messages.length === 0 ? (

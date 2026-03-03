@@ -28,6 +28,7 @@ import { deleteBlobs, uploadBlob } from "@/lib/storage";
 import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 
 const IMAGE_MODEL = "bfl/flux-2-flex";
+const BASE64_PREFIX_REGEX = /^data:image\/\w+;base64,/;
 
 async function generateImageMetadata(imageUrl: string) {
   const { output } = await generateText({
@@ -237,4 +238,74 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
 
   revalidatePath("/dashboard/media");
   return results;
+}
+
+export async function generateImagePreview(
+  prompt: string,
+  sourceImageBase64?: string
+) {
+  await requireAuth();
+
+  const translatedPrompt = await translatePromptToEnglish(prompt);
+
+  const sourceBuffer = sourceImageBase64
+    ? Buffer.from(sourceImageBase64.replace(BASE64_PREFIX_REGEX, ""), "base64")
+    : undefined;
+
+  const imagePrompt = sourceBuffer
+    ? { text: translatedPrompt, images: [sourceBuffer] }
+    : `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`;
+
+  const { images } = await generateImage({
+    model: IMAGE_MODEL,
+    prompt: imagePrompt,
+    size: "512x512",
+  });
+
+  const [image] = images;
+  if (!image) {
+    throw new Error("Error generating image");
+  }
+
+  const optimized = await optimizeImage(Buffer.from(image.uint8Array));
+  const base64 = `data:image/webp;base64,${optimized.toString("base64")}`;
+
+  return { imageBase64: base64 };
+}
+
+export async function commitGeneratedImage(
+  imageBase64: string,
+  prompt: string,
+  derivedFrom?: number
+) {
+  const user = await requireAuth();
+
+  const buffer = Buffer.from(
+    imageBase64.replace(BASE64_PREFIX_REGEX, ""),
+    "base64"
+  );
+
+  const blob = await uploadBlob(`library/${crypto.randomUUID()}.webp`, buffer);
+
+  const metadata = await generateImageMetadata(blob.url);
+  const embedding = metadata.description
+    ? await generateEmbedding(metadata.description)
+    : undefined;
+
+  await db.insert(medias).values({
+    name:
+      metadata.name.charAt(0).toUpperCase() +
+      metadata.name.slice(1).toLowerCase(),
+    description: metadata.description,
+    tags: metadata.tags.map((tag) => tag.toLowerCase()),
+    blobKey: blob.pathname,
+    mimeType: "image/webp",
+    thumbnailKey: null,
+    metadata: { prompt, model: IMAGE_MODEL },
+    authorId: user.id,
+    derivedFrom: derivedFrom ?? null,
+    embedding,
+  });
+
+  revalidatePath("/dashboard/media");
 }

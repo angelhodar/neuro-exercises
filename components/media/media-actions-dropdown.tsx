@@ -1,16 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Copy, MoreVertical, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-import { deleteMedia, generateDerivedMedia } from "@/app/actions/media";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { deleteMedia } from "@/app/actions/media";
+import CreateMediaWithAI from "@/app/dashboard/media/create-media-with-ai";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,15 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useConfirm } from "@/hooks/use-confirm";
 import type { Media } from "@/lib/db/schema";
 
@@ -43,8 +30,7 @@ export function MediaActionsDropdown({
   const router = useRouter();
   const { confirm } = useConfirm();
   const [openVariantDialog, setOpenVariantDialog] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // Infer mediaType from mimeType
+
   const getMediaType = (mimeType: string): "image" | "audio" | "video" => {
     if (mimeType.startsWith("image/")) {
       return "image";
@@ -55,7 +41,7 @@ export function MediaActionsDropdown({
     if (mimeType.startsWith("video/")) {
       return "video";
     }
-    return "image"; // fallback
+    return "image";
   };
 
   const mediaType = getMediaType(media.mimeType);
@@ -82,33 +68,6 @@ export function MediaActionsDropdown({
     });
   };
 
-  // Formulario para crear variante
-  const schema = z.object({
-    prompt: z.string().min(1, "El prompt es obligatorio"),
-  });
-  type FormSchema = z.infer<typeof schema>;
-  const form = useForm<FormSchema>({
-    resolver: zodResolver(schema),
-    defaultValues: { prompt: "" },
-  });
-
-  const handleCreateVariant = () => setOpenVariantDialog(true);
-
-  const onSubmit = async (values: FormSchema) => {
-    setIsSubmitting(true);
-    try {
-      await generateDerivedMedia(media, values.prompt);
-      toast.success("Variante generada correctamente");
-      setOpenVariantDialog(false);
-      form.reset();
-      router.refresh();
-    } catch (_e) {
-      toast.error("Error generando la variante");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const showImageActions = mediaType === "image";
 
   return (
@@ -119,7 +78,7 @@ export function MediaActionsDropdown({
             <button
               aria-label="Media actions"
               className="rounded-full bg-white/80 p-2 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/90"
-              onClick={(e) => e.stopPropagation()} // Prevent triggering parent selection
+              onClick={(e) => e.stopPropagation()}
               type="button"
             />
           }
@@ -129,7 +88,7 @@ export function MediaActionsDropdown({
         <DropdownMenuContent align="end" className="w-62">
           {showImageActions && (
             <>
-              <DropdownMenuItem onClick={handleCreateVariant}>
+              <DropdownMenuItem onClick={() => setOpenVariantDialog(true)}>
                 <Copy className="mr-3 h-4 w-4" />
                 Crear variante
               </DropdownMenuItem>
@@ -152,37 +111,11 @@ export function MediaActionsDropdown({
           <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs" />,
           document.body
         )}
-      <Dialog onOpenChange={setOpenVariantDialog} open={openVariantDialog}>
-        <DialogContent>
-          <DialogTitle>Crear variante de imagen</DialogTitle>
-          <Form {...form}>
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={form.handleSubmit(onSubmit)}
-            >
-              <FormField
-                control={form.control}
-                name="prompt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Instrucciones para la variante</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Describe la variante que quieres generar..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button disabled={isSubmitting} type="submit">
-                {isSubmitting ? "Generando..." : "Generar variante"}
-              </Button>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      <CreateMediaWithAI
+        open={openVariantDialog}
+        setOpen={setOpenVariantDialog}
+        sourceMedia={media}
+      />
     </div>
   );
 }

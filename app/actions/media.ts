@@ -27,7 +27,7 @@ import { mediaMetadataSchema } from "@/lib/schemas/medias";
 import { deleteBlobs, uploadBlob } from "@/lib/storage";
 import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 
-const IMAGE_MODEL = "bfl/flux-2-flex";
+const IMAGE_MODEL = "xai/grok-imagine-image-pro";
 const BASE64_PREFIX_REGEX = /^data:image\/\w+;base64,/;
 
 async function generateImageMetadata(imageUrl: string) {

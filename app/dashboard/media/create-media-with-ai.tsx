@@ -207,7 +207,7 @@ export default function CreateMediaWithAI({
 
   return (
     <Dialog onOpenChange={handleClose} open={open}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+      <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle>
             {sourceMedia ? "Crear variante de imagen" : "Generar imagen con IA"}

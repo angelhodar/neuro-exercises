@@ -27,7 +27,8 @@ import { mediaMetadataSchema } from "@/lib/schemas/medias";
 import { deleteBlobs, uploadBlob } from "@/lib/storage";
 import { createBlobUrl, downloadFromUrl } from "@/lib/utils";
 
-const IMAGE_MODEL = "bfl/flux-2-flex";
+const IMAGE_MODEL = "xai/grok-imagine-image-pro";
+const BASE64_PREFIX_REGEX = /^data:image\/\w+;base64,/;
 
 async function generateImageMetadata(imageUrl: string) {
   const { output } = await generateText({
@@ -57,15 +58,14 @@ async function generateImageMetadata(imageUrl: string) {
   return output;
 }
 
-async function generateAndInsertMedia(
+async function generateOptimizedImage(
   prompt: string,
-  authorId: string,
-  options?: { sourceImage?: Buffer; derivedFrom?: number }
-) {
+  sourceImage?: Buffer
+): Promise<Buffer> {
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
-  const imagePrompt = options?.sourceImage
-    ? { text: translatedPrompt, images: [options.sourceImage] }
+  const imagePrompt = sourceImage
+    ? { text: translatedPrompt, images: [sourceImage] }
     : `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`;
 
   const { images } = await generateImage({
@@ -79,10 +79,18 @@ async function generateAndInsertMedia(
     throw new Error("Error generating image");
   }
 
-  const optimized = await optimizeImage(Buffer.from(image.uint8Array));
+  return optimizeImage(Buffer.from(image.uint8Array));
+}
+
+async function uploadAndInsertMedia(
+  imageBuffer: Buffer,
+  prompt: string,
+  authorId: string,
+  derivedFrom?: number
+) {
   const blob = await uploadBlob(
     `library/${crypto.randomUUID()}.webp`,
-    optimized
+    imageBuffer
   );
 
   const metadata = await generateImageMetadata(blob.url);
@@ -101,7 +109,7 @@ async function generateAndInsertMedia(
     thumbnailKey: null,
     metadata: { prompt, model: IMAGE_MODEL },
     authorId,
-    derivedFrom: options?.derivedFrom ?? null,
+    derivedFrom: derivedFrom ?? null,
     embedding,
   });
 }
@@ -142,17 +150,16 @@ export async function generateDerivedMedia(media: Media, prompt: string) {
     .then((r) => r.arrayBuffer())
     .then((b) => Buffer.from(b));
 
-  await generateAndInsertMedia(prompt, user.id, {
-    sourceImage,
-    derivedFrom: media.id,
-  });
+  const optimized = await generateOptimizedImage(prompt, sourceImage);
+  await uploadAndInsertMedia(optimized, prompt, user.id, media.id);
 
   revalidatePath("/dashboard/media");
 }
 
 export async function generateMediaFromPrompt(prompt: string) {
   const user = await requireAuth();
-  await generateAndInsertMedia(prompt, user.id);
+  const optimized = await generateOptimizedImage(prompt);
+  await uploadAndInsertMedia(optimized, prompt, user.id);
   revalidatePath("/dashboard/media");
 }
 
@@ -237,4 +244,36 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
 
   revalidatePath("/dashboard/media");
   return results;
+}
+
+export async function generateImagePreview(
+  prompt: string,
+  sourceImageBase64?: string
+) {
+  await requireAuth();
+
+  const sourceBuffer = sourceImageBase64
+    ? Buffer.from(sourceImageBase64.replace(BASE64_PREFIX_REGEX, ""), "base64")
+    : undefined;
+
+  const optimized = await generateOptimizedImage(prompt, sourceBuffer);
+  return {
+    imageBase64: `data:image/webp;base64,${optimized.toString("base64")}`,
+  };
+}
+
+export async function commitGeneratedImage(
+  imageBase64: string,
+  prompt: string,
+  derivedFrom?: number
+) {
+  const user = await requireAuth();
+
+  const buffer = Buffer.from(
+    imageBase64.replace(BASE64_PREFIX_REGEX, ""),
+    "base64"
+  );
+
+  await uploadAndInsertMedia(buffer, prompt, user.id, derivedFrom);
+  revalidatePath("/dashboard/media");
 }

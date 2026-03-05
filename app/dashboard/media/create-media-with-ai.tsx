@@ -219,7 +219,7 @@ export default function CreateMediaWithAI({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 md:max-h-[500px] md:flex-row">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 md:max-h-[800px] md:flex-row">
           {/* Chat panel */}
           <div className="flex min-h-64 flex-1 flex-col overflow-hidden rounded-lg border md:min-h-0">
             <Conversation className="min-h-0 flex-1">

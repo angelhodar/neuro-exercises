@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   }
 
   const { messages: conversationMessages, lastCodeBlobKey } =
-    createConversationHistory(generations, slug);
+    createConversationHistory(generations);
 
   const sandbox = await getAgentSandbox();
   await writePreviousGenToSandbox(sandbox, lastCodeBlobKey);
@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     tools,
     sandbox,
     generationId: lastGeneration.id,
+    slug,
   });
 
   const result = await agent.stream({ messages: conversationMessages });

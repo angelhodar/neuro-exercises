@@ -7,8 +7,7 @@ interface ConversationData {
 }
 
 export function createConversationHistory(
-  generations: ExerciseChatGeneration[],
-  slug: string
+  generations: ExerciseChatGeneration[]
 ): ConversationData {
   const firstGeneration = generations.at(0);
 
@@ -19,22 +18,8 @@ export function createConversationHistory(
   const messages: ModelMessage[] = [];
   let lastCodeBlobKey: string | null = null;
 
-  // First generation's prompt becomes the initial user message with guidelines + slug context
-  const initialMessage = `
-The initial guidelines for the exercise are:
-
-<initial-guidelines>
-${firstGeneration.prompt}
-</initial-guidelines>
-
-The exercise slug is:
-
-<slug>
-${slug}
-</slug>
-`;
-
-  messages.push({ role: "user", content: initialMessage });
+  // First generation's prompt is the initial user message
+  messages.push({ role: "user", content: firstGeneration.prompt });
 
   // For each generation, add the assistant summary and the next generation's prompt
   for (let i = 0; i < generations.length; i++) {

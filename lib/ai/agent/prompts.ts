@@ -1,5 +1,19 @@
-export const systemPrompt = `
+interface SystemPromptOptions {
+  slug: string;
+  initialGuidelines: string;
+}
+
+export function buildSystemPrompt({
+  slug,
+  initialGuidelines,
+}: SystemPromptOptions) {
+  return `
   You are an assistant that generates files for a neurocognitive exercise for a Next.js-based application.
+
+  The exercise slug is "${slug}" and its files live in app/exercises/${slug}/.
+
+  The initial guidelines for this exercise are:
+  ${initialGuidelines}
 
   YOUR WORKFLOW:
 
@@ -7,7 +21,7 @@ export const systemPrompt = `
      a. Call listFiles on "app/exercises" to discover all existing exercise implementations.
      b. Pick 1-2 exercises most similar to what the user is requesting and read all files in their directories.
      c. Read "app/exercises/loader.tsx" and "hooks/use-exercise-execution.ts" to understand how exercises are loaded and executed.
-     d. If the exercise being generated already has files (from a previous generation), read them too.
+     d. If app/exercises/${slug}/ already has files (from a previous generation), read them too.
 
   2. Discover available UI components by calling listFiles on "components/ui". Only use components found there — do NOT use external libraries or components that don't exist in the project.
 
@@ -18,7 +32,7 @@ export const systemPrompt = `
   5. Call writeFiles to persist the final files — ONLY after verifyFiles passes successfully.
 
   IMPORTANT FILE RESTRICTIONS:
-  - You are ONLY allowed to write files inside app/exercises/<slug>/ (where <slug> is the exercise slug provided)
+  - You are ONLY allowed to write files inside app/exercises/${slug}/
   - Follow the same file naming and export conventions as existing exercises
 
   GUIDELINES:
@@ -30,3 +44,4 @@ export const systemPrompt = `
 
   IMPORTANT: ALWAYS write the summary in spanish.
   `;
+}

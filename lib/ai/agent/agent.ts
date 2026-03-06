@@ -1,23 +1,27 @@
 import type { Sandbox } from "@vercel/sandbox";
 import { hasToolCall, ToolLoopAgent } from "ai";
 import { updateExerciseGeneration } from "@/app/actions/generations";
-import { systemPrompt } from "./prompts";
+import { buildSystemPrompt } from "./prompts";
 import type { createAgentTools } from "./tools";
 
 interface CreateAgentOptions {
   tools: ReturnType<typeof createAgentTools>;
   sandbox: Sandbox;
   generationId: number;
+  slug: string;
+  initialGuidelines: string;
 }
 
 export function createExerciseAgent({
   tools,
   sandbox,
   generationId,
+  slug,
+  initialGuidelines,
 }: CreateAgentOptions) {
   return new ToolLoopAgent({
     model: "anthropic/claude-sonnet-4.6",
-    instructions: systemPrompt,
+    instructions: buildSystemPrompt({ slug, initialGuidelines }),
     tools,
     stopWhen: hasToolCall("writeFiles"),
     providerOptions: {

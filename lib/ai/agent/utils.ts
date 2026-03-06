@@ -4,11 +4,11 @@ import type { ExerciseChatGeneration } from "@/lib/db/schema";
 interface ConversationData {
   messages: ModelMessage[];
   lastCodeBlobKey: string | null;
+  initialGuidelines: string;
 }
 
 export function createConversationHistory(
-  generations: ExerciseChatGeneration[],
-  slug: string
+  generations: ExerciseChatGeneration[]
 ): ConversationData {
   const firstGeneration = generations.at(0);
 
@@ -19,24 +19,8 @@ export function createConversationHistory(
   const messages: ModelMessage[] = [];
   let lastCodeBlobKey: string | null = null;
 
-  // First generation's prompt becomes the initial user message with guidelines + slug context
-  const initialMessage = `
-The initial guidelines for the exercise are:
-
-<initial-guidelines>
-${firstGeneration.prompt}
-</initial-guidelines>
-
-The exercise slug is:
-
-<slug>
-${slug}
-</slug>
-`;
-
-  messages.push({ role: "user", content: initialMessage });
-
-  // For each generation, add the assistant summary and the next generation's prompt
+  // First generation's prompt is used as initialGuidelines in the system prompt,
+  // so the conversation only contains follow-up messages.
   for (let i = 0; i < generations.length; i++) {
     const generation = generations[i];
 
@@ -57,5 +41,5 @@ ${slug}
     }
   }
 
-  return { messages, lastCodeBlobKey };
+  return { messages, lastCodeBlobKey, initialGuidelines: firstGeneration.prompt };
 }

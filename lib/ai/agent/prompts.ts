@@ -27,15 +27,9 @@ export function buildSystemPrompt(slug: string) {
   - Only use UI components from "components/ui" — do NOT use external libraries or components that don't exist in the project. Call listFiles on "components/ui" to discover what's available.
 
   USEFUL PROJECT DIRECTORIES:
-  - "components/exercises/" — Shared exercise UI components you can import:
-    exercise-base-fields.tsx (base config form fields), exercise-config-form.tsx (form wrapper),
-    exercise-config-preset-selector.tsx (preset loading), exercise-floating-bar.tsx (pause/reset/finish controls),
-    exercise-countdown.tsx (timer display), exercise-container.tsx (wrapper), exercise-presentation.tsx (main wrapper),
-    exercise-fullscreen-button.tsx, exercise-audio-button.tsx, exercise-card.tsx, card-action-stop.tsx.
-  - "lib/schemas/base-schemas.ts" — Defines baseExerciseConfigSchema (endConditionType, totalQuestions, timeLimitSeconds, automaticNextQuestion) and BaseExerciseConfig type. Every exercise schema MUST extend this via .merge().
-  - "lib/utils.ts" — Utility helpers available for import:
-    cn() for Tailwind class merging, getDiff() for word-level diff analysis (useful for speech/text exercises),
-    formatDate() for Spanish-locale date formatting, createBlobUrl() for blob URL generation.
+  - "components/exercises/" — Shared reusable exercise UI components (config forms, timers, floating controls, presentation wrappers, etc.). Call listFiles to discover what's available.
+  - "lib/schemas/base-schemas.ts" — Base exercise config schema and type that every exercise MUST extend via .merge().
+  - "lib/utils.ts" — Common utility helpers (class merging, word-level diff analysis, date formatting, blob URLs).
 
   At the end, briefly summarize the actions performed for non technical users. Dont mention the files you created or modified, code strategy, etc. Just a short summary of the changes you made.
 

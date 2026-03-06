@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     return new Response("Failed to create generation", { status: 500 });
   }
 
-  const { messages: conversationMessages, lastCodeBlobKey, initialGuidelines } =
+  const { messages: conversationMessages, lastCodeBlobKey } =
     createConversationHistory(generations);
 
   const sandbox = await getAgentSandbox();
@@ -72,7 +72,6 @@ export async function POST(req: Request) {
     sandbox,
     generationId: lastGeneration.id,
     slug,
-    initialGuidelines,
   });
 
   const result = await agent.stream({ messages: conversationMessages });

@@ -1,19 +1,8 @@
-interface SystemPromptOptions {
-  slug: string;
-  initialGuidelines: string;
-}
-
-export function buildSystemPrompt({
-  slug,
-  initialGuidelines,
-}: SystemPromptOptions) {
+export function buildSystemPrompt(slug: string) {
   return `
   You are an assistant that generates files for a neurocognitive exercise for a Next.js-based application.
 
   The exercise slug is "${slug}" and its files live in app/exercises/${slug}/.
-
-  The initial guidelines for this exercise are:
-  ${initialGuidelines}
 
   YOUR WORKFLOW:
 

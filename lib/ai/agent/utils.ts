@@ -4,7 +4,6 @@ import type { ExerciseChatGeneration } from "@/lib/db/schema";
 interface ConversationData {
   messages: ModelMessage[];
   lastCodeBlobKey: string | null;
-  initialGuidelines: string;
 }
 
 export function createConversationHistory(
@@ -19,8 +18,10 @@ export function createConversationHistory(
   const messages: ModelMessage[] = [];
   let lastCodeBlobKey: string | null = null;
 
-  // First generation's prompt is used as initialGuidelines in the system prompt,
-  // so the conversation only contains follow-up messages.
+  // First generation's prompt is the initial user message
+  messages.push({ role: "user", content: firstGeneration.prompt });
+
+  // For each generation, add the assistant summary and the next generation's prompt
   for (let i = 0; i < generations.length; i++) {
     const generation = generations[i];
 
@@ -41,5 +42,5 @@ export function createConversationHistory(
     }
   }
 
-  return { messages, lastCodeBlobKey, initialGuidelines: firstGeneration.prompt };
+  return { messages, lastCodeBlobKey };
 }

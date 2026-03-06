@@ -9,7 +9,6 @@ interface CreateAgentOptions {
   sandbox: Sandbox;
   generationId: number;
   slug: string;
-  initialGuidelines: string;
 }
 
 export function createExerciseAgent({
@@ -17,11 +16,10 @@ export function createExerciseAgent({
   sandbox,
   generationId,
   slug,
-  initialGuidelines,
 }: CreateAgentOptions) {
   return new ToolLoopAgent({
     model: "anthropic/claude-sonnet-4.6",
-    instructions: buildSystemPrompt({ slug, initialGuidelines }),
+    instructions: buildSystemPrompt(slug),
     tools,
     stopWhen: hasToolCall("writeFiles"),
     providerOptions: {

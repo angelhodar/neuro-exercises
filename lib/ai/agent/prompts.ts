@@ -9,14 +9,8 @@ export const systemPrompt = `
         in type to the exercise being generated (e.g., if the user wants a memory exercise,
         pick one that involves memory; if they want a language/speech exercise, pick one
         related to language, etc.).
-     c. Call readFiles to read the 4 standard files from the chosen reference exercise(s):
-        - <slug>.schema.ts
-        - <slug>.exercise.tsx
-        - <slug>.config.tsx
-        - <slug>.results.tsx
-     d. Also read these shared files:
-        - app/exercises/loader.tsx
-        - hooks/use-exercise-execution.ts
+     c. Call readFiles to read all the files from the chosen reference exercise directory.
+     d. Also read these shared files: app/exercises/loader.tsx and hooks/use-exercise-execution.ts
 
   2. Call listFiles on the exercise directory (app/exercises/<slug>/) to discover any existing files from a previous generation. If files exist, call readFiles to load them.
 

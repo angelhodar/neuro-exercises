@@ -143,6 +143,12 @@ async function tryReuseSandbox(
     return null;
   }
 
+  try {
+    await sandbox.extendTimeout(900_000);
+  } catch (error) {
+    console.error("Failed to extend sandbox timeout:", error);
+  }
+
   // Refresh code files from blob (may have been updated by multiple writeFiles calls)
   await writeSandboxCodeFiles(sandbox, codeBlobKey);
 

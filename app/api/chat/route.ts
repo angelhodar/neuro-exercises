@@ -60,13 +60,10 @@ export async function POST(req: Request) {
     return new Response("Failed to create generation", { status: 500 });
   }
 
-  const {
-    messages: conversationMessages,
-    lastCodeBlobKey,
-    lastSandboxId,
-  } = createConversationHistory(generations, slug);
+  const { messages: conversationMessages, lastCodeBlobKey } =
+    createConversationHistory(generations, slug);
 
-  const sandbox = await getAgentSandbox(lastSandboxId);
+  const sandbox = await getAgentSandbox();
   await writePreviousGenToSandbox(sandbox, lastCodeBlobKey);
 
   const tools = createAgentTools(sandbox, lastGeneration.id, lastCodeBlobKey);

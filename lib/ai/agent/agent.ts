@@ -34,8 +34,13 @@ export function createExerciseAgent({
       await updateExerciseGeneration(generationId, {
         status: "COMPLETED",
         summary: event.text,
-        sandboxId: sandbox.sandboxId,
       });
+
+      try {
+        await sandbox.stop();
+      } catch (error) {
+        console.error("Failed to stop agent sandbox:", error);
+      }
     },
   });
 }

@@ -13,24 +13,7 @@ async function getOrRefreshSnapshot() {
   return createSnapshot();
 }
 
-export async function getAgentSandbox(
-  previousSandboxId: string | null
-): Promise<Sandbox> {
-  if (previousSandboxId) {
-    try {
-      const sandbox = await Sandbox.get({ sandboxId: previousSandboxId });
-
-      if (sandbox.status === "running") {
-        console.log(`Reusing existing sandbox: ${previousSandboxId}`);
-        return sandbox;
-      }
-    } catch {
-      console.log(
-        `Previous sandbox ${previousSandboxId} unavailable, creating new one...`
-      );
-    }
-  }
-
+export async function getAgentSandbox(): Promise<Sandbox> {
   const snapshot = await getOrRefreshSnapshot();
 
   const sandbox = await Sandbox.create({

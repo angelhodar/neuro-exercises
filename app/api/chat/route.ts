@@ -12,7 +12,7 @@ import {
 import { createConversationHistory } from "@/lib/ai/agent/utils";
 
 export async function POST(req: Request) {
-  const { messages, slug } = await req.json();
+  const { messages, slug, forkedFromId } = await req.json();
 
   const lastMessage = messages.at(-1);
 
@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       exerciseId: exercise.id,
       prompt: lastMessageContent,
       status: "GENERATING",
+      forkedFromId: forkedFromId ?? undefined,
     });
 
     if (!newGeneration) {
@@ -60,8 +61,9 @@ export async function POST(req: Request) {
     return new Response("Failed to create generation", { status: 500 });
   }
 
+  const effectiveForkBaseId = lastGeneration?.forkedFromId ?? undefined;
   const { messages: conversationMessages, lastCodeBlobKey } =
-    createConversationHistory(generations, slug);
+    createConversationHistory(generations, slug, effectiveForkBaseId);
 
   const sandbox = await getAgentSandbox();
   await writePreviousGenToSandbox(sandbox, lastCodeBlobKey);

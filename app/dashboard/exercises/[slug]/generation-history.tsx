@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { Check, History } from "lucide-react";
+import { Check, GitFork, History } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,6 +73,9 @@ export function GenerationHistory({ generations }: GenerationHistoryProps) {
                     <span className="font-medium text-xs">
                       v{versionNumber}
                     </span>
+                    {generation.forkedFromId && (
+                      <GitFork className="h-3 w-3 text-amber-500" />
+                    )}
                     <span className="text-gray-400 text-xs">
                       {formatDistanceToNow(generation.createdAt, {
                         addSuffix: true,

@@ -26,6 +26,7 @@ export async function createExerciseGeneration(data: {
   exerciseId: number;
   prompt: string;
   status?: "PENDING" | "GENERATING" | "COMPLETED" | "ERROR";
+  forkedFromId?: number;
 }): Promise<ExerciseChatGeneration | null> {
   try {
     const user = await getCurrentUser();
@@ -41,6 +42,7 @@ export async function createExerciseGeneration(data: {
         userId: user.id,
         status: data.status || "PENDING",
         prompt: data.prompt,
+        forkedFromId: data.forkedFromId ?? null,
       })
       .returning();
 

@@ -376,6 +376,7 @@ export const exerciseChatGeneration = pgTable(
     sandboxId: varchar("sandbox_id", { length: 255 }),
     summary: text("summary"),
     prompt: text("prompt").notNull(),
+    forkedFromId: integer("forked_from_id"),
     ...timestamps,
   },
   (table) => [
@@ -393,6 +394,11 @@ export const exerciseChatGeneration = pgTable(
       foreignColumns: [users.id],
       name: "exercise_chat_generation_user_fk",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.forkedFromId],
+      foreignColumns: [table.id],
+      name: "exercise_chat_generation_forked_from_fk",
+    }).onDelete("set null"),
   ]
 );
 
@@ -658,6 +664,11 @@ export const exerciseChatGenerationRelations = relations(
     user: one(users, {
       fields: [exerciseChatGeneration.userId],
       references: [users.id],
+    }),
+    forkedFrom: one(exerciseChatGeneration, {
+      fields: [exerciseChatGeneration.forkedFromId],
+      references: [exerciseChatGeneration.id],
+      relationName: "forkedGeneration",
     }),
   })
 );

@@ -74,6 +74,7 @@ export default async function ExerciseChatPage({ params }: PageProps) {
                 <Chat
                   autoStart={autoStart}
                   exercise={exercise}
+                  generations={generations}
                   messages={messages}
                 />
               </div>

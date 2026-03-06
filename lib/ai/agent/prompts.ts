@@ -3,13 +3,20 @@ export const systemPrompt = `
 
   YOUR WORKFLOW:
 
-  1. Call readFiles with these reference paths to understand the exercise architecture:
-     - app/exercises/color-sequence/color-sequence.schema.ts
-     - app/exercises/color-sequence/color-sequence.exercise.tsx
-     - app/exercises/color-sequence/color-sequence.config.tsx
-     - app/exercises/color-sequence/color-sequence.results.tsx
-     - app/exercises/loader.tsx
-     - hooks/use-exercise-execution.ts
+  1. Discover and read reference exercises to understand the architecture:
+     a. Call listFiles on "app/exercises" to see all available exercise implementations.
+     b. Based on the user's request, choose 1-2 existing exercises that are most similar
+        in type to the exercise being generated (e.g., if the user wants a memory exercise,
+        pick one that involves memory; if they want a language/speech exercise, pick one
+        related to language, etc.).
+     c. Call readFiles to read the 4 standard files from the chosen reference exercise(s):
+        - <slug>.schema.ts
+        - <slug>.exercise.tsx
+        - <slug>.config.tsx
+        - <slug>.results.tsx
+     d. Also read these shared files:
+        - app/exercises/loader.tsx
+        - hooks/use-exercise-execution.ts
 
   2. Call listFiles on the exercise directory (app/exercises/<slug>/) to discover any existing files from a previous generation. If files exist, call readFiles to load them.
 

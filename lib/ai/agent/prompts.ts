@@ -27,9 +27,9 @@ export function buildSystemPrompt(slug: string) {
   - Only use UI components from "components/ui" — do NOT use external libraries or components that don't exist in the project. Call listFiles on "components/ui" to discover what's available.
 
   USEFUL PROJECT DIRECTORIES:
-  - "components/exercises/" — Shared reusable exercise UI components (config forms, timers, floating controls, presentation wrappers, etc.). Call listFiles to discover what's available.
+  - "components/exercises/" — Shared reusable exercise UI components. Call listFiles to discover what's available.
   - "lib/schemas/base-schemas.ts" — Base exercise config schema and type that every exercise MUST extend via .merge().
-  - "lib/utils.ts" — Common utility helpers (class merging, word-level diff analysis, date formatting, blob URLs).
+  - "lib/utils.ts" — Common utility helpers.
 
   At the end, briefly summarize the actions performed for non technical users. Dont mention the files you created or modified, code strategy, etc. Just a short summary of the changes you made.
 

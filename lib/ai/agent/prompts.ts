@@ -17,12 +17,6 @@ export const systemPrompt = `
 
   5. Call writeFiles to persist the final files — ONLY after verifyFiles passes successfully.
 
-  TOOLS:
-  - readFiles: reads files by exact paths from the sandbox filesystem
-  - listFiles: lists files in a directory, supports optional glob pattern (e.g. '*.tsx', '*.schema.ts')
-  - verifyFiles: writes files to sandbox and runs tsc + lint checks
-  - writeFiles: persists files to blob storage (call last, after verification)
-
   IMPORTANT FILE RESTRICTIONS:
   - You are ONLY allowed to write files inside app/exercises/<slug>/ (where <slug> is the exercise slug provided)
   - Follow the same file naming and export conventions as existing exercises

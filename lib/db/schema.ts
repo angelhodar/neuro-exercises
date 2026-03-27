@@ -34,6 +34,12 @@ export const generationStatusEnum = pgEnum("generation_status", [
   "ERROR",
 ]);
 
+export const publishStatusEnum = pgEnum("publish_status", [
+  "UNPUBLISHED",
+  "PENDING_REVIEW",
+  "PUBLISHED",
+]);
+
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -196,6 +202,9 @@ export const exercises = pgTable(
     tags: text("tags").array().notNull().default([]),
     description: text(),
     prNumber: integer("pr_number"),
+    publishStatus: publishStatusEnum("publish_status")
+      .default("UNPUBLISHED")
+      .notNull(),
     thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     audioInstructions: varchar("audio_instructions", { length: 500 }),
     ...timestamps,

@@ -6,7 +6,9 @@ import { DefaultChatTransport } from "ai";
 import {
   CheckCircle,
   Code,
+  ExternalLink,
   FolderSearch,
+  Lock,
   Loader2,
   MessageSquare,
   Settings,
@@ -229,15 +231,46 @@ export function Chat({
       </Conversation>
 
       <div className="shrink-0 border-t p-2">
-        <PromptInput onSubmit={handleSubmit}>
-          <PromptInputBody>
-            <PromptInputTextarea placeholder="Ask about this exercise..." />
-          </PromptInputBody>
-          <PromptInputFooter>
-            <div />
-            <PromptInputSubmit onStop={stop} status={status} />
-          </PromptInputFooter>
-        </PromptInput>
+        {exercise.publishStatus === "PENDING_REVIEW" ? (
+          <div className="flex items-start gap-3 rounded-lg bg-yellow-50 p-3 text-yellow-800">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium">Chat bloqueado — revisión pendiente</p>
+              <p className="text-yellow-700">
+                Este ejercicio tiene un PR abierto.{" "}
+                <a
+                  className="underline hover:text-yellow-900"
+                  href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_OWNER ?? "angelhodar"}/${process.env.NEXT_PUBLIC_GITHUB_REPO ?? "neuro-exercises"}/pull/${exercise.prNumber}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Ver PR #{exercise.prNumber}
+                  <ExternalLink className="ml-1 inline h-3 w-3" />
+                </a>
+              </p>
+            </div>
+          </div>
+        ) : exercise.publishStatus === "PUBLISHED" ? (
+          <div className="flex items-start gap-3 rounded-lg bg-green-50 p-3 text-green-800">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium">Chat bloqueado — ejercicio publicado</p>
+              <p className="text-green-700">
+                Este ejercicio ya está publicado en el repositorio.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <PromptInput onSubmit={handleSubmit}>
+            <PromptInputBody>
+              <PromptInputTextarea placeholder="Ask about this exercise..." />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <div />
+              <PromptInputSubmit onStop={stop} status={status} />
+            </PromptInputFooter>
+          </PromptInput>
+        )}
       </div>
     </div>
   );

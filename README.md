@@ -54,7 +54,7 @@ npm run db:push
 | `DATABASE_URL` | PostgreSQL connection string (Neon) |
 | `BETTER_AUTH_SECRET` | Auth secret for Better Auth |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
-| `GROQ_API_KEY` | Groq API key (speech transcription) |
+| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key (speech transcription) |
 | `CARTESIA_API_KEY` | Cartesia TTS API key |
 | `SERPER_API_KEY` | Serper image search API key |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob read/write token |

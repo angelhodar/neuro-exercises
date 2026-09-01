@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/app/actions/users";
-import { transcribeWithGroq } from "@/lib/ai/transcribe";
+import { transcribeWithGateway } from "@/lib/ai/transcribe";
 import { db } from "@/lib/db";
 import { speechTexts, transcriptionResults } from "@/lib/db/schema";
 
@@ -37,7 +37,7 @@ export async function transcribeAudio(
     throw new Error("File too large");
   }
 
-  const text = await transcribeWithGroq(audioFile);
+  const text = await transcribeWithGateway(audioFile);
   revalidatePath("/dashboard/speech-recognition");
   return { language: "es", text };
 }

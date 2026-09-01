@@ -6,19 +6,8 @@ import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function Dialog({
-  onOpenChange,
-  ...props
-}: Omit<DialogPrimitive.Root.Props, "onOpenChange"> & {
-  onOpenChange?: (open: boolean) => void;
-}) {
-  return (
-    <DialogPrimitive.Root
-      data-slot="dialog"
-      onOpenChange={onOpenChange ? (open) => onOpenChange(open) : undefined}
-      {...props}
-    />
-  );
+function Dialog({ ...props }: DialogPrimitive.Root.Props) {
+  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
 function DialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
@@ -40,7 +29,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Backdrop
       className={cn(
-        "data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 isolate z-50 bg-black/10 duration-100 data-closed:animate-out data-open:animate-in supports-backdrop-filter:backdrop-blur-xs",
+        "data-open:fade-in-0 data-closed:fade-out-0 fixed inset-0 isolate z-50 bg-black/10 duration-100 data-closed:animate-out data-open:animate-in supports-backdrop-filter:backdrop-blur-xs",
         className
       )}
       data-slot="dialog-overlay"
@@ -62,14 +51,14 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Popup
         className={cn(
-          "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100vh-2rem)] w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 overflow-y-auto rounded-xl bg-background p-6 text-sm outline-none ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in sm:max-w-lg",
+          "data-open:fade-in-0 data-open:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground text-sm outline-none ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in sm:max-w-md",
           className
         )}
         data-slot="dialog-content"
         {...props}
       >
         {children}
-        {!!showCloseButton && (
+        {showCloseButton ? (
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={
@@ -83,7 +72,7 @@ function DialogContent({
             <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
-        )}
+        ) : null}
       </DialogPrimitive.Popup>
     </DialogPortal>
   );
@@ -117,11 +106,11 @@ function DialogFooter({
       {...props}
     >
       {children}
-      {!!showCloseButton && (
+      {showCloseButton ? (
         <DialogPrimitive.Close render={<Button variant="outline" />}>
           Close
         </DialogPrimitive.Close>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -129,7 +118,7 @@ function DialogFooter({
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
-      className={cn("font-semibold text-lg leading-none", className)}
+      className={cn("font-medium leading-none", className)}
       data-slot="dialog-title"
       {...props}
     />

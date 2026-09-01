@@ -14,7 +14,7 @@ export default function Providers({ children }: PropsWithChildren) {
     <QueryClientProvider client={queryClient}>
       <NuqsAdapter>
         <Toaster />
-        <TooltipProvider delayDuration={500}>
+        <TooltipProvider delay={500}>
           <ConfirmProvider>{children}</ConfirmProvider>
         </TooltipProvider>
       </NuqsAdapter>

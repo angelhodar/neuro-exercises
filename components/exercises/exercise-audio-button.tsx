@@ -2,9 +2,9 @@
 
 import { Pause, Volume2 } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-interface ExerciseAudioButtonProps extends ButtonProps {
+interface ExerciseAudioButtonProps {
   audioSrc?: string;
 }
 

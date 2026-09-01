@@ -158,7 +158,7 @@ export function ResultBarChart({
             offset={-4}
             position="insideLeft"
             style={{ fontSize: 14, fontWeight: 500, textAnchor: "middle" }}
-            value={String(config.tiempo?.label ?? "Tiempo (s)")}
+            value={String(config.tiempo.label ?? "Tiempo (s)")}
           />
         </YAxis>
         <ChartTooltip content={<ChartTooltipContent />} />

@@ -2,8 +2,13 @@
 
 import { ArrowLeft, ChevronRight, Clock, Menu, Settings } from "lucide-react";
 import Link from "next/link";
-import { type RefObject, useEffect, useState } from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import {
+  type ComponentProps,
+  type RefObject,
+  useEffect,
+  useState,
+} from "react";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -20,7 +25,9 @@ export const FloatingBarButton = ({
   children,
   ref,
   ...props
-}: ButtonProps & { ref?: RefObject<HTMLButtonElement | null> }) => (
+}: ComponentProps<typeof Button> & {
+  ref?: RefObject<HTMLButtonElement | null>;
+}) => (
   <Button
     className={cn(
       "h-10 w-10 rounded-full transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700",

@@ -2,12 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { updateOrganization } from "@/app/actions/organizations";
-import type { ButtonProps } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,7 +37,7 @@ const updateOrganizationSchema = z.object({
 
 type UpdateOrganizationFormValues = z.infer<typeof updateOrganizationSchema>;
 
-interface EditOrganizationButtonProps extends ButtonProps {
+interface EditOrganizationButtonProps extends ComponentProps<typeof Button> {
   organization: Organization;
 }
 

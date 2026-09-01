@@ -27,10 +27,12 @@ function ButtonGroup({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: A fieldset would incorrectly imply form control ownership.
     <div
       className={cn(buttonGroupVariants({ orientation }), className)}
       data-orientation={orientation}
       data-slot="button-group"
+      role="group"
       {...props}
     />
   );

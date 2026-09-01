@@ -102,7 +102,7 @@ export function Results({ results }: WordMatchingResultsProps) {
           </TabsList>
 
           <TabsContent value="detalle">
-            <Accordion className="space-y-2" type="multiple">
+            <Accordion className="space-y-2" multiple>
               {results.map((result, roundIndex) => {
                 const isPerfect = result.incorrectAttempts === 0;
                 return (

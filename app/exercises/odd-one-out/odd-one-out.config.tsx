@@ -24,7 +24,7 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
   const totalQuestions: number = watch(`${basePath}totalQuestions`) || 0;
 
   return (
-    <Accordion className="h-96 space-y-2 overflow-y-auto" type="multiple">
+    <Accordion className="h-96 space-y-2 overflow-y-auto" multiple>
       {Array.from({ length: totalQuestions }, (_, index) => ({
         index,
         key: `${basePath}questions.${index}`,

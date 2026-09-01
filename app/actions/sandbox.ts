@@ -8,7 +8,7 @@ import {
 } from "@/app/actions/generations";
 import { getLatestSnapshot } from "@/app/actions/snapshots";
 import type { Exercise } from "@/lib/db/schema";
-import { createSnapshot } from "@/lib/sandbox";
+import { createSnapshot, SANDBOX_PROJECT_DIR } from "@/lib/sandbox";
 import { createBlobUrl } from "@/lib/utils";
 import { extractFiles } from "@/lib/zip";
 import { getExerciseById } from "./exercises";
@@ -28,6 +28,10 @@ function createSandboxEnvVars(exercise: Exercise) {
     .join("\n");
 }
 
+function previewSandboxName(generationId: number) {
+  return `exercise-preview-${generationId}`;
+}
+
 async function writeSandboxCodeFiles(sandbox: Sandbox, codeBlobKey: string) {
   const zipResponse = await fetch(createBlobUrl(codeBlobKey));
 
@@ -40,7 +44,7 @@ async function writeSandboxCodeFiles(sandbox: Sandbox, codeBlobKey: string) {
 
   await sandbox.writeFiles(
     files.map((file) => ({
-      path: file.path,
+      path: `${SANDBOX_PROJECT_DIR}/${file.path}`,
       content: Buffer.from(file.content),
     }))
   );
@@ -69,8 +73,9 @@ async function waitForServer(sandbox: Sandbox, maxWaitMs = 60_000) {
 
 async function startDevServerAndWait(sandbox: Sandbox) {
   const command = await sandbox.runCommand({
-    cmd: "npm",
     args: ["run", "dev"],
+    cmd: "npm",
+    cwd: SANDBOX_PROJECT_DIR,
     detached: true,
   });
 
@@ -133,15 +138,11 @@ async function isDevServerRunning(sandbox: Sandbox) {
 }
 
 async function tryReuseSandbox(
-  sandboxId: string,
+  sandboxName: string,
   codeBlobKey: string,
   exercise: Exercise
 ) {
-  const sandbox = await Sandbox.get({ sandboxId });
-
-  if (sandbox.status !== "running") {
-    return null;
-  }
+  const sandbox = await Sandbox.get({ name: sandboxName });
 
   try {
     await sandbox.extendTimeout(900_000);
@@ -155,7 +156,7 @@ async function tryReuseSandbox(
   // Write .env (agent sandbox may not have it)
   await sandbox.writeFiles([
     {
-      path: ".env",
+      path: `${SANDBOX_PROJECT_DIR}/.env`,
       content: Buffer.from(createSandboxEnvVars(exercise)),
     },
   ]);
@@ -166,7 +167,7 @@ async function tryReuseSandbox(
   }
 
   return {
-    sandboxId: sandbox.sandboxId,
+    sandboxName: sandbox.name,
     sandboxUrl: sandbox.domain(3000),
   };
 }
@@ -174,11 +175,13 @@ async function tryReuseSandbox(
 async function createNewSandbox(
   exercise: Exercise,
   codeBlobKey: string,
-  snapshotId: string
+  snapshotId: string,
+  generationId: number
 ) {
   const sandbox = await Sandbox.create({
-    source: { type: "snapshot", snapshotId },
+    name: previewSandboxName(generationId),
     ports: [3000],
+    source: { snapshotId, type: "snapshot" },
     timeout: 900_000, // 15 min
   });
 
@@ -186,7 +189,7 @@ async function createNewSandbox(
 
   await sandbox.writeFiles([
     {
-      path: ".env",
+      path: `${SANDBOX_PROJECT_DIR}/.env`,
       content: Buffer.from(createSandboxEnvVars(exercise)),
     },
   ]);
@@ -194,7 +197,7 @@ async function createNewSandbox(
   await startDevServerAndWait(sandbox);
 
   return {
-    sandboxId: sandbox.sandboxId,
+    sandboxName: sandbox.name,
     sandboxUrl: sandbox.domain(3000),
   };
 }
@@ -246,12 +249,13 @@ export async function initializeExercisePreview(
   const result = await createNewSandbox(
     exercise,
     lastGeneration.codeBlobKey,
-    snapshot.snapshotId
+    snapshot.snapshotId,
+    lastGeneration.id
   );
 
-  // Store the sandbox ID on the generation for future reuse
+  // The legacy sandbox_id column now stores the v2/v3 sandbox name.
   await updateExerciseGeneration(lastGeneration.id, {
-    sandboxId: result.sandboxId,
+    sandboxId: result.sandboxName,
   });
 
   return result;

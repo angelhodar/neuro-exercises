@@ -2,6 +2,7 @@ import type { Sandbox } from "@vercel/sandbox";
 import { tool } from "ai";
 import { z } from "zod";
 import { updateExerciseGeneration } from "@/app/actions/generations";
+import { SANDBOX_PROJECT_DIR } from "@/lib/sandbox";
 import { uploadBlob } from "@/lib/storage";
 import { createBlobUrl } from "@/lib/utils";
 import { createZipBuffer, extractFiles } from "@/lib/zip";
@@ -13,12 +14,16 @@ export const generatedFileSchema = z.object({
 
 export type GeneratedFile = z.infer<typeof generatedFileSchema>;
 
+function projectPath(path: string) {
+  return `${SANDBOX_PROJECT_DIR}/${path}`;
+}
+
 async function readSandboxFile(
   sandbox: Sandbox,
   path: string
 ): Promise<GeneratedFile> {
   try {
-    const buffer = await sandbox.readFileToBuffer({ path });
+    const buffer = await sandbox.readFileToBuffer({ path: projectPath(path) });
 
     if (!buffer) {
       return { path, content: "[Error: file not found or empty]" };
@@ -36,8 +41,8 @@ async function readSandboxFile(
 
 function toSandboxFiles(files: GeneratedFile[]) {
   return files.map((file) => ({
-    path: file.path,
     content: Buffer.from(file.content),
+    path: projectPath(file.path),
   }));
 }
 
@@ -124,7 +129,11 @@ export function createAgentTools(
         args.push("-not", "-path", "*/node_modules/*");
         args.push("-not", "-path", "*/.next/*");
 
-        const result = await sandbox.runCommand("find", args);
+        const result = await sandbox.runCommand({
+          args,
+          cmd: "find",
+          cwd: SANDBOX_PROJECT_DIR,
+        });
 
         const stdout = await result.stdout();
         const files = stdout
@@ -156,7 +165,11 @@ export function createAgentTools(
 
         const errors: string[] = [];
 
-        const tscResult = await sandbox.runCommand("npm", ["run", "ts-check"]);
+        const tscResult = await sandbox.runCommand({
+          args: ["run", "ts-check"],
+          cmd: "npm",
+          cwd: SANDBOX_PROJECT_DIR,
+        });
         const tscOutput = await tscResult.stderr();
 
         if (tscOutput) {
@@ -170,12 +183,11 @@ export function createAgentTools(
           }
         }
 
-        const lintResult = await sandbox.runCommand("npm", [
-          "run",
-          "check",
-          "--",
-          exerciseDir,
-        ]);
+        const lintResult = await sandbox.runCommand({
+          args: ["run", "check", "--", exerciseDir],
+          cmd: "npm",
+          cwd: SANDBOX_PROJECT_DIR,
+        });
 
         const lintOutput = await lintResult.stderr();
 

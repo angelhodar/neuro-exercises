@@ -17,11 +17,12 @@ export async function getAgentSandbox(): Promise<Sandbox> {
   const snapshot = await getOrRefreshSnapshot();
 
   const sandbox = await Sandbox.create({
-    source: { type: "snapshot", snapshotId: snapshot.snapshotId },
+    persistent: false,
     ports: [3000],
+    source: { snapshotId: snapshot.snapshotId, type: "snapshot" },
     timeout: 900_000, // 15 min
   });
 
-  console.log(`Created new agent sandbox: ${sandbox.sandboxId}`);
+  console.log(`Created new agent sandbox: ${sandbox.name}`);
   return sandbox;
 }

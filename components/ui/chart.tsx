@@ -11,10 +11,11 @@ import {
   useMemo,
 } from "react";
 import {
+  type DefaultLegendContentProps,
   Legend,
-  type LegendProps,
   ResponsiveContainer,
   Tooltip,
+  type TooltipContentProps,
 } from "recharts";
 
 import { cn } from "@/lib/utils";
@@ -124,7 +125,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: ComponentProps<typeof Tooltip> &
+}: Partial<TooltipContentProps> &
   ComponentProps<"div"> & {
     hideLabel?: boolean;
     hideIndicator?: boolean;
@@ -198,7 +199,7 @@ function ChartTooltipContent({
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
                 )}
-                key={item.dataKey}
+                key={String(item.dataKey)}
               >
                 {formatter && item?.value !== undefined && item.name ? (
                   formatter(item.value, item.name, item, index, item.payload)
@@ -265,7 +266,7 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: ComponentProps<"div"> &
-  Pick<LegendProps, "payload" | "verticalAlign"> & {
+  Pick<DefaultLegendContentProps, "payload" | "verticalAlign"> & {
     hideIcon?: boolean;
     nameKey?: string;
   }) {

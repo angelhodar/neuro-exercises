@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ChevronRight, Clock, Menu, Settings } from "lucide-react";
 import Link from "next/link";
-import { forwardRef, useEffect, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Tooltip,
@@ -15,23 +15,24 @@ import { Progress } from "../ui/progress";
 import { Separator } from "../ui/separator";
 import { ExerciseFullscreenButton } from "./exercise-fullscreen-button";
 
-export const FloatingBarButton = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <Button
-        className={cn(
-          "h-10 w-10 rounded-full transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700",
-          className
-        )}
-        ref={ref}
-        size="sm"
-        variant="ghost"
-        {...props}
-      >
-        {children}
-      </Button>
-    );
-  }
+export const FloatingBarButton = ({
+  className,
+  children,
+  ref,
+  ...props
+}: ButtonProps & { ref?: RefObject<HTMLButtonElement | null> }) => (
+  <Button
+    className={cn(
+      "h-10 w-10 rounded-full transition-colors duration-200 hover:bg-blue-100 hover:text-blue-700",
+      className
+    )}
+    ref={ref}
+    size="sm"
+    variant="ghost"
+    {...props}
+  >
+    {children}
+  </Button>
 );
 
 FloatingBarButton.displayName = "FloatingBarButton";
@@ -101,7 +102,7 @@ export default function FloatingBottomBar() {
               <Progress className="mb-3 h-2" value={progressPercentage} />
 
               {/* Timer in expanded state */}
-              {showTimer && (
+              {!!showTimer && (
                 <div className="flex items-center justify-center gap-2 p-2 font-mono text-base">
                   <Clock className="h-5 w-5 text-blue-600" />
                   <span className="font-bold text-blue-700 text-xl">
@@ -164,7 +165,7 @@ export default function FloatingBottomBar() {
                   <TooltipContent>Configurar ejercicio</TooltipContent>
                 </Tooltip>
 
-                {waitingForNextQuestionTrigger && (
+                {!!waitingForNextQuestionTrigger && (
                   <>
                     <Separator orientation="vertical" />
 
@@ -195,7 +196,7 @@ export default function FloatingBottomBar() {
               </FloatingBarButton>
 
               {/* Timer in collapsed state */}
-              {showTimer && (
+              {!!showTimer && (
                 <>
                   <Separator orientation="vertical" />
                   <div className="flex items-center gap-2 px-2 font-mono text-base">
@@ -208,7 +209,7 @@ export default function FloatingBottomBar() {
               )}
 
               {/* Next Question Button in collapsed state */}
-              {waitingForNextQuestionTrigger && (
+              {!!waitingForNextQuestionTrigger && (
                 <>
                   <Separator orientation="vertical" />
 

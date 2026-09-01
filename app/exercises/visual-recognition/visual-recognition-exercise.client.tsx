@@ -22,12 +22,12 @@ interface VisualRecognitionExerciseClientProps {
 }
 
 interface QuestionState {
-  targetTag: string | null;
-  displayedImages: ImageData[];
   correctImageIds: string[];
-  selectedImageIds: string[];
+  displayedImages: ImageData[];
   isAnswerSubmitted: boolean;
   pendingResult: VisualRecognitionQuestionResult | null;
+  selectedImageIds: string[];
+  targetTag: string | null;
 }
 
 export function VisualRecognitionExerciseClient({
@@ -44,12 +44,12 @@ export function VisualRecognitionExerciseClient({
   const questionStartTime = useRef(Date.now());
 
   const [questionState, setQuestionState] = useState<QuestionState>({
-    targetTag: null,
-    displayedImages: [],
     correctImageIds: [],
-    selectedImageIds: [],
+    displayedImages: [],
     isAnswerSubmitted: false,
     pendingResult: null,
+    selectedImageIds: [],
+    targetTag: null,
   });
 
   function handleImageClick(imageId: string) {
@@ -73,19 +73,19 @@ export function VisualRecognitionExerciseClient({
 
       // Create result immediately
       const result = {
-        targetTag: questionState.targetTag ?? "",
         correctImages: questionState.correctImageIds,
         selectedImages: updatedSelected,
-        timeSpent: Date.now() - questionStartTime.current,
+        targetTag: questionState.targetTag ?? "",
         timeExpired: false,
+        timeSpent: Date.now() - questionStartTime.current,
       } as VisualRecognitionQuestionResult;
 
       // Update state with result and submitted flag
       setQuestionState((prev) => ({
         ...prev,
-        selectedImageIds: updatedSelected,
         isAnswerSubmitted: true,
         pendingResult: result,
+        selectedImageIds: updatedSelected,
       }));
     } else {
       // Just update selected images
@@ -118,12 +118,12 @@ export function VisualRecognitionExerciseClient({
         "No se pudieron generar las preguntas. Verifica la configuracion y las imagenes disponibles."
       );
       setQuestionState({
-        targetTag: "Error",
-        displayedImages: [],
         correctImageIds: [],
-        selectedImageIds: [],
+        displayedImages: [],
         isAnswerSubmitted: false,
         pendingResult: null,
+        selectedImageIds: [],
+        targetTag: "Error",
       });
       return;
     }
@@ -133,12 +133,12 @@ export function VisualRecognitionExerciseClient({
 
     if (targetImages.length < correctImagesCount) {
       setQuestionState({
-        targetTag: "Error",
-        displayedImages: [],
         correctImageIds: [],
-        selectedImageIds: [],
+        displayedImages: [],
         isAnswerSubmitted: false,
         pendingResult: null,
+        selectedImageIds: [],
+        targetTag: "Error",
       });
       return;
     }
@@ -159,12 +159,12 @@ export function VisualRecognitionExerciseClient({
 
     if (potentialDistractors.length < distractorImagesNeeded) {
       setQuestionState({
-        targetTag: "Error",
-        displayedImages: [],
         correctImageIds: [],
-        selectedImageIds: [],
+        displayedImages: [],
         isAnswerSubmitted: false,
         pendingResult: null,
+        selectedImageIds: [],
+        targetTag: "Error",
       });
       return;
     }
@@ -182,12 +182,12 @@ export function VisualRecognitionExerciseClient({
     );
 
     setQuestionState({
-      targetTag,
-      displayedImages: allImages,
       correctImageIds: correctImages.map((img) => img.id),
-      selectedImageIds: [],
+      displayedImages: allImages,
       isAnswerSubmitted: false,
       pendingResult: null,
+      selectedImageIds: [],
+      targetTag,
     });
   }, [
     currentQuestionIndex,
@@ -235,7 +235,7 @@ export function VisualRecognitionExerciseClient({
                 type="image"
               >
                 <MultimediaCardThumbnail />
-                {showImageNames && (
+                {!!showImageNames && (
                   <MultimediaCardTitle className="line-clamp-2 whitespace-normal text-center">
                     {image.name}
                   </MultimediaCardTitle>

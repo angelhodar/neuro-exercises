@@ -2,19 +2,19 @@ import { z } from "zod";
 import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 const stimulusCountRangeSchema = z.object({
-  minStimuli: z.coerce
-    .number()
-    .min(1, "Debe haber al menos 1 estímulo")
-    .max(50, "No puede haber más de 50 estímulos")
-    .int("El mínimo debe ser un número entero"),
+  allowOverlap: z.boolean({
+    error: "Debe especificar si se permite solapamiento",
+  }),
   maxStimuli: z.coerce
     .number()
     .min(1, "Debe haber al menos 1 estímulo")
     .max(50, "No puede haber más de 50 estímulos")
     .int("El máximo debe ser un número entero"),
-  allowOverlap: z.boolean({
-    error: "Debe especificar si se permite solapamiento",
-  }),
+  minStimuli: z.coerce
+    .number()
+    .min(1, "Debe haber al menos 1 estímulo")
+    .max(50, "No puede haber más de 50 estímulos")
+    .int("El mínimo debe ser un número entero"),
 });
 
 export const stimulusCountConfigSchema = baseExerciseConfigSchema
@@ -32,10 +32,10 @@ export const stimulusCountConfigSchema = baseExerciseConfigSchema
 export const stimulusCountSpecificConfigSchema = stimulusCountRangeSchema;
 
 export const stimulusCountQuestionResultSchema = z.object({
-  shownStimuli: z.number().int(),
-  userAnswer: z.number().int(),
   isCorrect: z.boolean(),
+  shownStimuli: z.number().int(),
   timeSpent: z.number().int(), // ms
+  userAnswer: z.number().int(),
 });
 
 export type StimulusCountSpecificConfig = z.infer<
@@ -50,20 +50,20 @@ export const shapeSchema = z.enum(["star", "circle", "square", "triangle"]);
 export type Shape = z.infer<typeof shapeSchema>;
 
 export const stimulusSchema = z.object({
-  shape: shapeSchema,
   color: z.string(),
+  shape: shapeSchema,
 });
 
 export type Stimulus = z.infer<typeof stimulusSchema>;
 
 export const defaultConfig: StimulusCountConfig = {
-  endConditionType: "questions",
-  automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
-  minStimuli: 3,
-  maxStimuli: 5,
   allowOverlap: false,
+  automaticNextQuestion: true,
+  endConditionType: "questions",
+  maxStimuli: 5,
+  minStimuli: 3,
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };
 
 export const configSchema = stimulusCountConfigSchema;

@@ -36,10 +36,10 @@ export function DiffViewer({ diffWords }: DiffViewerProps) {
   return (
     <div className="rounded-md border bg-gray-50 p-4">
       <div className="flex flex-wrap gap-1">
-        {diffWords.map((word, index) => (
+        {diffWords.map((word) => (
           <span
             className={`rounded px-1 py-0.5 font-medium text-sm ${getWordStyle(word.type)}`}
-            key={`${word.text}-${word.type}-${index}`}
+            key={`${word.text}-${word.type}`}
             title={getWordLabel(word.type)}
           >
             {word.text}

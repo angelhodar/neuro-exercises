@@ -59,7 +59,7 @@ export default async function PatientDetailPage({
             <DashboardHeaderTitle>
               {patient.firstName} {patient.lastName}
             </DashboardHeaderTitle>
-            {patient.diagnosis && (
+            {!!patient.diagnosis && (
               <DashboardHeaderDescription>
                 {patient.diagnosis}
               </DashboardHeaderDescription>

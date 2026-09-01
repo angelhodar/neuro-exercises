@@ -49,9 +49,9 @@ export function MediaActionsDropdown({
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const confirmed = await confirm({
-      title: "¿Eliminar archivo?",
       description:
         "Esta acción no se puede deshacer. ¿Seguro que quieres eliminar este archivo multimedia?",
+      title: "¿Eliminar archivo?",
     });
     if (!confirmed) {
       return;
@@ -106,7 +106,7 @@ export function MediaActionsDropdown({
         </DropdownMenuContent>
       </DropdownMenu>
       {/* Manual backdrop since this Dialog is nested inside MultimediaCard's Dialog (base-ui suppresses backdrops for nested dialogs) */}
-      {openVariantDialog &&
+      {!!openVariantDialog &&
         createPortal(
           <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs" />,
           document.body

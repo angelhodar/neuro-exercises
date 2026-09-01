@@ -22,8 +22,8 @@ export default function DeleteOrganizationButton({
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: "Eliminar organización",
       description: `¿Estás seguro de que quieres eliminar la organización "${organization.name}"? Esta acción no se puede deshacer.`,
+      title: "Eliminar organización",
     });
 
     if (!confirmed) {

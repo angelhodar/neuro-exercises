@@ -68,7 +68,7 @@ function ComboboxInput({
         {...props}
       />
       <InputGroupAddon align="inline-end">
-        {showTrigger && (
+        {!!showTrigger && (
           <InputGroupButton
             className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
             data-slot="input-group-button"
@@ -78,7 +78,7 @@ function ComboboxInput({
             variant="ghost"
           />
         )}
-        {showClear && <ComboboxClear disabled={disabled} />}
+        {!!showClear && <ComboboxClear disabled={disabled} />}
       </InputGroupAddon>
       {children}
     </InputGroup>
@@ -252,7 +252,7 @@ function ComboboxChip({
       {...props}
     >
       {children}
-      {showRemove && (
+      {!!showRemove && (
         <ComboboxPrimitive.ChipRemove
           className="-ml-1 opacity-50 hover:opacity-100"
           data-slot="combobox-chip-remove"
@@ -284,18 +284,18 @@ function useComboboxAnchor() {
 
 export {
   Combobox,
-  ComboboxInput,
-  ComboboxContent,
-  ComboboxList,
-  ComboboxItem,
-  ComboboxGroup,
-  ComboboxLabel,
-  ComboboxCollection,
-  ComboboxEmpty,
-  ComboboxSeparator,
-  ComboboxChips,
   ComboboxChip,
+  ComboboxChips,
   ComboboxChipsInput,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxSeparator,
   ComboboxTrigger,
   ComboboxValue,
   useComboboxAnchor,

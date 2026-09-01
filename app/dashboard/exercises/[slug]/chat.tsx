@@ -35,16 +35,16 @@ import { useSandbox } from "@/hooks/use-sandbox";
 import type { Exercise } from "@/lib/db/schema";
 
 interface InitialMessage {
-  id: string;
-  role: "user" | "assistant";
   content: string;
   createdAt: Date;
+  id: string;
+  role: "user" | "assistant";
 }
 
 interface ChatProps {
-  messages: InitialMessage[];
-  exercise: Exercise;
   autoStart: boolean;
+  exercise: Exercise;
+  messages: InitialMessage[];
 }
 
 function getToolIcon(toolName: string) {
@@ -147,17 +147,17 @@ export function Chat({
   const hasAutoStarted = useRef(false);
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      credentials: "include",
-      body: { slug: exercise.slug },
-    }),
     messages: initialMessages.map((msg) => ({
       id: msg.id,
+      parts: [{ text: msg.content, type: "text" as const }],
       role: msg.role,
-      parts: [{ type: "text" as const, text: msg.content }],
     })),
     onFinish: () => initializePreview(),
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: { slug: exercise.slug },
+      credentials: "include",
+    }),
   });
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export function Chat({
 
   const handleSubmit = (message: PromptInputMessage) => {
     if (message.text.trim()) {
-      sendMessage({ text: message.text, files: message.files });
+      sendMessage({ files: message.files, text: message.text });
     }
   };
 
@@ -191,10 +191,12 @@ export function Chat({
             filteredMessages.map((m) => (
               <Message from={m.role} key={m.id}>
                 <MessageContent>
-                  {m.parts.map((part, i) => {
+                  {m.parts.map((part) => {
                     if (part.type === "text") {
                       return (
-                        <MessageResponse key={`${m.id}-${i}`}>
+                        <MessageResponse
+                          key={`${m.id}-${part.type}-${part.text}`}
+                        >
                           {part.text}
                         </MessageResponse>
                       );
@@ -208,7 +210,7 @@ export function Chat({
 
           <StreamingStatus messages={messages} status={status} />
 
-          {error && (
+          {!!error && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">
               <div className="flex items-center justify-between">
                 <span className="text-red-600 text-sm">

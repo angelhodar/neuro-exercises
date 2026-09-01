@@ -2,6 +2,10 @@ import { z } from "zod";
 import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 
 export const colorSequenceSpecificConfigSchema = z.object({
+  highlightInterval: z.coerce
+    .number()
+    .min(200, "El intervalo de iluminación debe ser al menos 200ms")
+    .max(5000, "El intervalo de iluminación debe ser como máximo 5 segundos"),
   numCells: z.coerce
     .number()
     .min(2, "Debe haber al menos 2 celdas")
@@ -12,10 +16,6 @@ export const colorSequenceSpecificConfigSchema = z.object({
     .min(1, "La longitud de la secuencia debe ser al menos 1")
     .max(12, "La longitud de la secuencia no puede superar 12")
     .int("La longitud de la secuencia debe ser un número entero"),
-  highlightInterval: z.coerce
-    .number()
-    .min(200, "El intervalo de iluminación debe ser al menos 200ms")
-    .max(5000, "El intervalo de iluminación debe ser como máximo 5 segundos"),
 });
 
 export function colorSequenceConfigRefinements(
@@ -37,19 +37,19 @@ export const configSchema = baseExerciseConfigSchema
   .superRefine(colorSequenceConfigRefinements);
 
 export const defaultConfig: ColorSequenceConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
+  endConditionType: "questions",
+  highlightInterval: 1200,
   numCells: 4,
   sequenceLength: 2,
-  highlightInterval: 1200,
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };
 
 export const resultSchema = z.object({
+  isCorrect: z.boolean(),
   targetSequence: z.array(z.number().int()),
   userSequence: z.array(z.number().int()),
-  isCorrect: z.boolean(),
 });
 
 export type ColorSequenceSpecificConfig = z.infer<

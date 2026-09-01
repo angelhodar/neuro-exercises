@@ -2,17 +2,17 @@
 // Cada grupo contiene 4 palabras relacionadas: objeto, categoría, característica y acción
 
 export interface WordGroup {
-  object: string;
+  action: string;
   category: string;
   characteristic: string;
-  action: string;
+  object: string;
 }
 
 export const COLUMN_LABELS: Record<keyof WordGroup, string> = {
-  object: "Objeto",
+  action: "Acción",
   category: "Categoría",
   characteristic: "Característica",
-  action: "Acción",
+  object: "Objeto",
 };
 
 export const COLUMN_KEYS: (keyof WordGroup)[] = [
@@ -25,288 +25,288 @@ export const COLUMN_KEYS: (keyof WordGroup)[] = [
 export const wordGroups: WordGroup[] = [
   // Alimentos
   {
-    object: "manzana",
+    action: "morder",
     category: "fruta",
     characteristic: "saludable",
-    action: "morder",
+    object: "manzana",
   },
   {
-    object: "zanahoria",
+    action: "rallar",
     category: "verdura",
     characteristic: "nutritiva",
-    action: "rallar",
+    object: "zanahoria",
   },
   {
-    object: "pan",
+    action: "hornear",
     category: "cereal",
     characteristic: "crujiente",
-    action: "hornear",
+    object: "pan",
   },
   {
-    object: "leche",
+    action: "verter",
     category: "lácteo",
     characteristic: "cremosa",
-    action: "verter",
+    object: "leche",
   },
   {
-    object: "salmón",
+    action: "asar",
     category: "pescado",
     characteristic: "proteico",
-    action: "asar",
+    object: "salmón",
   },
   {
-    object: "chocolate",
+    action: "derretir",
     category: "dulce",
     characteristic: "irresistible",
-    action: "derretir",
+    object: "chocolate",
   },
   {
-    object: "naranja",
+    action: "exprimir",
     category: "cítrico",
     characteristic: "vitamínica",
-    action: "exprimir",
+    object: "naranja",
   },
   {
-    object: "queso",
+    action: "fundir",
     category: "derivado",
     characteristic: "aromático",
-    action: "fundir",
+    object: "queso",
   },
   {
-    object: "arroz",
+    action: "cocer",
     category: "grano",
     characteristic: "versátil",
-    action: "cocer",
+    object: "arroz",
   },
 
   // Animales
   {
-    object: "perro",
+    action: "ladrar",
     category: "doméstico",
     characteristic: "fiel",
-    action: "ladrar",
+    object: "perro",
   },
   {
-    object: "águila",
+    action: "planear",
     category: "ave",
     characteristic: "veloz",
-    action: "planear",
+    object: "águila",
   },
   {
-    object: "delfín",
+    action: "saltar",
     category: "marino",
     characteristic: "inteligente",
-    action: "saltar",
+    object: "delfín",
   },
   {
-    object: "gato",
+    action: "ronronear",
     category: "felino",
     characteristic: "independiente",
-    action: "ronronear",
+    object: "gato",
   },
   {
-    object: "caballo",
+    action: "galopar",
     category: "equino",
     characteristic: "fuerte",
-    action: "galopar",
+    object: "caballo",
   },
   {
-    object: "tortuga",
+    action: "reptar",
     category: "reptil",
     characteristic: "longeva",
-    action: "reptar",
+    object: "tortuga",
   },
   {
-    object: "abeja",
+    action: "polinizar",
     category: "insecto",
     characteristic: "trabajadora",
-    action: "polinizar",
+    object: "abeja",
   },
 
   // Objetos
   {
-    object: "libro",
+    action: "leer",
     category: "lectura",
     characteristic: "educativo",
-    action: "leer",
+    object: "libro",
   },
   {
-    object: "reloj",
+    action: "marcar",
     category: "tiempo",
     characteristic: "preciso",
-    action: "marcar",
+    object: "reloj",
   },
   {
-    object: "guitarra",
+    action: "rasguear",
     category: "instrumento",
     characteristic: "melódica",
-    action: "rasguear",
+    object: "guitarra",
   },
   {
-    object: "pincel",
+    action: "pintar",
     category: "arte",
     characteristic: "creativo",
-    action: "pintar",
+    object: "pincel",
   },
   {
-    object: "telescopio",
+    action: "observar",
     category: "ciencia",
     characteristic: "exploratorio",
-    action: "observar",
+    object: "telescopio",
   },
   {
-    object: "martillo",
+    action: "clavar",
     category: "herramienta",
     characteristic: "resistente",
-    action: "clavar",
+    object: "martillo",
   },
 
   // Naturaleza
   {
-    object: "volcán",
+    action: "erupcionar",
     category: "montaña",
     characteristic: "imponente",
-    action: "erupcionar",
+    object: "volcán",
   },
   {
-    object: "río",
+    action: "fluir",
     category: "agua",
     characteristic: "caudaloso",
-    action: "fluir",
+    object: "río",
   },
   {
-    object: "roble",
+    action: "crecer",
     category: "árbol",
     characteristic: "centenario",
-    action: "crecer",
+    object: "roble",
   },
   {
-    object: "rosa",
+    action: "florecer",
     category: "flor",
     characteristic: "fragante",
-    action: "florecer",
+    object: "rosa",
   },
   {
-    object: "diamante",
+    action: "relucir",
     category: "mineral",
     characteristic: "brillante",
-    action: "relucir",
+    object: "diamante",
   },
   {
-    object: "relámpago",
+    action: "iluminar",
     category: "fenómeno",
     characteristic: "luminoso",
-    action: "iluminar",
+    object: "relámpago",
   },
 
   // Profesiones
   {
-    object: "médico",
+    action: "curar",
     category: "salud",
     characteristic: "dedicado",
-    action: "curar",
+    object: "médico",
   },
   {
-    object: "arquitecto",
+    action: "diseñar",
     category: "construcción",
     characteristic: "visionario",
-    action: "diseñar",
+    object: "arquitecto",
   },
   {
-    object: "maestro",
+    action: "enseñar",
     category: "educación",
     characteristic: "paciente",
-    action: "enseñar",
+    object: "maestro",
   },
   {
-    object: "bombero",
+    action: "rescatar",
     category: "emergencia",
     characteristic: "valiente",
-    action: "rescatar",
+    object: "bombero",
   },
   {
-    object: "cocinero",
+    action: "cocinar",
     category: "gastronomía",
     characteristic: "habilidoso",
-    action: "cocinar",
+    object: "cocinero",
   },
 
   // Emociones
   {
-    object: "risa",
+    action: "reír",
     category: "alegría",
     characteristic: "contagiosa",
-    action: "reír",
+    object: "risa",
   },
   {
-    object: "llanto",
+    action: "llorar",
     category: "tristeza",
     characteristic: "liberador",
-    action: "llorar",
+    object: "llanto",
   },
   {
-    object: "abrazo",
+    action: "abrazar",
     category: "cariño",
     characteristic: "reconfortante",
-    action: "abrazar",
+    object: "abrazo",
   },
   {
-    object: "sorpresa",
+    action: "asombrar",
     category: "asombro",
     characteristic: "inesperada",
-    action: "asombrar",
+    object: "sorpresa",
   },
 
   // Deportes
   {
-    object: "fútbol",
+    action: "chutar",
     category: "equipo",
     characteristic: "competitivo",
-    action: "chutar",
+    object: "fútbol",
   },
   {
-    object: "natación",
+    action: "nadar",
     category: "acuático",
     characteristic: "completo",
-    action: "nadar",
+    object: "natación",
   },
   {
-    object: "ajedrez",
+    action: "pensar",
     category: "mental",
     characteristic: "estratégico",
-    action: "pensar",
+    object: "ajedrez",
   },
   {
-    object: "yoga",
+    action: "meditar",
     category: "relajación",
     characteristic: "equilibrado",
-    action: "meditar",
+    object: "yoga",
   },
 
   // Lugares
   {
-    object: "hospital",
+    action: "atender",
     category: "sanidad",
     characteristic: "necesario",
-    action: "atender",
+    object: "hospital",
   },
   {
-    object: "museo",
+    action: "exhibir",
     category: "cultura",
     characteristic: "histórico",
-    action: "exhibir",
+    object: "museo",
   },
   {
-    object: "mercado",
+    action: "comprar",
     category: "comercio",
     characteristic: "bullicioso",
-    action: "comprar",
+    object: "mercado",
   },
   {
-    object: "parque",
+    action: "pasear",
     category: "recreo",
     characteristic: "tranquilo",
-    action: "pasear",
+    object: "parque",
   },
 ];
 
@@ -315,7 +315,7 @@ export const wordGroups: WordGroup[] = [
  */
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
+  for (let i = result.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }

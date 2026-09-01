@@ -25,10 +25,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { VisualRecognitionQuestionResult } from "./visual-recognition.schema";
 
 const visualRecognitionChartConfig = {
+  bajo: { color: "var(--chart-1)", label: "Bajo" },
+  parcial: { color: "var(--chart-3)", label: "Parcial" },
+  perfecto: { color: "var(--chart-2)", label: "Perfecto" },
   tiempo: { label: "Tiempo (s)" },
-  perfecto: { label: "Perfecto", color: "var(--chart-2)" },
-  parcial: { label: "Parcial", color: "var(--chart-3)" },
-  bajo: { label: "Bajo", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
 interface VisualRecognitionResultsProps {
@@ -83,9 +83,9 @@ export function Results({ results }: VisualRecognitionResultsProps) {
       fill = "var(--color-parcial)";
     }
     return {
+      fill,
       question: `${i + 1}`,
       tiempo: r.timeSpent,
-      fill,
     };
   });
 
@@ -150,7 +150,7 @@ export function Results({ results }: VisualRecognitionResultsProps) {
                       result.selectedImages.length - correctSelections;
 
                     return (
-                      <TableRow key={`${result.targetTag}-${index}`}>
+                      <TableRow key={JSON.stringify(result)}>
                         <TCell>{index + 1}</TCell>
                         <TCell>
                           <Badge className="capitalize" variant="outline">

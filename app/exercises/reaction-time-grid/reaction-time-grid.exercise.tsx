@@ -13,11 +13,11 @@ interface ReactionTimeGridProps {
 }
 
 interface QuestionState {
-  targetCells: number[] | null;
-  startTime: number | null;
-  selectedCells: number[];
-  reactionTimes: number[];
   pendingResult: ReactionTimeQuestionResult | null;
+  reactionTimes: number[];
+  selectedCells: number[];
+  startTime: number | null;
+  targetCells: number[] | null;
 }
 
 export function Exercise({ config }: ReactionTimeGridProps) {
@@ -30,11 +30,11 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   const delayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [questionState, setQuestionState] = useState<QuestionState>({
-    targetCells: null,
-    startTime: null,
-    selectedCells: [],
-    reactionTimes: [],
     pendingResult: null,
+    reactionTimes: [],
+    selectedCells: [],
+    startTime: null,
+    targetCells: null,
   });
 
   // Generate grid cells as simple indices
@@ -50,10 +50,8 @@ export function Exercise({ config }: ReactionTimeGridProps) {
     reactionTimes: number[]
   ) {
     // Clear auto-complete timeout
-    if (autoCompleteTimeoutRef.current) {
-      clearTimeout(autoCompleteTimeoutRef.current);
-      autoCompleteTimeoutRef.current = null;
-    }
+    clearTimeout(autoCompleteTimeoutRef.current ?? undefined);
+    autoCompleteTimeoutRef.current = null;
 
     setQuestionState((currentState) => {
       if (!currentState.targetCells) {
@@ -61,18 +59,18 @@ export function Exercise({ config }: ReactionTimeGridProps) {
       }
 
       const result: ReactionTimeQuestionResult = {
-        targetCells: currentState.targetCells,
-        selectedCells,
         reactionTimes,
+        selectedCells,
+        targetCells: currentState.targetCells,
       };
 
       return {
         ...currentState,
-        targetCells: null,
-        selectedCells: [],
-        reactionTimes: [],
-        startTime: null,
         pendingResult: result,
+        reactionTimes: [],
+        selectedCells: [],
+        startTime: null,
+        targetCells: null,
       };
     });
   }
@@ -105,8 +103,8 @@ export function Exercise({ config }: ReactionTimeGridProps) {
 
     setQuestionState((prev) => ({
       ...prev,
-      selectedCells: updatedSelectedCells,
       reactionTimes: updatedReactionTimes,
+      selectedCells: updatedSelectedCells,
     }));
 
     // If we've selected enough cells or all target cells, submit the result
@@ -119,22 +117,18 @@ export function Exercise({ config }: ReactionTimeGridProps) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
   useEffect(() => {
     // Clear any existing timeouts
-    if (delayTimeoutRef.current) {
-      clearTimeout(delayTimeoutRef.current);
-      delayTimeoutRef.current = null;
-    }
-    if (autoCompleteTimeoutRef.current) {
-      clearTimeout(autoCompleteTimeoutRef.current);
-      autoCompleteTimeoutRef.current = null;
-    }
+    clearTimeout(delayTimeoutRef.current ?? undefined);
+    delayTimeoutRef.current = null;
+    clearTimeout(autoCompleteTimeoutRef.current ?? undefined);
+    autoCompleteTimeoutRef.current = null;
 
     setQuestionState((prev) => ({
       ...prev,
-      targetCells: null,
-      selectedCells: [],
-      reactionTimes: [],
-      startTime: null,
       pendingResult: null,
+      reactionTimes: [],
+      selectedCells: [],
+      startTime: null,
+      targetCells: null,
     }));
 
     // Random delay before showing the target
@@ -159,39 +153,35 @@ export function Exercise({ config }: ReactionTimeGridProps) {
           }
 
           const result: ReactionTimeQuestionResult = {
-            targetCells: currentState.targetCells,
-            selectedCells: currentState.selectedCells,
             reactionTimes: currentState.reactionTimes,
+            selectedCells: currentState.selectedCells,
+            targetCells: currentState.targetCells,
           };
 
           return {
             ...currentState,
-            targetCells: null,
-            selectedCells: [],
-            reactionTimes: [],
-            startTime: null,
             pendingResult: result,
+            reactionTimes: [],
+            selectedCells: [],
+            startTime: null,
+            targetCells: null,
           };
         });
       }, cellDisplayDuration);
 
       setQuestionState((prev) => ({
         ...prev,
-        targetCells: newTargets,
-        startTime,
         pendingResult: null,
+        startTime,
+        targetCells: newTargets,
       }));
     }, delay);
 
     return () => {
-      if (delayTimeoutRef.current) {
-        clearTimeout(delayTimeoutRef.current);
-        delayTimeoutRef.current = null;
-      }
-      if (autoCompleteTimeoutRef.current) {
-        clearTimeout(autoCompleteTimeoutRef.current);
-        autoCompleteTimeoutRef.current = null;
-      }
+      clearTimeout(delayTimeoutRef.current ?? undefined);
+      delayTimeoutRef.current = null;
+      clearTimeout(autoCompleteTimeoutRef.current ?? undefined);
+      autoCompleteTimeoutRef.current = null;
     };
   }, [
     currentQuestionIndex,

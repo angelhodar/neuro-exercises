@@ -8,18 +8,18 @@ import { db } from "@/lib/db";
 import { speechTexts, transcriptionResults } from "@/lib/db/schema";
 
 export interface TranscriptionResult {
-  text: string;
   confidence?: number;
   language?: string;
+  text: string;
 }
 
 export interface CreateTranscriptionResultData {
-  referenceText: string;
-  transcribedText: string;
-  audioBlobKey: string;
   accuracy: number;
+  audioBlobKey: string;
   matchingWords: number;
   nonMatchingWords: number;
+  referenceText: string;
+  transcribedText: string;
 }
 
 export async function transcribeAudio(
@@ -39,7 +39,7 @@ export async function transcribeAudio(
 
   const text = await transcribeWithGroq(audioFile);
   revalidatePath("/dashboard/speech-recognition");
-  return { text, language: "es" };
+  return { language: "es", text };
 }
 
 export async function getSpeechTexts() {
@@ -50,8 +50,8 @@ export async function getSpeechTexts() {
   }
 
   return await db.query.speechTexts.findMany({
-    where: eq(speechTexts.userId, user.id),
     orderBy: speechTexts.createdAt,
+    where: eq(speechTexts.userId, user.id),
   });
 }
 
@@ -129,6 +129,7 @@ export async function getTranscriptionResults() {
   }
 
   return await db.query.transcriptionResults.findMany({
+    orderBy: transcriptionResults.createdAt,
     where: eq(transcriptionResults.targetUserId, user.id),
     with: {
       referenceText: {
@@ -139,7 +140,6 @@ export async function getTranscriptionResults() {
         },
       },
     },
-    orderBy: transcriptionResults.createdAt,
   });
 }
 
@@ -175,13 +175,13 @@ export async function createTranscriptionResult(
   }
 
   await db.insert(transcriptionResults).values({
+    accuracy,
+    audioBlobKey,
+    matchingWords,
+    nonMatchingWords,
     referenceTextId: referenceTextEntry.id,
     targetUserId: user.id,
     transcribedText,
-    audioBlobKey,
-    accuracy,
-    matchingWords,
-    nonMatchingWords,
   });
 
   revalidatePath("/dashboard/speech-transcriptions");

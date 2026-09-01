@@ -23,8 +23,8 @@ export async function getPatients() {
     }
 
     return await db.query.patients.findMany({
-      where: eq(patients.creatorId, user.id),
       orderBy: desc(patients.createdAt),
+      where: eq(patients.creatorId, user.id),
     });
   } catch (error) {
     console.error("Error getting patients:", error);

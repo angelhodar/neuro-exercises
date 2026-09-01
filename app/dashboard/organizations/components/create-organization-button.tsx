@@ -28,10 +28,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const createOrganizationSchema = z.object({
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  slug: z.string().optional(),
   logo: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
   metadata: z.string().optional(),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  slug: z.string().optional(),
 });
 
 type CreateOrganizationFormValues = z.infer<typeof createOrganizationSchema>;
@@ -41,13 +41,13 @@ export default function CreateOrganizationButton() {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreateOrganizationFormValues>({
-    resolver: zodResolver(createOrganizationSchema),
     defaultValues: {
-      name: "",
-      slug: "",
       logo: "",
       metadata: "",
+      name: "",
+      slug: "",
     },
+    resolver: zodResolver(createOrganizationSchema),
   });
 
   const onSubmit = async (data: CreateOrganizationFormValues) => {

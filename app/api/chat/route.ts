@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
   const lastMessage = messages.at(-1);
 
-  if (!lastMessage || lastMessage.role !== "user") {
+  if (lastMessage?.role !== "user") {
     return new Response("No user message found", { status: 400 });
   }
 
@@ -68,10 +68,10 @@ export async function POST(req: Request) {
 
   const tools = createAgentTools(sandbox, lastGeneration.id, lastCodeBlobKey);
   const agent = createExerciseAgent({
-    tools,
-    sandbox,
     generationId: lastGeneration.id,
+    sandbox,
     slug,
+    tools,
   });
 
   const result = await agent.stream({ messages: conversationMessages });

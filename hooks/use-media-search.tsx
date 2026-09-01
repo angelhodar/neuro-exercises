@@ -24,8 +24,8 @@ const searchMedia = async (query: string): Promise<SelectableMediaSchema[]> => {
 
 export function useMediaSearch(searchTerm: string, enabled = true) {
   return useQuery({
-    queryKey: ["media", "search", searchTerm],
-    queryFn: () => searchMedia(searchTerm),
     enabled: enabled && searchTerm.trim().length > 0,
+    queryFn: () => searchMedia(searchTerm),
+    queryKey: ["media", "search", searchTerm],
   });
 }

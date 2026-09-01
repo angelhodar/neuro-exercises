@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/tooltip";
 
 interface TagsProps {
-  tags: string[];
   maxVisible?: number;
+  tags: string[];
 }
 
 export default function HorizontalTags({ tags, maxVisible = 2 }: TagsProps) {
-  if (!tags || tags.length === 0) {
+  if (tags.length === 0) {
     return null;
   }
 

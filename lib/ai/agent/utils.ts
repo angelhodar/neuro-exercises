@@ -2,8 +2,8 @@ import type { ModelMessage } from "ai";
 import type { ExerciseChatGeneration } from "@/lib/db/schema";
 
 interface ConversationData {
-  messages: ModelMessage[];
   lastCodeBlobKey: string | null;
+  messages: ModelMessage[];
 }
 
 export function createConversationHistory(
@@ -19,10 +19,10 @@ export function createConversationHistory(
   let lastCodeBlobKey: string | null = null;
 
   // First generation's prompt is the initial user message
-  messages.push({ role: "user", content: firstGeneration.prompt });
+  messages.push({ content: firstGeneration.prompt, role: "user" });
 
   // For each generation, add the assistant summary and the next generation's prompt
-  for (let i = 0; i < generations.length; i++) {
+  for (let i = 0; i < generations.length; i += 1) {
     const generation = generations[i];
 
     // Track the most recent codeBlobKey before the current (last) generation
@@ -31,16 +31,16 @@ export function createConversationHistory(
     }
 
     if (generation.summary) {
-      messages.push({ role: "assistant", content: generation.summary });
+      messages.push({ content: generation.summary, role: "assistant" });
     }
 
     // Add the next generation's prompt as a user message
     const nextGeneration = generations[i + 1];
 
     if (nextGeneration) {
-      messages.push({ role: "user", content: nextGeneration.prompt });
+      messages.push({ content: nextGeneration.prompt, role: "user" });
     }
   }
 
-  return { messages, lastCodeBlobKey };
+  return { lastCodeBlobKey, messages };
 }

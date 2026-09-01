@@ -24,8 +24,8 @@ export async function getImplementedExerciseSlugs(): Promise<string[]> {
   const dirs = getExerciseDirectories();
   const checks = await Promise.all(
     dirs.map(async (slug) => ({
-      slug,
       hasAssets: await exerciseHasAssets(slug),
+      slug,
     }))
   );
   return checks.filter((c) => c.hasAssets).map((c) => c.slug);

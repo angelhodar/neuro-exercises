@@ -39,17 +39,17 @@ import { AddExerciseButton } from "./add-exercise-button";
 import ConfigureExerciseButton from "./configure-exercise-button";
 
 const templateSchema = z.object({
-  title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   exercises: z
     .array(
       z.object({
+        config: z.any(),
         exerciseId: z.number(),
         slug: z.string(),
-        config: z.any(),
       })
     )
     .min(1, "At least one exercise is required"),
+  title: z.string().min(1, "Title is required"),
 });
 
 type TemplateFormData = z.infer<typeof templateSchema>;
@@ -65,12 +65,12 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<TemplateFormData>({
-    resolver: zodResolver(templateSchema),
     defaultValues: {
-      title: "",
       description: "",
       exercises: [],
+      title: "",
     },
+    resolver: zodResolver(templateSchema),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -94,18 +94,18 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
       const defaultConfig = assets?.defaultConfig ?? {};
 
       append({
+        config: defaultConfig,
         exerciseId: selectedExercise.id,
         slug: selectedExercise.slug,
-        config: defaultConfig,
       });
       toast.success("Ejercicio añadido");
     } catch (error) {
       console.error("Error loading exercise presets:", error);
       // Fallback to empty config if loading fails
       append({
+        config: {},
         exerciseId: selectedExercise.id,
         slug: selectedExercise.slug,
-        config: {},
       });
       toast.success("Ejercicio añadido (sin configuración por defecto)");
     }
@@ -120,17 +120,17 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
     try {
       setIsSubmitting(true);
       await createExerciseTemplate({
-        title: data.title,
         description: data.description || null,
         items: data.exercises.map((exercise, index) => ({
-          exerciseId: exercise.exerciseId,
           config: exercise.config,
+          exerciseId: exercise.exerciseId,
           position: index,
         })),
+        title: data.title,
       });
       toast.success("Plantilla guardada!");
       router.push("/dashboard/templates");
-    } catch (_error) {
+    } catch {
       toast.error("Error al guardar la plantilla");
     } finally {
       setIsSubmitting(false);
@@ -273,7 +273,7 @@ export default function CreateTemplateForm(props: CreateTemplateFormProps) {
                   </div>
                 )}
 
-                {form.formState.errors.exercises && (
+                {!!form.formState.errors.exercises && (
                   <p className="font-medium text-destructive text-sm">
                     {form.formState.errors.exercises.message}
                   </p>

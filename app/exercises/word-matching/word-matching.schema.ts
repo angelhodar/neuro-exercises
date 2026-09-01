@@ -51,33 +51,33 @@ export const configSchema = baseExerciseConfigSchema
 
 // Schema for each individual match attempt
 const matchAttemptSchema = z.object({
-  words: z.array(z.string()),
   isCorrect: z.boolean(),
+  words: z.array(z.string()),
 });
 
 // Result schema for a single round
 export const resultSchema = z.object({
+  correctMatches: z.number().int().min(0),
   expectedGroups: z.array(
     z.object({
-      object: z.string(),
+      action: z.string(),
       category: z.string(),
       characteristic: z.string(),
-      action: z.string(),
+      object: z.string(),
     })
   ),
-  matchAttempts: z.array(matchAttemptSchema),
-  correctMatches: z.number().int().min(0),
   incorrectAttempts: z.number().int().min(0),
-  totalAttempts: z.number().int().min(0),
-  timeSpent: z.number().min(0),
+  matchAttempts: z.array(matchAttemptSchema),
   phrases: z
     .array(
       z.object({
-        expected: z.string(),
         entered: z.string(),
+        expected: z.string(),
       })
     )
     .optional(),
+  timeSpent: z.number().min(0),
+  totalAttempts: z.number().int().min(0),
 });
 
 export type MatchAttempt = z.infer<typeof matchAttemptSchema>;
@@ -89,11 +89,11 @@ export type WordMatchingConfig = z.infer<typeof configSchema>;
 export type WordMatchingQuestionResult = z.infer<typeof resultSchema>;
 
 export const defaultConfig: WordMatchingConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
+  endConditionType: "questions",
   groupsPerRound: 3,
   numberOfColumns: 2,
   requirePhrase: false,
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };

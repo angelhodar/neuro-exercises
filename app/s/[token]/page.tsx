@@ -33,17 +33,15 @@ export default async function SharedLinkPage({
       </div>
 
       <div className="mb-6 space-y-4">
-        {linkData.template.exerciseTemplateItems.map((item) => {
-          return (
-            <LinkExerciseCard
-              completed={!!item.exerciseResults[0]}
-              exercise={item.exercise}
-              itemId={item.id}
-              key={item.id}
-              linkId={linkData.id}
-            />
-          );
-        })}
+        {linkData.template.exerciseTemplateItems.map((item) => (
+          <LinkExerciseCard
+            completed={!!item.exerciseResults[0]}
+            exercise={item.exercise}
+            itemId={item.id}
+            key={item.id}
+            linkId={linkData.id}
+          />
+        ))}
       </div>
     </div>
   );

@@ -11,12 +11,12 @@ import { Tag } from "@/components/ui/tag";
 import { cn } from "@/lib/utils";
 
 interface TagsInputProps {
-  value?: string[];
+  className?: string;
+  disabled?: boolean;
   onValueChange?: (value: string[]) => void;
   placeholder?: string;
-  disabled?: boolean;
-  className?: string;
   ref?: Ref<HTMLDivElement>;
+  value?: string[];
 }
 
 function TagsInput({
@@ -97,5 +97,5 @@ function TagsInput({
   );
 }
 
-export { TagsInput };
 export type { TagsInputProps };
+export { TagsInput };

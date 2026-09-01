@@ -52,11 +52,11 @@ export default function AddMemberButton({
   const [isLoading, setIsLoading] = useState(false);
 
   const addMemberForm = useForm<AddMemberFormValues>({
-    resolver: zodResolver(addMemberSchema),
     defaultValues: {
       email: "",
       role: "member",
     },
+    resolver: zodResolver(addMemberSchema),
   });
 
   const onAddMemberSubmit = async (values: AddMemberFormValues) => {
@@ -65,9 +65,9 @@ export default function AddMemberButton({
       // First, we need to find the user by email
       const users = await authClient.admin.listUsers({
         query: {
-          searchValue: values.email,
           searchField: "email",
           searchOperator: "contains",
+          searchValue: values.email,
         },
       });
 
@@ -91,8 +91,9 @@ export default function AddMemberButton({
         organizationId
       );
 
-      if (result.error) {
-        toast.error(`Error al agregar miembro: ${result.error}`);
+      const error = result.error as string | undefined;
+      if (error) {
+        toast.error(`Error al agregar miembro: ${error}`);
         return;
       }
 
@@ -149,9 +150,9 @@ export default function AddMemberButton({
                       defaultValue={field.value}
                       disabled={isLoading}
                       items={[
-                        { value: "member", label: "Miembro" },
-                        { value: "admin", label: "Administrador" },
-                        { value: "owner", label: "Propietario" },
+                        { label: "Miembro", value: "member" },
+                        { label: "Administrador", value: "admin" },
+                        { label: "Propietario", value: "owner" },
                       ]}
                       onValueChange={field.onChange}
                     >

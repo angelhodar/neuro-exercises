@@ -15,8 +15,8 @@ function WorkflowStep({ step, icon: Icon, children }: WorkflowStepProps) {
     <motion.div
       className="group relative flex flex-col items-center px-4 text-center sm:px-8"
       initial={{ opacity: 0, y: 40 }}
-      transition={{ duration: 0.6, delay: step * 0.15, ease: "easeOut" }}
-      viewport={{ once: true, margin: "-60px" }}
+      transition={{ delay: step * 0.15, duration: 0.6, ease: "easeOut" }}
+      viewport={{ margin: "-60px", once: true }}
       whileInView={{ opacity: 1, y: 0 }}
     >
       <div className="relative mb-6">

@@ -17,8 +17,8 @@ import {
 import type { PatientSession } from "@/lib/db/schema";
 
 interface DeleteSessionButtonProps {
-  session: PatientSession;
   patientId: number;
+  session: PatientSession;
 }
 
 export default function DeleteSessionButton({

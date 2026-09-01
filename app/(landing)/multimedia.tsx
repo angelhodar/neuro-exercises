@@ -31,8 +31,8 @@ function MultimediaFeature({
       className="flex items-start gap-4"
       initial={{ opacity: 0, x: -20 }}
       transition={{
-        duration: 0.5,
         delay: 0.1 + index * 0.08,
+        duration: 0.5,
         ease: "easeOut",
       }}
       viewport={{ once: true }}
@@ -198,7 +198,7 @@ export default function MultimediaSection() {
           <motion.div
             className="relative pb-8 sm:pr-4 sm:pb-8"
             initial={{ opacity: 0, x: 40 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
+            transition={{ delay: 0.2, duration: 0.9, ease: "easeOut" }}
             viewport={{ once: true }}
             whileInView={{ opacity: 1, x: 0 }}
           >

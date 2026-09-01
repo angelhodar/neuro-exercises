@@ -16,10 +16,10 @@ interface PageProps {
 }
 
 interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
   content: string;
   createdAt: Date;
+  id: string;
+  role: "user" | "assistant";
 }
 
 export default async function ExerciseChatPage({ params }: PageProps) {
@@ -36,19 +36,19 @@ export default async function ExerciseChatPage({ params }: PageProps) {
   const messages = generations.flatMap((generation) => {
     const m: ChatMessage[] = [
       {
-        id: `${generation.id}-user`,
-        role: "user",
         content: generation.prompt,
         createdAt: generation.createdAt,
+        id: `${generation.id}-user`,
+        role: "user",
       },
     ];
 
     if (generation.summary) {
       m.push({
-        id: `${generation.id}-assistant`,
-        role: "assistant",
         content: generation.summary,
         createdAt: generation.createdAt,
+        id: `${generation.id}-assistant`,
+        role: "assistant",
       });
     }
 

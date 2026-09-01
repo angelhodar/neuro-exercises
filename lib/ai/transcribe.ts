@@ -9,8 +9,8 @@ const TRAILING_PUNCTUATION_REGEX = /[.,;:!¿?]+$/g;
 export async function transcribeWithGroq(file: File): Promise<string> {
   const transcription = await groq.audio.transcriptions.create({
     file,
-    model: "whisper-large-v3-turbo",
     language: "es",
+    model: "whisper-large-v3-turbo",
   });
   // Elimina signos de puntuación finales
   return transcription.text.replace(TRAILING_PUNCTUATION_REGEX, "").trim();

@@ -34,29 +34,24 @@ export function CountdownProvider({ children }: PropsWithChildren) {
   const [countdown, setCountdown] = useState<number>(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
+  useEffect(
+    () => () => {
+      clearInterval(intervalRef.current ?? undefined);
+    },
+    []
+  );
 
   const startCountdown = () => {
     setCountdown(3);
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    clearInterval(intervalRef.current ?? undefined);
 
     intervalRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev > 1) {
           return prev - 1;
         }
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
+        clearInterval(intervalRef.current ?? undefined);
         return 0;
       });
     }, 1000);
@@ -69,10 +64,8 @@ export function CountdownProvider({ children }: PropsWithChildren) {
 
     if (countdown === 0) {
       startExercise();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      clearInterval(intervalRef.current ?? undefined);
+      intervalRef.current = null;
     }
   }, [countdown, startExercise]);
 

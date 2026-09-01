@@ -55,8 +55,8 @@ function ExerciseCard({
 }
 
 interface ExerciseCardThumbnailProps {
-  className?: string;
   children?: React.ReactNode;
+  className?: string;
 }
 
 function ExerciseCardThumbnail({

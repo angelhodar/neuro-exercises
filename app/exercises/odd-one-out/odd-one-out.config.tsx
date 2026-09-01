@@ -25,11 +25,13 @@ export function ConfigFields({ basePath = "" }: OddOneOutConfigFieldsProps) {
 
   return (
     <Accordion className="h-96 space-y-2 overflow-y-auto" type="multiple">
-      {Array.from({ length: totalQuestions }, (_, index) => (
+      {Array.from({ length: totalQuestions }, (_, index) => ({
+        index,
+        key: `${basePath}questions.${index}`,
+      })).map(({ index, key }) => (
         <AccordionItem
           className="rounded-md border"
-          // biome-ignore lint/suspicious/noArrayIndexKey: positional slots derived from a count
-          key={index}
+          key={key}
           value={`pregunta-${index}`}
         >
           <AccordionTrigger className="px-3 py-2 text-sm">

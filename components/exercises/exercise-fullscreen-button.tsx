@@ -34,15 +34,16 @@ export function ExerciseFullscreenButton() {
       document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (document.fullscreenElement) {
         document.exitFullscreen().catch((error) => {
           console.error("Error exiting fullscreen on unmount:", error);
         });
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <FloatingBarButton onClick={handleToggleFullscreen}>

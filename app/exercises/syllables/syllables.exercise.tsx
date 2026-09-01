@@ -54,19 +54,19 @@ export function Exercise({ config }: SyllablesExerciseProps) {
 
     setQuestionState((prev) => ({
       ...prev,
-      selectedSyllables: updatedSelected,
       scrambledSyllables: updatedScrambled,
+      selectedSyllables: updatedSelected,
     }));
 
     // Check if word is complete
     if (updatedSelected.length === questionState.currentWord.syllables.length) {
       const timeSpent = Date.now() - questionStartTime.current;
       const result: SyllablesQuestionResult = {
-        targetWord: questionState.currentWord.word,
-        targetSyllables: questionState.currentWord.syllables,
         selectedSyllables: updatedSelected,
-        timeSpent,
+        targetSyllables: questionState.currentWord.syllables,
+        targetWord: questionState.currentWord.word,
         timeExpired: false,
+        timeSpent,
       };
       addResult(result);
     }
@@ -81,8 +81,8 @@ export function Exercise({ config }: SyllablesExerciseProps) {
 
     setQuestionState((prev) => ({
       ...prev,
-      selectedSyllables: updatedSelected,
       scrambledSyllables: updatedScrambled,
+      selectedSyllables: updatedSelected,
     }));
   }
 
@@ -95,7 +95,7 @@ export function Exercise({ config }: SyllablesExerciseProps) {
 
     // Scramble syllables (Fisher-Yates shuffle)
     const scrambled = [...word.syllables];
-    for (let i = scrambled.length - 1; i > 0; i--) {
+    for (let i = scrambled.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
       [scrambled[i], scrambled[j]] = [scrambled[j], scrambled[i]];
     }

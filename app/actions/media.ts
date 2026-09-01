@@ -32,23 +32,23 @@ const BASE64_PREFIX_REGEX = /^data:image\/\w+;base64,/;
 
 async function generateImageMetadata(imageUrl: string) {
   const { output } = await generateText({
-    model: "google/gemini-2.5-flash",
-    output: Output.object({ schema: mediaMetadataSchema }),
     messages: [
       {
-        role: "user",
         content: [
           {
-            type: "text",
             text: "Analiza esta imagen utilizando palabras en castellano. Genera metadatos apropiados para la imagen: un nombre corto y descriptivo, una descripción de una frase y una lista de etiquetas (máximo 5) que la clasifiquen",
+            type: "text",
           },
           {
-            type: "image",
             image: new URL(imageUrl),
+            type: "image",
           },
         ],
+        role: "user",
       },
     ],
+    model: "google/gemini-2.5-flash",
+    output: Output.object({ schema: mediaMetadataSchema }),
   });
 
   if (!output) {
@@ -65,7 +65,7 @@ async function generateOptimizedImage(
   const translatedPrompt = await translatePromptToEnglish(prompt);
 
   const imagePrompt = sourceImage
-    ? { text: translatedPrompt, images: [sourceImage] }
+    ? { images: [sourceImage], text: translatedPrompt }
     : `Generate an image of ${translatedPrompt.toLowerCase()}, clear and simple, centered, white background`;
 
   const { images } = await generateImage({
@@ -99,18 +99,18 @@ async function uploadAndInsertMedia(
     : undefined;
 
   await db.insert(medias).values({
+    authorId,
+    blobKey: blob.pathname,
+    derivedFrom: derivedFrom ?? null,
+    description: metadata.description,
+    embedding,
+    metadata: { model: IMAGE_MODEL, prompt },
+    mimeType: "image/webp",
     name:
       metadata.name.charAt(0).toUpperCase() +
       metadata.name.slice(1).toLowerCase(),
-    description: metadata.description,
     tags: metadata.tags.map((tag) => tag.toLowerCase()),
-    blobKey: blob.pathname,
-    mimeType: "image/webp",
     thumbnailKey: null,
-    metadata: { prompt, model: IMAGE_MODEL },
-    authorId,
-    derivedFrom: derivedFrom ?? null,
-    embedding,
   });
 }
 
@@ -134,7 +134,7 @@ export async function getMedias(searchTerm?: string, limit = 20, offset = 0) {
 }
 
 export async function getMediasByTags(tags: string[]): Promise<Media[]> {
-  if (!tags || tags.length === 0) {
+  if (tags.length === 0) {
     return [];
   }
 
@@ -173,10 +173,10 @@ export async function uploadManualMedia(data: CreateManualMediaSchema) {
 
   await db.insert(medias).values({
     ...rest,
-    tags: rest.tags.map((tag) => tag.toLowerCase()),
-    blobKey: fileKey,
     authorId: user.id,
+    blobKey: fileKey,
     embedding,
+    tags: rest.tags.map((tag) => tag.toLowerCase()),
   });
 
   revalidatePath("/dashboard/medias");
@@ -218,25 +218,25 @@ export async function transferImagesToLibrary(images: DownloadableImage[]) {
           : undefined;
 
         await db.insert(medias).values({
+          authorId: user.id,
+          blobKey: blob.pathname,
+          description: metadata.description,
+          embedding,
+          metadata: { originalImageUrl: image.imageUrl },
+          mimeType: "image/webp",
           name:
             metadata.name.charAt(0).toUpperCase() +
             metadata.name.slice(1).toLowerCase(),
-          description: metadata.description,
           tags: metadata.tags.map((tag) => tag.toLowerCase()),
-          blobKey: blob.pathname,
-          authorId: user.id,
-          mimeType: "image/webp",
-          metadata: { originalImageUrl: image.imageUrl },
-          embedding,
         });
 
-        return { success: true, name: metadata.name, url: blob.url };
+        return { name: metadata.name, success: true, url: blob.url };
       } catch (error) {
         console.error(`Error processing image ${image.title}:`, error);
         return {
-          success: false,
-          name: image.title,
           error: error instanceof Error ? error.message : "Unknown error",
+          name: image.title,
+          success: false,
         };
       }
     })

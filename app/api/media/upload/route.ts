@@ -7,11 +7,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const jsonResponse = await handleUpload({
       body,
-      request,
       onBeforeGenerateToken: async () => ({
-        allowedContentTypes: ["image/*", "audio/*", "video/*"],
         addRandomSuffix: true,
+        allowedContentTypes: ["image/*", "audio/*", "video/*"],
       }),
+      request,
     });
 
     return NextResponse.json(jsonResponse);

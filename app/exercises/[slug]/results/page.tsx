@@ -56,9 +56,7 @@ export default async function ExerciseResultsPage({
       notFound();
     }
 
-    config = resultData.config;
-    results = resultData.results;
-    backUrl = resultData.backUrl;
+    ({ backUrl, config, results } = resultData);
   }
 
   if (!(config && results)) {

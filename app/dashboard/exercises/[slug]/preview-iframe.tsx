@@ -12,12 +12,13 @@ export function PreviewIframe({ slug }: { slug: string }) {
   const { sandboxUrl, isLoading, error, initializePreview } = useSandbox();
 
   const handleRefresh = () => {
-    if (!(iframeRef.current && sandboxUrl)) {
+    const iframe = iframeRef.current as HTMLIFrameElement | null;
+    if (!(iframe && sandboxUrl)) {
       return;
     }
-    const currentSrc = iframeRef.current.src;
-    iframeRef.current.src = "";
-    iframeRef.current.src = currentSrc;
+    const currentSrc = iframe.src;
+    iframe.src = "";
+    iframe.src = currentSrc;
   };
 
   const handleCopyUrl = () => {
@@ -59,7 +60,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
   return (
     <>
       {/* Absolute Action Buttons */}
-      {sandboxUrl && (
+      {!!sandboxUrl && (
         <div className="absolute top-4 right-4 z-10 flex gap-2">
           <Button
             className="rounded-xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
@@ -86,7 +87,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
       {/* Preview Content */}
       <div className="relative flex-1 px-2">
         <Card className="relative h-full overflow-hidden border border-gray-200/50 shadow-sm">
-          {isLoading && (
+          {!!isLoading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/95 backdrop-blur-sm">
               <div className="flex flex-col items-center justify-center text-center">
                 <div className="relative mb-6">
@@ -118,7 +119,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
             </div>
           )}
 
-          {error && (
+          {!!error && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/95 backdrop-blur-sm">
               <div className="flex flex-col items-center justify-center text-center">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
@@ -141,7 +142,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
             </div>
           )}
 
-          {sandboxUrl && (
+          {!!sandboxUrl && (
             <iframe
               allowFullScreen
               className="h-full w-full rounded-md border-0"

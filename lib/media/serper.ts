@@ -1,24 +1,26 @@
 export interface DownloadableImage {
-  title: string;
+  imageHeight: number;
   imageUrl: string;
   imageWidth: number;
-  imageHeight: number;
+  title: string;
 }
 
 export interface ImageResult extends DownloadableImage {
-  thumbnailUrl: string;
-  thumbnailWidth: number;
-  thumbnailHeight: number;
-  source: string;
-  domain: string;
-  link: string;
-  googleUrl: string;
-  position: number;
   creator?: string;
   credit?: string;
+  domain: string;
+  googleUrl: string;
+  link: string;
+  position: number;
+  source: string;
+  thumbnailHeight: number;
+  thumbnailUrl: string;
+  thumbnailWidth: number;
 }
 
 export interface SearchResponse {
+  credits: number;
+  images: ImageResult[];
   searchParameters: {
     q: string;
     gl: string;
@@ -27,8 +29,6 @@ export interface SearchResponse {
     engine: string;
     num: number;
   };
-  images: ImageResult[];
-  credits: number;
 }
 
 export async function searchImages(
@@ -37,17 +37,17 @@ export async function searchImages(
 ): Promise<SearchResponse> {
   try {
     const response = await fetch("https://google.serper.dev/images", {
-      method: "POST",
-      headers: {
-        "X-API-KEY": process.env.SERPER_API_KEY ?? "",
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
-        q: query,
         gl: "es",
         hl: "es",
         num: numResults,
+        q: query,
       }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": process.env.SERPER_API_KEY ?? "",
+      },
+      method: "POST",
     });
 
     if (!response.ok) {
@@ -58,6 +58,6 @@ export async function searchImages(
     return data;
   } catch (error) {
     console.error("Error searching images:", error);
-    throw new Error("Error searching images");
+    throw new Error("Error searching images", { cause: error });
   }
 }

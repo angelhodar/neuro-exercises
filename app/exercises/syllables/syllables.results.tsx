@@ -24,10 +24,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { SyllablesQuestionResult } from "./syllables.schema";
 
 const syllablesChartConfig = {
+  correcto: { color: "var(--chart-2)", label: "Correcto" },
+  expirado: { color: "var(--chart-4)", label: "Tiempo agotado" },
+  incorrecto: { color: "var(--chart-1)", label: "Incorrecto" },
   tiempo: { label: "Tiempo (s)" },
-  correcto: { label: "Correcto", color: "var(--chart-2)" },
-  incorrecto: { label: "Incorrecto", color: "var(--chart-1)" },
-  expirado: { label: "Tiempo agotado", color: "var(--chart-4)" },
 } satisfies ChartConfig;
 
 interface SyllablesResultsProps {
@@ -63,9 +63,9 @@ export function Results({ results }: SyllablesResultsProps) {
       fill = "var(--color-correcto)";
     }
     return {
+      fill,
       question: `${i + 1}`,
       tiempo: r.timeSpent,
-      fill,
     };
   });
 
@@ -115,7 +115,7 @@ export function Results({ results }: SyllablesResultsProps) {
                 {results.map((result, index) => {
                   const resultIsCorrect = isCorrect(result);
                   return (
-                    <TableRow key={`${result.targetWord}-${index}`}>
+                    <TableRow key={JSON.stringify(result)}>
                       <TCell>{index + 1}</TCell>
                       <TCell>
                         <div>

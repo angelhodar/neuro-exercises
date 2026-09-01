@@ -50,12 +50,12 @@ export default function SpeechRecognitionClient() {
       const audioBlobKey = blob.pathname;
 
       await createTranscriptionResult({
-        referenceText,
-        transcribedText,
-        audioBlobKey,
         accuracy: Math.round(diffResult.accuracy),
+        audioBlobKey,
         matchingWords: diffResult.matches,
         nonMatchingWords: diffResult.differences,
+        referenceText,
+        transcribedText,
       });
 
       toast.success("Resultado guardado exitosamente");
@@ -95,7 +95,7 @@ export default function SpeechRecognitionClient() {
         </Card>
       </div>
 
-      {transcribedText && diffResult && (
+      {!!transcribedText && !!diffResult && (
         <Card>
           <CardHeader>
             <CardTitle>Resultado</CardTitle>
@@ -161,7 +161,7 @@ export default function SpeechRecognitionClient() {
             {/* Diff Visualization */}
             <DiffViewer diffWords={diffResult.diffWords} />
 
-            {referenceText && audioBlob && (
+            {!!referenceText && !!audioBlob && (
               <div className="flex justify-end border-t pt-4">
                 <Button
                   className="ml-auto"

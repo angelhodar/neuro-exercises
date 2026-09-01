@@ -52,15 +52,15 @@ export default function RegisterExerciseButton({
   const router = useRouter();
 
   const form = useForm<RegisterExerciseSchema>({
-    resolver: zodResolver(registerExerciseSchema),
     defaultValues: {
-      slug: "",
-      displayName: "",
       description: "",
+      displayName: "",
+      file: undefined,
+      slug: "",
       tags: [],
       thumbnailPrompt: "",
-      file: undefined,
     },
+    resolver: zodResolver(registerExerciseSchema),
   });
 
   const { isSubmitting } = form.formState;
@@ -75,7 +75,7 @@ export default function RegisterExerciseButton({
       setOpen(false);
       form.reset();
       router.refresh();
-    } catch (_e) {
+    } catch {
       setError("Error registrando el ejercicio");
     }
   };
@@ -256,7 +256,7 @@ export default function RegisterExerciseButton({
                 </Tabs>
               </div>
 
-              {error && <div className="text-red-500 text-sm">{error}</div>}
+              {!!error && <div className="text-red-500 text-sm">{error}</div>}
 
               <DialogFooter>
                 <Button

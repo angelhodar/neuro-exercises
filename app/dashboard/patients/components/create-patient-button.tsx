@@ -28,17 +28,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const createPatientSchema = z.object({
-  firstName: z.string().min(1, "El nombre es obligatorio"),
-  lastName: z.string().min(1, "Los apellidos son obligatorios"),
   dateOfBirth: z.string().optional(),
-  phone: z.string().optional(),
+  diagnosis: z.string().optional(),
   email: z
     .string()
     .email("Introduce un email válido")
     .optional()
     .or(z.literal("")),
-  diagnosis: z.string().optional(),
+  firstName: z.string().min(1, "El nombre es obligatorio"),
+  lastName: z.string().min(1, "Los apellidos son obligatorios"),
   notes: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 type CreatePatientFormValues = z.infer<typeof createPatientSchema>;
@@ -48,29 +48,29 @@ export default function CreatePatientButton() {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreatePatientFormValues>({
-    resolver: zodResolver(createPatientSchema),
     defaultValues: {
+      dateOfBirth: "",
+      diagnosis: "",
+      email: "",
       firstName: "",
       lastName: "",
-      dateOfBirth: "",
-      phone: "",
-      email: "",
-      diagnosis: "",
       notes: "",
+      phone: "",
     },
+    resolver: zodResolver(createPatientSchema),
   });
 
   const onSubmit = async (data: CreatePatientFormValues) => {
     setIsLoading(true);
     try {
       await createPatient({
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        diagnosis: data.diagnosis || null,
+        email: data.email || null,
         firstName: data.firstName,
         lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        phone: data.phone || null,
-        email: data.email || null,
-        diagnosis: data.diagnosis || null,
         notes: data.notes || null,
+        phone: data.phone || null,
       });
       toast.success("Paciente creado exitosamente");
       form.reset();

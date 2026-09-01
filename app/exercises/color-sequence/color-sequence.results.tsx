@@ -85,14 +85,14 @@ export function Results({ results }: ColorSequenceResultsProps) {
           </TableHeader>
           <TableBody>
             {results.map((result, index) => (
-              <TableRow key={`row-${result.targetSequence.join("-")}-${index}`}>
+              <TableRow key={JSON.stringify(result)}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    {result.targetSequence.map((c: number, i: number) => (
+                    {result.targetSequence.map((c: number) => (
                       <span
                         className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]}`}
-                        key={`target-${i}-${c}`}
+                        key={`target-${result.targetSequence.join("-")}-${c}`}
                       />
                     ))}
                   </div>
@@ -102,11 +102,11 @@ export function Results({ results }: ColorSequenceResultsProps) {
                     {result.userSequence.map((c: number, i: number) => (
                       <span
                         className={`inline-block h-6 w-6 rounded-sm ${SEQUENCE_COLORS[c]} ${
-                          c !== result.targetSequence[i]
-                            ? "ring-2 ring-red-500 ring-offset-1"
-                            : ""
+                          c === result.targetSequence[i]
+                            ? ""
+                            : "ring-2 ring-red-500 ring-offset-1"
                         }`}
-                        key={`user-${i}-${c}`}
+                        key={`user-${result.userSequence.join("-")}-${c}`}
                       />
                     ))}
                   </div>

@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ConfirmOptions {
-  title: string;
   description: string;
+  title: string;
 }
 
 interface ConfirmContextProps {
@@ -27,8 +27,8 @@ interface ConfirmContextProps {
 }
 
 interface PendingPromise {
-  resolve: (value: boolean) => void;
   reject: (reason?: unknown) => void;
+  resolve: (value: boolean) => void;
 }
 
 const ConfirmContext = createContext<ConfirmContextProps | undefined>(
@@ -37,19 +37,18 @@ const ConfirmContext = createContext<ConfirmContextProps | undefined>(
 
 export function ConfirmProvider({ children }: PropsWithChildren) {
   const [options, setOptions] = useState<ConfirmOptions>({
-    title: "",
     description: "",
+    title: "",
   });
   const [pendingPromise, setPendingPromise] = useState<PendingPromise | null>(
     null
   );
 
-  const confirm = (options: ConfirmOptions): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      setOptions(options);
-      setPendingPromise({ resolve, reject });
+  const confirm = (confirmOptions: ConfirmOptions): Promise<boolean> =>
+    new Promise((resolve, reject) => {
+      setOptions(confirmOptions);
+      setPendingPromise({ reject, resolve });
     });
-  };
 
   const handleConfirm = () => {
     if (pendingPromise) {

@@ -6,10 +6,10 @@ import type { Exercise } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
 interface LinkExerciseCardProps {
-  exercise: Exercise;
   completed: boolean;
-  linkId: number;
+  exercise: Exercise;
   itemId: number;
+  linkId: number;
 }
 
 export function LinkExerciseCard(props: LinkExerciseCardProps) {

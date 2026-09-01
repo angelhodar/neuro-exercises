@@ -19,11 +19,11 @@ import {
 import type { ExerciseConfigPreset } from "@/lib/db/schema";
 
 interface ExerciseConfigFormProps extends PropsWithChildren {
+  exerciseId: number;
+  onSubmit?: (config: Record<string, unknown>) => void;
+  presets?: ExerciseConfigPreset[];
   slug: string;
   title: string;
-  exerciseId: number;
-  presets?: ExerciseConfigPreset[];
-  onSubmit?: (config: Record<string, unknown>) => void;
 }
 
 interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
@@ -44,8 +44,8 @@ function ExerciseConfigFormContent({
   const { configSchema, defaultConfig, ConfigFieldsComponent } = assets;
 
   const form = useForm<z.infer<typeof configSchema>>({
-    resolver: zodResolver(configSchema),
     defaultValues: defaultConfig,
+    resolver: zodResolver(configSchema),
   });
 
   function handleSubmit(data: z.infer<typeof configSchema>) {
@@ -74,7 +74,7 @@ function ExerciseConfigFormContent({
             className="space-y-6"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
-            {presets && (
+            {!!presets && (
               <>
                 <ExerciseConfigPresetSelector
                   exerciseId={exerciseId}

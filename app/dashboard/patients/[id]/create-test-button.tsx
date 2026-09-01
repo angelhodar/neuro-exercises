@@ -38,9 +38,9 @@ import { EVALUATED_PROCESS_LABELS, EVALUATED_PROCESSES } from "../constants";
 const createTestSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   evaluatedProcess: z.string().min(1, "El proceso evaluado es obligatorio"),
-  testName: z.string().optional(),
-  score: z.string().optional(),
   observations: z.string().optional(),
+  score: z.string().optional(),
+  testName: z.string().optional(),
 });
 
 type CreateTestFormValues = z.infer<typeof createTestSchema>;
@@ -54,27 +54,27 @@ export default function CreateTestButton({ patientId }: CreateTestButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreateTestFormValues>({
-    resolver: zodResolver(createTestSchema),
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
       evaluatedProcess: "",
-      testName: "",
-      score: "",
       observations: "",
+      score: "",
+      testName: "",
     },
+    resolver: zodResolver(createTestSchema),
   });
 
   const onSubmit = async (data: CreateTestFormValues) => {
     setIsLoading(true);
     try {
       await createPatientTest({
-        patientId,
         date: new Date(data.date),
         evaluatedProcess: data.evaluatedProcess,
-        testName: data.testName || null,
-        score: data.score || null,
         observations: data.observations || null,
+        patientId,
+        score: data.score || null,
         sessionId: null,
+        testName: data.testName || null,
       });
       toast.success("Test creado exitosamente");
       form.reset();
@@ -123,8 +123,8 @@ export default function CreateTestButton({ patientId }: CreateTestButtonProps) {
                     <Select
                       disabled={isLoading}
                       items={EVALUATED_PROCESSES.map((process) => ({
-                        value: process,
                         label: EVALUATED_PROCESS_LABELS[process],
+                        value: process,
                       }))}
                       onValueChange={field.onChange}
                       value={field.value}

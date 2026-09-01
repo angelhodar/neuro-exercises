@@ -69,7 +69,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        {showCloseButton && (
+        {!!showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
             render={
@@ -134,11 +134,11 @@ function SheetDescription({
 
 export {
   Sheet,
-  SheetTrigger,
   SheetClose,
   SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 };

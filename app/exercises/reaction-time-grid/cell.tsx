@@ -5,10 +5,10 @@ import * as m from "motion/react-m";
 import { cn } from "@/lib/utils";
 
 interface CellProps {
-  isTarget: boolean;
-  isSelected: boolean;
-  onClick: () => void;
   disabled: boolean;
+  isSelected: boolean;
+  isTarget: boolean;
+  onClick: () => void;
 }
 
 export function Cell({ isTarget, isSelected, onClick, disabled }: CellProps) {

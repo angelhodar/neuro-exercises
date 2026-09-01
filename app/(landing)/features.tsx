@@ -38,7 +38,7 @@ function LandingExerciseCard({ exercise }: { exercise: Exercise }) {
         duration: 0.6,
         ease: "easeOut",
       }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ margin: "-60px", once: true }}
       whileHover={{ y: -4 }}
       whileInView={{ opacity: 1, y: 0 }}
     >
@@ -53,14 +53,14 @@ function LandingExerciseCard({ exercise }: { exercise: Exercise }) {
             fill
             src={createBlobUrl(exercise.thumbnailUrl ?? "")}
           />
-          {exercise.tags[0] && (
+          {exercise.tags[0] ? (
             <Badge
               className="absolute top-3 right-3 border-blue-300 bg-blue-50 p-3 text-blue-700 text-sm capitalize"
               variant="outline"
             >
               {exercise.tags[0]}
             </Badge>
-          )}
+          ) : null}
         </ExerciseCardThumbnail>
 
         <div className="flex flex-1 flex-col p-5">

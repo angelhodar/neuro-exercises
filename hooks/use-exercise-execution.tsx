@@ -45,14 +45,13 @@ export function ExerciseProvider({
   const results = useRef<object[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
+  useEffect(
+    () => () => {
+      clearTimeout(timerRef.current ?? undefined);
+      timerRef.current = null;
+    },
+    []
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -82,10 +81,8 @@ export function ExerciseProvider({
   }
 
   async function finishExercise() {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearTimeout(timerRef.current ?? undefined);
+    timerRef.current = null;
 
     const linkId = searchParams.get("linkId");
     const itemId = searchParams.get("itemId");
@@ -109,7 +106,6 @@ export function ExerciseProvider({
       } catch (error) {
         toast.error("Error subiendo resultados");
         console.error("Error subiendo resultados:", error);
-        return;
       }
     } else {
       setExerciseState("finished");
@@ -143,22 +139,20 @@ export function ExerciseProvider({
     setCurrentQuestionIndex(0);
     setExerciseState("ready");
     results.current = [];
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearTimeout(timerRef.current ?? undefined);
+    timerRef.current = null;
   }
 
   const contextValue: ExerciseExecutionContext = {
-    exercise,
-    currentQuestionIndex,
-    exerciseState,
-    waitingForNextQuestionTrigger,
     addResult,
-    nextQuestion,
+    currentQuestionIndex,
+    exercise,
+    exerciseState,
     finishExercise,
+    nextQuestion,
     resetExercise,
     startExercise,
+    waitingForNextQuestionTrigger,
     ...config,
   };
 

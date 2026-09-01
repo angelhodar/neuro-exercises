@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeuroGranada - Plataforma de Ejercicios Neurológicos",
   description:
     "Ejercicios interactivos para personas con problemas neurológicos",
+  title: "NeuroGranada - Plataforma de Ejercicios Neurológicos",
 };
 
 export default function RootLayout({ children }: Readonly<PropsWithChildren>) {

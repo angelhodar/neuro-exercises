@@ -27,15 +27,15 @@ import type {
 } from "./reaction-time-grid.schema";
 
 const reactionTimeChartConfig = {
+  correcto: { color: "var(--chart-2)", label: "Correcto" },
+  incorrecto: { color: "var(--chart-1)", label: "Incorrecto" },
+  parcial: { color: "var(--chart-3)", label: "Parcial" },
   tiempo: { label: "Tiempo medio (s)" },
-  correcto: { label: "Correcto", color: "var(--chart-2)" },
-  parcial: { label: "Parcial", color: "var(--chart-3)" },
-  incorrecto: { label: "Incorrecto", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
 interface ExerciseResultsProps {
-  results: ReactionTimeQuestionResult[];
   config: ReactionTimeGridConfig;
+  results: ReactionTimeQuestionResult[];
 }
 
 function ReactionTimeHeatmap({
@@ -48,7 +48,7 @@ function ReactionTimeHeatmap({
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
 
-  for (let i = 0; i < gridSize * gridSize; i++) {
+  for (let i = 0; i < gridSize * gridSize; i += 1) {
     const avg = cellAverages[i];
     if (!Number.isNaN(avg)) {
       if (avg < min) {
@@ -75,9 +75,9 @@ function ReactionTimeHeatmap({
     <div
       className="grid overflow-hidden rounded border"
       style={{
+        gap: 1,
         gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
         gridTemplateRows: `repeat(${gridSize}, 1fr)`,
-        gap: 1,
       }}
     >
       {Array.from({ length: gridSize * gridSize }, (_, n) => n).map(
@@ -141,7 +141,7 @@ export function Results({ results, config }: ExerciseResultsProps) {
     for (const [index, cell] of result.selectedCells.entries()) {
       if (result.targetCells.includes(cell)) {
         totalCorrectReactionTime += result.reactionTimes[index];
-        totalCorrectSelections++;
+        totalCorrectSelections += 1;
       }
     }
   }
@@ -161,7 +161,7 @@ export function Results({ results, config }: ExerciseResultsProps) {
     }
   }
   const cellAverages: Record<number, number> = {};
-  for (let i = 0; i < config.gridSize * config.gridSize; i++) {
+  for (let i = 0; i < config.gridSize * config.gridSize; i += 1) {
     const arr = cellReactionTimes[i] || [];
     cellAverages[i] = arr.length
       ? arr.reduce((a, b) => a + b, 0) / arr.length
@@ -182,9 +182,9 @@ export function Results({ results, config }: ExerciseResultsProps) {
       fill = "var(--color-parcial)";
     }
     return {
+      fill,
       question: `${i + 1}`,
       tiempo: Math.round(avgTime),
-      fill,
     };
   });
 
@@ -235,9 +235,7 @@ export function Results({ results, config }: ExerciseResultsProps) {
                 {results.map((result, index) => {
                   const correctCount = calculateCorrectSelections(result);
                   return (
-                    <TableRow
-                      key={`result-${result.targetCells.join("-")}-${index}`}
-                    >
+                    <TableRow key={JSON.stringify(result)}>
                       <TCell>{index + 1}</TCell>
                       <TCell>
                         {result.targetCells.map((cell) => (

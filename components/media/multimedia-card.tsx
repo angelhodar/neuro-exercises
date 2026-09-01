@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
 type MediaType = "image" | "video" | "audio";
 
 interface MultimediaCardContextValue {
-  type: MediaType;
-  src: string;
   alt: string;
-  thumbnailSrc?: string;
   previewEnabled: boolean;
+  src: string;
+  thumbnailSrc?: string;
+  type: MediaType;
 }
 
 const MultimediaCardContext = createContext<MultimediaCardContextValue | null>(
@@ -67,7 +67,7 @@ function MultimediaCard({
   if (!previewEnabled) {
     return (
       <MultimediaCardContext
-        value={{ type, src, alt, thumbnailSrc, previewEnabled: false }}
+        value={{ alt, previewEnabled: false, src, thumbnailSrc, type }}
       >
         {content}
       </MultimediaCardContext>
@@ -76,7 +76,7 @@ function MultimediaCard({
 
   return (
     <MultimediaCardContext
-      value={{ type, src, alt, thumbnailSrc, previewEnabled: true }}
+      value={{ alt, previewEnabled: true, src, thumbnailSrc, type }}
     >
       <Dialog>
         {content}
@@ -93,8 +93,8 @@ const THUMBNAIL_BASE = "relative aspect-[4/3] w-full overflow-hidden";
 
 const MEDIA_ICONS = {
   audio: MusicIcon,
-  video: VideoIcon,
   image: ImageIcon,
+  video: VideoIcon,
 };
 
 interface MultimediaCardThumbnailProps {
@@ -262,6 +262,7 @@ function MediaPreview({
 }
 
 export {
+  type MediaType,
   MultimediaCard,
   MultimediaCardActions,
   MultimediaCardAudioThumbnail,
@@ -269,5 +270,4 @@ export {
   MultimediaCardThumbnail,
   MultimediaCardTitle,
   MultimediaCardVideoThumbnail,
-  type MediaType,
 };

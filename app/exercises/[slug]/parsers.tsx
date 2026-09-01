@@ -6,24 +6,24 @@ import type { Exercise } from "@/lib/db/schema";
 const configOnlySchema = z
   .object({
     config: z.string(),
-    linkId: z.undefined().optional(),
     itemId: z.undefined().optional(),
+    linkId: z.undefined().optional(),
   })
   .transform((data) => ({
-    type: "config" as const,
     config: data.config,
+    type: "config" as const,
   }));
 
 const linkOnlySchema = z
   .object({
-    linkId: z.string(),
-    itemId: z.string(),
     config: z.undefined().optional(),
+    itemId: z.string(),
+    linkId: z.string(),
   })
   .transform((data) => ({
-    type: "link" as const,
-    linkId: data.linkId,
     itemId: data.itemId,
+    linkId: data.linkId,
+    type: "link" as const,
   }));
 
 export const exerciseParamsSchema = z.union([configOnlySchema, linkOnlySchema]);
@@ -38,20 +38,20 @@ const configWithResultsSchema = z
     rid: z.undefined().optional(),
   })
   .transform((data) => ({
-    type: "config" as const,
     config: data.config,
     results: data.results,
+    type: "config" as const,
   }));
 
 const resultIdSchema = z
   .object({
-    rid: z.string().regex(/^\d+$/).transform(Number),
     config: z.undefined().optional(),
     results: z.undefined().optional(),
+    rid: z.string().regex(/^\d+$/).transform(Number),
   })
   .transform((data) => ({
-    type: "result" as const,
     rid: data.rid,
+    type: "result" as const,
   }));
 
 export const exerciseResultsParamsSchema = z.union([
@@ -69,7 +69,7 @@ export function parseConfigFromUrl(
 
   try {
     parsedJson = JSON.parse(configString);
-  } catch (_error) {
+  } catch {
     return null;
   }
 
@@ -90,7 +90,7 @@ export function parseResultsFromUrl(
 
   try {
     parsedJson = JSON.parse(resultsString);
-  } catch (_error) {
+  } catch {
     return null;
   }
 
@@ -118,7 +118,7 @@ export async function getExerciseConfigFromLink(
 
   const numericItemId = Number.parseInt(itemId, 10);
   const item = linkData.template.exerciseTemplateItems.find(
-    (item) => item.id === numericItemId
+    (templateItem) => templateItem.id === numericItemId
   );
 
   if (!item?.config) {

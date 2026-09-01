@@ -11,8 +11,8 @@ export async function getExerciseGenerations(
 ): Promise<ExerciseChatGeneration[]> {
   try {
     const generations = await db.query.exerciseChatGeneration.findMany({
-      where: eq(exerciseChatGeneration.exerciseId, exerciseId),
       orderBy: asc(exerciseChatGeneration.createdAt),
+      where: eq(exerciseChatGeneration.exerciseId, exerciseId),
     });
 
     return generations;
@@ -38,9 +38,9 @@ export async function createExerciseGeneration(data: {
       .insert(exerciseChatGeneration)
       .values({
         exerciseId: data.exerciseId,
-        userId: user.id,
-        status: data.status || "PENDING",
         prompt: data.prompt,
+        status: data.status || "PENDING",
+        userId: user.id,
       })
       .returning();
 
@@ -82,12 +82,12 @@ export async function getLastCompletedGeneration(
 ): Promise<ExerciseChatGeneration | null> {
   try {
     const generation = await db.query.exerciseChatGeneration.findFirst({
-      where: (generation, { eq, and }) =>
+      orderBy: (generationTable, { desc }) => desc(generationTable.createdAt),
+      where: (generationTable, { eq: equals, and }) =>
         and(
-          eq(generation.status, "COMPLETED"),
-          eq(generation.exerciseId, exerciseId)
+          equals(generationTable.status, "COMPLETED"),
+          equals(generationTable.exerciseId, exerciseId)
         ),
-      orderBy: (generation, { desc }) => desc(generation.createdAt),
     });
 
     return generation || null;

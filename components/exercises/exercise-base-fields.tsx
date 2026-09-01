@@ -134,8 +134,8 @@ export function ExerciseExplicitGoalFields(props: ExerciseFieldsBaseProps) {
             <FormControl>
               <Select
                 items={[
-                  { value: "questions", label: "Número de ensayos" },
-                  { value: "time", label: "Tiempo límite" },
+                  { label: "Número de ensayos", value: "questions" },
+                  { label: "Tiempo límite", value: "time" },
                 ]}
                 onValueChange={field.onChange}
                 value={field.value}

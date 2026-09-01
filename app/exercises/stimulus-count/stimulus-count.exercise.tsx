@@ -16,9 +16,9 @@ interface StimulusCountExerciseProps {
 }
 
 interface QuestionState {
+  questionStart: number | null;
   stimuli: Stimulus[];
   userAnswer: string;
-  questionStart: number | null;
 }
 
 const shapes: Shape[] = ["star", "circle", "square", "triangle"];
@@ -40,9 +40,9 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
   const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
+    questionStart: null,
     stimuli: [],
     userAnswer: "",
-    questionStart: null,
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -53,15 +53,15 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
       Math.floor(Math.random() * (maxStimuli - minStimuli + 1)) + minStimuli;
     const newStimuli = Array.from({ length: count }).map(
       (): Stimulus => ({
-        shape: shapes[Math.floor(Math.random() * shapes.length)],
         color: colors[Math.floor(Math.random() * colors.length)],
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
       })
     );
 
     setQuestionState({
+      questionStart: Date.now(),
       stimuli: newStimuli,
       userAnswer: "",
-      questionStart: Date.now(),
     });
   }, [currentQuestionIndex, minStimuli, maxStimuli]);
 
@@ -83,10 +83,10 @@ export function Exercise({ config }: StimulusCountExerciseProps) {
     const isCorrect = numericAnswer === questionState.stimuli.length;
 
     const result: StimulusCountQuestionResult = {
-      shownStimuli: questionState.stimuli.length,
-      userAnswer: numericAnswer,
       isCorrect,
+      shownStimuli: questionState.stimuli.length,
       timeSpent,
+      userAnswer: numericAnswer,
     };
 
     addResult(result);

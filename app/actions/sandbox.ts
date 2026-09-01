@@ -18,9 +18,9 @@ import { getExerciseById } from "./exercises";
 function createSandboxEnvVars(exercise: Exercise) {
   const vars: Record<string, string> = {
     NEXT_PUBLIC_BLOB_URL: process.env.NEXT_PUBLIC_BLOB_URL ?? "",
-    SANDBOX_EXERCISE: JSON.stringify(exercise),
-    NODE_ENV: "development",
     NEXT_TELEMETRY_DISABLED: "1",
+    NODE_ENV: "development",
+    SANDBOX_EXERCISE: JSON.stringify(exercise),
   };
 
   return Object.entries(vars)
@@ -44,31 +44,42 @@ async function writeSandboxCodeFiles(sandbox: Sandbox, codeBlobKey: string) {
 
   await sandbox.writeFiles(
     files.map((file) => ({
-      path: `${SANDBOX_PROJECT_DIR}/${file.path}`,
       content: Buffer.from(file.content),
+      path: `${SANDBOX_PROJECT_DIR}/${file.path}`,
     }))
   );
 }
 
-async function waitForServer(sandbox: Sandbox, maxWaitMs = 60_000) {
+function waitForServer(sandbox: Sandbox, maxWaitMs = 60_000) {
   const url = sandbox.domain(3000);
   const start = Date.now();
 
-  while (Date.now() - start < maxWaitMs) {
+  const checkServer = async (): Promise<boolean> => {
     try {
       const res = await fetch(url);
       if (res.ok) {
-        return;
+        return true;
       }
     } catch {
       // Server not ready yet
     }
-    await new Promise((r) => setTimeout(r, 2000));
-  }
+    return false;
+  };
 
-  throw new Error(
-    "No se pudo iniciar la previsualización del ejercicio. Intenta generar el código de nuevo."
-  );
+  const poll = async (): Promise<void> => {
+    if (Date.now() - start >= maxWaitMs) {
+      throw new Error(
+        "No se pudo iniciar la previsualización del ejercicio. Intenta generar el código de nuevo."
+      );
+    }
+    if (await checkServer()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return poll();
+  };
+
+  return poll();
 }
 
 async function startDevServerAndWait(sandbox: Sandbox) {
@@ -156,8 +167,8 @@ async function tryReuseSandbox(
   // Write .env (agent sandbox may not have it)
   await sandbox.writeFiles([
     {
-      path: `${SANDBOX_PROJECT_DIR}/.env`,
       content: Buffer.from(createSandboxEnvVars(exercise)),
+      path: `${SANDBOX_PROJECT_DIR}/.env`,
     },
   ]);
 
@@ -189,8 +200,8 @@ async function createNewSandbox(
 
   await sandbox.writeFiles([
     {
-      path: `${SANDBOX_PROJECT_DIR}/.env`,
       content: Buffer.from(createSandboxEnvVars(exercise)),
+      path: `${SANDBOX_PROJECT_DIR}/.env`,
     },
   ]);
 
@@ -232,9 +243,7 @@ export async function initializeExercisePreview(
         exercise
       );
 
-      if (result) {
-        return result;
-      }
+      return result;
     } catch {
       // Sandbox is gone or errored — fall through to create a new one
     }

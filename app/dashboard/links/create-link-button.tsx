@@ -40,8 +40,8 @@ const createLinkSchema = z.object({
 type CreateLinkSchema = z.infer<typeof createLinkSchema>;
 
 interface CreateLinkButtonProps {
-  users: { id: string; name: string | null; email: string }[];
   templates: { id: number; title: string }[];
+  users: { id: string; name: string | null; email: string }[];
 }
 
 export default function CreateLinkButton({
@@ -55,11 +55,11 @@ export default function CreateLinkButton({
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CreateLinkSchema>({
-    resolver: zodResolver(createLinkSchema),
     defaultValues: {
       targetUserId: "",
       templateId: "",
     },
+    resolver: zodResolver(createLinkSchema),
   });
 
   const { isSubmitting } = form.formState;
@@ -104,8 +104,8 @@ export default function CreateLinkButton({
                   <FormControl>
                     <Select
                       items={users.map((u) => ({
-                        value: u.id,
                         label: u.name || u.email,
+                        value: u.id,
                       }))}
                       onValueChange={field.onChange}
                       required
@@ -139,8 +139,8 @@ export default function CreateLinkButton({
                   <FormControl>
                     <Select
                       items={templates.map((t) => ({
-                        value: t.id.toString(),
                         label: t.title,
+                        value: t.id.toString(),
                       }))}
                       onValueChange={field.onChange}
                       required
@@ -168,7 +168,7 @@ export default function CreateLinkButton({
                 </FormItem>
               )}
             />
-            {error && <div className="text-red-500 text-sm">{error}</div>}
+            {!!error && <div className="text-red-500 text-sm">{error}</div>}
             <DialogFooter>
               <Button className="w-full" disabled={isSubmitting} type="submit">
                 {isSubmitting ? "Creando..." : "Crear enlace"}

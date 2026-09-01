@@ -20,7 +20,13 @@ async function copySandboxVariants(sandbox: Sandbox) {
 
   console.log(`Found ${sandboxFiles.length} sandbox files`);
 
-  for (const src of sandboxFiles) {
+  async function copyFiles(files: string[]): Promise<void> {
+    const [src, ...remainingFiles] = files;
+
+    if (!src) {
+      return;
+    }
+
     const dst = src.replace(".sandbox.", ".");
     await sandbox.runCommand({
       args: [src, dst],
@@ -28,7 +34,11 @@ async function copySandboxVariants(sandbox: Sandbox) {
       cwd: SANDBOX_PROJECT_DIR,
     });
     console.log(`  Copied ${src} -> ${dst}`);
+
+    await copyFiles(remainingFiles);
   }
+
+  await copyFiles(sandboxFiles);
 }
 
 export async function createSnapshot(

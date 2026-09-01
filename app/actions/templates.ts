@@ -11,30 +11,30 @@ import { getCurrentUser } from "./users";
 
 export async function getExerciseTemplates() {
   const templates = await db.query.exerciseTemplates.findMany({
+    orderBy: (template) => template.createdAt,
     with: {
       creator: {
         columns: {
+          email: true,
           id: true,
           name: true,
-          email: true,
         },
       },
       exerciseTemplateItems: {
+        orderBy: (item) => item.position,
         with: {
           exercise: {
             columns: {
+              displayName: true,
               id: true,
               slug: true,
-              displayName: true,
-              thumbnailUrl: true,
               tags: true,
+              thumbnailUrl: true,
             },
           },
         },
-        orderBy: (item) => item.position,
       },
     },
-    orderBy: (template) => template.createdAt,
   });
 
   return templates;
@@ -62,8 +62,8 @@ export async function createExerciseTemplate(
     .insert(exerciseTemplates)
     .values({
       creatorId: user.id,
-      title: newTemplate.title,
       description: newTemplate.description || null,
+      title: newTemplate.title,
     })
     .returning();
 
@@ -72,10 +72,10 @@ export async function createExerciseTemplate(
   }
 
   const itemsToInsert = newTemplate.items.map((item) => ({
-    templateId: template.id,
-    exerciseId: item.exerciseId,
     config: item.config,
+    exerciseId: item.exerciseId,
     position: item.position,
+    templateId: template.id,
   }));
 
   await db.insert(exerciseTemplateItems).values(itemsToInsert);

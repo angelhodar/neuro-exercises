@@ -48,15 +48,15 @@ const timestamps = {
 export const users = pgTable(
   "users",
   {
-    id: text().primaryKey(),
-    name: text(),
-    email: text().notNull().unique(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
-    image: text(),
-    role: text("role"),
+    banExpires: timestamp("ban_expires", { withTimezone: true }),
     banned: boolean("banned"),
     banReason: text("ban_reason"),
-    banExpires: timestamp("ban_expires", { withTimezone: true }),
+    email: text().notNull().unique(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    id: text().primaryKey(),
+    image: text(),
+    name: text(),
+    role: text("role"),
     ...timestamps,
   },
   (table) => [
@@ -68,14 +68,14 @@ export const users = pgTable(
 export const sessions = pgTable(
   "sessions",
   {
-    id: text().primaryKey(),
+    activeOrganizationId: text("active_organization_id"),
     expiresAt: timestamp("expires_at").notNull(),
-    token: text().notNull().unique(),
+    id: text().primaryKey(),
+    impersonatedBy: text("impersonated_by"),
     ipAddress: text("ip_address"),
+    token: text().notNull().unique(),
     userAgent: text("user_agent"),
     userId: text("user_id").notNull(),
-    activeOrganizationId: text("active_organization_id"),
-    impersonatedBy: text("impersonated_by"),
     ...timestamps,
   },
   (table) => [
@@ -90,17 +90,17 @@ export const sessions = pgTable(
 export const accounts = pgTable(
   "accounts",
   {
-    id: text().primaryKey(),
-    accountId: text("account_id").notNull(),
-    providerId: text("provider_id").notNull(),
-    userId: text("user_id").notNull(),
     accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
     accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    accountId: text("account_id").notNull(),
+    id: text().primaryKey(),
+    idToken: text("id_token"),
+    password: text(),
+    providerId: text("provider_id").notNull(),
+    refreshToken: text("refresh_token"),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text(),
-    password: text(),
+    userId: text("user_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -113,19 +113,19 @@ export const accounts = pgTable(
 );
 
 export const verifications = pgTable("verifications", {
+  expiresAt: timestamp("expires_at").notNull(),
   id: text().primaryKey(),
   identifier: text().notNull(),
   value: text().notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
   ...timestamps,
 });
 
 export const organization = pgTable("organizations", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").unique(),
   logo: text("logo"),
   metadata: text("metadata"),
+  name: text("name").notNull(),
+  slug: text("slug").unique(),
   ...timestamps,
 });
 
@@ -134,8 +134,8 @@ export const member = pgTable(
   {
     id: text("id").primaryKey(),
     organizationId: text("organization_id").notNull(),
-    userId: text("user_id").notNull(),
     role: text("role").default("member").notNull(),
+    userId: text("user_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -161,13 +161,13 @@ export const member = pgTable(
 export const invitation = pgTable(
   "invitations",
   {
-    id: text("id").primaryKey(),
-    organizationId: text("organization_id").notNull(),
     email: text("email").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    id: text("id").primaryKey(),
+    inviterId: text("inviter_id").notNull(),
+    organizationId: text("organization_id").notNull(),
     role: text("role"),
     status: text("status").default("pending").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    inviterId: text("inviter_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -190,14 +190,14 @@ export const invitation = pgTable(
 export const exercises = pgTable(
   "exercises",
   {
-    id: serial().primaryKey(),
-    slug: varchar({ length: 100 }).notNull().unique(),
-    displayName: varchar("display_name", { length: 255 }).notNull(),
-    tags: text("tags").array().notNull().default([]),
-    description: text(),
-    prNumber: integer("pr_number"),
-    thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     audioInstructions: varchar("audio_instructions", { length: 500 }),
+    description: text(),
+    displayName: varchar("display_name", { length: 255 }).notNull(),
+    id: serial().primaryKey(),
+    prNumber: integer("pr_number"),
+    slug: varchar({ length: 100 }).notNull().unique(),
+    tags: text("tags").array().notNull().default([]),
+    thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
     ...timestamps,
   },
   (table) => [
@@ -209,10 +209,10 @@ export const exercises = pgTable(
 export const exerciseTemplates = pgTable(
   "exercise_templates",
   {
-    id: serial().primaryKey(),
     creatorId: text("creator_id").notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
+    id: serial().primaryKey(),
+    title: varchar("title", { length: 255 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -228,11 +228,11 @@ export const exerciseTemplates = pgTable(
 export const exerciseTemplateItems = pgTable(
   "exercise_template_items",
   {
-    id: serial().primaryKey(),
-    templateId: integer("template_id").notNull(),
-    exerciseId: integer("exercise_id").notNull(),
     config: jsonb().$type<ConfigSchema>(),
+    exerciseId: integer("exercise_id").notNull(),
+    id: serial().primaryKey(),
     position: integer().notNull(),
+    templateId: integer("template_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -262,10 +262,10 @@ export const exerciseTemplateItems = pgTable(
 export const exerciseLinks = pgTable(
   "exercise_links",
   {
-    id: serial().primaryKey(),
     creatorId: text("creator_id").notNull(),
-    templateId: integer("template_id").notNull(),
+    id: serial().primaryKey(),
     targetUserId: text("target_user_id").notNull(),
+    templateId: integer("template_id").notNull(),
     token: varchar("token", { length: 50 }).notNull().unique(),
     ...timestamps,
   },
@@ -295,14 +295,14 @@ export const exerciseLinks = pgTable(
 export const exerciseResults = pgTable(
   "exercise_results",
   {
-    id: serial().primaryKey(),
-    linkId: integer("link_id").notNull(),
-    templateItemId: integer("template_item_id").notNull(),
-    results: jsonb(),
-    startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
+    id: serial().primaryKey(),
+    linkId: integer("link_id").notNull(),
+    results: jsonb(),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    templateItemId: integer("template_item_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -330,19 +330,19 @@ export const exerciseResults = pgTable(
 export const medias = pgTable(
   "medias",
   (_table) => ({
-    id: serial().primaryKey(),
-    name: varchar("name", { length: 255 }).notNull(),
-    description: text("description"),
-    tags: text("tags").array().default([]),
+    authorId: text("creator_id").notNull(),
     blobKey: varchar("blob_key", { length: 500 }).notNull(),
+    derivedFrom: integer("derived_from"),
+    description: text("description"),
+    embedding: vector("embedding", { dimensions: 768 }),
+    id: serial().primaryKey(),
+    metadata: jsonb("metadata"),
     mimeType: varchar("mime_type", { length: 100 })
       .notNull()
       .default("image/png"),
+    name: varchar("name", { length: 255 }).notNull(),
+    tags: text("tags").array().default([]),
     thumbnailKey: varchar("thumbnail_key", { length: 500 }),
-    metadata: jsonb("metadata"),
-    authorId: text("creator_id").notNull(),
-    derivedFrom: integer("derived_from"),
-    embedding: vector("embedding", { dimensions: 768 }),
     ...timestamps,
   }),
   (table) => [
@@ -368,14 +368,14 @@ export const medias = pgTable(
 export const exerciseChatGeneration = pgTable(
   "exercise_chat_generation",
   {
-    id: serial().primaryKey(),
-    exerciseId: integer("exercise_id").notNull(),
-    userId: text("user_id").notNull(),
-    status: generationStatusEnum("status").notNull(),
     codeBlobKey: varchar("code_blob_key", { length: 500 }),
-    sandboxId: varchar("sandbox_id", { length: 255 }),
-    summary: text("summary"),
+    exerciseId: integer("exercise_id").notNull(),
+    id: serial().primaryKey(),
     prompt: text("prompt").notNull(),
+    sandboxId: varchar("sandbox_id", { length: 255 }),
+    status: generationStatusEnum("status").notNull(),
+    summary: text("summary"),
+    userId: text("user_id").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -400,11 +400,11 @@ export const exerciseChatGeneration = pgTable(
 export const exerciseConfigPresets = pgTable(
   "exercise_config_presets",
   {
-    id: serial().primaryKey(),
-    exerciseId: integer("exercise_id").notNull(),
-    creatorId: text("creator_id").notNull(),
-    name: varchar("name", { length: 255 }).notNull(),
     config: jsonb().$type<ConfigSchema>().notNull(),
+    creatorId: text("creator_id").notNull(),
+    exerciseId: integer("exercise_id").notNull(),
+    id: serial().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -432,15 +432,15 @@ export const exerciseConfigPresets = pgTable(
 export const patients = pgTable(
   "patients",
   {
-    id: serial().primaryKey(),
-    firstName: varchar("first_name", { length: 255 }).notNull(),
-    lastName: varchar("last_name", { length: 255 }).notNull(),
-    dateOfBirth: timestamp("date_of_birth", { withTimezone: true }),
-    phone: varchar("phone", { length: 50 }),
-    email: varchar("email", { length: 255 }),
-    diagnosis: text("diagnosis"),
-    notes: text("notes"),
     creatorId: text("creator_id").notNull(),
+    dateOfBirth: timestamp("date_of_birth", { withTimezone: true }),
+    diagnosis: text("diagnosis"),
+    email: varchar("email", { length: 255 }),
+    firstName: varchar("first_name", { length: 255 }).notNull(),
+    id: serial().primaryKey(),
+    lastName: varchar("last_name", { length: 255 }).notNull(),
+    notes: text("notes"),
+    phone: varchar("phone", { length: 50 }),
     ...timestamps,
   },
   (table) => [
@@ -457,13 +457,13 @@ export const patients = pgTable(
 export const patientSessions = pgTable(
   "patient_sessions",
   {
-    id: serial().primaryKey(),
-    patientId: integer("patient_id").notNull(),
-    date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
-    type: varchar("type", { length: 50 }).notNull(),
-    discipline: varchar("discipline", { length: 50 }).notNull(),
-    observations: text("observations"),
     creatorId: text("creator_id").notNull(),
+    date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
+    discipline: varchar("discipline", { length: 50 }).notNull(),
+    id: serial().primaryKey(),
+    observations: text("observations"),
+    patientId: integer("patient_id").notNull(),
+    type: varchar("type", { length: 50 }).notNull(),
     ...timestamps,
   },
   (table) => [
@@ -486,15 +486,15 @@ export const patientSessions = pgTable(
 export const patientTests = pgTable(
   "patient_tests",
   {
-    id: serial().primaryKey(),
-    patientId: integer("patient_id").notNull(),
-    sessionId: integer("session_id"),
+    creatorId: text("creator_id").notNull(),
     date: timestamp("date", { withTimezone: true }).defaultNow().notNull(),
     evaluatedProcess: varchar("evaluated_process", { length: 100 }).notNull(),
-    testName: varchar("test_name", { length: 255 }),
-    score: varchar("score", { length: 100 }),
+    id: serial().primaryKey(),
     observations: text("observations"),
-    creatorId: text("creator_id").notNull(),
+    patientId: integer("patient_id").notNull(),
+    score: varchar("score", { length: 100 }),
+    sessionId: integer("session_id"),
+    testName: varchar("test_name", { length: 255 }),
     ...timestamps,
   },
   (table) => [
@@ -524,8 +524,8 @@ export const patientTests = pgTable(
 export const waitlistEmails = pgTable(
   "waitlist_emails",
   {
-    id: serial().primaryKey(),
     email: text().notNull().unique(),
+    id: serial().primaryKey(),
     ...timestamps,
   },
   (table) => [uniqueIndex("waitlist_emails_email_idx").on(table.email)]
@@ -538,25 +538,25 @@ export const mediaTagsView = pgMaterializedView("media_tags", {
 
 // Relations
 export const userRelations = relations(users, ({ many }) => ({
-  createdExerciseTemplates: many(exerciseTemplates),
+  accounts: many(accounts),
   createdExerciseLinks: many(exerciseLinks, {
     relationName: "createdExerciseLinks",
   }),
+  createdExerciseTemplates: many(exerciseTemplates),
+  createdPatientSessions: many(patientSessions),
+  createdPatients: many(patients),
+  createdPatientTests: many(patientTests),
+  exerciseChatGenerations: many(exerciseChatGeneration),
+  exerciseConfigPresets: many(exerciseConfigPresets),
+  medias: many(medias),
+  memberships: many(member),
+  referenceTexts: many(speechTexts),
+  sentInvitations: many(invitation, { relationName: "sentInvitations" }),
+  sessions: many(sessions),
   targetedExerciseLinks: many(exerciseLinks, {
     relationName: "targetedExerciseLinks",
   }),
-  sessions: many(sessions),
-  accounts: many(accounts),
-  medias: many(medias),
-  exerciseChatGenerations: many(exerciseChatGeneration),
-  memberships: many(member),
-  sentInvitations: many(invitation, { relationName: "sentInvitations" }),
-  referenceTexts: many(speechTexts),
   transcriptionResults: many(transcriptionResults),
-  createdPatients: many(patients),
-  createdPatientSessions: many(patientSessions),
-  createdPatientTests: many(patientTests),
-  exerciseConfigPresets: many(exerciseConfigPresets),
 }));
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
@@ -574,9 +574,9 @@ export const accountRelations = relations(accounts, ({ one }) => ({
 }));
 
 export const exercisesRelations = relations(exercises, ({ many }) => ({
-  exerciseTemplateItems: many(exerciseTemplateItems),
   exerciseChatGenerations: many(exerciseChatGeneration),
   exerciseConfigPresets: many(exerciseConfigPresets),
+  exerciseTemplateItems: many(exerciseTemplateItems),
 }));
 
 export const exerciseTemplatesRelations = relations(
@@ -586,23 +586,23 @@ export const exerciseTemplatesRelations = relations(
       fields: [exerciseTemplates.creatorId],
       references: [users.id],
     }),
-    exerciseTemplateItems: many(exerciseTemplateItems),
     exerciseLinks: many(exerciseLinks),
+    exerciseTemplateItems: many(exerciseTemplateItems),
   })
 );
 
 export const exerciseTemplateItemsRelations = relations(
   exerciseTemplateItems,
   ({ one, many }) => ({
-    template: one(exerciseTemplates, {
-      fields: [exerciseTemplateItems.templateId],
-      references: [exerciseTemplates.id],
-    }),
     exercise: one(exercises, {
       fields: [exerciseTemplateItems.exerciseId],
       references: [exercises.id],
     }),
     exerciseResults: many(exerciseResults),
+    template: one(exerciseTemplates, {
+      fields: [exerciseTemplateItems.templateId],
+      references: [exerciseTemplates.id],
+    }),
   })
 );
 
@@ -614,16 +614,16 @@ export const exerciseLinksRelations = relations(
       references: [users.id],
       relationName: "createdExerciseLinks",
     }),
-    template: one(exerciseTemplates, {
-      fields: [exerciseLinks.templateId],
-      references: [exerciseTemplates.id],
-    }),
+    exerciseResults: many(exerciseResults),
     targetUser: one(users, {
       fields: [exerciseLinks.targetUserId],
       references: [users.id],
       relationName: "targetedExerciseLinks",
     }),
-    exerciseResults: many(exerciseResults),
+    template: one(exerciseTemplates, {
+      fields: [exerciseLinks.templateId],
+      references: [exerciseTemplates.id],
+    }),
   })
 );
 
@@ -665,13 +665,13 @@ export const exerciseChatGenerationRelations = relations(
 export const exerciseConfigPresetsRelations = relations(
   exerciseConfigPresets,
   ({ one }) => ({
-    exercise: one(exercises, {
-      fields: [exerciseConfigPresets.exerciseId],
-      references: [exercises.id],
-    }),
     creator: one(users, {
       fields: [exerciseConfigPresets.creatorId],
       references: [users.id],
+    }),
+    exercise: one(exercises, {
+      fields: [exerciseConfigPresets.exerciseId],
+      references: [exercises.id],
     }),
   })
 );
@@ -700,14 +700,14 @@ export const speechTexts = pgTable(
 export const transcriptionResults = pgTable(
   "transcription_results",
   {
+    accuracy: integer("accuracy").notNull(), // Stored as percentage (0-100)
+    audioBlobKey: varchar("audio_blob_key", { length: 500 }).notNull(),
     id: serial().primaryKey(),
+    matchingWords: integer("matching_words").notNull(),
+    nonMatchingWords: integer("non_matching_words").notNull(),
     referenceTextId: integer("reference_text_id").notNull(),
     targetUserId: text("target_user_id").notNull(),
     transcribedText: text("transcribed_text").notNull(),
-    audioBlobKey: varchar("audio_blob_key", { length: 500 }).notNull(),
-    accuracy: integer("accuracy").notNull(), // Stored as percentage (0-100)
-    matchingWords: integer("matching_words").notNull(),
-    nonMatchingWords: integer("non_matching_words").notNull(),
     ...timestamps,
   },
   (table) => [
@@ -729,8 +729,8 @@ export const transcriptionResults = pgTable(
 );
 
 export const organizationRelations = relations(organization, ({ many }) => ({
-  members: many(member),
   invitations: many(invitation),
+  members: many(member),
 }));
 
 export const memberRelations = relations(member, ({ one }) => ({
@@ -745,23 +745,23 @@ export const memberRelations = relations(member, ({ one }) => ({
 }));
 
 export const invitationRelations = relations(invitation, ({ one }) => ({
-  organization: one(organization, {
-    fields: [invitation.organizationId],
-    references: [organization.id],
-  }),
   inviter: one(users, {
     fields: [invitation.inviterId],
     references: [users.id],
     relationName: "sentInvitations",
   }),
+  organization: one(organization, {
+    fields: [invitation.organizationId],
+    references: [organization.id],
+  }),
 }));
 
 export const speechTextsRelations = relations(speechTexts, ({ one, many }) => ({
+  transcriptionResults: many(transcriptionResults),
   user: one(users, {
     fields: [speechTexts.userId],
     references: [users.id],
   }),
-  transcriptionResults: many(transcriptionResults),
 }));
 
 export const transcriptionResultsRelations = relations(
@@ -791,19 +791,23 @@ export const patientsRelations = relations(patients, ({ one, many }) => ({
 export const patientSessionsRelations = relations(
   patientSessions,
   ({ one, many }) => ({
-    patient: one(patients, {
-      fields: [patientSessions.patientId],
-      references: [patients.id],
-    }),
     creator: one(users, {
       fields: [patientSessions.creatorId],
       references: [users.id],
+    }),
+    patient: one(patients, {
+      fields: [patientSessions.patientId],
+      references: [patients.id],
     }),
     patientTests: many(patientTests),
   })
 );
 
 export const patientTestsRelations = relations(patientTests, ({ one }) => ({
+  creator: one(users, {
+    fields: [patientTests.creatorId],
+    references: [users.id],
+  }),
   patient: one(patients, {
     fields: [patientTests.patientId],
     references: [patients.id],
@@ -811,10 +815,6 @@ export const patientTestsRelations = relations(patientTests, ({ one }) => ({
   session: one(patientSessions, {
     fields: [patientTests.sessionId],
     references: [patientSessions.id],
-  }),
-  creator: one(users, {
-    fields: [patientTests.creatorId],
-    references: [users.id],
   }),
 }));
 

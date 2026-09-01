@@ -43,16 +43,16 @@ import {
 
 const editSessionSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
-  type: z.string().min(1, "El tipo de sesión es obligatorio"),
   discipline: z.string().min(1, "La disciplina es obligatoria"),
   observations: z.string().optional(),
+  type: z.string().min(1, "El tipo de sesión es obligatorio"),
 });
 
 type EditSessionFormValues = z.infer<typeof editSessionSchema>;
 
 interface EditSessionButtonProps {
-  session: PatientSession;
   patientId: number;
+  session: PatientSession;
 }
 
 export default function EditSessionButton({
@@ -63,13 +63,13 @@ export default function EditSessionButton({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<EditSessionFormValues>({
-    resolver: zodResolver(editSessionSchema),
     defaultValues: {
       date: new Date(session.date).toISOString().split("T")[0],
-      type: session.type,
       discipline: session.discipline,
       observations: session.observations || "",
+      type: session.type,
     },
+    resolver: zodResolver(editSessionSchema),
   });
 
   const onSubmit = async (data: EditSessionFormValues) => {
@@ -77,9 +77,9 @@ export default function EditSessionButton({
     try {
       await updatePatientSession(session.id, patientId, {
         date: new Date(data.date),
-        type: data.type,
         discipline: data.discipline,
         observations: data.observations || null,
+        type: data.type,
       });
       toast.success("Sesión actualizada exitosamente");
       setOpen(false);
@@ -127,8 +127,8 @@ export default function EditSessionButton({
                       <Select
                         disabled={isLoading}
                         items={SESSION_TYPES.map((type) => ({
-                          value: type,
                           label: SESSION_TYPE_LABELS[type],
+                          value: type,
                         }))}
                         onValueChange={field.onChange}
                         value={field.value}
@@ -164,8 +164,8 @@ export default function EditSessionButton({
                       <Select
                         disabled={isLoading}
                         items={DISCIPLINES.map((discipline) => ({
-                          value: discipline,
                           label: DISCIPLINE_LABELS[discipline],
+                          value: discipline,
                         }))}
                         onValueChange={field.onChange}
                         value={field.value}

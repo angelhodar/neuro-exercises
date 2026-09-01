@@ -38,11 +38,11 @@ export default function CreateSpeechTextButton() {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormSchema>({
-    resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       referenceText: "",
     },
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = async (values: FormSchema) => {
@@ -56,7 +56,7 @@ export default function CreateSpeechTextButton() {
       toast.success("Texto de referencia creado exitosamente");
       setIsOpen(false);
       form.reset();
-    } catch (_error) {
+    } catch {
       toast.error("Error al crear el texto de referencia");
     } finally {
       setIsLoading(false);

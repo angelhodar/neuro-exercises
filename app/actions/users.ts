@@ -27,6 +27,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function getUsers() {
   try {
     const allUsers = await db.query.users.findMany({
+      orderBy: desc(users.createdAt),
       with: {
         memberships: {
           with: {
@@ -40,7 +41,6 @@ export async function getUsers() {
           },
         },
       },
-      orderBy: desc(users.createdAt),
     });
 
     return allUsers;
@@ -64,8 +64,8 @@ export async function getAvailableUsers() {
 }
 
 interface CreateUserData {
-  name: string;
   email: string;
+  name: string;
   password: string;
   role: "user" | "admin";
 }
@@ -74,8 +74,8 @@ export async function createUser(data: CreateUserData) {
   try {
     const result = await auth.api.createUser({
       body: {
-        name: data.name,
         email: data.email,
+        name: data.name,
         password: data.password,
         role: data.role,
       },

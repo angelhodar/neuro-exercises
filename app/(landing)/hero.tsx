@@ -16,7 +16,7 @@ export default function HeroSection() {
           animate={{ opacity: 1 }}
           className="font-(family-name:--font-display) mb-8 font-bold text-5xl leading-[0.92] tracking-tight md:text-6xl xl:text-7xl"
           initial={{ opacity: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
+          transition={{ delay: 0.2, duration: 1 }}
         >
           <span className="text-slate-900">Rehabilitación </span>
           <span className="bg-linear-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
@@ -31,7 +31,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 max-w-3xl text-slate-600 text-xl leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.7, delay: 0.35 }}
+          transition={{ delay: 0.35, duration: 0.7 }}
         >
           Diseña ejercicios cognitivos en lenguaje natural, previsualízalos al
           instante y compártelos con tus pacientes. Todo en una plataforma
@@ -43,7 +43,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-16 flex flex-col gap-4 sm:flex-row"
           initial={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
+          transition={{ delay: 0.5, duration: 0.7 }}
         >
           <Button
             className="h-auto bg-blue-600 px-6 py-3 text-base text-white shadow-blue-200 shadow-lg transition-all hover:bg-blue-700 hover:shadow-blue-200 hover:shadow-xl sm:px-8 sm:py-4 sm:text-lg"
@@ -67,7 +67,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full text-left"
           initial={{ opacity: 0, y: 40 }}
-          transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
+          transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
         >
           <AgentChatDemo />
         </motion.div>

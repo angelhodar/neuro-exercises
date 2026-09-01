@@ -31,7 +31,7 @@ export async function uploadBlob(
     };
   } catch (error) {
     console.error("Error uploading blob:", error);
-    throw new Error(`Failed to upload ${fileName}`);
+    throw new Error(`Failed to upload ${fileName}`, { cause: error });
   }
 }
 
@@ -71,7 +71,8 @@ export async function deleteBlobs(pathnames: string | string[]): Promise<void> {
   } catch (error) {
     console.error("Error deleting blobs:", error);
     throw new Error(
-      `Failed to delete blobs: ${Array.isArray(pathnames) ? pathnames.join(", ") : pathnames}`
+      `Failed to delete blobs: ${Array.isArray(pathnames) ? pathnames.join(", ") : pathnames}`,
+      { cause: error }
     );
   }
 }

@@ -4,6 +4,7 @@ on:
   pull_request:
 
 permissions:
+  checks: read
   contents: read
 
 jobs:
@@ -15,17 +16,43 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
-
-      - uses: actions/cache@v5
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-
 
       - run: npm ci
       - run: npm run check
       - run: npm run ts-check
-      - run: npm run build:ci
+
+  vercel:
+    name: Vercel build
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const deadline = Date.now() + 20 * 60 * 1000;
+
+            while (Date.now() < deadline) {
+              const { data } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.payload.pull_request.head.sha,
+              });
+              const vercelCheck = data.check_runs.find(
+                (check) => check.name === "Vercel"
+              );
+
+              if (vercelCheck?.status === "completed") {
+                if (vercelCheck.conclusion === "success") return;
+                core.setFailed(
+                  `Vercel build finished with ${vercelCheck.conclusion ?? "an unknown status"}.`
+                );
+                return;
+              }
+
+              await new Promise((resolve) => setTimeout(resolve, 10_000));
+            }
+
+            core.setFailed("Timed out waiting for the Vercel build.");

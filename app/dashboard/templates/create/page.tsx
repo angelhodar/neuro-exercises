@@ -2,6 +2,8 @@ import { getExercises } from "@/app/actions/exercises";
 import { exerciseHasAssets } from "@/app/exercises/loader";
 import CreateTemplateForm from "./create-template-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function CreateTemplatePage() {
   const exercises = await getExercises();
 

@@ -17,11 +17,11 @@ export async function getExercisePresets(exerciseId: number) {
   }
 
   return db.query.exerciseConfigPresets.findMany({
+    orderBy: (preset) => preset.name,
     where: and(
       eq(exerciseConfigPresets.exerciseId, exerciseId),
       eq(exerciseConfigPresets.creatorId, user.id)
     ),
-    orderBy: (preset) => preset.name,
   });
 }
 
@@ -39,10 +39,10 @@ export async function createExercisePreset(data: {
   const [preset] = await db
     .insert(exerciseConfigPresets)
     .values({
-      exerciseId: data.exerciseId,
-      creatorId: user.id,
-      name: data.name,
       config: data.config,
+      creatorId: user.id,
+      exerciseId: data.exerciseId,
+      name: data.name,
     })
     .returning();
 

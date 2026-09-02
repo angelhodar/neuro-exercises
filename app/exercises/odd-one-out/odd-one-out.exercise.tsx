@@ -21,9 +21,9 @@ export async function Exercise({ config }: OddOneOutExerciseProps) {
 
   const allMediasFromDb = (await db.query.medias.findMany({
     columns: {
+      blobKey: true,
       id: true,
       name: true,
-      blobKey: true,
       tags: true,
     },
     where: inArray(medias.id, allMediaIds),

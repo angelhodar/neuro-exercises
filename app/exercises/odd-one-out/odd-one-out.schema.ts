@@ -4,12 +4,12 @@ import { selectableMediaSchema } from "@/lib/schemas/medias";
 
 // Schema for a single question configuration
 export const oddOneOutQuestionSchema = z.object({
-  patternMedias: z
-    .array(selectableMediaSchema)
-    .min(2, "Cada pregunta debe tener al menos 2 imágenes de patrón."),
   outlierMedia: z
     .array(selectableMediaSchema)
     .max(1, "Cada pregunta debe tener máximo una imagen diferente."),
+  patternMedias: z
+    .array(selectableMediaSchema)
+    .min(2, "Cada pregunta debe tener al menos 2 imágenes de patrón."),
 });
 
 // Main configuration schema for the exercise
@@ -50,10 +50,10 @@ export const oddOneOutConfigSchema = baseExerciseConfigSchema
   });
 
 export const oddOneOutResultSchema = z.object({
-  questionIndex: z.number(),
-  isCorrect: z.boolean(),
-  selectedId: z.number(),
   correctId: z.number(),
+  isCorrect: z.boolean(),
+  questionIndex: z.number(),
+  selectedId: z.number(),
 });
 
 export type OddOneOutConfig = z.infer<typeof oddOneOutConfigSchema>;
@@ -61,16 +61,16 @@ export type OddOneOutQuestion = z.infer<typeof oddOneOutQuestionSchema>;
 export type OddOneOutResult = z.infer<typeof oddOneOutResultSchema>;
 
 export const defaultConfig: OddOneOutConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
+  endConditionType: "questions",
   questions: [
     {
-      patternMedias: [],
       outlierMedia: [],
+      patternMedias: [],
     },
   ],
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };
 
 // Exports required by the loader

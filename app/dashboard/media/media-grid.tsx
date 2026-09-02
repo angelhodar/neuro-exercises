@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { type InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { getMedias } from "@/app/actions/media";
 import { MediaActionsDropdown } from "@/components/media/media-actions-dropdown";
@@ -12,6 +12,7 @@ import {
 } from "@/components/media/multimedia-card";
 import { Spinner } from "@/components/ui/spinner";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import type { Media } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -31,12 +32,18 @@ export function MediaGrid() {
   const query = searchParams.get("q") || undefined;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteQuery({
-      queryKey: ["media", "list", query],
-      queryFn: ({ pageParam }) => getMedias(query, PAGE_SIZE, pageParam),
-      initialPageParam: 0,
+    useInfiniteQuery<
+      Media[],
+      Error,
+      InfiniteData<Media[]>,
+      readonly ["media", "list", string | undefined],
+      number
+    >({
       getNextPageParam: (lastPage, _allPages, lastPageParam) =>
         lastPage.length < PAGE_SIZE ? undefined : lastPageParam + PAGE_SIZE,
+      initialPageParam: 0,
+      queryFn: ({ pageParam }) => getMedias(query, PAGE_SIZE, pageParam),
+      queryKey: ["media", "list", query] as const,
     });
 
   const sentinelRef = useIntersectionObserver(
@@ -104,9 +111,9 @@ export function MediaGrid() {
       </div>
 
       <div className="mt-4 flex justify-center py-4" ref={sentinelRef}>
-        {isFetchingNextPage && (
+        {isFetchingNextPage ? (
           <Spinner className="size-6 text-muted-foreground" />
-        )}
+        ) : null}
       </div>
     </>
   );

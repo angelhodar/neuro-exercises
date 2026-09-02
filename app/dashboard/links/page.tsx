@@ -37,7 +37,7 @@ function TargetUserInfo({ name, email }: { name: string; email: string }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-sm">{name || email}</p>
-        {name && (
+        {!!name && (
           <p className="truncate text-muted-foreground text-xs">{email}</p>
         )}
       </div>
@@ -95,7 +95,7 @@ export default async function LinksPage() {
                     <p className="font-medium leading-none">
                       {link.template?.title}
                     </p>
-                    {link.template?.description && (
+                    {!!link.template?.description && (
                       <p className="line-clamp-2 text-muted-foreground text-sm">
                         {link.template.description}
                       </p>

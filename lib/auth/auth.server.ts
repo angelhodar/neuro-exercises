@@ -11,20 +11,20 @@ export const auth = betterAuth({
     provider: "pg",
     schema: {
       ...schema,
-      user: schema.users,
-      session: schema.sessions,
-      verification: schema.verifications,
       account: schema.accounts,
-      organization: schema.organization,
-      member: schema.member,
       invitation: schema.invitation,
+      member: schema.member,
+      organization: schema.organization,
+      session: schema.sessions,
+      user: schema.users,
+      verification: schema.verifications,
     },
   }),
-  plugins: [organization(), admin()],
   emailAndPassword: {
-    enabled: true,
     disableSignUp: true,
+    enabled: true,
   },
+  plugins: [organization(), admin()],
   session: {
     cookieCache: {
       enabled: true,

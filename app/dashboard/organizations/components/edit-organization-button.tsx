@@ -2,12 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building2, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { updateOrganization } from "@/app/actions/organizations";
-import type { ButtonProps } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,15 +29,15 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Organization } from "@/lib/db/schema";
 
 const updateOrganizationSchema = z.object({
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  slug: z.string().optional(),
   logo: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
   metadata: z.string().optional(),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  slug: z.string().optional(),
 });
 
 type UpdateOrganizationFormValues = z.infer<typeof updateOrganizationSchema>;
 
-interface EditOrganizationButtonProps extends ButtonProps {
+interface EditOrganizationButtonProps extends ComponentProps<typeof Button> {
   organization: Organization;
 }
 
@@ -51,13 +50,13 @@ export default function EditOrganizationButton({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<UpdateOrganizationFormValues>({
-    resolver: zodResolver(updateOrganizationSchema),
     defaultValues: {
-      name: organization.name,
-      slug: organization.slug || "",
       logo: organization.logo || "",
       metadata: organization.metadata || "",
+      name: organization.name,
+      slug: organization.slug || "",
     },
+    resolver: zodResolver(updateOrganizationSchema),
   });
 
   const onSubmit = async (data: UpdateOrganizationFormValues) => {
@@ -65,10 +64,10 @@ export default function EditOrganizationButton({
 
     try {
       await updateOrganization(organization.id, {
-        name: data.name,
-        slug: data.slug || undefined,
         logo: data.logo || undefined,
         metadata: data.metadata || undefined,
+        name: data.name,
+        slug: data.slug || undefined,
       });
 
       toast.success("Organización actualizada exitosamente");

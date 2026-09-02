@@ -89,11 +89,11 @@ function ExercisePreview({ visible }: { visible: boolean }) {
               <div
                 className="zoom-in scale-75 animate-in duration-300 [animation-delay:600ms] sm:scale-100"
                 style={{
-                  width: 0,
-                  height: 0,
+                  borderBottom: "56px solid oklch(0.65 0.2 175 / 0.3)",
                   borderLeft: "32px solid transparent",
                   borderRight: "32px solid transparent",
-                  borderBottom: "56px solid oklch(0.65 0.2 175 / 0.3)",
+                  height: 0,
+                  width: 0,
                 }}
               />
             </div>
@@ -121,7 +121,7 @@ function ExercisePreview({ visible }: { visible: boolean }) {
 
 export function AgentChatDemo() {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { amount: 0.3, once: true });
   const [step, setStep] = useState(0);
 
   useEffect(() => {

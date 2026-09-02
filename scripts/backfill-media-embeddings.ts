@@ -10,16 +10,21 @@ const BATCH_SIZE = 10;
 async function main() {
   const rows = await db
     .select({
-      id: medias.id,
       description: medias.description,
+      id: medias.id,
     })
     .from(medias)
     .where(and(isNull(medias.embedding), isNotNull(medias.description)));
 
   console.log(`Found ${rows.length} media rows to backfill`);
 
-  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-    const batch = rows.slice(i, i + BATCH_SIZE);
+  async function processBatches(start: number): Promise<void> {
+    const batch = rows.slice(start, start + BATCH_SIZE);
+
+    if (batch.length === 0) {
+      return;
+    }
+
     const texts = batch.map((row) => row.description as string);
 
     const embeddings = await generateEmbeddings(texts);
@@ -34,9 +39,13 @@ async function main() {
     );
 
     console.log(
-      `Backfilled ${Math.min(i + BATCH_SIZE, rows.length)}/${rows.length}`
+      `Backfilled ${Math.min(start + BATCH_SIZE, rows.length)}/${rows.length}`
     );
+
+    await processBatches(start + BATCH_SIZE);
   }
+
+  await processBatches(0);
 
   console.log("Done");
 }

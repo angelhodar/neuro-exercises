@@ -49,35 +49,35 @@ export async function getUserExerciseLinks() {
     }
 
     const linksWithDetails = await db.query.exerciseLinks.findMany({
-      where: eq(exerciseLinks.creatorId, currentUser.id),
       orderBy: desc(exerciseLinks.createdAt),
+      where: eq(exerciseLinks.creatorId, currentUser.id),
       with: {
         targetUser: {
           columns: {
-            id: true,
             email: true,
+            id: true,
             name: true,
           },
         },
         template: {
           columns: {
+            description: true,
             id: true,
             title: true,
-            description: true,
           },
           with: {
             exerciseTemplateItems: {
+              orderBy: (item) => item.position,
               with: {
                 exercise: {
                   columns: {
+                    displayName: true,
                     id: true,
                     slug: true,
-                    displayName: true,
                     tags: true,
                   },
                 },
               },
-              orderBy: (item) => item.position,
             },
           },
         },
@@ -128,8 +128,8 @@ export async function getExerciseLinkByToken(token: string) {
     const linkWithDetails = await db.query.exerciseLinks.findFirst({
       where: eq(exerciseLinks.token, token),
       with: {
-        targetUser: true,
         creator: true,
+        targetUser: true,
         template: {
           with: {
             exerciseTemplateItems: {
@@ -158,8 +158,8 @@ export async function saveExerciseResults(
   try {
     await db.insert(exerciseResults).values({
       linkId,
-      templateItemId: exerciseItemId,
       results,
+      templateItemId: exerciseItemId,
     });
     return { ok: true };
   } catch (error) {

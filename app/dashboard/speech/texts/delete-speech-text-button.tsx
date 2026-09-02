@@ -33,7 +33,7 @@ export default function DeleteSpeechTextButton({
       await deleteSpeechText(id);
       toast.success("Texto de referencia eliminado exitosamente");
       setIsOpen(false);
-    } catch (_error) {
+    } catch {
       toast.error("Error al eliminar el texto de referencia");
     } finally {
       setIsLoading(false);

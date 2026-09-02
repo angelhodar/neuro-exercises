@@ -29,8 +29,8 @@ export default function CtaSection() {
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<WaitlistFormValues>({
-    resolver: zodResolver(waitlistSchema),
     defaultValues: { email: "" },
+    resolver: zodResolver(waitlistSchema),
   });
 
   const onSubmit = async (values: WaitlistFormValues) => {

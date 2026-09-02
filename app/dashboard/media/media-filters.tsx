@@ -14,9 +14,7 @@ export default function MediaSearch() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+    clearTimeout(debounceRef.current ?? undefined);
 
     debounceRef.current = setTimeout(() => {
       const trimmed = value.trim();
@@ -28,9 +26,7 @@ export default function MediaSearch() {
     }, 400);
 
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+      clearTimeout(debounceRef.current ?? undefined);
     };
   }, [value, router, currentSearch]);
 
@@ -48,7 +44,7 @@ export default function MediaSearch() {
         placeholder="Buscar contenido..."
         value={value}
       />
-      {value && (
+      {!!value && (
         <Button
           className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 p-0"
           onClick={clear}

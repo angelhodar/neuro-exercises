@@ -20,6 +20,6 @@ export async function optimizeImage(
 
     return processedBuffer;
   } catch (error) {
-    throw new Error(`Sharp processing failed: ${error}`);
+    throw new Error(`Sharp processing failed: ${error}`, { cause: error });
   }
 }

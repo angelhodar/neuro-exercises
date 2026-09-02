@@ -27,10 +27,10 @@ export default function CreateExercisePage() {
   const router = useRouter();
 
   const form = useForm<CreateExerciseSchema>({
-    resolver: zodResolver(createExerciseSchema),
     defaultValues: {
       prompt: "",
     },
+    resolver: zodResolver(createExerciseSchema),
   });
 
   const { isSubmitting } = form.formState;
@@ -43,7 +43,7 @@ export default function CreateExercisePage() {
         throw new Error("Failed to create exercise");
       }
       router.push(`/dashboard/exercises/${created.slug}`);
-    } catch (_e) {
+    } catch {
       setError("Error creando el ejercicio. Por favor intenta nuevamente.");
     }
   };
@@ -53,8 +53,8 @@ export default function CreateExercisePage() {
     if (file) {
       setSelectedImage(file);
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
+      reader.onload = (loadEvent) => {
+        setImagePreview(loadEvent.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -134,7 +134,7 @@ export default function CreateExercisePage() {
               />
 
               {/* Image Preview */}
-              {imagePreview && (
+              {!!imagePreview && (
                 <div className="relative overflow-hidden rounded-xl border border-blue-200">
                   {/* biome-ignore lint/performance/noImgElement: data URL from FileReader cannot use next/image */}
                   <img
@@ -156,7 +156,7 @@ export default function CreateExercisePage() {
             </div>
 
             {/* Error Message */}
-            {error && (
+            {!!error && (
               <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                 <div className="text-red-600 text-sm">{error}</div>
               </div>

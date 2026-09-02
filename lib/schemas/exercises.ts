@@ -6,31 +6,36 @@ export const createExerciseSchema = z.object({
 
 // Schema para editar ejercicios existentes
 export const updateExerciseSchema = z.object({
-  id: z.number(),
-  displayName: z.string().min(1, "El nombre es obligatorio"),
+  audioPrompt: z.string().optional(),
   description: z.string().min(1, "La descripción es obligatoria"),
+  displayName: z.string().min(1, "El nombre es obligatorio"),
+  file: z.instanceof(File).optional(),
+  id: z.number(),
   tags: z.array(z.string()).min(1, "Debe tener al menos un tag"),
   thumbnailPrompt: z.string().optional(),
-  file: z.instanceof(File).optional(),
-  audioPrompt: z.string().optional(),
 });
 
 // Schema para la respuesta generada por AI
 export const generatedExerciseSchema = z.object({
-  slug: z
+  audioPrompt: z
     .string()
     .describe(
-      "Identificador único en formato kebab-case, descriptivo y muy breve, máximo 3-4 palabras (ej: 'visual-memory-sequence', 'attention-numbers'). Solo letras minúsculas, números y guiones."
+      "Descripción concisa en español para generar las instrucciones de audio del ejercicio. Debe explicar claramente qué debe hacer el usuario, cómo funciona el ejercicio y cualquier instrucción importante. Entre 50-100 palabras, en tono amigable."
+    ),
+  description: z
+    .string()
+    .describe(
+      "Descripción profesional y detallada del ejercicio que explique claramente qué hace el usuario, qué habilidades cognitivas entrena y cómo funciona. Entre 50-150 palabras."
     ),
   displayName: z
     .string()
     .describe(
       "Nombre atractivo y profesional del ejercicio que será visible para los usuarios. Debe ser claro, conciso y motivador (ej: 'Test de Stroop', 'Torre de Hanoi', 'Secuencia de colores')."
     ),
-  description: z
+  slug: z
     .string()
     .describe(
-      "Descripción profesional y detallada del ejercicio que explique claramente qué hace el usuario, qué habilidades cognitivas entrena y cómo funciona. Entre 50-150 palabras."
+      "Identificador único en formato kebab-case, descriptivo y muy breve, máximo 3-4 palabras (ej: 'visual-memory-sequence', 'attention-numbers'). Solo letras minúsculas, números y guiones."
     ),
   tags: z
     .array(z.string())
@@ -42,21 +47,16 @@ export const generatedExerciseSchema = z.object({
     .describe(
       "Descripción visual concisa en inglés para generar la imagen thumbnail del ejercicio. Debe describir elementos visuales específicos que representen el ejercicio (ej: 'Colorful memory cards arranged in sequence', 'Numbers floating in space for attention exercise'). Máximo 20 palabras."
     ),
-  audioPrompt: z
-    .string()
-    .describe(
-      "Descripción concisa en español para generar las instrucciones de audio del ejercicio. Debe explicar claramente qué debe hacer el usuario, cómo funciona el ejercicio y cualquier instrucción importante. Entre 50-100 palabras, en tono amigable."
-    ),
 });
 
 // Schema para registrar ejercicios con código existente (sin generación AI)
 export const registerExerciseSchema = z.object({
-  slug: z.string().min(1, "El slug es obligatorio"),
-  displayName: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().optional(),
+  displayName: z.string().min(1, "El nombre es obligatorio"),
+  file: z.instanceof(File).optional(),
+  slug: z.string().min(1, "El slug es obligatorio"),
   tags: z.array(z.string()),
   thumbnailPrompt: z.string().optional(),
-  file: z.instanceof(File).optional(),
 });
 
 export type CreateExerciseSchema = z.infer<typeof createExerciseSchema>;

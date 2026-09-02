@@ -18,7 +18,7 @@ export function ExercisePresentation() {
 
   return (
     <div className="mx-auto max-w-md text-center">
-      {exercise.thumbnailUrl && (
+      {!!exercise.thumbnailUrl && (
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
           {/* biome-ignore lint/performance/noImgElement: dynamic blob URL from storage */}
           <img
@@ -48,7 +48,7 @@ export function ExercisePresentation() {
           Empezar
         </Button>
 
-        {exercise.audioInstructions && (
+        {!!exercise.audioInstructions && (
           <Tooltip>
             <TooltipTrigger
               render={

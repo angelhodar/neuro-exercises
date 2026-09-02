@@ -50,11 +50,11 @@ export default function EditSpeechTextButton({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormSchema>({
-    resolver: zodResolver(schema),
     defaultValues: {
       name: speechText.name,
       referenceText: speechText.referenceText,
     },
+    resolver: zodResolver(schema),
   });
 
   const onSubmit = async (values: FormSchema) => {
@@ -67,7 +67,7 @@ export default function EditSpeechTextButton({
       await updateSpeechText(speechText.id, formData);
       toast.success("Texto de referencia actualizado exitosamente");
       setIsOpen(false);
-    } catch (_error) {
+    } catch {
       toast.error("Error al actualizar el texto de referencia");
     } finally {
       setIsLoading(false);

@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/chart";
 
 export const correctIncorrectChartConfig = {
+  correcto: { color: "var(--chart-2)", label: "Correcto" },
+  incorrecto: { color: "var(--chart-1)", label: "Incorrecto" },
   tiempo: { label: "Tiempo (s)" },
-  correcto: { label: "Correcto", color: "var(--chart-2)" },
-  incorrecto: { label: "Incorrecto", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
 interface StatItem {
@@ -47,8 +47,8 @@ export function StatRow({ items }: { items: StatItem[] }) {
 
 function buildPieData(correct: number, incorrect: number) {
   return [
-    { name: "correcto", value: correct, fill: "var(--color-correcto)" },
-    { name: "incorrecto", value: incorrect, fill: "var(--color-incorrecto)" },
+    { fill: "var(--color-correcto)", name: "correcto", value: correct },
+    { fill: "var(--color-incorrecto)", name: "incorrecto", value: incorrect },
   ];
 }
 
@@ -114,9 +114,9 @@ export function AccuracyDonutChart({
 }
 
 interface BarChartEntry {
+  fill: string;
   question: string;
   tiempo: number;
-  fill: string;
 }
 
 export function ResultBarChart({
@@ -157,8 +157,8 @@ export function ResultBarChart({
             angle={-90}
             offset={-4}
             position="insideLeft"
-            style={{ textAnchor: "middle", fontSize: 14, fontWeight: 500 }}
-            value={String(config.tiempo?.label ?? "Tiempo (s)")}
+            style={{ fontSize: 14, fontWeight: 500, textAnchor: "middle" }}
+            value={String(config.tiempo.label ?? "Tiempo (s)")}
           />
         </YAxis>
         <ChartTooltip content={<ChartTooltipContent />} />

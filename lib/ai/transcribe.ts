@@ -1,17 +1,13 @@
-import Groq from "groq-sdk";
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import { gateway } from "@ai-sdk/gateway";
+import { experimental_transcribe as transcribe } from "ai";
 
 const TRAILING_PUNCTUATION_REGEX = /[.,;:!¿?]+$/g;
 
-export async function transcribeWithGroq(file: File): Promise<string> {
-  const transcription = await groq.audio.transcriptions.create({
-    file,
-    model: "whisper-large-v3-turbo",
-    language: "es",
+export async function transcribeWithGateway(file: File): Promise<string> {
+  const result = await transcribe({
+    audio: new Uint8Array(await file.arrayBuffer()),
+    model: gateway.transcriptionModel("google/gemini-3.5-transcribe"),
   });
-  // Elimina signos de puntuación finales
-  return transcription.text.replace(TRAILING_PUNCTUATION_REGEX, "").trim();
+
+  return result.text.replace(TRAILING_PUNCTUATION_REGEX, "").trim();
 }

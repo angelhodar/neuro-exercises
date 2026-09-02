@@ -4,9 +4,9 @@ import {
   type ComponentPropsWithoutRef,
   cloneElement,
   createContext,
-  forwardRef,
   type HTMLAttributes,
   type ReactElement,
+  type RefObject,
   useContext,
   useId,
 } from "react";
@@ -39,13 +39,11 @@ const FormField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
-}: ControllerProps<TFieldValues, TName>) => {
-  return (
-    <FormFieldContext.Provider value={{ name: props.name }}>
-      <Controller {...props} />
-    </FormFieldContext.Provider>
-  );
-};
+}: ControllerProps<TFieldValues, TName>) => (
+  <FormFieldContext.Provider value={{ name: props.name }}>
+    <Controller {...props} />
+  </FormFieldContext.Provider>
+);
 
 const useFormField = () => {
   const fieldContext = useContext(FormFieldContext);
@@ -61,11 +59,11 @@ const useFormField = () => {
   const { id } = itemContext;
 
   return {
+    formDescriptionId: `${id}-form-item-description`,
+    formItemId: `${id}-form-item`,
+    formMessageId: `${id}-form-item-message`,
     id,
     name: fieldContext.name,
-    formItemId: `${id}-form-item`,
-    formDescriptionId: `${id}-form-item-description`,
-    formMessageId: `${id}-form-item-message`,
     ...fieldState,
   };
 };
@@ -78,23 +76,30 @@ const FormItemContext = createContext<FormItemContextValue>(
   {} as FormItemContextValue
 );
 
-const FormItem = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const id = useId();
+const FormItem = ({
+  className,
+  ref,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  ref?: RefObject<HTMLDivElement | null>;
+}) => {
+  const id = useId();
 
-    return (
-      <FormItemContext.Provider value={{ id }}>
-        <div className={cn("space-y-2", className)} ref={ref} {...props} />
-      </FormItemContext.Provider>
-    );
-  }
-);
+  return (
+    <FormItemContext.Provider value={{ id }}>
+      <div className={cn("space-y-2", className)} ref={ref} {...props} />
+    </FormItemContext.Provider>
+  );
+};
 FormItem.displayName = "FormItem";
 
-const FormLabel = forwardRef<
-  HTMLLabelElement,
-  ComponentPropsWithoutRef<"label">
->(({ className, ...props }, ref) => {
+const FormLabel = ({
+  className,
+  ref,
+  ...props
+}: ComponentPropsWithoutRef<"label"> & {
+  ref?: RefObject<HTMLLabelElement | null>;
+}) => {
   const { error, formItemId } = useFormField();
 
   return (
@@ -105,7 +110,7 @@ const FormLabel = forwardRef<
       {...props}
     />
   );
-});
+};
 FormLabel.displayName = "FormLabel";
 
 function FormControl({
@@ -117,19 +122,22 @@ function FormControl({
     useFormField();
 
   return cloneElement(children, {
-    id: formItemId,
     "aria-describedby": error
       ? `${formDescriptionId} ${formMessageId}`
       : formDescriptionId,
     "aria-invalid": !!error,
+    id: formItemId,
   } as Record<string, unknown>);
 }
 FormControl.displayName = "FormControl";
 
-const FormDescription = forwardRef<
-  HTMLParagraphElement,
-  HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => {
+const FormDescription = ({
+  className,
+  ref,
+  ...props
+}: HTMLAttributes<HTMLParagraphElement> & {
+  ref?: RefObject<HTMLParagraphElement | null>;
+}) => {
   const { formDescriptionId } = useFormField();
 
   return (
@@ -140,13 +148,17 @@ const FormDescription = forwardRef<
       {...props}
     />
   );
-});
+};
 FormDescription.displayName = "FormDescription";
 
-const FormMessage = forwardRef<
-  HTMLParagraphElement,
-  HTMLAttributes<HTMLParagraphElement>
->(({ className, children, ...props }, ref) => {
+const FormMessage = ({
+  className,
+  children,
+  ref,
+  ...props
+}: HTMLAttributes<HTMLParagraphElement> & {
+  ref?: RefObject<HTMLParagraphElement | null>;
+}) => {
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message) : children;
 
@@ -164,16 +176,16 @@ const FormMessage = forwardRef<
       {body}
     </p>
   );
-});
+};
 FormMessage.displayName = "FormMessage";
 
 export {
-  useFormField,
   Form,
-  FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
-  FormMessage,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
 };

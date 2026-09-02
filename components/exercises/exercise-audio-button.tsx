@@ -2,9 +2,9 @@
 
 import { Pause, Volume2 } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
-interface ExerciseAudioButtonProps extends ButtonProps {
+interface ExerciseAudioButtonProps {
   audioSrc?: string;
 }
 
@@ -17,14 +17,17 @@ export function ExerciseAudioButton({ audioSrc }: ExerciseAudioButtonProps) {
   }
 
   const handleToggleAudio = () => {
-    if (audioRef.current) {
-      if (isPlayingAudio) {
-        audioRef.current.pause();
-        setIsPlayingAudio(false);
-      } else {
-        audioRef.current.play();
-        setIsPlayingAudio(true);
-      }
+    const audio = audioRef.current as HTMLAudioElement | null;
+    if (!audio) {
+      return;
+    }
+
+    if (isPlayingAudio) {
+      audio.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audio.play();
+      setIsPlayingAudio(true);
     }
   };
 

@@ -48,26 +48,26 @@ const COLUMN_CARD_COLORS = [
   {
     bg: "bg-emerald-50",
     border: "border-emerald-200",
-    text: "text-emerald-900",
     selected: "bg-emerald-500 text-white border-emerald-600",
+    text: "text-emerald-900",
   },
   {
     bg: "bg-blue-50",
     border: "border-blue-200",
-    text: "text-blue-900",
     selected: "bg-blue-500 text-white border-blue-600",
+    text: "text-blue-900",
   },
   {
     bg: "bg-purple-50",
     border: "border-purple-200",
-    text: "text-purple-900",
     selected: "bg-purple-500 text-white border-purple-600",
+    text: "text-purple-900",
   },
   {
     bg: "bg-amber-50",
     border: "border-amber-200",
-    text: "text-amber-900",
     selected: "bg-amber-500 text-white border-amber-600",
+    text: "text-amber-900",
   },
 ];
 
@@ -76,26 +76,26 @@ interface WordMatchingExerciseProps {
 }
 
 interface QuestionState {
-  groups: WordGroup[];
-  shuffledColumns: string[][];
-  selections: (number | null)[];
-  matchedWords: Map<string, number>;
-  matchedCount: number;
-  incorrectAttempts: number;
-  totalAttempts: number;
-  feedbackState: "none" | "correct" | "incorrect";
   /** The column index the user must pick next (sequential flow: 0 → 1 → 2 → ...) */
   currentStep: number;
+  feedbackState: "none" | "correct" | "incorrect";
+  groups: WordGroup[];
+  incorrectAttempts: number;
   matchAttempts: MatchAttempt[];
+  matchedCount: number;
+  matchedWords: Map<string, number>;
   // Phrase input state
   pendingPhraseGroup: WordGroup | null;
   phraseInput: string;
   phrases: { expected: string; entered: string }[];
+  selections: (number | null)[];
+  shuffledColumns: string[][];
+  totalAttempts: number;
 }
 
 function shuffleArray<T>(array: T[]): T[] {
   const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
+  for (let i = result.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
@@ -113,28 +113,26 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
   const phraseInputRef = useRef<HTMLInputElement>(null);
 
   const [questionState, setQuestionState] = useState<QuestionState>({
-    groups: [],
-    shuffledColumns: [],
-    selections: new Array(numberOfColumns).fill(null),
-    matchedWords: new Map(),
-    matchedCount: 0,
-    incorrectAttempts: 0,
-    totalAttempts: 0,
-    feedbackState: "none",
     currentStep: 0,
+    feedbackState: "none",
+    groups: [],
+    incorrectAttempts: 0,
     matchAttempts: [],
+    matchedCount: 0,
+    matchedWords: new Map(),
     pendingPhraseGroup: null,
     phraseInput: "",
     phrases: [],
+    selections: new Array(numberOfColumns).fill(null),
+    shuffledColumns: [],
+    totalAttempts: 0,
   });
 
   // Setup question when round changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: currentQuestionIndex is intentionally used as a trigger to reset the question
   useEffect(() => {
-    if (feedbackTimeout.current) {
-      clearTimeout(feedbackTimeout.current);
-      feedbackTimeout.current = null;
-    }
+    clearTimeout(feedbackTimeout.current ?? undefined);
+    feedbackTimeout.current = null;
 
     const groups = getRandomGroups(groupsPerRound);
 
@@ -144,25 +142,23 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
 
     questionStartTime.current = Date.now();
     setQuestionState({
-      groups,
-      shuffledColumns,
-      selections: new Array(numberOfColumns).fill(null),
-      matchedWords: new Map(),
-      matchedCount: 0,
-      incorrectAttempts: 0,
-      totalAttempts: 0,
-      feedbackState: "none",
       currentStep: 0,
+      feedbackState: "none",
+      groups,
+      incorrectAttempts: 0,
       matchAttempts: [],
+      matchedCount: 0,
+      matchedWords: new Map(),
       pendingPhraseGroup: null,
       phraseInput: "",
       phrases: [],
+      selections: new Array(numberOfColumns).fill(null),
+      shuffledColumns,
+      totalAttempts: 0,
     });
 
     return () => {
-      if (feedbackTimeout.current) {
-        clearTimeout(feedbackTimeout.current);
-      }
+      clearTimeout(feedbackTimeout.current ?? undefined);
     };
   }, [currentQuestionIndex, groupsPerRound, numberOfColumns]);
 
@@ -173,21 +169,19 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
   ) {
     const timeSpent = Date.now() - questionStartTime.current;
     const result: WordMatchingQuestionResult = {
-      expectedGroups: state.groups,
-      matchAttempts: state.matchAttempts,
       correctMatches: newMatchedCount,
-      totalAttempts: newTotalAttempts,
+      expectedGroups: state.groups,
       incorrectAttempts: state.incorrectAttempts,
-      timeSpent,
+      matchAttempts: state.matchAttempts,
       phrases: state.phrases.length > 0 ? state.phrases : undefined,
+      timeSpent,
+      totalAttempts: newTotalAttempts,
     };
     setTimeout(() => addResult(result), 400);
   }
 
   function clearFeedbackAfterDelay() {
-    if (feedbackTimeout.current) {
-      clearTimeout(feedbackTimeout.current);
-    }
+    clearTimeout(feedbackTimeout.current ?? undefined);
     feedbackTimeout.current = setTimeout(() => {
       setQuestionState((prev) => ({ ...prev, feedbackState: "none" }));
     }, 600);
@@ -205,20 +199,18 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     if (requirePhrase) {
       setQuestionState((prev) => ({
         ...prev,
-        selections: emptySelections,
-        matchedWords: newMatchedWords,
-        matchedCount: newMatchedCount,
-        totalAttempts: newTotalAttempts,
-        matchAttempts: [...prev.matchAttempts, attempt],
-        feedbackState: "correct",
         currentStep: 0,
+        feedbackState: "correct",
+        matchAttempts: [...prev.matchAttempts, attempt],
+        matchedCount: newMatchedCount,
+        matchedWords: newMatchedWords,
         pendingPhraseGroup: matchedGroup,
         phraseInput: "",
+        selections: emptySelections,
+        totalAttempts: newTotalAttempts,
       }));
 
-      if (feedbackTimeout.current) {
-        clearTimeout(feedbackTimeout.current);
-      }
+      clearTimeout(feedbackTimeout.current ?? undefined);
       feedbackTimeout.current = setTimeout(() => {
         setQuestionState((prev) => ({ ...prev, feedbackState: "none" }));
         phraseInputRef.current?.focus();
@@ -228,13 +220,13 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
 
       setQuestionState((prev) => ({
         ...prev,
-        selections: emptySelections,
-        matchedWords: newMatchedWords,
-        matchedCount: newMatchedCount,
-        totalAttempts: newTotalAttempts,
-        matchAttempts: newAttempts,
-        feedbackState: "correct",
         currentStep: 0,
+        feedbackState: "correct",
+        matchAttempts: newAttempts,
+        matchedCount: newMatchedCount,
+        matchedWords: newMatchedWords,
+        selections: emptySelections,
+        totalAttempts: newTotalAttempts,
       }));
 
       clearFeedbackAfterDelay();
@@ -263,11 +255,23 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     );
 
     const attempt: MatchAttempt = {
-      words: selectedWords,
       isCorrect: groupIdx !== -1,
+      words: selectedWords,
     };
 
-    if (groupIdx !== -1) {
+    if (groupIdx === -1) {
+      setQuestionState((prev) => ({
+        ...prev,
+        currentStep: 0, // Reset back to first column
+        feedbackState: "incorrect",
+        incorrectAttempts: prev.incorrectAttempts + 1,
+        matchAttempts: [...prev.matchAttempts, attempt],
+        selections: new Array(numberOfColumns).fill(null),
+        totalAttempts: prev.totalAttempts + 1,
+      }));
+
+      clearFeedbackAfterDelay();
+    } else {
       const colorIdx = questionState.matchedCount;
       const newMatchedWords = new Map(questionState.matchedWords);
       for (const word of selectedWords) {
@@ -281,18 +285,6 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
         questionState.groups[groupIdx],
         attempt
       );
-    } else {
-      setQuestionState((prev) => ({
-        ...prev,
-        selections: new Array(numberOfColumns).fill(null),
-        matchAttempts: [...prev.matchAttempts, attempt],
-        incorrectAttempts: prev.incorrectAttempts + 1,
-        totalAttempts: prev.totalAttempts + 1,
-        feedbackState: "incorrect",
-        currentStep: 0, // Reset back to first column
-      }));
-
-      clearFeedbackAfterDelay();
     }
   }
 
@@ -324,16 +316,16 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     if (nextStep >= numberOfColumns) {
       setQuestionState((prev) => ({
         ...prev,
-        selections: newSelections,
         currentStep: nextStep,
+        selections: newSelections,
       }));
       tryMatch(newSelections);
     } else {
       // Advance to next column
       setQuestionState((prev) => ({
         ...prev,
-        selections: newSelections,
         currentStep: nextStep,
+        selections: newSelections,
       }));
     }
   }
@@ -348,7 +340,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
     const expected = expectedWords.join(" ");
     const entered = questionState.phraseInput.trim();
 
-    const newPhrases = [...questionState.phrases, { expected, entered }];
+    const newPhrases = [...questionState.phrases, { entered, expected }];
 
     const newState: Partial<QuestionState> = {
       pendingPhraseGroup: null,
@@ -376,7 +368,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
   }
 
   // The highlighted column is the one the user needs to pick next
-  const currentStep = questionState.currentStep;
+  const { currentStep } = questionState;
 
   const GRID_COLS_MAP: Record<number, string> = {
     2: "grid-cols-2",
@@ -453,7 +445,7 @@ export function Exercise({ config }: WordMatchingExerciseProps) {
       </div>
 
       {/* Phrase input area */}
-      {questionState.pendingPhraseGroup && (
+      {!!questionState.pendingPhraseGroup && (
         <div className="w-full max-w-2xl rounded-xl border-2 border-indigo-200 bg-indigo-50 p-4">
           <p className="mb-3 text-center font-medium text-base text-indigo-900">
             Escribe una frase combinando las palabras:{" "}

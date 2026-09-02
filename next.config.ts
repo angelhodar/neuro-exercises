@@ -5,11 +5,12 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
         hostname: "**",
+        protocol: "https",
       },
     ],
   },
+  reactCompiler: true,
 };
 
 export default withBotId(nextConfig);

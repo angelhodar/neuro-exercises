@@ -4,24 +4,24 @@ import { baseExerciseConfigSchema } from "@/lib/schemas/base-schemas";
 export interface ImageData {
   id: string;
   name: string;
-  url: string;
   tags: string[];
+  url: string;
 }
 
 // Visual recognition specific configuration schema
 export const visualRecognitionSpecificConfigSchema = z.object({
-  imagesPerQuestion: z.coerce
-    .number()
-    .min(2, "Mínimo 2 imágenes por pregunta")
-    .max(10, "Máximo 10 imágenes por pregunta")
-    .int("El número de imágenes debe ser un número entero"),
   correctImagesCount: z.coerce
     .number()
     .min(1, "Mínimo 1 imagen correcta")
     .max(6, "Máximo 6 imágenes correctas")
     .int("El número de imágenes correctas debe ser un número entero"),
-  tags: z.array(z.string()).min(2, "Selecciona al menos 2 etiquetas"),
+  imagesPerQuestion: z.coerce
+    .number()
+    .min(2, "Mínimo 2 imágenes por pregunta")
+    .max(10, "Máximo 10 imágenes por pregunta")
+    .int("El número de imágenes debe ser un número entero"),
   showImageNames: z.boolean(),
+  tags: z.array(z.string()).min(2, "Selecciona al menos 2 etiquetas"),
 });
 
 // Reusable refinement function for visual recognition configurations
@@ -58,11 +58,11 @@ export const configSchema = baseExerciseConfigSchema
 
 // Question result schema - exported as resultSchema
 export const resultSchema = z.object({
-  targetTag: z.string(),
   correctImages: z.array(z.string()), // Image IDs
   selectedImages: z.array(z.string()), // Image IDs
-  timeSpent: z.number().min(0),
+  targetTag: z.string(),
   timeExpired: z.boolean(),
+  timeSpent: z.number().min(0),
 });
 
 // Inferred types
@@ -73,12 +73,12 @@ export type VisualRecognitionConfig = z.infer<typeof configSchema>;
 export type VisualRecognitionQuestionResult = z.infer<typeof resultSchema>;
 
 export const defaultConfig: VisualRecognitionConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
-  imagesPerQuestion: 4,
   correctImagesCount: 2,
-  tags: ["animal", "comida"],
+  endConditionType: "questions",
+  imagesPerQuestion: 4,
   showImageNames: true,
+  tags: ["animal", "comida"],
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };

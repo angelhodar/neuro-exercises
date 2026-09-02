@@ -15,17 +15,17 @@ interface ColorSequenceExerciseProps {
 
 interface CellProps {
   colorClass: string;
-  onClick: () => void;
-  isHighlighted: boolean;
   disabled: boolean;
+  isHighlighted: boolean;
+  onClick: () => void;
 }
 
 interface QuestionState {
-  targetSequence: number[] | null;
-  isPlaying: boolean;
   highlightedIndex: number | null;
-  userSequence: number[];
+  isPlaying: boolean;
   isWaitingNext: boolean;
+  targetSequence: number[] | null;
+  userSequence: number[];
 }
 
 function ColorCell({
@@ -76,11 +76,11 @@ export function Exercise({ config }: ColorSequenceExerciseProps) {
 
   // Estado interno agrupado
   const [questionState, setQuestionState] = useState<QuestionState>({
-    targetSequence: null,
-    isPlaying: false,
     highlightedIndex: null,
-    userSequence: [],
+    isPlaying: false,
     isWaitingNext: false,
+    targetSequence: null,
+    userSequence: [],
   });
 
   // Maneja el clic del usuario
@@ -97,9 +97,9 @@ export function Exercise({ config }: ColorSequenceExerciseProps) {
         (val, i) => val === questionState.targetSequence?.[i]
       );
       const result: ColorSequenceQuestionResult = {
+        isCorrect,
         targetSequence: questionState.targetSequence,
         userSequence: newSeq,
-        isCorrect,
       };
 
       // Dar un pequeño tiempo antes de la siguiente pregunta
@@ -130,15 +130,15 @@ export function Exercise({ config }: ColorSequenceExerciseProps) {
 
     // Generate sequence
     const seq: number[] = [];
-    for (let i = 0; i < sequenceLength; i++) {
+    for (let i = 0; i < sequenceLength; i += 1) {
       seq.push(Math.floor(Math.random() * numCells));
     }
 
     setQuestionState((prev) => ({
       ...prev,
+      isPlaying: true,
       targetSequence: seq,
       userSequence: [],
-      isPlaying: true,
     }));
 
     // Play the sequence
@@ -208,9 +208,9 @@ export function Exercise({ config }: ColorSequenceExerciseProps) {
             (slotIndex) => {
               const selectedIdx = questionState.userSequence[slotIndex];
               const colorClass =
-                selectedIdx !== undefined
-                  ? colors[selectedIdx]
-                  : "bg-gray-300 dark:bg-gray-700";
+                selectedIdx === undefined
+                  ? "bg-gray-300 dark:bg-gray-700"
+                  : colors[selectedIdx];
               return (
                 <div
                   className={`h-8 w-8 rounded-sm ${colorClass}`}

@@ -27,10 +27,10 @@ async function fetchTags(query: string): Promise<string[]> {
 }
 
 export interface MultiSelectTagsProps {
-  value?: string[];
-  onChange?: (tags: string[]) => void;
   className?: string;
+  onChange?: (tags: string[]) => void;
   placeholder?: string;
+  value?: string[];
 }
 
 export default function MultiSelectTags({
@@ -48,8 +48,8 @@ export default function MultiSelectTags({
     error,
     isLoading,
   } = useQuery<string[]>({
-    queryKey: ["tags", debouncedQuery],
     queryFn: () => fetchTags(debouncedQuery),
+    queryKey: ["tags", debouncedQuery],
   });
 
   // Merge selected values with search results so selected items are always available
@@ -97,7 +97,7 @@ export default function MultiSelectTags({
             <Loader2 className="size-4 animate-spin text-muted-foreground" />
           </div>
         )}
-        {error && (
+        {!!error && (
           <div className="py-2 text-center text-destructive text-sm">
             Error al buscar etiquetas
           </div>

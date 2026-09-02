@@ -18,8 +18,8 @@ interface OddOneOutExerciseClientProps {
 }
 
 interface QuestionState {
-  selectedAnswerId: number | null;
   isAnswered: boolean;
+  selectedAnswerId: number | null;
 }
 
 export function OddOneOutExerciseClient({
@@ -29,8 +29,8 @@ export function OddOneOutExerciseClient({
   const { currentQuestionIndex, addResult } = useExerciseExecution();
 
   const [questionState, setQuestionState] = useState<QuestionState>({
-    selectedAnswerId: null,
     isAnswered: false,
+    selectedAnswerId: null,
   });
 
   // Crear un mapa para acceso rápido por id
@@ -51,8 +51,8 @@ export function OddOneOutExerciseClient({
           ...q.outlierMedia.map((m) => mediaMap[m.id]),
         ];
         return {
-          options,
           correctAnswerId: q.outlierMedia[0].id,
+          options,
         };
       }),
     [config, mediaMap]
@@ -67,25 +67,25 @@ export function OddOneOutExerciseClient({
 
     setQuestionState((prev) => ({
       ...prev,
-      selectedAnswerId: mediaId,
       isAnswered: true,
+      selectedAnswerId: mediaId,
     }));
 
     // Enviar resultado automáticamente después de un breve delay para mostrar feedback
     setTimeout(() => {
       const isCorrect = mediaId === currentQuestion.correctAnswerId;
       addResult({
-        questionIndex: currentQuestionIndex,
-        selectedId: mediaId,
         correctId: currentQuestion.correctAnswerId,
         isCorrect,
+        questionIndex: currentQuestionIndex,
+        selectedId: mediaId,
       } as OddOneOutResult);
 
       // Reset para la siguiente pregunta
       setQuestionState((prev) => ({
         ...prev,
-        selectedAnswerId: null,
         isAnswered: false,
+        selectedAnswerId: null,
       }));
     }, 1500); // 1.5 segundos para ver el feedback
   };

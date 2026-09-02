@@ -39,10 +39,10 @@ import type { Media } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
 
 interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
   content: string;
+  id: string;
   imageBase64?: string;
+  role: "user" | "assistant";
 }
 
 function ImagePreview({
@@ -131,13 +131,14 @@ export default function CreateMediaWithAI({
       return;
     }
 
-    if (!firstPromptRef.current) {
+    const firstPrompt = firstPromptRef.current as string | null;
+    if (!firstPrompt) {
       firstPromptRef.current = prompt;
     }
 
     setMessages((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), role: "user", content: prompt },
+      { content: prompt, id: crypto.randomUUID(), role: "user" },
     ]);
     setIsGenerating(true);
 
@@ -163,19 +164,19 @@ export default function CreateMediaWithAI({
       setMessages((prev) => [
         ...prev,
         {
-          id: crypto.randomUUID(),
-          role: "assistant",
           content: "Imagen generada",
+          id: crypto.randomUUID(),
           imageBase64: result.imageBase64,
+          role: "assistant",
         },
       ]);
     } catch (e) {
       setMessages((prev) => [
         ...prev,
         {
+          content: `Error: ${e instanceof Error ? e.message : "Error generando la imagen"}`,
           id: crypto.randomUUID(),
           role: "assistant",
-          content: `Error: ${e instanceof Error ? e.message : "Error generando la imagen"}`,
         },
       ]);
     } finally {
@@ -184,21 +185,19 @@ export default function CreateMediaWithAI({
   }
 
   async function handleCommit() {
-    if (!(latestImageRef.current && firstPromptRef.current)) {
+    const image = latestImageRef.current as string | null;
+    const prompt = firstPromptRef.current as string | null;
+    if (!(image && prompt)) {
       return;
     }
 
     setIsCommitting(true);
     try {
-      await commitGeneratedImage(
-        latestImageRef.current,
-        firstPromptRef.current,
-        sourceMedia?.id
-      );
+      await commitGeneratedImage(image, prompt, sourceMedia?.id);
       toast.success("Imagen guardada correctamente");
       reset();
       setOpen(false);
-    } catch (_e) {
+    } catch {
       toast.error("Error guardando la imagen");
     } finally {
       setIsCommitting(false);
@@ -291,7 +290,7 @@ export default function CreateMediaWithAI({
             Cancelar
           </Button>
           <Button
-            disabled={!latestImageRef.current || busy}
+            disabled={!(latestImageRef.current as string | null) || busy}
             onClick={handleCommit}
             type="button"
           >

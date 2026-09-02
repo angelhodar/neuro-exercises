@@ -17,8 +17,8 @@ import {
 import type { PatientTest } from "@/lib/db/schema";
 
 interface DeleteTestButtonProps {
-  test: PatientTest;
   patientId: number;
+  test: PatientTest;
 }
 
 export default function DeleteTestButton({

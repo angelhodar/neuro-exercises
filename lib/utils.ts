@@ -16,9 +16,9 @@ export function formatDate(dateString: string | Date) {
   const date = new Date(dateString);
 
   return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
     day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
 }
 
@@ -42,17 +42,16 @@ export interface DiffWord {
 }
 
 export interface DiffResult {
-  diffWords: DiffWord[];
   accuracy: number;
-  matches: number;
   differences: number;
+  diffWords: DiffWord[];
+  matches: number;
   totalOriginalWords: number;
 }
 
 // Function to normalize words by removing common punctuation
-const normalizeWord = (word: string): string => {
-  return word.toLowerCase().replace(/[.,;:!?()[\]{}"'`~@#$%^&*+=|\\/<>]/g, "");
-};
+const normalizeWord = (word: string): string =>
+  word.toLowerCase().replace(/[.,;:!?()[\]{}"'`~@#$%^&*+=|\\/<>]/g, "");
 
 // Checks if two words match when normalized
 function wordsMatch(a: string, b: string): boolean {
@@ -113,25 +112,25 @@ function processDiffStep(
     wordsMatch(originalWords[i], modifiedWords[j])
   ) {
     return {
-      words: [{ text: originalWords[i], type: "unchanged" }],
       nextI: i + 1,
       nextJ: j + 1,
+      words: [{ text: originalWords[i], type: "unchanged" }],
     };
   }
 
   if (isAddedWord(originalWords, modifiedWords, i, j)) {
     return {
-      words: [{ text: modifiedWords[j], type: "added" }],
       nextI: i,
       nextJ: j + 1,
+      words: [{ text: modifiedWords[j], type: "added" }],
     };
   }
 
   if (isRemovedWord(originalWords, modifiedWords, i, j)) {
     return {
-      words: [{ text: originalWords[i], type: "removed" }],
       nextI: i + 1,
       nextJ: j,
+      words: [{ text: originalWords[i], type: "removed" }],
     };
   }
 
@@ -149,7 +148,7 @@ function processDiffStep(
     nextJ = j + 1;
   }
 
-  return { words, nextI, nextJ };
+  return { nextI, nextJ, words };
 }
 
 export function getDiff(original: string, modified: string): DiffResult {
@@ -177,10 +176,10 @@ export function getDiff(original: string, modified: string): DiffResult {
     totalOriginalWords > 0 ? (matches / totalOriginalWords) * 100 : 0;
 
   return {
-    diffWords,
     accuracy,
-    matches,
     differences,
+    diffWords,
+    matches,
     totalOriginalWords,
   };
 }

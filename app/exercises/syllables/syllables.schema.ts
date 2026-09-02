@@ -23,7 +23,7 @@ export function syllablesConfigRefinements(
   const availableWords = getWordsBySyllableCount(
     data.syllablesCount as SyllableCount
   );
-  if (!availableWords || availableWords.length === 0) {
+  if (availableWords.length === 0) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `No hay palabras disponibles para ${data.syllablesCount} sílabas`,
@@ -32,7 +32,7 @@ export function syllablesConfigRefinements(
   }
 
   // Validate that we have enough words for the total questions
-  if (availableWords && availableWords.length < 5) {
+  if (availableWords.length < 5) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `No hay suficientes palabras disponibles para ${data.syllablesCount} sílabas (mínimo 5 necesarias)`,
@@ -48,11 +48,11 @@ export const configSchema = baseExerciseConfigSchema
 
 // Updated question result schema - exported as resultSchema
 export const resultSchema = z.object({
-  targetWord: z.string(),
-  targetSyllables: z.array(z.string()),
   selectedSyllables: z.array(z.string()),
-  timeSpent: z.number().min(0),
+  targetSyllables: z.array(z.string()),
+  targetWord: z.string(),
   timeExpired: z.boolean(),
+  timeSpent: z.number().min(0),
 });
 
 export type SyllablesSpecificConfig = z.infer<
@@ -62,9 +62,9 @@ export type SyllablesConfig = z.infer<typeof configSchema>;
 export type SyllablesQuestionResult = z.infer<typeof resultSchema>;
 
 export const defaultConfig: SyllablesConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
+  endConditionType: "questions",
   syllablesCount: 3,
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };

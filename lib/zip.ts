@@ -1,8 +1,8 @@
 import AdmZip from "adm-zip";
 
 export interface ZipFileItem {
-  path: string;
   content: string;
+  path: string;
 }
 
 export function createZipBuffer(files: ZipFileItem[]): Buffer {
@@ -27,8 +27,8 @@ export function extractFiles(zipBuffer: Buffer): ZipFileItem[] {
     if (!entry.isDirectory) {
       const content = zip.readAsText(entry, "utf8");
       extractedFiles.push({
-        path: entry.entryName,
         content,
+        path: entry.entryName,
       });
     }
   }

@@ -100,28 +100,28 @@ const convertBlobUrlToDataUrl = async (url: string): Promise<string | null> => {
 // ============================================================================
 
 export interface AttachmentsContext {
-  files: (FileUIPart & { id: string })[];
   add: (files: File[] | FileList) => void;
-  remove: (id: string) => void;
   clear: () => void;
-  openFileDialog: () => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
+  files: (FileUIPart & { id: string })[];
+  openFileDialog: () => void;
+  remove: (id: string) => void;
 }
 
 export interface TextInputContext {
-  value: string;
-  setInput: (v: string) => void;
   clear: () => void;
+  setInput: (v: string) => void;
+  value: string;
 }
 
 export interface PromptInputControllerProps {
-  textInput: TextInputContext;
-  attachments: AttachmentsContext;
   /** INTERNAL: Allows PromptInput to register its file textInput + "open" callback */
   __registerFileInput: (
     ref: RefObject<HTMLInputElement | null>,
     open: () => void
   ) => void;
+  attachments: AttachmentsContext;
+  textInput: TextInputContext;
 }
 
 const PromptInputController = createContext<PromptInputControllerProps | null>(
@@ -241,7 +241,7 @@ export const PromptInputProvider = ({
   );
 
   const openFileDialog = useCallback(() => {
-    openRef.current?.();
+    openRef.current();
   }, []);
 
   const attachments = useMemo<AttachmentsContext>(
@@ -310,10 +310,10 @@ export const usePromptInputAttachments = () => {
 // ============================================================================
 
 export interface ReferencedSourcesContext {
-  sources: (SourceDocumentUIPart & { id: string })[];
   add: (sources: SourceDocumentUIPart[] | SourceDocumentUIPart) => void;
-  remove: (id: string) => void;
   clear: () => void;
+  remove: (id: string) => void;
+  sources: (SourceDocumentUIPart & { id: string })[];
 }
 
 export const LocalReferencedSourcesContext =
@@ -357,8 +357,8 @@ export const PromptInputActionAddAttachments = ({
 };
 
 export interface PromptInputMessage {
-  text: string;
   files: FileUIPart[];
+  text: string;
 }
 
 export type PromptInputProps = Omit<
@@ -606,7 +606,7 @@ export const PromptInput = ({
 
   // Attach drop handlers on nearest form and document (opt-in)
   useEffect(() => {
-    const form = formRef.current;
+    const form = formRef.current as HTMLFormElement | null;
     if (!form) {
       return;
     }
@@ -1034,7 +1034,7 @@ export const PromptInputButton = ({
       <TooltipTrigger>{button}</TooltipTrigger>
       <TooltipContent side={side}>
         {tooltipContent}
-        {shortcut && (
+        {!!shortcut && (
           <span className="ml-2 text-muted-foreground">{shortcut}</span>
         )}
       </TooltipContent>

@@ -34,11 +34,11 @@ import {
 } from "@/components/ui/select";
 
 const createUserSchema = z.object({
+  email: z.string().email("Introduce un email válido"),
   name: z
     .string()
     .min(2, "El nombre debe tener al menos 2 caracteres")
     .max(50, "El nombre no puede exceder 50 caracteres"),
-  email: z.string().email("Introduce un email válido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
   role: z.enum(["user", "admin"]),
 });
@@ -51,13 +51,13 @@ export default function AddUserButton() {
   const [showPassword, setShowPassword] = useState(false);
 
   const createUserForm = useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
     defaultValues: {
-      name: "",
       email: "",
+      name: "",
       password: "",
       role: "user",
     },
+    resolver: zodResolver(createUserSchema),
   });
 
   const onCreateUserSubmit = async (values: CreateUserFormValues) => {
@@ -65,8 +65,9 @@ export default function AddUserButton() {
     try {
       const result = await createUser(values);
 
-      if (result.error) {
-        toast.error(`Error al crear usuario: ${result.error}`);
+      const error = result.error as string | undefined;
+      if (error) {
+        toast.error(`Error al crear usuario: ${error}`);
         return;
       }
 
@@ -178,8 +179,8 @@ export default function AddUserButton() {
                         defaultValue={field.value}
                         disabled={isLoading}
                         items={[
-                          { value: "user", label: "Usuario" },
-                          { value: "admin", label: "Administrador" },
+                          { label: "Usuario", value: "user" },
+                          { label: "Administrador", value: "admin" },
                         ]}
                         onValueChange={field.onChange}
                       >

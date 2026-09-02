@@ -23,11 +23,11 @@ import type { SelectableMediaSchema } from "@/lib/schemas/medias";
 import { createBlobUrl } from "@/lib/utils";
 
 interface MediaSelectorProps {
-  selectedMedias: SelectableMediaSchema[];
-  onMediasChange: (medias: SelectableMediaSchema[]) => void;
-  selectionMode?: "single" | "multiple";
-  compact?: boolean;
   className?: string;
+  compact?: boolean;
+  onMediasChange: (medias: SelectableMediaSchema[]) => void;
+  selectedMedias: SelectableMediaSchema[];
+  selectionMode?: "single" | "multiple";
 }
 
 export default function MediaSelector(props: MediaSelectorProps) {
@@ -92,12 +92,12 @@ export default function MediaSelector(props: MediaSelectorProps) {
                   placeholder="Buscar por nombre o etiquetas..."
                   value={searchTerm}
                 />
-                {isFetching && (
+                {!!isFetching && (
                   <Loader2 className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 transform animate-spin text-muted-foreground" />
                 )}
               </div>
 
-              {error && (
+              {!!error && (
                 <div className="py-4 text-center text-red-500">
                   Error al buscar imágenes. Inténtalo de nuevo.
                 </div>

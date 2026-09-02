@@ -17,9 +17,9 @@ import { useExerciseAssetsLoader } from "@/hooks/use-exercise-assets-loader";
 import type { ExerciseConfigPreset } from "@/lib/db/schema";
 
 interface ConfigureExerciseButtonProps {
-  slug: string;
-  index: number;
   exerciseId: number;
+  index: number;
+  slug: string;
 }
 
 export default function ConfigureExerciseButton(

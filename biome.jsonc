@@ -4,5 +4,13 @@
     "ultracite/biome/core",
     "ultracite/biome/next",
     "ultracite/biome/react"
-  ]
+  ],
+  "linter": {
+    "rules": {
+      "performance": {
+        // React Compiler memoizes JSX callbacks, making this manual rule redundant.
+        "noJsxPropsBind": "off"
+      }
+    }
+  }
 }

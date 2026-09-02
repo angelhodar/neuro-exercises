@@ -14,15 +14,15 @@ interface StroopColorInterferenceExerciseProps {
 }
 
 interface CurrentQuestion {
-  word: { name: string; value: string };
   color: { name: string; value: string };
   options: string[];
+  word: { name: string; value: string };
 }
 
 // Fisher-Yates shuffle algorithm
 function shuffle<T>(array: T[]): T[] {
   const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
+  for (let i = newArray.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
@@ -43,8 +43,8 @@ export function Exercise({ config }: StroopColorInterferenceExerciseProps) {
 
       // Asegurarse de que la palabra y el color no sean el mismo
       do {
-        word = shuffle([...STROOP_COLORS])[0];
-        color = shuffle([...STROOP_COLORS])[0];
+        [word] = shuffle([...STROOP_COLORS]);
+        [color] = shuffle([...STROOP_COLORS]);
       } while (word.name === color.name);
 
       const correctAnswer = color.name;
@@ -55,7 +55,7 @@ export function Exercise({ config }: StroopColorInterferenceExerciseProps) {
       const shuffledOptions = shuffle(otherOptions).slice(0, numOptions - 1);
       const finalOptions = shuffle([...shuffledOptions, correctAnswer]);
 
-      setQuestion({ word, color, options: finalOptions });
+      setQuestion({ color, options: finalOptions, word });
       setStartTime(Date.now());
     };
 
@@ -73,11 +73,11 @@ export function Exercise({ config }: StroopColorInterferenceExerciseProps) {
     const isCorrect = selectedAnswer === question.color.name;
 
     const result: StroopColorInterferenceQuestionResult = {
-      word: question.word.name,
       color: question.color.name,
-      userAnswer: selectedAnswer,
       isCorrect,
       responseTime,
+      userAnswer: selectedAnswer,
+      word: question.word.name,
     };
 
     addResult(result);

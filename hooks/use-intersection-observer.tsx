@@ -6,7 +6,7 @@ export function useIntersectionObserver(
   callback: (entries: IntersectionObserverEntry[]) => void,
   options?: IntersectionObserverInit
 ) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 
@@ -14,7 +14,7 @@ export function useIntersectionObserver(
   optionsRef.current = options;
 
   useEffect(() => {
-    const element = ref.current;
+    const element = ref.current as HTMLDivElement | null;
     if (!element) {
       return;
     }

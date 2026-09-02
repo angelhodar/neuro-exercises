@@ -15,8 +15,8 @@ async function getImagesForExercise(tags: string[]): Promise<ImageData[]> {
   return medias.map((media) => ({
     id: media.id.toString(),
     name: media.name,
-    url: media.blobKey,
     tags: media.tags ?? [],
+    url: media.blobKey,
   }));
 }
 

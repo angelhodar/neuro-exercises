@@ -1,8 +1,9 @@
 "use client";
 
-import { Button, type ButtonProps } from "@/components/ui/button";
+import type { ComponentProps } from "react";
+import { Button } from "@/components/ui/button";
 
-interface ScrollToElementButtonProps extends ButtonProps {
+interface ScrollToElementButtonProps extends ComponentProps<typeof Button> {
   elementId: string;
 }
 

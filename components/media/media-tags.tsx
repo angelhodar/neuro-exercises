@@ -4,12 +4,12 @@ import type { Ref } from "react";
 import { TagsInput } from "@/components/ui/tags-input";
 
 interface MediaTagsInputProps {
-  value?: string[];
+  className?: string;
+  disabled?: boolean;
   onChange?: (value: string[]) => void;
   placeholder?: string;
-  disabled?: boolean;
-  className?: string;
   ref?: Ref<HTMLDivElement>;
+  value?: string[];
 }
 
 export function MediaTagsInput({

@@ -61,22 +61,20 @@ const MediaFile = ({
   );
 };
 
-const AddMediaButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <div className="relative flex aspect-square items-center justify-center rounded-md border-2 border-muted-foreground/25 border-dashed bg-transparent">
-      <Button onClick={onClick} type="button" variant="outline">
-        <PlusIcon />
-      </Button>
-    </div>
-  );
-};
+const AddMediaButton = ({ onClick }: { onClick: () => void }) => (
+  <div className="relative flex aspect-square items-center justify-center rounded-md border-2 border-muted-foreground/25 border-dashed bg-transparent">
+    <Button onClick={onClick} type="button" variant="outline">
+      <PlusIcon />
+    </Button>
+  </div>
+);
 
 interface FileMediaSelectorProps {
-  medias: SelectableMediaSchema[];
-  removeFile: (id: number) => void;
-  onAddMediaClick: () => void;
-  compact?: boolean;
   className?: string;
+  compact?: boolean;
+  medias: SelectableMediaSchema[];
+  onAddMediaClick: () => void;
+  removeFile: (id: number) => void;
 }
 
 export default function FileMediaSelector({

@@ -21,8 +21,8 @@ export async function getResultsById(resultId: number) {
           with: {
             exercise: {
               columns: {
-                slug: true,
                 displayName: true,
+                slug: true,
               },
             },
           },
@@ -35,14 +35,14 @@ export async function getResultsById(resultId: number) {
     }
 
     return {
+      backUrl: `/s/${result.exerciseLink.token}`,
+      completedAt: result.completedAt,
+      config: result.templateItem.config,
+      exerciseDisplayName: result.templateItem.exercise.displayName,
+      exerciseSlug: result.templateItem.exercise.slug,
       id: result.id,
       results: result.results,
-      config: result.templateItem.config,
-      exerciseSlug: result.templateItem.exercise.slug,
-      exerciseDisplayName: result.templateItem.exercise.displayName,
-      completedAt: result.completedAt,
       startedAt: result.startedAt,
-      backUrl: `/s/${result.exerciseLink.token}`,
     };
   } catch (error) {
     console.error("Error fetching result by ID:", error);

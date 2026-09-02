@@ -56,18 +56,18 @@ export default function SearchImagesDialog({
   const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set());
 
   const form = useForm<SearchSchema>({
-    resolver: zodResolver(searchSchema),
     defaultValues: {
       query: "",
     },
+    resolver: zodResolver(searchSchema),
   });
 
   const onSubmit = async (values: SearchSchema) => {
     setIsSearching(true);
     try {
       const data: SearchResponse = await searchImages(values.query);
-      setSearchResults(data.images || []);
-      if (data.images && data.images.length > 0) {
+      setSearchResults(data.images);
+      if (data.images.length > 0) {
         toast.success(`${data.images.length} imágenes encontradas`);
       } else {
         toast.info("No se encontraron imágenes para tu búsqueda");
@@ -106,10 +106,10 @@ export default function SearchImagesDialog({
 
       const downloadableImages: DownloadableImage[] = selectedImageResults.map(
         (img) => ({
-          title: img.title,
+          imageHeight: img.imageHeight,
           imageUrl: img.imageUrl,
           imageWidth: img.imageWidth,
-          imageHeight: img.imageHeight,
+          title: img.title,
         })
       );
 
@@ -232,7 +232,7 @@ export default function SearchImagesDialog({
           </div>
         )}
 
-        {isSearching && (
+        {!!isSearching && (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="mr-2 h-6 w-6 animate-spin" />
             <span>Buscando imágenes...</span>

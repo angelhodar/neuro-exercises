@@ -3,8 +3,8 @@ import type React from "react";
 import { cn } from "@/lib/utils";
 
 interface SelectableProps extends React.HTMLAttributes<HTMLButtonElement> {
-  selected: boolean;
   onClick: () => void;
+  selected: boolean;
 }
 
 export function Selectable({
@@ -29,7 +29,7 @@ export function Selectable({
       {...props}
     >
       {children}
-      {selected && (
+      {!!selected && (
         <div className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 font-bold text-lg text-white shadow-lg">
           <Check className="h-4 w-4" />
         </div>

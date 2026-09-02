@@ -2,12 +2,12 @@ import type { ComponentType } from "react";
 import type { z } from "zod";
 
 export interface ExerciseAssets {
+  ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
   configSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
-  resultSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
   defaultConfig: Record<string, unknown>;
   ExerciseComponent: ComponentType<{ config: Record<string, unknown> }>;
   ResultsComponent: ComponentType<Record<string, unknown>>;
-  ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
+  resultSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
 }
 
 export type ClientAssets = Omit<
@@ -32,12 +32,12 @@ export async function loadExerciseAssets(
     ]);
 
     return {
+      ConfigFieldsComponent: ConfigFields,
       configSchema,
-      resultSchema,
       defaultConfig,
       ExerciseComponent: Exercise,
       ResultsComponent: Results,
-      ConfigFieldsComponent: ConfigFields,
+      resultSchema,
     };
   } catch (error) {
     console.error(`Failed to load exercise assets for slug: ${slug}`, error);
@@ -56,10 +56,10 @@ export async function loadClientAssets(
       ]);
 
     return {
-      configSchema,
-      resultSchema,
-      defaultConfig,
       ConfigFieldsComponent: ConfigFields,
+      configSchema,
+      defaultConfig,
+      resultSchema,
     };
   } catch (error) {
     console.error(`Failed to load client assets for slug: ${slug}`, error);
@@ -71,7 +71,7 @@ export async function exerciseHasAssets(slug: string): Promise<boolean> {
   try {
     await import(`./${slug}/${slug}.schema`);
     return true;
-  } catch (_error) {
+  } catch {
     return false;
   }
 }

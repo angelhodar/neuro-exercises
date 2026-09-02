@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 const NON_DIGIT_REGEX = /\D/;
 
 interface NumericPadProps {
-  value: string;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   onChange: (value: string) => void;
   onSubmit: () => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  value: string;
 }
 
 export function NumericPad({

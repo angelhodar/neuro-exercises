@@ -71,7 +71,7 @@ export default async function SpeechTranscriptionsPage() {
                     <div className="font-medium">
                       {transcription.referenceText.name}
                     </div>
-                    {transcription.referenceText.referenceText && (
+                    {!!transcription.referenceText.referenceText && (
                       <Tooltip>
                         <TooltipTrigger
                           render={

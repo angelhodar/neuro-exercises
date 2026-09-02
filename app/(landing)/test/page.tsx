@@ -9,56 +9,56 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface SampleMedia {
-  type: MediaType;
-  src: string;
   alt: string;
-  title: string;
+  src: string;
   thumbnailSrc?: string;
+  title: string;
+  type: MediaType;
 }
 
 const SAMPLE_MEDIA: SampleMedia[] = [
   {
-    type: "image",
-    src: "https://picsum.photos/id/10/800/600",
     alt: "Mountain landscape with a lake",
+    src: "https://picsum.photos/id/10/800/600",
     title: "Mountain Landscape",
+    type: "image",
   },
   {
-    type: "image",
-    src: "https://picsum.photos/id/22/800/600",
     alt: "Coastal sunrise over the ocean",
+    src: "https://picsum.photos/id/22/800/600",
     title: "Coastal Sunrise",
-  },
-  {
     type: "image",
-    src: "https://picsum.photos/id/237/600/900",
-    alt: "Portrait of a black puppy",
-    title: "Portrait Photo",
   },
   {
-    type: "video",
+    alt: "Portrait of a black puppy",
+    src: "https://picsum.photos/id/237/600/900",
+    title: "Portrait Photo",
+    type: "image",
+  },
+  {
+    alt: "Big Buck Bunny animated short",
     src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     thumbnailSrc: "https://picsum.photos/id/180/800/450",
-    alt: "Big Buck Bunny animated short",
     title: "Big Buck Bunny",
-  },
-  {
     type: "video",
-    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+  },
+  {
     alt: "Elephants Dream animated short",
+    src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     title: "Elephants Dream",
+    type: "video",
   },
   {
-    type: "audio",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     alt: "SoundHelix Song 1 audio track",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     title: "SoundHelix Song 1",
+    type: "audio",
   },
   {
-    type: "audio",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
     alt: "SoundHelix Song 6 audio track",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
     title: "SoundHelix Song 6",
+    type: "audio",
   },
 ];
 

@@ -13,10 +13,10 @@ import {
 import { initializeExercisePreview } from "@/app/actions/sandbox";
 
 interface SandboxContextType {
-  sandboxUrl: string | null;
-  isLoading: boolean;
   error: string | null;
   initializePreview: () => Promise<void>;
+  isLoading: boolean;
+  sandboxUrl: string | null;
 }
 
 const SandboxContext = createContext<SandboxContextType | undefined>(undefined);
@@ -58,11 +58,11 @@ export function SandboxProvider({
     try {
       const result = await initializeExercisePreview(exerciseId, gen);
       setSandboxUrl(result.sandboxUrl);
-    } catch (error) {
-      console.error("Error initializing preview:", error);
+    } catch (previewError) {
+      console.error("Error initializing preview:", previewError);
       setError(
-        error instanceof Error
-          ? error.message
+        previewError instanceof Error
+          ? previewError.message
           : "No se pudo iniciar la previsualización"
       );
     } finally {
@@ -88,10 +88,10 @@ export function SandboxProvider({
   }, [gen, hasCompletedGeneration, initializePreview]);
 
   const value: SandboxContextType = {
-    sandboxUrl,
-    isLoading,
     error,
     initializePreview,
+    isLoading,
+    sandboxUrl,
   };
 
   return (

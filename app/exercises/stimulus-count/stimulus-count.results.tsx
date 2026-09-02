@@ -33,9 +33,9 @@ export function Results({ results }: StimulusCountResultsProps) {
     results.length > 0 ? (totalCorrect / results.length) * 100 : 0;
 
   const chartData = results.map((r, i) => ({
+    fill: r.isCorrect ? "var(--color-correcto)" : "var(--color-incorrecto)",
     question: `${i + 1}`,
     tiempo: r.timeSpent,
-    fill: r.isCorrect ? "var(--color-correcto)" : "var(--color-incorrecto)",
   }));
 
   return (
@@ -82,9 +82,7 @@ export function Results({ results }: StimulusCountResultsProps) {
               </TableHeader>
               <TableBody>
                 {results.map((result, index) => (
-                  <TableRow
-                    key={`${result.shownStimuli}-${result.userAnswer}-${index}`}
-                  >
+                  <TableRow key={JSON.stringify(result)}>
                     <TCell>{index + 1}</TCell>
                     <TCell>{result.shownStimuli}</TCell>
                     <TCell>{result.userAnswer}</TCell>

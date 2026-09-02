@@ -36,111 +36,111 @@ import {
 import { UserDropdown } from "./user-dropdown";
 
 const data = {
-  navMain: [
-    {
-      title: "Inicio",
-      url: "/dashboard",
-      icon: Home,
-    },
-  ],
   exercises: [
     {
+      icon: Grid3x3,
       title: "Cuadrícula",
       url: "/exercises/reaction-time-grid",
-      icon: Grid3x3,
     },
     {
+      icon: BookOpen,
       title: "Sílabas",
       url: "/exercises/syllables",
-      icon: BookOpen,
     },
     {
+      icon: ImageIcon,
       title: "Reconocimiento visual",
       url: "/exercises/visual-recognition",
-      icon: ImageIcon,
     },
     {
+      icon: Palette,
       title: "Secuencia de colores",
       url: "/exercises/color-sequence",
-      icon: Palette,
     },
     {
+      icon: Circle,
       title: "Conteo de estímulos",
       url: "/exercises/stimulus-count",
-      icon: Circle,
     },
     {
+      icon: ScanSearch,
       title: "¿Cual te has dejado?",
       url: "/exercises/odd-one-out",
-      icon: ScanSearch,
-    },
-  ],
-  management: [
-    {
-      title: "Organizaciones",
-      url: "/dashboard/organizations",
-      icon: Building2,
-    },
-    {
-      title: "Usuarios",
-      url: "/dashboard/users",
-      icon: Users,
-    },
-    {
-      title: "Pacientes",
-      url: "/dashboard/patients",
-      icon: UserRound,
     },
   ],
   library: [
     {
+      icon: FileImage,
       title: "Biblioteca multimedia",
       url: "/dashboard/media",
-      icon: FileImage,
     },
     {
+      icon: ImagePlus,
       title: "Generar imágenes con IA",
       url: "/dashboard/media?create-media-ai=true",
-      icon: ImagePlus,
     },
     {
+      icon: Upload,
       title: "Subir contenido manualmente",
       url: "/dashboard/media?create-media-manual=true",
-      icon: Upload,
+    },
+  ],
+  management: [
+    {
+      icon: Building2,
+      title: "Organizaciones",
+      url: "/dashboard/organizations",
+    },
+    {
+      icon: Users,
+      title: "Usuarios",
+      url: "/dashboard/users",
+    },
+    {
+      icon: UserRound,
+      title: "Pacientes",
+      url: "/dashboard/patients",
+    },
+  ],
+  navMain: [
+    {
+      icon: Home,
+      title: "Inicio",
+      url: "/dashboard",
     },
   ],
   sharing: [
     {
+      icon: Clipboard,
       title: "Plantillas",
       url: "/dashboard/templates",
-      icon: Clipboard,
     },
     {
+      icon: LinkIcon,
       title: "Mis enlaces",
       url: "/dashboard/links",
-      icon: LinkIcon,
     },
     {
+      icon: Plus,
       title: "Crear enlace",
       url: "/dashboard/links?create-link=true",
-      icon: Plus,
     },
   ],
   tools: [
     {
+      icon: BookOpen,
       title: "Textos",
       url: "/dashboard/speech/texts",
-      icon: BookOpen,
     },
     {
+      icon: Mic,
       title: "Transcripciones",
       url: "/dashboard/speech/transcriptions",
-      icon: Mic,
     },
     {
+      icon: Plus,
       title: "Crear transcripción",
       url: "/dashboard/speech/transcript",
-      icon: Plus,
     },
   ],
 };

@@ -32,11 +32,11 @@ export const configSchema = baseExerciseConfigSchema.merge(
 
 // 3. Esquema para los resultados de una pregunta individual
 export const resultSchema = z.object({
-  word: z.string(),
   color: z.string(),
-  userAnswer: z.string(),
   isCorrect: z.boolean(),
   responseTime: z.number(),
+  userAnswer: z.string(),
+  word: z.string(),
 });
 
 // 5. Tipos derivados para uso en la aplicación
@@ -49,9 +49,9 @@ export type StroopColorInterferenceQuestionResult = z.infer<
 >;
 
 export const defaultConfig: StroopColorInterferenceConfig = {
-  endConditionType: "questions",
   automaticNextQuestion: true,
-  totalQuestions: 5,
-  timeLimitSeconds: 0,
+  endConditionType: "questions",
   numOptions: 3,
+  timeLimitSeconds: 0,
+  totalQuestions: 5,
 };

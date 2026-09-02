@@ -27,10 +27,10 @@ import { Input } from "@/components/ui/input";
 import { uploadBlobFromFile } from "@/lib/storage";
 
 const schema = z.object({
-  name: z.string().min(1, "El nombre es obligatorio"),
-  tags: z.array(z.string()).min(1, "Escribe al menos una etiqueta"),
   description: z.string().min(1, "La descripción es obligatoria"),
   file: z.instanceof(File, { message: "El archivo es obligatorio" }),
+  name: z.string().min(1, "El nombre es obligatorio"),
+  tags: z.array(z.string()).min(1, "Escribe al menos una etiqueta"),
   thumbnail: z.instanceof(File).optional(),
 });
 
@@ -44,12 +44,12 @@ export default function CreateMediaManual({
   setOpen: (v: boolean) => void;
 }) {
   const form = useForm<FormSchema>({
-    resolver: zodResolver(schema),
     defaultValues: {
+      description: "",
       name: "",
       tags: [],
-      description: "",
     },
+    resolver: zodResolver(schema),
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,17 +66,17 @@ export default function CreateMediaManual({
       ]);
       const thumbnailKey = thumbBlob ? thumbBlob.pathname : undefined;
       await uploadManualMedia({
-        name: values.name,
-        tags: values.tags,
         description: values.description,
         fileKey: blob.pathname,
-        thumbnailKey,
         mimeType: blob.contentType,
+        name: values.name,
+        tags: values.tags,
+        thumbnailKey,
       });
       toast.success("Contenido subido correctamente");
       setOpen(false);
       form.reset();
-    } catch (_e) {
+    } catch {
       toast.error("Error subiendo el contenido");
     } finally {
       setIsSubmitting(false);

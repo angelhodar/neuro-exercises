@@ -5,53 +5,49 @@ import { type FC, Fragment } from "react";
 import { cn } from "@/lib/utils";
 
 interface StepProps {
-  title: string;
   description?: string;
-  isCompleted?: boolean;
   isActive?: boolean;
+  isCompleted?: boolean;
+  title: string;
 }
 
-const Step: FC<StepProps> = ({ title, description, isCompleted, isActive }) => {
-  return (
-    <div className="flex items-center">
-      <div className="relative flex items-center justify-center">
-        <div
-          className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-full border-2",
-            isCompleted && "border-primary bg-primary text-primary-foreground",
-            !isCompleted && isActive && "border-primary",
-            !(isCompleted || isActive) && "border-muted"
-          )}
-        >
-          {isCompleted ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <span className="font-medium text-sm">{title[0]}</span>
-          )}
-        </div>
-      </div>
-      <div className="ml-4">
-        <p
-          className={cn(
-            "font-medium text-sm",
-            isActive || isCompleted
-              ? "text-foreground"
-              : "text-muted-foreground"
-          )}
-        >
-          {title}
-        </p>
-        {description && (
-          <p className="text-muted-foreground text-sm">{description}</p>
+const Step: FC<StepProps> = ({ title, description, isCompleted, isActive }) => (
+  <div className="flex items-center">
+    <div className="relative flex items-center justify-center">
+      <div
+        className={cn(
+          "flex h-8 w-8 items-center justify-center rounded-full border-2",
+          isCompleted && "border-primary bg-primary text-primary-foreground",
+          !isCompleted && isActive && "border-primary",
+          !(isCompleted || isActive) && "border-muted"
+        )}
+      >
+        {isCompleted ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <span className="font-medium text-sm">{title[0]}</span>
         )}
       </div>
     </div>
-  );
-};
+    <div className="ml-4">
+      <p
+        className={cn(
+          "font-medium text-sm",
+          isActive || isCompleted ? "text-foreground" : "text-muted-foreground"
+        )}
+      >
+        {title}
+      </p>
+      {!!description && (
+        <p className="text-muted-foreground text-sm">{description}</p>
+      )}
+    </div>
+  </div>
+);
 
 interface StepperProps {
-  steps: Array<{ title: string; description?: string }>;
   currentStep: number;
+  steps: Array<{ title: string; description?: string }>;
 }
 
 export function Stepper({ steps, currentStep }: StepperProps) {

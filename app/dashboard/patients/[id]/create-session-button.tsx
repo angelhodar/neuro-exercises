@@ -42,9 +42,9 @@ import {
 
 const createSessionSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
-  type: z.string().min(1, "El tipo de sesión es obligatorio"),
   discipline: z.string().min(1, "La disciplina es obligatoria"),
   observations: z.string().optional(),
+  type: z.string().min(1, "El tipo de sesión es obligatorio"),
 });
 
 type CreateSessionFormValues = z.infer<typeof createSessionSchema>;
@@ -60,24 +60,24 @@ export default function CreateSessionButton({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<CreateSessionFormValues>({
-    resolver: zodResolver(createSessionSchema),
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
-      type: "",
       discipline: "",
       observations: "",
+      type: "",
     },
+    resolver: zodResolver(createSessionSchema),
   });
 
   const onSubmit = async (data: CreateSessionFormValues) => {
     setIsLoading(true);
     try {
       await createPatientSession({
-        patientId,
         date: new Date(data.date),
-        type: data.type,
         discipline: data.discipline,
         observations: data.observations || null,
+        patientId,
+        type: data.type,
       });
       toast.success("Sesión creada exitosamente");
       form.reset();
@@ -127,8 +127,8 @@ export default function CreateSessionButton({
                       <Select
                         disabled={isLoading}
                         items={SESSION_TYPES.map((type) => ({
-                          value: type,
                           label: SESSION_TYPE_LABELS[type],
+                          value: type,
                         }))}
                         onValueChange={field.onChange}
                         value={field.value}
@@ -164,8 +164,8 @@ export default function CreateSessionButton({
                       <Select
                         disabled={isLoading}
                         items={DISCIPLINES.map((discipline) => ({
-                          value: discipline,
                           label: DISCIPLINE_LABELS[discipline],
+                          value: discipline,
                         }))}
                         onValueChange={field.onChange}
                         value={field.value}

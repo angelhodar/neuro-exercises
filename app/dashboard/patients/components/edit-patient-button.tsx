@@ -29,17 +29,17 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Patient } from "@/lib/db/schema";
 
 const editPatientSchema = z.object({
-  firstName: z.string().min(1, "El nombre es obligatorio"),
-  lastName: z.string().min(1, "Los apellidos son obligatorios"),
   dateOfBirth: z.string().optional(),
-  phone: z.string().optional(),
+  diagnosis: z.string().optional(),
   email: z
     .string()
     .email("Introduce un email válido")
     .optional()
     .or(z.literal("")),
-  diagnosis: z.string().optional(),
+  firstName: z.string().min(1, "El nombre es obligatorio"),
+  lastName: z.string().min(1, "Los apellidos son obligatorios"),
   notes: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 type EditPatientFormValues = z.infer<typeof editPatientSchema>;
@@ -61,29 +61,29 @@ export default function EditPatientButton({ patient }: EditPatientButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<EditPatientFormValues>({
-    resolver: zodResolver(editPatientSchema),
     defaultValues: {
+      dateOfBirth: formatDateForInput(patient.dateOfBirth),
+      diagnosis: patient.diagnosis || "",
+      email: patient.email || "",
       firstName: patient.firstName,
       lastName: patient.lastName,
-      dateOfBirth: formatDateForInput(patient.dateOfBirth),
-      phone: patient.phone || "",
-      email: patient.email || "",
-      diagnosis: patient.diagnosis || "",
       notes: patient.notes || "",
+      phone: patient.phone || "",
     },
+    resolver: zodResolver(editPatientSchema),
   });
 
   const onSubmit = async (data: EditPatientFormValues) => {
     setIsLoading(true);
     try {
       await updatePatient(patient.id, {
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        diagnosis: data.diagnosis || null,
+        email: data.email || null,
         firstName: data.firstName,
         lastName: data.lastName,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-        phone: data.phone || null,
-        email: data.email || null,
-        diagnosis: data.diagnosis || null,
         notes: data.notes || null,
+        phone: data.phone || null,
       });
       toast.success("Paciente actualizado exitosamente");
       setOpen(false);

@@ -43,16 +43,16 @@ export default function EditExerciseButton({
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<UpdateExerciseSchema>({
-    resolver: zodResolver(updateExerciseSchema),
     defaultValues: {
-      id: exercise.id,
-      displayName: exercise.displayName,
+      audioPrompt: "",
       description: exercise.description || "",
+      displayName: exercise.displayName,
+      file: undefined,
+      id: exercise.id,
       tags: exercise.tags || [],
       thumbnailPrompt: "",
-      file: undefined,
-      audioPrompt: "",
     },
+    resolver: zodResolver(updateExerciseSchema),
   });
 
   const { isSubmitting } = form.formState;
@@ -65,7 +65,7 @@ export default function EditExerciseButton({
         throw new Error("Failed to update exercise");
       }
       setOpen(false);
-    } catch (_e) {
+    } catch {
       setError("Error actualizando el ejercicio");
     }
   };
@@ -234,7 +234,7 @@ export default function EditExerciseButton({
               )}
             />
 
-            {error && <div className="text-red-500 text-sm">{error}</div>}
+            {!!error && <div className="text-red-500 text-sm">{error}</div>}
 
             <DialogFooter>
               <Button

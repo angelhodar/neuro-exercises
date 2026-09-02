@@ -22,11 +22,11 @@ export async function getCurrentUserOrganizations() {
     }
 
     const userOrganizations = await db.query.member.findMany({
+      orderBy: desc(member.createdAt),
       where: eq(member.userId, user.id),
       with: {
         organization: true,
       },
-      orderBy: desc(member.createdAt),
     });
 
     return userOrganizations.map((m) => m.organization);
@@ -39,21 +39,21 @@ export async function getCurrentUserOrganizations() {
 export async function getAllOrganizations() {
   try {
     const organizations = await db.query.organization.findMany({
+      orderBy: desc(organization.createdAt),
       with: {
+        invitations: true,
         members: {
           with: {
             user: {
               columns: {
+                email: true,
                 id: true,
                 name: true,
-                email: true,
               },
             },
           },
         },
-        invitations: true,
       },
-      orderBy: desc(organization.createdAt),
     });
 
     return organizations;
@@ -68,18 +68,18 @@ export async function getOrganizationById(id: string) {
     const org = await db.query.organization.findFirst({
       where: eq(organization.id, id),
       with: {
+        invitations: true,
         members: {
           with: {
             user: {
               columns: {
+                email: true,
                 id: true,
                 name: true,
-                email: true,
               },
             },
           },
         },
-        invitations: true,
       },
     });
 
@@ -110,10 +110,10 @@ export async function createOrganization(data: NewOrganization) {
       .insert(organization)
       .values({
         id: orgId,
-        name: data.name,
-        slug,
         logo: data.logo,
         metadata: data.metadata,
+        name: data.name,
+        slug,
       })
       .returning();
 
@@ -121,8 +121,8 @@ export async function createOrganization(data: NewOrganization) {
     await db.insert(member).values({
       id: crypto.randomUUID(),
       organizationId: orgId,
-      userId: user.id,
       role: "admin",
+      userId: user.id,
     });
 
     // Revalidate the main organizations page to show the new organization
@@ -147,7 +147,7 @@ export async function updateOrganization(id: string, data: UpdateOrganization) {
       where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
     });
 
-    if (!userMember || userMember.role !== "admin") {
+    if (userMember?.role !== "admin") {
       throw new Error("You don't have permission to edit this organization");
     }
 
@@ -179,7 +179,7 @@ export async function deleteOrganization(id: string) {
       where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
     });
 
-    if (!userMember || userMember.role !== "admin") {
+    if (userMember?.role !== "admin") {
       throw new Error("You don't have permission to delete this organization");
     }
 
@@ -213,7 +213,7 @@ export async function inviteUserToOrganization(
       ),
     });
 
-    if (!userMember || userMember.role !== "admin") {
+    if (userMember?.role !== "admin") {
       throw new Error(
         "You don't have permission to invite users to this organization"
       );
@@ -222,12 +222,12 @@ export async function inviteUserToOrganization(
     const newInvitation = await db
       .insert(invitation)
       .values({
-        id: crypto.randomUUID(),
-        organizationId,
         email,
-        role,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        id: crypto.randomUUID(),
         inviterId: user.id,
+        organizationId,
+        role,
       })
       .returning();
 
@@ -258,7 +258,7 @@ export async function removeMemberFromOrganization(
       ),
     });
 
-    if (!userMember || userMember.role !== "admin") {
+    if (userMember?.role !== "admin") {
       throw new Error(
         "You don't have permission to remove members from this organization"
       );
@@ -288,16 +288,9 @@ export async function getOrgMembers(organizationId?: string) {
       : undefined;
 
     const members = await db.query.member.findMany({
+      orderBy: member.createdAt,
       where: whereClause,
       with: {
-        user: {
-          columns: {
-            id: true,
-            name: true,
-            email: true,
-            createdAt: true,
-          },
-        },
         organization: {
           columns: {
             id: true,
@@ -305,8 +298,15 @@ export async function getOrgMembers(organizationId?: string) {
             slug: true,
           },
         },
+        user: {
+          columns: {
+            createdAt: true,
+            email: true,
+            id: true,
+            name: true,
+          },
+        },
       },
-      orderBy: member.createdAt,
     });
 
     return members;
@@ -329,9 +329,9 @@ export async function addMemberToOrganization(
     // Add the member to the organization using Better Auth API
     const result = await auth.api.addMember({
       body: {
-        userId,
-        role,
         organizationId,
+        role,
+        userId,
       },
     });
 

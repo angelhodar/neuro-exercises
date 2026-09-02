@@ -17,9 +17,9 @@ export function DeleteLinkButton({ linkId }: DeleteLinkButtonProps) {
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: "¿Estás seguro?",
       description:
         "Esta acción no se puede deshacer. El enlace dejará de funcionar y se perderán todos los datos asociados.",
+      title: "¿Estás seguro?",
     });
 
     if (!confirmed) {

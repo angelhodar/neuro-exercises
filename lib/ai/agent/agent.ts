@@ -5,10 +5,10 @@ import { buildSystemPrompt } from "./prompts";
 import type { createAgentTools } from "./tools";
 
 interface CreateAgentOptions {
-  tools: ReturnType<typeof createAgentTools>;
-  sandbox: Sandbox;
   generationId: number;
+  sandbox: Sandbox;
   slug: string;
+  tools: ReturnType<typeof createAgentTools>;
 }
 
 export function createExerciseAgent({
@@ -18,19 +18,8 @@ export function createExerciseAgent({
   slug,
 }: CreateAgentOptions) {
   return new ToolLoopAgent({
-    model: "anthropic/claude-sonnet-4.6",
     instructions: buildSystemPrompt(slug),
-    tools,
-    stopWhen: hasToolCall("writeFiles"),
-    providerOptions: {
-      anthropic: {
-        effort: "medium",
-        thinking: { type: "adaptive" },
-      },
-    },
-    onStepFinish: (event) => {
-      console.log(event.text);
-    },
+    model: "anthropic/claude-sonnet-4.6",
     onFinish: async (event) => {
       console.log("Agent finished, updating generation...");
       await updateExerciseGeneration(generationId, {
@@ -44,5 +33,16 @@ export function createExerciseAgent({
         console.error("Failed to stop agent sandbox:", error);
       }
     },
+    onStepFinish: (event) => {
+      console.log(event.text);
+    },
+    providerOptions: {
+      anthropic: {
+        effort: "medium",
+        thinking: { type: "adaptive" },
+      },
+    },
+    stopWhen: hasToolCall("writeFiles"),
+    tools,
   });
 }

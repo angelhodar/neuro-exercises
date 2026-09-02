@@ -36,9 +36,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
-      }
+      clearInterval(recordingTimerRef.current ?? undefined);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]);
@@ -48,13 +46,12 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     setFileName("");
     setRecordingDuration(0);
     setIsRecording(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    const fileInput = fileInputRef.current as HTMLInputElement | null;
+    if (fileInput) {
+      fileInput.value = "";
     }
-    if (recordingTimerRef.current) {
-      clearInterval(recordingTimerRef.current);
-      recordingTimerRef.current = null;
-    }
+    clearInterval(recordingTimerRef.current ?? undefined);
+    recordingTimerRef.current = null;
   };
 
   const startRecording = async () => {
@@ -93,13 +90,12 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+    const mediaRecorder = mediaRecorderRef.current as MediaRecorder | null;
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
       setIsRecording(false);
-      if (recordingTimerRef.current) {
-        clearInterval(recordingTimerRef.current);
-        recordingTimerRef.current = null;
-      }
+      clearInterval(recordingTimerRef.current ?? undefined);
+      recordingTimerRef.current = null;
     }
   };
 
@@ -173,7 +169,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
               </Button>
             </>
           )}
-          {isRecording && (
+          {!!isRecording && (
             <Button
               className="flex items-center gap-2"
               onClick={stopRecording}
@@ -184,7 +180,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
             </Button>
           )}
         </div>
-        {isRecording && (
+        {!!isRecording && (
           <div className="flex items-center gap-2 text-red-600">
             <div className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
             <span>Grabando... {formatTime(recordingDuration)}</span>
@@ -193,7 +189,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       </div>
 
       {/* Audio Display and Controls */}
-      {audioBlob && (
+      {!!audioBlob && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-green-600">
             <FileAudio className="h-4 w-4" />

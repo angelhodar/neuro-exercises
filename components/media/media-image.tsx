@@ -3,8 +3,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface MediaImageProps extends Omit<ImageProps, "src" | "alt"> {
-  src: string;
   alt: string;
+  src: string;
 }
 
 export function MediaImage({
@@ -24,7 +24,7 @@ export function MediaImage({
     <Image
       alt={alt}
       src={src || "/placeholder.svg"}
-      {...(useFill ? { fill: true, sizes } : { width, height })}
+      {...(useFill ? { fill: true, sizes } : { height, width })}
       className={cn("object-cover", className)}
       placeholder={placeholder}
       quality={quality}

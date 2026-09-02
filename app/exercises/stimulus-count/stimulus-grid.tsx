@@ -6,8 +6,8 @@ import { useMemo, useRef } from "react";
 import type { Shape, Stimulus } from "./stimulus-count.schema";
 
 interface StimulusGridProps {
-  stimuli: Stimulus[];
   allowOverlap: boolean;
+  stimuli: Stimulus[];
 }
 
 function renderShape(shape: Shape, className: string) {
@@ -80,7 +80,7 @@ export function StimulusGrid({ stimuli, allowOverlap }: StimulusGridProps) {
       do {
         x = Math.random() * (containerWidth - stimulusSize);
         y = Math.random() * (containerHeight - stimulusSize);
-        attempts++;
+        attempts += 1;
         if (allowOverlap) {
           break;
         }
@@ -92,7 +92,7 @@ export function StimulusGrid({ stimuli, allowOverlap }: StimulusGridProps) {
         <div
           className="absolute flex items-center justify-center"
           key={`${stimulus.shape}-${stimulus.color}-${idx}`}
-          style={{ top: y, left: x, width: stimulusSize, height: stimulusSize }}
+          style={{ height: stimulusSize, left: x, top: y, width: stimulusSize }}
         >
           {renderShape(stimulus.shape, `${stimulus.color}`)}
         </div>

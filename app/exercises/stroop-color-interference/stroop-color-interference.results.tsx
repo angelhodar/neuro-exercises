@@ -35,9 +35,9 @@ export function Results({ results }: StroopColorInterferenceResultsProps) {
     results.reduce((acc, r) => acc + r.responseTime, 0) / results.length;
 
   const chartData = results.map((r, i) => ({
+    fill: r.isCorrect ? "var(--color-correcto)" : "var(--color-incorrecto)",
     question: `${i + 1}`,
     tiempo: r.responseTime,
-    fill: r.isCorrect ? "var(--color-correcto)" : "var(--color-incorrecto)",
   }));
 
   return (
@@ -87,7 +87,7 @@ export function Results({ results }: StroopColorInterferenceResultsProps) {
               </TableHeader>
               <TableBody>
                 {results.map((result, index) => (
-                  <TableRow key={`${result.word}-${result.color}-${index}`}>
+                  <TableRow key={JSON.stringify(result)}>
                     <TCell>{index + 1}</TCell>
                     <TCell>{result.word}</TCell>
                     <TCell>{result.color}</TCell>

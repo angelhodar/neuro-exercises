@@ -36,7 +36,7 @@ export function useExerciseAssetsLoader(slug: string) {
 
   return {
     assets,
-    isLoading,
     error,
+    isLoading,
   };
 }

@@ -17,7 +17,7 @@ export function MediaDisplay({ media }: MediaDisplayProps) {
   if (media.mimeType.startsWith("audio/")) {
     return (
       <MediaAudio preload="metadata" src={blobUrl}>
-        {thumbnailUrl && <MediaImage alt={media.name} src={thumbnailUrl} />}
+        {!!thumbnailUrl && <MediaImage alt={media.name} src={thumbnailUrl} />}
       </MediaAudio>
     );
   }

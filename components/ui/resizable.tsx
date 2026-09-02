@@ -44,9 +44,9 @@ function ResizableHandle({
       data-slot="resizable-handle"
       {...props}
     >
-      {withHandle && (
+      {withHandle ? (
         <div className="z-10 flex h-6 w-1 shrink-0 rounded-lg bg-border" />
-      )}
+      ) : null}
     </Separator>
   );
 }

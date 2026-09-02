@@ -32,9 +32,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WordMatchingQuestionResult } from "./word-matching.schema";
 
 const wordMatchingChartConfig = {
+  correcto: { color: "var(--chart-2)", label: "Sin errores" },
+  incorrecto: { color: "var(--chart-1)", label: "Con errores" },
   tiempo: { label: "Tiempo (s)" },
-  correcto: { label: "Sin errores", color: "var(--chart-2)" },
-  incorrecto: { label: "Con errores", color: "var(--chart-1)" },
 } satisfies ChartConfig;
 
 interface WordMatchingResultsProps {
@@ -59,12 +59,12 @@ export function Results({ results }: WordMatchingResultsProps) {
       : 0;
 
   const chartData = results.map((r, i) => ({
-    question: `${i + 1}`,
-    tiempo: r.timeSpent,
     fill:
       r.incorrectAttempts === 0
         ? "var(--color-correcto)"
         : "var(--color-incorrecto)",
+    question: `${i + 1}`,
+    tiempo: r.timeSpent,
   }));
 
   return (
@@ -102,12 +102,12 @@ export function Results({ results }: WordMatchingResultsProps) {
           </TabsList>
 
           <TabsContent value="detalle">
-            <Accordion className="space-y-2" type="multiple">
+            <Accordion className="space-y-2" multiple>
               {results.map((result, roundIndex) => {
                 const isPerfect = result.incorrectAttempts === 0;
                 return (
                   <AccordionItem
-                    key={`detail-${result.timeSpent}-${roundIndex}`}
+                    key={JSON.stringify(result)}
                     value={`round-${roundIndex}`}
                   >
                     <AccordionTrigger className="px-4">
@@ -158,10 +158,10 @@ export function Results({ results }: WordMatchingResultsProps) {
                               Intentos realizados
                             </h4>
                             <div className="space-y-1.5">
-                              {result.matchAttempts.map((attempt, aIdx) => (
+                              {result.matchAttempts.map((attempt) => (
                                 <div
                                   className="flex items-center gap-2"
-                                  key={`attempt-${attempt.words.join("-")}-${aIdx}`}
+                                  key={JSON.stringify(attempt)}
                                 >
                                   {attempt.isCorrect ? (
                                     <CheckCircle className="h-4 w-4 shrink-0 text-green-600" />
@@ -236,9 +236,7 @@ export function Results({ results }: WordMatchingResultsProps) {
                 {results.map((result, index) => {
                   const isPerfect = result.incorrectAttempts === 0;
                   return (
-                    <TableRow
-                      key={`table-${result.timeSpent}-${result.correctMatches}-${index}`}
-                    >
+                    <TableRow key={JSON.stringify(result)}>
                       <TCell>{index + 1}</TCell>
                       <TCell>{result.expectedGroups.length}</TCell>
                       <TCell>{result.correctMatches}</TCell>

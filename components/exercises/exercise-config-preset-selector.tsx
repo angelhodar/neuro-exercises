@@ -36,9 +36,9 @@ import type {
 const TRAILING_DOT = /\.$/;
 
 interface ExerciseConfigPresetSelectorProps {
+  basePath?: string;
   exerciseId: number;
   initialPresets: ExerciseConfigPreset[];
-  basePath?: string;
 }
 
 export function ExerciseConfigPresetSelector({
@@ -82,9 +82,9 @@ export function ExerciseConfigPresetSelector({
     startTransition(async () => {
       try {
         const preset = await createExercisePreset({
+          config: currentValues as NewExerciseConfigPreset["config"],
           exerciseId,
           name,
-          config: currentValues as NewExerciseConfigPreset["config"],
         });
         if (preset) {
           setPresets((prev) => [...prev, preset]);

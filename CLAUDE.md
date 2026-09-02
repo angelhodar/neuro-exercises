@@ -17,7 +17,8 @@ npm run db:push                # Push schema to database
 npm run db:generate            # Generate Drizzle migrations
 npm run db:migrate             # Run Drizzle migrations
 npm run db:studio              # Open Drizzle Studio
-npm run sandbox <command>      # Manage Vercel Sandbox (snapshot, start, stop, list, info)
+npm run sandbox -- <command>   # Manage Vercel Sandboxes with the official CLI
+npm run sandbox:snapshot       # Create the project's base exercise snapshot
 ```
 
 ## Architecture & Conventions
@@ -97,10 +98,10 @@ Exercises can be generated/modified via a chat agent (`app/api/chat/route.ts`):
 Generated exercises are previewed in an isolated Vercel Sandbox:
 
 - **Snapshot-based**: A base snapshot has the project pre-installed with sandbox page variants
-- **Per-exercise**: Sandbox created from snapshot, exercise files injected, dev server started
+- **Per-exercise**: A named, persistent sandbox is created from the snapshot, exercise files are injected, and the dev server starts
 - **Sandbox pages** (`*.sandbox.tsx`): DB-free variants using `pglite` and `SANDBOX_EXERCISE` env var
 - **Flow**: `SandboxProvider` → `createOrConnectToSandbox()` → iframe preview
-- **Refresh snapshot**: `npm run sandbox snapshot` (snapshots expire after 7 days)
+- **Refresh snapshot**: `npm run sandbox:snapshot` (snapshots expire after 7 days)
 
 ## UI Patterns
 

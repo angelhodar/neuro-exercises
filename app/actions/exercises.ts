@@ -76,7 +76,7 @@ async function generateAudioInstructions(
 export async function getExercises(slugs?: string[], query?: string) {
   if (slugs && slugs.length > 0) {
     const filteredExercises = await db.query.exercises.findMany({
-      where: (exercises, { inArray }) => inArray(exercises.slug, slugs),
+      where: (exerciseTable, { inArray }) => inArray(exerciseTable.slug, slugs),
     });
 
     return filteredExercises;
@@ -84,7 +84,8 @@ export async function getExercises(slugs?: string[], query?: string) {
 
   const allExercises = await db.query.exercises.findMany({
     where: query
-      ? (exercises, { ilike }) => ilike(exercises.displayName, `%${query}%`)
+      ? (exerciseTable, { ilike }) =>
+          ilike(exerciseTable.displayName, `%${query}%`)
       : undefined,
   });
   return allExercises;
@@ -122,9 +123,9 @@ async function generateExerciseData(prompt: string) {
   const { output } = await generateText({
     model: "google/gemini-2.5-flash",
     output: Output.object({ schema: generatedExerciseSchema }),
+    prompt,
     system:
       "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
-    prompt,
   });
 
   if (!output) {
@@ -152,8 +153,8 @@ export async function createExercise(
       .insert(exercises)
       .values({
         ...generatedData,
-        thumbnailUrl: thumbnail,
         audioInstructions,
+        thumbnailUrl: thumbnail,
       })
       .returning();
 
@@ -209,9 +210,9 @@ export async function registerExercise(
     const [created] = await db
       .insert(exercises)
       .values({
-        slug,
-        displayName,
         description: description || null,
+        displayName,
+        slug,
         tags,
         thumbnailUrl,
       })
@@ -267,8 +268,8 @@ export async function updateExercise(
     }
 
     const updateData: Partial<Exercise> = {
-      displayName,
       description,
+      displayName,
       tags,
       updatedAt: new Date(),
     };

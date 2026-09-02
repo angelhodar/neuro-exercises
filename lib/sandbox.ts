@@ -4,17 +4,15 @@ import type { SnapshotInfo } from "@/app/actions/snapshots";
 const REPO_URL = "https://github.com/angelhodar/neuro-exercises.git";
 const BRANCH = "main";
 const LEADING_DOT_SLASH = /^\.\//;
+export const SANDBOX_PROJECT_DIR = "/vercel/sandbox/neuro-exercises";
 
 async function copySandboxVariants(sandbox: Sandbox) {
   console.log("Discovering sandbox file variants...");
-  const findResult = await sandbox.runCommand("find", [
-    ".",
-    "-name",
-    "*.sandbox.ts",
-    "-o",
-    "-name",
-    "*.sandbox.tsx",
-  ]);
+  const findResult = await sandbox.runCommand({
+    args: [".", "-name", "*.sandbox.ts", "-o", "-name", "*.sandbox.tsx"],
+    cmd: "find",
+    cwd: SANDBOX_PROJECT_DIR,
+  });
   const sandboxFiles = (await findResult.stdout())
     .split("\n")
     .map((f) => f.trim().replace(LEADING_DOT_SLASH, ""))
@@ -22,41 +20,54 @@ async function copySandboxVariants(sandbox: Sandbox) {
 
   console.log(`Found ${sandboxFiles.length} sandbox files`);
 
-  for (const src of sandboxFiles) {
+  async function copyFiles(files: string[]): Promise<void> {
+    const [src, ...remainingFiles] = files;
+
+    if (!src) {
+      return;
+    }
+
     const dst = src.replace(".sandbox.", ".");
-    await sandbox.runCommand("cp", [src, dst]);
+    await sandbox.runCommand({
+      args: [src, dst],
+      cmd: "cp",
+      cwd: SANDBOX_PROJECT_DIR,
+    });
     console.log(`  Copied ${src} -> ${dst}`);
+
+    await copyFiles(remainingFiles);
   }
+
+  await copyFiles(sandboxFiles);
 }
 
 export async function createSnapshot(
-  existingSandboxId?: string
+  existingSandboxName?: string
 ): Promise<SnapshotInfo> {
   let sandbox: Sandbox;
 
-  if (existingSandboxId) {
-    console.log(`Connecting to existing sandbox ${existingSandboxId}...`);
-    sandbox = await Sandbox.get({ sandboxId: existingSandboxId });
-
-    if (sandbox.status !== "running") {
-      throw new Error(
-        `Sandbox is ${sandbox.status}. Stopped sandboxes cannot be restarted.`
-      );
-    }
+  if (existingSandboxName) {
+    console.log(`Connecting to existing sandbox ${existingSandboxName}...`);
+    sandbox = await Sandbox.get({ name: existingSandboxName });
 
     console.log(`Connected (status: ${sandbox.status})`);
   } else {
     console.log("Creating sandbox from git repo...");
     sandbox = await Sandbox.create({
-      source: { type: "git", url: REPO_URL, revision: BRANCH },
-      runtime: "node24",
+      image: "vercel/sandbox/node:24",
+      persistent: false,
       ports: [3000],
+      source: { revision: BRANCH, type: "git", url: REPO_URL },
       timeout: 600_000,
     });
-    console.log(`Sandbox created: ${sandbox.sandboxId}`);
+    console.log(`Sandbox created: ${sandbox.name}`);
 
     console.log("Installing dependencies...");
-    const installResult = await sandbox.runCommand("npm", ["ci"]);
+    const installResult = await sandbox.runCommand({
+      args: ["ci"],
+      cmd: "npm",
+      cwd: SANDBOX_PROJECT_DIR,
+    });
     console.log(`npm ci stdout:\n${await installResult.stdout()}`);
   }
 
@@ -67,7 +78,7 @@ export async function createSnapshot(
   console.log(`Snapshot created: ${snap.snapshotId}`);
 
   return {
-    snapshotId: snap.snapshotId,
     expiresAt: snap.expiresAt,
+    snapshotId: snap.snapshotId,
   };
 }

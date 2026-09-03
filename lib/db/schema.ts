@@ -191,6 +191,7 @@ export const exercises = pgTable(
   "exercises",
   {
     audioInstructions: varchar("audio_instructions", { length: 500 }),
+    creatorId: text("creator_id"),
     description: text(),
     displayName: varchar("display_name", { length: 255 }).notNull(),
     id: serial().primaryKey(),
@@ -203,6 +204,12 @@ export const exercises = pgTable(
   (table) => [
     uniqueIndex("exercises_slug_idx").on(table.slug),
     index("exercises_tags_idx").on(table.tags),
+    index("exercises_creator_idx").on(table.creatorId),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "exercises_creator_fk",
+    }).onDelete("set null"),
   ]
 );
 
@@ -396,6 +403,45 @@ export const exerciseChatGeneration = pgTable(
   ]
 );
 
+export const exerciseWorkspaces = pgTable(
+  "exercise_workspaces",
+  {
+    activeGenerationId: integer("active_generation_id"),
+    baseCommitSha: varchar("base_commit_sha", { length: 64 }),
+    exerciseId: integer("exercise_id").notNull(),
+    harnessResumeState: jsonb("harness_resume_state").$type<
+      Record<string, unknown>
+    >(),
+    harnessSessionId: varchar("harness_session_id", { length: 255 }).notNull(),
+    id: serial().primaryKey(),
+    lastActiveAt: timestamp("last_active_at", { withTimezone: true }),
+    lastError: text("last_error"),
+    lockExpiresAt: timestamp("lock_expires_at", { withTimezone: true }),
+    sandboxName: varchar("sandbox_name", { length: 255 }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("exercise_workspaces_exercise_unique").on(table.exerciseId),
+    uniqueIndex("exercise_workspaces_harness_session_unique").on(
+      table.harnessSessionId
+    ),
+    uniqueIndex("exercise_workspaces_sandbox_unique").on(table.sandboxName),
+    index("exercise_workspaces_active_generation_idx").on(
+      table.activeGenerationId
+    ),
+    foreignKey({
+      columns: [table.exerciseId],
+      foreignColumns: [exercises.id],
+      name: "exercise_workspaces_exercise_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.activeGenerationId],
+      foreignColumns: [exerciseChatGeneration.id],
+      name: "exercise_workspaces_active_generation_fk",
+    }).onDelete("set null"),
+  ]
+);
+
 // Exercise config presets (user-created)
 export const exerciseConfigPresets = pgTable(
   "exercise_config_presets",
@@ -548,6 +594,7 @@ export const userRelations = relations(users, ({ many }) => ({
   createdPatientTests: many(patientTests),
   exerciseChatGenerations: many(exerciseChatGeneration),
   exerciseConfigPresets: many(exerciseConfigPresets),
+  exercises: many(exercises),
   medias: many(medias),
   memberships: many(member),
   referenceTexts: many(speechTexts),
@@ -573,10 +620,15 @@ export const accountRelations = relations(accounts, ({ one }) => ({
   }),
 }));
 
-export const exercisesRelations = relations(exercises, ({ many }) => ({
+export const exercisesRelations = relations(exercises, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [exercises.creatorId],
+    references: [users.id],
+  }),
   exerciseChatGenerations: many(exerciseChatGeneration),
   exerciseConfigPresets: many(exerciseConfigPresets),
   exerciseTemplateItems: many(exerciseTemplateItems),
+  workspace: one(exerciseWorkspaces),
 }));
 
 export const exerciseTemplatesRelations = relations(
@@ -658,6 +710,20 @@ export const exerciseChatGenerationRelations = relations(
     user: one(users, {
       fields: [exerciseChatGeneration.userId],
       references: [users.id],
+    }),
+  })
+);
+
+export const exerciseWorkspacesRelations = relations(
+  exerciseWorkspaces,
+  ({ one }) => ({
+    activeGeneration: one(exerciseChatGeneration, {
+      fields: [exerciseWorkspaces.activeGenerationId],
+      references: [exerciseChatGeneration.id],
+    }),
+    exercise: one(exercises, {
+      fields: [exerciseWorkspaces.exerciseId],
+      references: [exercises.id],
     }),
   })
 );
@@ -858,6 +924,13 @@ export const exerciseChatGenerationUpdateSchema = createUpdateSchema(
   exerciseChatGeneration
 );
 
+export const exerciseWorkspaceSelectSchema =
+  createSelectSchema(exerciseWorkspaces);
+export const exerciseWorkspaceInsertSchema =
+  createInsertSchema(exerciseWorkspaces);
+export const exerciseWorkspaceUpdateSchema =
+  createUpdateSchema(exerciseWorkspaces);
+
 export const speechTextSelectSchema = createSelectSchema(speechTexts);
 export const speechTextInsertSchema = createInsertSchema(speechTexts);
 export const speechTextUpdateSchema = createUpdateSchema(speechTexts);
@@ -927,6 +1000,9 @@ export type NewMedia = typeof medias.$inferInsert;
 export type ExerciseChatGeneration = typeof exerciseChatGeneration.$inferSelect;
 export type NewExerciseChatGeneration =
   typeof exerciseChatGeneration.$inferInsert;
+
+export type ExerciseWorkspace = typeof exerciseWorkspaces.$inferSelect;
+export type NewExerciseWorkspace = typeof exerciseWorkspaces.$inferInsert;
 
 export type Organization = typeof organization.$inferSelect;
 export type NewOrganization = Omit<typeof organization.$inferInsert, "id">;

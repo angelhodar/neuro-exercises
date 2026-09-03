@@ -14,6 +14,7 @@ import { initializeExercisePreview } from "@/app/actions/sandbox";
 
 interface SandboxContextType {
   error: string | null;
+  initializeLatestPreview: () => Promise<void>;
   initializePreview: () => Promise<void>;
   isLoading: boolean;
   sandboxUrl: string | null;
@@ -46,29 +47,49 @@ export function SandboxProvider({
   const [error, setError] = useState<string | null>(null);
   const [gen] = useQueryState("gen", parseAsInteger);
   const prevGen = useRef<number | null | undefined>(undefined);
+  const requestId = useRef(0);
 
-  const initializePreview = useCallback(async () => {
-    if (isLoading) {
-      return;
-    }
+  const initialize = useCallback(
+    async (generationId: number | null) => {
+      requestId.current += 1;
+      const currentRequestId = requestId.current;
+      setIsLoading(true);
+      setError(null);
 
-    setIsLoading(true);
-    setError(null);
+      try {
+        const result = await initializeExercisePreview(
+          exerciseId,
+          generationId
+        );
+        if (requestId.current === currentRequestId) {
+          setSandboxUrl(result.sandboxUrl);
+        }
+      } catch (previewError) {
+        console.error("Error initializing preview:", previewError);
+        if (requestId.current === currentRequestId) {
+          setError(
+            previewError instanceof Error
+              ? previewError.message
+              : "No se pudo iniciar la previsualización"
+          );
+        }
+      } finally {
+        if (requestId.current === currentRequestId) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [exerciseId]
+  );
 
-    try {
-      const result = await initializeExercisePreview(exerciseId, gen);
-      setSandboxUrl(result.sandboxUrl);
-    } catch (previewError) {
-      console.error("Error initializing preview:", previewError);
-      setError(
-        previewError instanceof Error
-          ? previewError.message
-          : "No se pudo iniciar la previsualización"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [exerciseId, gen, isLoading]);
+  const initializePreview = useCallback(
+    () => initialize(gen),
+    [gen, initialize]
+  );
+  const initializeLatestPreview = useCallback(
+    () => initialize(null),
+    [initialize]
+  );
 
   // Auto-initialize on mount if there's a completed generation,
   // and re-initialize when the gen query param changes
@@ -89,6 +110,7 @@ export function SandboxProvider({
 
   const value: SandboxContextType = {
     error,
+    initializeLatestPreview,
     initializePreview,
     isLoading,
     sandboxUrl,

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  serverExternalPackages: ["@ai-sdk/harness-pi", "pi-mcp-adapter"],
 };
 
 export default withBotId(nextConfig);

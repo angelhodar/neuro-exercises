@@ -6,6 +6,11 @@ const BRANCH = "main";
 const LEADING_DOT_SLASH = /^\.\//;
 export const SANDBOX_PROJECT_DIR = "/vercel/sandbox/neuro-exercises";
 
+export function getBaseSandboxName() {
+  const revision = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? BRANCH;
+  return `exercise-base-${revision}`;
+}
+
 async function copySandboxVariants(sandbox: Sandbox) {
   console.log("Discovering sandbox file variants...");
   const findResult = await sandbox.runCommand({
@@ -53,23 +58,24 @@ export async function createSnapshot(
     console.log(`Connected (status: ${sandbox.status})`);
   } else {
     console.log("Creating sandbox from git repo...");
-    sandbox = await Sandbox.create({
+    sandbox = await Sandbox.getOrCreate({
       image: "vercel/sandbox/node:24",
-      persistent: false,
+      name: getBaseSandboxName(),
+      persistent: true,
       ports: [3000],
       source: { revision: BRANCH, type: "git", url: REPO_URL },
       timeout: 600_000,
     });
     console.log(`Sandbox created: ${sandbox.name}`);
-
-    console.log("Installing dependencies...");
-    const installResult = await sandbox.runCommand({
-      args: ["ci"],
-      cmd: "npm",
-      cwd: SANDBOX_PROJECT_DIR,
-    });
-    console.log(`npm ci stdout:\n${await installResult.stdout()}`);
   }
+
+  console.log("Installing dependencies...");
+  const installResult = await sandbox.runCommand({
+    args: ["ci"],
+    cmd: "npm",
+    cwd: SANDBOX_PROJECT_DIR,
+  });
+  console.log(`npm ci stdout:\n${await installResult.stdout()}`);
 
   await copySandboxVariants(sandbox);
 

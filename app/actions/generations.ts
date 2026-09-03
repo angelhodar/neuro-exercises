@@ -1,15 +1,30 @@
 "use server";
 
 import { asc, eq } from "drizzle-orm";
+import { assertCanEditExercise } from "@/lib/auth/can-edit-exercise";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import type { ExerciseChatGeneration } from "@/lib/db/schema";
-import { exerciseChatGeneration } from "@/lib/db/schema";
-import { getCurrentUser } from "./users";
+import { exerciseChatGeneration, exercises } from "@/lib/db/schema";
+
+async function authorizeExercise(exerciseId: number) {
+  const [user, exercise] = await Promise.all([
+    requireAuth(),
+    db.query.exercises.findFirst({ where: eq(exercises.id, exerciseId) }),
+  ]);
+
+  if (!exercise) {
+    throw new Error("Ejercicio no encontrado");
+  }
+  assertCanEditExercise(exercise, user);
+  return user;
+}
 
 export async function getExerciseGenerations(
   exerciseId: number
 ): Promise<ExerciseChatGeneration[]> {
   try {
+    await authorizeExercise(exerciseId);
     const generations = await db.query.exerciseChatGeneration.findMany({
       orderBy: asc(exerciseChatGeneration.createdAt),
       where: eq(exerciseChatGeneration.exerciseId, exerciseId),
@@ -28,11 +43,7 @@ export async function createExerciseGeneration(data: {
   status?: "PENDING" | "GENERATING" | "COMPLETED" | "ERROR";
 }): Promise<ExerciseChatGeneration | null> {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return null;
-    }
+    const user = await authorizeExercise(data.exerciseId);
 
     const [generation] = await db
       .insert(exerciseChatGeneration)
@@ -61,6 +72,14 @@ export async function updateExerciseGeneration(
   }
 ): Promise<ExerciseChatGeneration | null> {
   try {
+    const existing = await db.query.exerciseChatGeneration.findFirst({
+      where: eq(exerciseChatGeneration.id, id),
+    });
+    if (!existing) {
+      return null;
+    }
+    await authorizeExercise(existing.exerciseId);
+
     const [generation] = await db
       .update(exerciseChatGeneration)
       .set({
@@ -81,6 +100,7 @@ export async function getLastCompletedGeneration(
   exerciseId: number
 ): Promise<ExerciseChatGeneration | null> {
   try {
+    await authorizeExercise(exerciseId);
     const generation = await db.query.exerciseChatGeneration.findFirst({
       orderBy: (generationTable, { desc }) => desc(generationTable.createdAt),
       where: (generationTable, { eq: equals, and }) =>
@@ -105,7 +125,12 @@ export async function getGenerationById(
       where: eq(exerciseChatGeneration.id, id),
     });
 
-    return generation || null;
+    if (!generation) {
+      return null;
+    }
+    await authorizeExercise(generation.exerciseId);
+
+    return generation;
   } catch (error) {
     console.error("Error getting generation by id:", error);
     return null;

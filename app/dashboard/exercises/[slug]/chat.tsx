@@ -4,13 +4,15 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import {
-  CheckCircle,
   Code,
   FolderSearch,
   Loader2,
   MessageSquare,
+  Pencil,
   Settings,
+  Terminal,
 } from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 import {
   Conversation,
@@ -49,14 +51,21 @@ interface ChatProps {
 
 function getToolIcon(toolName: string) {
   switch (toolName) {
+    case "read":
     case "readFiles":
       return <Code className="h-4 w-4" />;
+    case "glob":
+    case "grep":
+    case "ls":
     case "listFiles":
       return <FolderSearch className="h-4 w-4" />;
+    case "bash":
     case "verifyFiles":
-      return <CheckCircle className="h-4 w-4" />;
+      return <Terminal className="h-4 w-4" />;
+    case "edit":
+    case "write":
     case "writeFiles":
-      return <Settings className="h-4 w-4" />;
+      return <Pencil className="h-4 w-4" />;
     default:
       return <Settings className="h-4 w-4" />;
   }
@@ -64,12 +73,20 @@ function getToolIcon(toolName: string) {
 
 function getToolDisplayName(toolName: string) {
   switch (toolName) {
+    case "read":
     case "readFiles":
       return "Leyendo archivos";
+    case "glob":
+    case "grep":
+    case "ls":
     case "listFiles":
       return "Explorando directorio";
+    case "bash":
     case "verifyFiles":
-      return "Verificando codigo";
+      return "Ejecutando comprobaciones";
+    case "edit":
+      return "Editando archivos";
+    case "write":
     case "writeFiles":
       return "Escribiendo archivos";
     default:
@@ -143,7 +160,8 @@ export function Chat({
   exercise,
   autoStart,
 }: ChatProps) {
-  const { initializePreview } = useSandbox();
+  const { initializeLatestPreview } = useSandbox();
+  const [, setGen] = useQueryState("gen", parseAsInteger);
   const hasAutoStarted = useRef(false);
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
@@ -152,7 +170,7 @@ export function Chat({
       parts: [{ text: msg.content, type: "text" as const }],
       role: msg.role,
     })),
-    onFinish: () => initializePreview(),
+    onFinish: () => initializeLatestPreview(),
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: { slug: exercise.slug },
@@ -163,9 +181,10 @@ export function Chat({
   useEffect(() => {
     if (autoStart && !hasAutoStarted.current) {
       hasAutoStarted.current = true;
+      setGen(null);
       regenerate();
     }
-  }, [autoStart, regenerate]);
+  }, [autoStart, regenerate, setGen]);
 
   const filteredMessages = messages.filter(
     (msg) => msg.role === "user" || msg.role === "assistant"
@@ -173,6 +192,7 @@ export function Chat({
 
   const handleSubmit = (message: PromptInputMessage) => {
     if (message.text.trim()) {
+      setGen(null);
       sendMessage({ files: message.files, text: message.text });
     }
   };

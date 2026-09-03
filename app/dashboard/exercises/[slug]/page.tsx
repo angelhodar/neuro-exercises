@@ -7,6 +7,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { SandboxProvider } from "@/hooks/use-sandbox";
+import { canEditExercise } from "@/lib/auth/can-edit-exercise";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { Chat } from "./chat";
 import { ExerciseHeader } from "./exercise-header";
 import { PreviewIframe } from "./preview-iframe";
@@ -25,9 +27,15 @@ interface ChatMessage {
 export default async function ExerciseChatPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const exercise = await getExerciseBySlug(slug);
+  const [exercise, user] = await Promise.all([
+    getExerciseBySlug(slug),
+    requireAuth(),
+  ]);
 
   if (!exercise) {
+    return notFound();
+  }
+  if (!canEditExercise(exercise, user)) {
     return notFound();
   }
 

@@ -158,6 +158,7 @@ export async function getGenerationPreviewSandbox({
     try {
       const existingSandbox = await Sandbox.get({ name: sandboxName });
       await existingSandbox.extendTimeout(15 * 60 * 1000);
+      await restoreCheckpoint(existingSandbox, checkpointBlobKey);
       await writeSandboxEnv(existingSandbox, exercise);
       await ensureDevServer(existingSandbox);
       await waitForUrl(

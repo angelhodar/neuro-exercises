@@ -1,14 +1,33 @@
+import { execSync } from "node:child_process";
 import { Sandbox } from "@vercel/sandbox";
 import type { SnapshotInfo } from "@/app/actions/snapshots";
 
 const REPO_URL = "https://github.com/angelhodar/neuro-exercises.git";
-const BRANCH = "main";
+
+function detectGitBranch(): string | null {
+  try {
+    const branch = execSync("git rev-parse --abbrev-ref HEAD", {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return branch || null;
+  } catch {
+    return null;
+  }
+}
+
+const BRANCH =
+  process.env.SANDBOX_BRANCH ??
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ??
+  detectGitBranch() ??
+  "main";
 const LEADING_DOT_SLASH = /^\.\//;
 export const SANDBOX_PROJECT_DIR = "/vercel/neuro-exercises";
 
 export function getBaseSandboxName() {
   const revision = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? BRANCH;
-  return `exercise-base-${revision}`;
+  return `exercise-base-${revision}`.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 async function copySandboxVariants(sandbox: Sandbox) {

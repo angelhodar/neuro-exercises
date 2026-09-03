@@ -2,14 +2,21 @@
 
 ## Current Status
 
-Exercise generation, checkpointing, and preview-sandbox creation work. The
-generated `adivina-palabra-secreta` exercise rendered its initial screen in a
-preview sandbox, but its React event handlers did not attach: the `Empezar`
-button did not change state either in the dashboard iframe or when opened
-directly at the sandbox URL.
+Exercise generation, checkpointing, preview-sandbox creation, and client-side
+hydration work. The generated `adivina-palabra-secreta` exercise was verified
+in a direct sandbox preview: `Empezar` starts the countdown and the generated
+exercise mounts afterward.
 
-This is not an iframe-permissions issue. The same behavior occurred when the
-preview URL was opened in its own browser tab.
+The hydration failure was caused by bundling `@electric-sql/pglite` into the
+Next.js webpack server runtime. Initializing the sandbox database through the
+`saveExerciseResults` server action caused PGlite's WASM asset `URL` to cross a
+webpack VM realm. Node rejected it with `ERR_INVALID_ARG_TYPE` (`Received an
+instance of URL`), aborting the RSC stream after the initial HTML had rendered.
+React therefore never committed the client tree or attached event handlers.
+
+`@electric-sql/pglite` is now listed in `serverExternalPackages`, so Node loads
+it outside the webpack VM. `*.vercel.run` is also listed in
+`allowedDevOrigins`, allowing the sandbox's HMR and development font requests.
 
 ## Fixes Already Applied
 
@@ -42,10 +49,10 @@ Previously observed root causes:
 - Checkpoint validation failure because the agent was asked not to create an
   exercise, so the required exercise directory did not exist.
 
-### Generated UI renders but is not interactive
+### Generated UI renders but is not interactive (resolved)
 
-The generated exercise screen is visible, but client handlers do not run. The
-following observations were verified against a completed generation:
+The generated exercise screen was visible, but client handlers did not run.
+The following observations were verified against a completed generation:
 
 - The preview route returns `200` and includes the generated exercise client
   module in its RSC payload.
@@ -53,12 +60,15 @@ following observations were verified against a completed generation:
 - React DevTools reports renderers, but no committed component tree is exposed.
 - DOM buttons have no React event properties, and both browser clicks and
   `element.click()` leave the initial screen unchanged.
-- Browser console does not show a hydration exception.
+- Browser console did not show a hydration exception.
+- The Next.js server log showed an unhandled `ERR_INVALID_ARG_TYPE` from the
+  PGlite initialization for every exercise request.
+- A checked-in exercise failed in the same sandbox, ruling out generated module
+  discovery and client-reference manifests.
 
-The likely area is Next's client-reference or hydration behavior for client
-components dynamically loaded from checkpoint files in a sandbox. Do not treat
-the iframe `sandbox` attribute as the cause until direct-preview interaction is
-shown to work.
+The server-side rejection aborted the streamed response without surfacing a
+browser hydration exception. Externalizing PGlite fixed both the checked-in and
+generated exercise paths. The iframe `sandbox` attribute was not involved.
 
 ## Useful Commands
 
@@ -106,24 +116,15 @@ agent-browser wait 5000
 agent-browser network requests
 ```
 
-## Recommended Next Investigation
+## Verification
 
-1. Create a fresh completed generation and a fresh preview sandbox from the
-   latest base snapshot. Do not reuse a prior preview sandbox for this test.
-2. Compare it with a checked-in exercise opened through the same sandbox and
-   browser session. Determine whether hydration fails for all sandbox pages or
-   only checkpoint-restored exercise modules.
-3. Capture the complete RSC response for both cases and compare client module
-   references and chunk lists. The key question is whether a restored generated
-   client module has a usable entry in the Next client manifest.
-4. Add a minimal static client component with a stateful button to the sandbox
-   page. If it hydrates while the generated component does not, focus on the
-   dynamic import/client-reference boundary in `app/exercises/loader.tsx`.
-5. If the static component also does not hydrate, investigate the sandbox dev
-   server configuration and the Next client bootstrap before changing generated
-   exercise code.
-6. Keep server-side checkpoint validation in place. A successful type check does
-   not prove that a dynamically restored client component can hydrate.
+1. Opened a generated exercise through the sandbox's direct preview URL.
+2. Confirmed the RSC response completed and the initial screen hydrated.
+3. Confirmed the HMR client connected without a cross-origin rejection.
+4. Clicked `Empezar`, observed the countdown, and reached the generated exercise
+   controls.
+5. Repeated the test with the repository's server-rendered sandbox page rather
+   than the temporary client-side loader used during investigation.
 
 ## Relevant Files
 

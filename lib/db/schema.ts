@@ -95,6 +95,7 @@ export const accounts = pgTable(
     accountId: text("account_id").notNull(),
     id: text().primaryKey(),
     idToken: text("id_token"),
+    issuer: text().notNull(),
     password: text(),
     providerId: text("provider_id").notNull(),
     refreshToken: text("refresh_token"),
@@ -104,6 +105,10 @@ export const accounts = pgTable(
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("accounts_issuer_account_id_unique").on(
+      table.issuer,
+      table.accountId
+    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],

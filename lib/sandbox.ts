@@ -4,7 +4,7 @@ import type { SnapshotInfo } from "@/app/actions/snapshots";
 const REPO_URL = "https://github.com/angelhodar/neuro-exercises.git";
 const BRANCH = "main";
 const LEADING_DOT_SLASH = /^\.\//;
-export const SANDBOX_PROJECT_DIR = "/vercel/sandbox/neuro-exercises";
+export const SANDBOX_PROJECT_DIR = "/vercel/neuro-exercises";
 
 export function getBaseSandboxName() {
   const revision = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? BRANCH;
@@ -25,25 +25,17 @@ async function copySandboxVariants(sandbox: Sandbox) {
 
   console.log(`Found ${sandboxFiles.length} sandbox files`);
 
-  async function copyFiles(files: string[]): Promise<void> {
-    const [src, ...remainingFiles] = files;
-
-    if (!src) {
-      return;
-    }
-
-    const dst = src.replace(".sandbox.", ".");
-    await sandbox.runCommand({
-      args: [src, dst],
-      cmd: "cp",
-      cwd: SANDBOX_PROJECT_DIR,
-    });
-    console.log(`  Copied ${src} -> ${dst}`);
-
-    await copyFiles(remainingFiles);
-  }
-
-  await copyFiles(sandboxFiles);
+  await Promise.all(
+    sandboxFiles.map(async (src) => {
+      const dst = src.replace(".sandbox.", ".");
+      await sandbox.runCommand({
+        args: [src, dst],
+        cmd: "cp",
+        cwd: SANDBOX_PROJECT_DIR,
+      });
+      console.log(`  Copied ${src} -> ${dst}`);
+    })
+  );
 }
 
 export async function createSnapshot(
@@ -75,7 +67,12 @@ export async function createSnapshot(
     cmd: "npm",
     cwd: SANDBOX_PROJECT_DIR,
   });
-  console.log(`npm ci stdout:\n${await installResult.stdout()}`);
+  const installOutput =
+    (await installResult.stderr()) || (await installResult.stdout());
+  if (installResult.exitCode !== 0) {
+    throw new Error(`No se pudieron instalar dependencias:\n${installOutput}`);
+  }
+  console.log(`npm ci output:\n${installOutput}`);
 
   await copySandboxVariants(sandbox);
 

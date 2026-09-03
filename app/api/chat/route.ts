@@ -12,6 +12,7 @@ import {
   type ModelMessage,
   toUIMessageStream,
   type UIMessage,
+  type UIMessageChunk,
   validateUIMessages,
 } from "ai";
 import type { NextRequest } from "next/server";
@@ -274,13 +275,31 @@ export async function POST(req: NextRequest) {
             session: harnessSession,
           });
 
+          let finishChunk: UIMessageChunk | undefined;
           writer.merge(
             toUIMessageStream({
               onEnd: (event) => handleGenerationEnd(sandbox, event),
               onError: getHarnessErrorMessage,
               originalMessages: messages,
               stream: result.stream,
-            })
+            }).pipeThrough(
+              new TransformStream<UIMessageChunk>({
+                flush(controller) {
+                  if (finishChunk) {
+                    controller.enqueue(finishChunk);
+                  }
+                },
+                transform(chunk, controller) {
+                  // The client begins preview initialization on this event. Hold
+                  // it until onEnd has saved the checkpoint and generation state.
+                  if (chunk.type === "finish") {
+                    finishChunk = chunk;
+                    return;
+                  }
+                  controller.enqueue(chunk);
+                },
+              })
+            )
           );
         } catch (error) {
           if (harnessSession) {

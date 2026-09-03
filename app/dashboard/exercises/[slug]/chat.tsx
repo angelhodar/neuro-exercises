@@ -170,7 +170,12 @@ export function Chat({
       parts: [{ text: msg.content, type: "text" as const }],
       role: msg.role,
     })),
-    onFinish: () => initializeLatestPreview(),
+    onFinish: ({ isAbort, isDisconnect, isError }) => {
+      if (isAbort || isDisconnect || isError) {
+        return;
+      }
+      return initializeLatestPreview();
+    },
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: { slug: exercise.slug },

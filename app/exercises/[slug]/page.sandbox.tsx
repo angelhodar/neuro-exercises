@@ -29,19 +29,15 @@ export default async function Page({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  if (!validationResult.success) {
-    redirect(`/exercises/${slug}/config`);
+  const { configSchema, defaultConfig } = entry;
+  let config: Record<string, unknown> | null = defaultConfig;
+
+  if (validationResult.success) {
+    if (validationResult.data.type !== "config") {
+      redirect(`/exercises/${slug}/config`);
+    }
+    config = parseConfigFromUrl(validationResult.data.config, configSchema);
   }
-
-  const { configSchema } = entry;
-
-  const parsedParams = validationResult.data;
-
-  if (parsedParams.type !== "config") {
-    redirect(`/exercises/${slug}/config`);
-  }
-
-  const config = parseConfigFromUrl(parsedParams.config, configSchema);
 
   if (!config) {
     redirect(`/exercises/${slug}/config`);

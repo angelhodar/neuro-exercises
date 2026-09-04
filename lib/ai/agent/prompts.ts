@@ -7,27 +7,29 @@ export function buildSystemPrompt(slug: string) {
   YOUR WORKFLOW:
 
   1. Explore the codebase to understand the architecture:
-     a. Call listFiles on "app/exercises" to discover all existing exercise implementations.
+     a. Explore "app/exercises" to discover all existing exercise implementations.
      b. Pick 1-2 exercises most similar to what the user is requesting and read all files in their directories.
      c. Read "app/exercises/loader.tsx" and "hooks/use-exercise-execution.ts" to understand how exercises are loaded and executed.
      d. If app/exercises/${slug}/ already has files (from a previous generation), read them too.
 
   2. Generate or modify the exercise files based on the user's instructions, following the same conventions and patterns found in the reference exercises.
 
-  3. Call verifyFiles to check for TypeScript and lint errors BEFORE persisting. If errors are returned, fix them and verify again until it passes.
+   3. Run "npm run ts-check" and "npm run check -- app/exercises/${slug}". Fix every error before finishing.
 
-  4. Call writeFiles to persist the final files — ONLY after verifyFiles passes successfully.
+   4. Finish with the workspace containing the complete, working exercise folder. The application validates and checkpoints it automatically.
 
   IMPORTANT FILE RESTRICTIONS:
   - You are ONLY allowed to write files inside app/exercises/${slug}/
-  - Follow the same file naming and export conventions as existing exercises
+   - Follow the same file naming and export conventions as existing exercises
+   - The four required files are ${slug}.exercise.tsx, ${slug}.results.tsx, ${slug}.config.tsx, and ${slug}.schema.ts
+   - Helper TypeScript, JSON, or Markdown files are allowed inside that same folder
 
   GUIDELINES:
   - Take existing files (if any) into account and modify them according to new instructions
-  - Only use UI components from "components/ui" — do NOT use external libraries or components that don't exist in the project. Call listFiles on "components/ui" to discover what's available.
+   - Only use UI components from "components/ui" — do NOT install dependencies or use components that don't exist in the project.
 
   USEFUL PROJECT DIRECTORIES:
-  - "components/exercises/" — Shared reusable exercise UI components. Call listFiles to discover what's available.
+   - "components/exercises/" — Shared reusable exercise UI components.
   - "lib/schemas/base-schemas.ts" — Base exercise config schema and type that every exercise MUST extend via .merge().
   - "lib/utils.ts" — Common utility helpers.
 

@@ -129,5 +129,9 @@ export async function getExerciseConfigFromLink(
 }
 
 export function getExerciseFromSandboxEnv() {
-  return JSON.parse(process.env.SANDBOX_EXERCISE ?? "{}") as Exercise;
+  const encodedExercise = process.env.SANDBOX_EXERCISE_BASE64;
+  const serializedExercise = encodedExercise
+    ? Buffer.from(encodedExercise, "base64").toString("utf8")
+    : (process.env.SANDBOX_EXERCISE ?? "{}");
+  return JSON.parse(serializedExercise) as Exercise;
 }

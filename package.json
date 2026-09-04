@@ -20,8 +20,11 @@
     "ts-check": "tsc --noEmit --pretty"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "4.0.70",
-    "@ai-sdk/react": "4.0.90",
+    "@ai-sdk/gateway": "4.0.72",
+    "@ai-sdk/harness": "1.0.99",
+    "@ai-sdk/harness-pi": "1.0.101",
+    "@ai-sdk/react": "4.0.93",
+    "@ai-sdk/sandbox-vercel": "1.0.99",
     "@base-ui/react": "1.7.0",
     "@electric-sql/pglite": "0.5.8",
     "@hookform/resolvers": "5.9.1",
@@ -30,7 +33,7 @@
     "@vercel/blob": "2.8.0",
     "@vercel/sandbox": "3.2.1",
     "adm-zip": "0.6.0",
-    "ai": "7.0.87",
+    "ai": "7.0.90",
     "better-auth": "1.7.2",
     "botid": "1.5.11",
     "class-variance-authority": "0.7.1",
@@ -57,6 +60,7 @@
     "sonner": "2.0.8",
     "tailwind-merge": "3.6.0",
     "use-stick-to-bottom": "1.1.6",
+    "ws": "8.21.0",
     "zod": "4.5.4"
   },
   "devDependencies": {

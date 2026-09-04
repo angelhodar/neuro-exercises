@@ -4,6 +4,8 @@ import { generateImage, generateText, Output } from "ai";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateAudio } from "@/lib/ai/audio";
+import { assertCanEditExercise } from "@/lib/auth/can-edit-exercise";
+import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import type { Exercise } from "@/lib/db/schema";
 import { exercises } from "@/lib/db/schema";
@@ -121,11 +123,11 @@ export async function getExerciseBySlug(
 
 async function generateExerciseData(prompt: string) {
   const { output } = await generateText({
-    model: "google/gemini-2.5-flash",
+    instructions:
+      "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
+    model: "google/gemini-3.8-flash",
     output: Output.object({ schema: generatedExerciseSchema }),
     prompt,
-    system:
-      "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
   });
 
   if (!output) {
@@ -141,6 +143,7 @@ export async function createExercise(
   try {
     const parsed = createExerciseSchema.parse(data);
     const { prompt } = parsed;
+    const user = await requireAuth();
 
     const generatedData = await generateExerciseData(prompt);
 
@@ -154,6 +157,7 @@ export async function createExercise(
       .values({
         ...generatedData,
         audioInstructions,
+        creatorId: user.id,
         thumbnailUrl: thumbnail,
       })
       .returning();
@@ -196,6 +200,7 @@ export async function registerExercise(
 ): Promise<Exercise | null> {
   try {
     const parsed = registerExerciseSchema.parse(data);
+    const user = await requireAuth();
     const { slug, displayName, description, tags, thumbnailPrompt, file } =
       parsed;
 
@@ -210,6 +215,7 @@ export async function registerExercise(
     const [created] = await db
       .insert(exercises)
       .values({
+        creatorId: user.id,
         description: description || null,
         displayName,
         slug,
@@ -249,6 +255,8 @@ export async function updateExercise(
     if (!exercise) {
       throw new Error("Ejercicio no encontrado");
     }
+    const user = await requireAuth();
+    assertCanEditExercise(exercise, user);
 
     // Si se proporciona un archivo, subirlo
     if (file) {

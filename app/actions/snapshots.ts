@@ -1,4 +1,5 @@
 import { Snapshot } from "@vercel/sandbox";
+import { getBaseSandboxName } from "@/lib/sandbox";
 
 export interface SnapshotInfo {
   expiresAt: Date | undefined;
@@ -7,7 +8,11 @@ export interface SnapshotInfo {
 
 export async function getLatestSnapshot(): Promise<SnapshotInfo | null> {
   try {
-    const snapshots = await Snapshot.list({ limit: 1, sortOrder: "desc" });
+    const snapshots = await Snapshot.list({
+      limit: 1,
+      name: getBaseSandboxName(),
+      sortOrder: "desc",
+    });
 
     for await (const snapshot of snapshots) {
       if (snapshot.status !== "created") {

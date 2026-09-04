@@ -42,6 +42,8 @@ const buttonVariants = cva(
 
 function Button({
   className,
+  nativeButton,
+  render,
   variant = "default",
   size = "default",
   ...props
@@ -50,6 +52,8 @@ function Button({
     <ButtonPrimitive
       className={cn(buttonVariants({ className, size, variant }))}
       data-slot="button"
+      nativeButton={nativeButton ?? render === undefined}
+      render={render}
       {...props}
     />
   );

@@ -1,17 +1,11 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import {
-  CheckCircle,
-  Code,
-  FolderSearch,
-  Loader2,
-  MessageSquare,
-  Settings,
-} from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import {
   Conversation,
   ConversationContent,
@@ -47,95 +41,19 @@ interface ChatProps {
   messages: InitialMessage[];
 }
 
-function getToolIcon(toolName: string) {
-  switch (toolName) {
-    case "readFiles":
-      return <Code className="h-4 w-4" />;
-    case "listFiles":
-      return <FolderSearch className="h-4 w-4" />;
-    case "verifyFiles":
-      return <CheckCircle className="h-4 w-4" />;
-    case "writeFiles":
-      return <Settings className="h-4 w-4" />;
-    default:
-      return <Settings className="h-4 w-4" />;
-  }
-}
-
-function getToolDisplayName(toolName: string) {
-  switch (toolName) {
-    case "readFiles":
-      return "Leyendo archivos";
-    case "listFiles":
-      return "Explorando directorio";
-    case "verifyFiles":
-      return "Verificando codigo";
-    case "writeFiles":
-      return "Escribiendo archivos";
-    default:
-      return toolName;
-  }
-}
-
-function getToolParts(parts: UIMessage["parts"]) {
-  return parts.filter((p) => p.type.startsWith("tool-"));
-}
-
-function StreamingStatus({
-  status,
-  messages,
-}: {
-  status: string;
-  messages: UIMessage[];
-}) {
-  if (status === "submitted") {
-    return (
-      <div className="flex items-center space-x-2 rounded-lg bg-blue-50 p-3 text-blue-600">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Procesando tu petici&oacute;n...</span>
-      </div>
-    );
+function StreamingStatus({ status }: { status: string }) {
+  if (status !== "submitted" && status !== "streaming") {
+    return null;
   }
 
-  if (status === "streaming") {
-    const lastAssistantMessage = [...messages]
-      .reverse()
-      .find((m) => m.role === "assistant");
-    const toolParts = lastAssistantMessage
-      ? getToolParts(lastAssistantMessage.parts)
-      : [];
-
-    return (
-      <div className="space-y-2 rounded-lg bg-blue-50 p-3">
-        <div className="flex items-center space-x-2 text-blue-600">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="font-medium text-sm">Procesando ejercicio...</span>
-        </div>
-
-        {toolParts.length > 0 && (
-          <div className="space-y-1">
-            {toolParts.map((part, index) => {
-              const toolName = part.type.replace("tool-", "");
-              return (
-                <div
-                  className="flex items-center space-x-2 text-gray-600 text-sm"
-                  key={"toolCallId" in part ? part.toolCallId : index}
-                >
-                  {getToolIcon(toolName)}
-                  <span>{getToolDisplayName(toolName)}</span>
-                  {"state" in part && part.state === "output-available" && (
-                    <span className="text-green-600">&check;</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="flex items-center space-x-2 rounded-lg bg-blue-50 p-3 text-blue-600">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      <span className="text-sm">
+        Generando ejercicio... Esto puede tardar unos minutos.
+      </span>
+    </div>
+  );
 }
 
 export function Chat({
@@ -143,7 +61,8 @@ export function Chat({
   exercise,
   autoStart,
 }: ChatProps) {
-  const { initializePreview } = useSandbox();
+  const { initializeLatestPreview } = useSandbox();
+  const [, setGen] = useQueryState("gen", parseAsInteger);
   const hasAutoStarted = useRef(false);
 
   const { messages, sendMessage, status, error, stop, regenerate } = useChat({
@@ -152,7 +71,12 @@ export function Chat({
       parts: [{ text: msg.content, type: "text" as const }],
       role: msg.role,
     })),
-    onFinish: () => initializePreview(),
+    onFinish: ({ isAbort, isDisconnect, isError }) => {
+      if (isAbort || isDisconnect || isError) {
+        return;
+      }
+      return initializeLatestPreview();
+    },
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: { slug: exercise.slug },
@@ -163,16 +87,25 @@ export function Chat({
   useEffect(() => {
     if (autoStart && !hasAutoStarted.current) {
       hasAutoStarted.current = true;
+      setGen(null);
       regenerate();
     }
-  }, [autoStart, regenerate]);
+  }, [autoStart, regenerate, setGen]);
 
   const filteredMessages = messages.filter(
     (msg) => msg.role === "user" || msg.role === "assistant"
   );
 
-  const handleSubmit = (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage): Promise<void> | void => {
+    if (status === "submitted" || status === "streaming") {
+      toast.error(
+        "Hay una generación en curso. Espera a que termine o deténla antes de enviar otro mensaje."
+      );
+      // Reject so PromptInput keeps the text (it skips clearing when onSubmit rejects)
+      return Promise.reject(new Error("Generation in progress"));
+    }
     if (message.text.trim()) {
+      setGen(null);
       sendMessage({ files: message.files, text: message.text });
     }
   };
@@ -208,7 +141,7 @@ export function Chat({
             ))
           )}
 
-          <StreamingStatus messages={messages} status={status} />
+          <StreamingStatus status={status} />
 
           {!!error && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-3">

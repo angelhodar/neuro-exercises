@@ -51,6 +51,7 @@ function LandingExerciseCard({ exercise }: { exercise: Exercise }) {
             alt={exercise.displayName}
             className="rounded-lg object-cover"
             fill
+            sizes="(min-width: 1360px) 411px, (min-width: 1024px) calc((100vw - 128px) / 3), (min-width: 768px) calc((100vw - 96px) / 3), calc(100vw - 48px)"
             src={createBlobUrl(exercise.thumbnailUrl ?? "")}
           />
           {exercise.tags[0] ? (

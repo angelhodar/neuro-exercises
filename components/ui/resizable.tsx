@@ -1,5 +1,6 @@
 "use client";
 
+import { GripVertical } from "lucide-react";
 import {
   Group,
   type GroupProps,
@@ -45,7 +46,9 @@ function ResizableHandle({
       {...props}
     >
       {withHandle ? (
-        <div className="z-10 flex h-6 w-1 shrink-0 rounded-lg bg-border" />
+        <div className="z-10 flex h-8 w-4 shrink-0 items-center justify-center rounded-sm border bg-muted shadow-sm">
+          <GripVertical className="size-3 text-muted-foreground" />
+        </div>
       ) : null}
     </Separator>
   );

@@ -36,8 +36,8 @@ export function PreviewIframe({ slug }: { slug: string }) {
   // Show message if no sandbox URL available
   if (!(sandboxUrl || isLoading || error)) {
     return (
-      <div className="relative flex-1 px-2 pb-2">
-        <Card className="relative h-full overflow-hidden border border-gray-200/50 shadow-sm">
+      <div className="relative min-h-0 flex-1 p-2">
+        <Card className="relative h-full min-h-0 overflow-hidden border border-gray-200/50 py-0 shadow-sm">
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/95 backdrop-blur-sm">
             <div className="flex flex-col items-center justify-center text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
@@ -85,8 +85,8 @@ export function PreviewIframe({ slug }: { slug: string }) {
       )}
 
       {/* Preview Content */}
-      <div className="relative flex-1 px-2">
-        <Card className="relative h-full overflow-hidden border border-gray-200/50 shadow-sm">
+      <div className="relative min-h-0 flex-1 p-2">
+        <Card className="relative h-full min-h-0 overflow-hidden border border-gray-200/50 py-0 shadow-sm">
           {!!isLoading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/95 backdrop-blur-sm">
               <div className="flex flex-col items-center justify-center text-center">
@@ -145,7 +145,7 @@ export function PreviewIframe({ slug }: { slug: string }) {
           {!!sandboxUrl && (
             <iframe
               allowFullScreen
-              className="h-full w-full rounded-md border-0"
+              className="block h-full w-full rounded-md border-0"
               ref={iframeRef}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
               src={`${sandboxUrl}/exercises/${slug}`}

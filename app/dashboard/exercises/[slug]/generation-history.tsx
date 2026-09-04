@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { Check, History } from "lucide-react";
+import { Check } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,23 +29,24 @@ export function GenerationHistory({ generations }: GenerationHistoryProps) {
     return null;
   }
 
-  // The active generation is either the one in the URL or the latest
   const activeId = gen ?? completedGenerations.at(-1)?.id;
+  const currentVersion =
+    completedGenerations.findIndex((g) => g.id === activeId) + 1;
 
   return (
     <Popover>
       <PopoverTrigger
         render={
-          <Button size="icon-sm" variant="ghost">
-            <History className="h-4 w-4" />
+          <Button size="icon" variant="outline">
+            v{currentVersion}
           </Button>
         }
       />
-      <PopoverContent align="end" className="w-80">
+      <PopoverContent align="end" className="w-[28rem]">
         <PopoverHeader>
           <PopoverTitle>Versiones</PopoverTitle>
         </PopoverHeader>
-        <div className="-mx-1 max-h-64 overflow-y-auto">
+        <div className="-mx-1 max-h-80 overflow-y-auto">
           {[...completedGenerations].reverse().map((generation, index) => {
             const versionNumber = completedGenerations.length - index;
             const isActive = generation.id === activeId;
@@ -80,7 +81,7 @@ export function GenerationHistory({ generations }: GenerationHistoryProps) {
                       })}
                     </span>
                   </div>
-                  <p className="truncate text-gray-500 text-xs">
+                  <p className="line-clamp-3 whitespace-pre-wrap text-gray-500 text-xs">
                     {generation.prompt}
                   </p>
                 </div>

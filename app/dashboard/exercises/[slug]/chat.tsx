@@ -5,18 +5,9 @@ import { DefaultChatTransport } from "ai";
 import { Loader2, MessageSquare } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationEmptyState,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
   PromptInput,
@@ -25,8 +16,19 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Message, MessageContent } from "@/components/ui/message";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller";
 import { useSandbox } from "@/hooks/use-sandbox";
 import type { Exercise } from "@/lib/db/schema";
+import { cn } from "@/lib/utils";
 
 interface InitialMessage {
   content: string;
@@ -39,6 +41,25 @@ interface ChatProps {
   autoStart: boolean;
   exercise: Exercise;
   messages: InitialMessage[];
+}
+
+function ChatMarkdown({
+  children,
+  invert,
+}: {
+  children: string;
+  invert?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "prose prose-sm prose-headings:my-2 prose-ol:my-1 prose-p:my-1 prose-pre:my-2 prose-ul:my-1 max-w-none prose-a:text-inherit prose-code:text-inherit prose-headings:text-inherit prose-li:text-inherit prose-p:text-inherit prose-strong:text-inherit prose-p:first:mt-0 prose-p:last:mb-0",
+        invert && "prose-invert"
+      )}
+    >
+      <Markdown remarkPlugins={[remarkGfm]}>{children}</Markdown>
+    </div>
+  );
 }
 
 function StreamingStatus({ status }: { status: string }) {
@@ -112,61 +133,84 @@ export function Chat({
 
   return (
     <div className="flex h-full flex-col">
-      <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="gap-6 p-6">
-          {filteredMessages.length === 0 ? (
-            <ConversationEmptyState
-              description="Start a conversation about this exercise. Ask questions, share thoughts, or request help."
-              icon={<MessageSquare className="h-8 w-8" />}
-              title="No messages yet"
-            />
-          ) : (
-            filteredMessages.map((m) => (
-              <Message from={m.role} key={m.id}>
-                <MessageContent>
-                  {m.parts.map((part) => {
-                    if (part.type === "text") {
-                      return (
-                        <MessageResponse
-                          key={`${m.id}-${part.type}-${part.text}`}
+      <MessageScrollerProvider autoScroll defaultScrollPosition="last-anchor">
+        <MessageScroller className="min-h-0 flex-1">
+          <MessageScrollerViewport>
+            <MessageScrollerContent className="gap-6 p-6">
+              {filteredMessages.length === 0 ? (
+                <MessageScrollerItem messageId="empty">
+                  <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-sm">No messages yet</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Start a conversation about this exercise. Ask questions,
+                        share thoughts, or request help.
+                      </p>
+                    </div>
+                  </div>
+                </MessageScrollerItem>
+              ) : (
+                filteredMessages.map((m) => (
+                  <MessageScrollerItem
+                    key={m.id}
+                    messageId={m.id}
+                    scrollAnchor={m.role === "user"}
+                  >
+                    <Message align={m.role === "user" ? "end" : "start"}>
+                      <MessageContent>
+                        <Bubble
+                          variant={m.role === "user" ? "default" : "muted"}
                         >
-                          {part.text}
-                        </MessageResponse>
-                      );
-                    }
-                    return null;
-                  })}
-                </MessageContent>
-              </Message>
-            ))
-          )}
+                          <BubbleContent>
+                            <ChatMarkdown invert={m.role === "user"}>
+                              {m.parts
+                                .filter((part) => part.type === "text")
+                                .map((part) => part.text)
+                                .join("")}
+                            </ChatMarkdown>
+                          </BubbleContent>
+                        </Bubble>
+                      </MessageContent>
+                    </Message>
+                  </MessageScrollerItem>
+                ))
+              )}
 
-          <StreamingStatus status={status} />
+              {status === "submitted" || status === "streaming" ? (
+                <MessageScrollerItem messageId="streaming-status">
+                  <StreamingStatus status={status} />
+                </MessageScrollerItem>
+              ) : null}
 
-          {!!error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-red-600 text-sm">
-                  Error: {error.message}
-                </span>
-                <button
-                  className="text-red-600 text-sm underline hover:text-red-700"
-                  onClick={() => regenerate()}
-                  type="button"
-                >
-                  Reintentar
-                </button>
-              </div>
-            </div>
-          )}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
+              {error ? (
+                <MessageScrollerItem messageId="error">
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-red-600 text-sm">
+                        Error: {error.message}
+                      </span>
+                      <button
+                        className="text-red-600 text-sm underline hover:text-red-700"
+                        onClick={() => regenerate()}
+                        type="button"
+                      >
+                        Reintentar
+                      </button>
+                    </div>
+                  </div>
+                </MessageScrollerItem>
+              ) : null}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+          <MessageScrollerButton />
+        </MessageScroller>
+      </MessageScrollerProvider>
 
-      <div className="shrink-0 border-t p-2">
+      <div className="shrink-0 p-2">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputBody>
-            <PromptInputTextarea placeholder="Ask about this exercise..." />
+            <PromptInputTextarea placeholder="Puedes seguir cambiando el ejercicio aqui..." />
           </PromptInputBody>
           <PromptInputFooter>
             <div />

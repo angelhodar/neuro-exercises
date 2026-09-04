@@ -41,6 +41,13 @@ function messageText(message: UIMessage) {
     .join("\n");
 }
 
+// The agent may emit intermediate commentary between tool calls; the summary
+// is the last text block it produces.
+function summaryText(message: UIMessage) {
+  const textParts = message.parts.filter((part) => part.type === "text");
+  return textParts.at(-1)?.text ?? "";
+}
+
 function serializableResumeState(state: unknown) {
   return JSON.parse(JSON.stringify(state)) as Record<string, unknown>;
 }
@@ -204,7 +211,7 @@ export async function POST(req: NextRequest) {
       {
         codeBlobKey,
         status: "COMPLETED",
-        summary: messageText(responseMessage),
+        summary: summaryText(responseMessage),
       }
     );
     if (!completedGeneration) {
@@ -276,6 +283,11 @@ export async function POST(req: NextRequest) {
           });
 
           let finishChunk: UIMessageChunk | undefined;
+          let textBuffer: UIMessageChunk[] = [];
+          const isTextChunk = (chunk: UIMessageChunk) =>
+            chunk.type === "text-start" ||
+            chunk.type === "text-delta" ||
+            chunk.type === "text-end";
           writer.merge(
             toUIMessageStream({
               onEnd: (event) => handleGenerationEnd(sandbox, event),
@@ -285,6 +297,9 @@ export async function POST(req: NextRequest) {
             }).pipeThrough(
               new TransformStream<UIMessageChunk>({
                 flush(controller) {
+                  for (const chunk of textBuffer) {
+                    controller.enqueue(chunk);
+                  }
                   if (finishChunk) {
                     controller.enqueue(finishChunk);
                   }
@@ -294,6 +309,29 @@ export async function POST(req: NextRequest) {
                   // it until onEnd has saved the checkpoint and generation state.
                   if (chunk.type === "finish") {
                     finishChunk = chunk;
+                    return;
+                  }
+                  // Buffer text blocks: the agent also emits internal commentary
+                  // between tool calls, which we don't want to leak. A text block
+                  // is only forwarded once it survives until a step boundary
+                  // (i.e. it is the final summary); if a tool chunk arrives
+                  // first, the block was intermediate and is discarded.
+                  if (isTextChunk(chunk)) {
+                    textBuffer.push(chunk);
+                    return;
+                  }
+                  if (chunk.type === "finish-step") {
+                    for (const buffered of textBuffer) {
+                      controller.enqueue(buffered);
+                    }
+                    textBuffer = [];
+                    controller.enqueue(chunk);
+                    return;
+                  }
+                  textBuffer = [];
+                  // Tool calls are an implementation detail of the agent; the
+                  // client only needs the final text summary.
+                  if (chunk.type.startsWith("tool-")) {
                     return;
                   }
                   controller.enqueue(chunk);

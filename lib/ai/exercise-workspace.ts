@@ -20,9 +20,12 @@ function workspaceSandboxName(exerciseId: number) {
 function createSandboxEnv(exercise: Exercise) {
   const serializedExercise = JSON.stringify(exercise);
   return [
-    `NEXT_PUBLIC_BLOB_URL=${process.env.NEXT_PUBLIC_BLOB_URL ?? ""}`,
     "NEXT_TELEMETRY_DISABLED=1",
     "NODE_ENV=development",
+    // Marks the dev server as an exercise preview so next.config.ts can hide
+    // the Next.js dev tools indicator.
+    "SANDBOX_PREVIEW=1",
+    `NEXT_PUBLIC_BLOB_URL=${process.env.NEXT_PUBLIC_BLOB_URL ?? ""}`,
     `SANDBOX_EXERCISE=${serializedExercise}`,
     `SANDBOX_EXERCISE_BASE64=${Buffer.from(serializedExercise).toString("base64")}`,
   ].join("\n");

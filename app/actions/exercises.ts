@@ -125,7 +125,7 @@ async function generateExerciseData(prompt: string) {
   const { output } = await generateText({
     instructions:
       "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
-    model: "google/gemini-2.5-flash",
+    model: "google/gemini-3.8-flash",
     output: Output.object({ schema: generatedExerciseSchema }),
     prompt,
   });

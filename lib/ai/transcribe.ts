@@ -1,5 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
-import { experimental_transcribe as transcribe } from "ai";
+import { transcribe } from "ai";
 
 const TRAILING_PUNCTUATION_REGEX = /[.,;:!¿?]+$/g;
 

@@ -12,7 +12,7 @@ export function ExerciseContainer({ children }: PropsWithChildren) {
   const { countdown } = useCountdown();
 
   return (
-    <Card className="relative flex h-full flex-1 items-center justify-center rounded-lg border-2 border-gray-300 border-dashed bg-gray-50">
+    <Card className="relative flex h-full min-h-0 flex-1 items-center justify-center rounded-lg border-2 border-gray-300 border-dashed bg-gray-50 py-0">
       {exerciseState === "ready" && !countdown ? (
         <ExercisePresentation />
       ) : (

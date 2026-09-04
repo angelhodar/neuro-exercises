@@ -7,16 +7,6 @@ import {
   commitGeneratedImage,
   generateImagePreview,
 } from "@/app/actions/media";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
   PromptInput,
@@ -25,6 +15,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,6 +25,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Message, MessageContent } from "@/components/ui/message";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Media } from "@/lib/db/schema";
 import { createBlobUrl } from "@/lib/utils";
@@ -221,40 +221,56 @@ export default function CreateMediaWithAI({
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-6 md:h-[800px] md:max-h-[800px] md:flex-row">
           {/* Chat panel */}
           <div className="flex min-h-64 flex-1 flex-col overflow-hidden rounded-lg border md:min-h-0">
-            <Conversation className="min-h-0 flex-1">
-              <ConversationContent className="gap-4 p-4">
-                {messages.length === 0 ? (
-                  <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
-                    <ImageIcon className="size-8 text-muted-foreground" />
-                    <p className="text-muted-foreground text-sm">
-                      {sourceMedia
-                        ? "Indica qué cambios quieres hacer sobre la imagen original"
-                        : "Escribe un prompt para generar tu primera imagen"}
-                    </p>
-                  </div>
-                ) : (
-                  messages.map((m) => (
-                    <Message from={m.role} key={m.id}>
-                      <MessageContent>
-                        {m.imageBase64 ? (
-                          // biome-ignore lint/performance/noImgElement: base64 data URLs cannot use next/image
-                          <img
-                            alt="Imagen generada"
-                            className="max-w-48 rounded-md"
-                            height={512}
-                            src={m.imageBase64}
-                            width={512}
-                          />
-                        ) : (
-                          <MessageResponse>{m.content}</MessageResponse>
-                        )}
-                      </MessageContent>
-                    </Message>
-                  ))
-                )}
-              </ConversationContent>
-              <ConversationScrollButton />
-            </Conversation>
+            <MessageScrollerProvider autoScroll defaultScrollPosition="end">
+              <MessageScroller className="min-h-0 flex-1">
+                <MessageScrollerViewport>
+                  <MessageScrollerContent className="justify-end gap-4 p-4">
+                    {messages.length === 0 ? (
+                      <MessageScrollerItem messageId="empty">
+                        <div className="flex size-full flex-col items-center justify-center gap-3 p-8 text-center">
+                          <ImageIcon className="size-8 text-muted-foreground" />
+                          <p className="text-muted-foreground text-sm">
+                            {sourceMedia
+                              ? "Indica qué cambios quieres hacer sobre la imagen original"
+                              : "Escribe un prompt para generar tu primera imagen"}
+                          </p>
+                        </div>
+                      </MessageScrollerItem>
+                    ) : (
+                      messages.map((m) => (
+                        <MessageScrollerItem key={m.id} messageId={m.id}>
+                          <Message align={m.role === "user" ? "end" : "start"}>
+                            <MessageContent>
+                              <Bubble
+                                variant={
+                                  m.role === "user" ? "default" : "muted"
+                                }
+                              >
+                                <BubbleContent>
+                                  {m.imageBase64 ? (
+                                    // biome-ignore lint/performance/noImgElement: base64 data URLs cannot use next/image
+                                    <img
+                                      alt="Imagen generada"
+                                      className="max-w-48 rounded-md"
+                                      height={512}
+                                      src={m.imageBase64}
+                                      width={512}
+                                    />
+                                  ) : (
+                                    m.content
+                                  )}
+                                </BubbleContent>
+                              </Bubble>
+                            </MessageContent>
+                          </Message>
+                        </MessageScrollerItem>
+                      ))
+                    )}
+                  </MessageScrollerContent>
+                </MessageScrollerViewport>
+                <MessageScrollerButton />
+              </MessageScroller>
+            </MessageScrollerProvider>
 
             <div className="shrink-0 border-t p-2">
               <PromptInput onSubmit={handleSendPrompt}>

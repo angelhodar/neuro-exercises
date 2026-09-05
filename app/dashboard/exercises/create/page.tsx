@@ -313,14 +313,6 @@ function QuestionCard({
             </QuestionnaireItem>
             <QuestionnaireActions>
               <Button
-                disabled={disabled}
-                onClick={() => onAnswer({ selected: [], skipped: true })}
-                type="button"
-                variant="ghost"
-              >
-                Sin preferencia
-              </Button>
-              <Button
                 disabled={
                   disabled || (selected.length === 0 && freeText.trim() === "")
                 }

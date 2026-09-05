@@ -29,7 +29,7 @@ async function generateThumbnail(
 ): Promise<string | null> {
   try {
     const { images } = await generateImage({
-      model: "xai/grok-imagine-image-pro",
+      model: "spacexai/grok-imagine-image-2.0",
       prompt: `Generate an image of ${thumbnailPrompt.toLowerCase()}, clear and simple, centered, white background`,
       size: "512x512",
     });

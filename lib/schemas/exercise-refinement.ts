@@ -62,10 +62,6 @@ export const askUserQuestionOutputSchema = z.object({
     .array(z.string().trim().min(1).max(80))
     .max(4)
     .describe("Labels of the selected options"),
-  skipped: z
-    .boolean()
-    .optional()
-    .describe("True when the professional has no preference for this question"),
 });
 
 export const exerciseBriefSchema = z.object({

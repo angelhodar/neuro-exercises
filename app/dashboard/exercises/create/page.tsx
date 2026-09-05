@@ -187,10 +187,6 @@ function withoutUnfinishedStep(messages: ExerciseRefinementMessage[]) {
 }
 
 function QuestionAnswer({ answer }: { answer: AskUserQuestionOutput }) {
-  if (answer.skipped) {
-    return <p className="text-muted-foreground text-sm">Sin preferencia</p>;
-  }
-
   return (
     <div className="flex flex-wrap gap-2">
       {answer.selected.map((selection) => (

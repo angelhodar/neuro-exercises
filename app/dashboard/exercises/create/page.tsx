@@ -7,14 +7,7 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import {
-  ArrowRight,
-  Brain,
-  FileText,
-  Loader2,
-  MessageSquareText,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Brain, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -363,24 +356,17 @@ function getPendingBrief(messages: ExerciseRefinementMessage[]) {
 
 function RequirementsDocument({
   brief,
+  creationError,
   creating,
   onCreate,
 }: {
   brief: ExerciseBrief;
+  creationError: string | null;
   creating: boolean;
   onCreate: () => void;
 }) {
   return (
     <section className="flex h-full min-h-0 flex-col bg-card">
-      <header className="flex items-center gap-3 border-b px-5 py-4">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-          <FileText className="size-4" />
-        </div>
-        <div>
-          <h2 className="font-medium">Requisitos del ejercicio</h2>
-          <p className="text-muted-foreground text-sm">{brief.summary}</p>
-        </div>
-      </header>
       <div className="min-h-0 flex-1 overflow-y-auto p-6">
         <div className="prose prose-sm prose-li:my-1 prose-h1:mt-0 prose-headings:mt-6 prose-headings:mb-2 max-w-none">
           <Markdown remarkPlugins={[remarkGfm]}>
@@ -388,7 +374,14 @@ function RequirementsDocument({
           </Markdown>
         </div>
       </div>
-      <footer className="flex justify-end border-t p-4">
+      <footer className="flex items-center justify-between gap-4 border-t p-4">
+        {creationError ? (
+          <p className="text-destructive text-sm" role="alert">
+            {creationError}
+          </p>
+        ) : (
+          <span />
+        )}
         <Button disabled={creating} onClick={onCreate}>
           {creating ? <Loader2 className="animate-spin" /> : <Sparkles />}
           {creating ? "Preparando ejercicio..." : "Crear ejercicio"}
@@ -551,17 +544,6 @@ function RefinementConversation({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-card">
-      <header className="flex items-center gap-3 border-b px-5 py-4">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-          <MessageSquareText className="size-4" />
-        </div>
-        <div>
-          <h2 className="font-medium">Conversación</h2>
-          <p className="text-muted-foreground text-sm">
-            Ajusta los requisitos antes de crear el ejercicio.
-          </p>
-        </div>
-      </header>
       <MessageScrollerProvider autoScroll defaultScrollPosition="last-anchor">
         <MessageScroller className="min-h-0 flex-1">
           <MessageScrollerViewport>
@@ -748,27 +730,20 @@ export default function CreateExercisePage() {
   }
 
   return (
-    <div className="-m-4 min-h-[calc(100vh-3rem)] w-[calc(100%+2rem)] bg-linear-to-b from-blue-50/70 via-white to-white px-4 py-8 pb-12 sm:px-6 md:py-10 md:pb-16 lg:px-8">
-      <main className="mx-auto w-full max-w-4xl">
+    <div
+      className={
+        started
+          ? "-m-4 h-[calc(100vh-3rem)] w-[calc(100%+2rem)] bg-card"
+          : "-m-4 min-h-[calc(100vh-3rem)] w-[calc(100%+2rem)] bg-linear-to-b from-blue-50/70 via-white to-white px-4 py-8 pb-12 sm:px-6 md:py-10 md:pb-16 lg:px-8"
+      }
+    >
+      <main className={started ? "h-full w-full" : "mx-auto w-full max-w-4xl"}>
         {started ? (
-          <div className="space-y-6">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                <MessageSquareText className="size-5" />
-              </div>
-              <h1 className="font-semibold text-2xl text-blue-950">
-                Afinemos el ejercicio
-              </h1>
-              <p className="mt-2 text-muted-foreground text-sm">
-                Preguntaremos únicamente por decisiones que afectan a la
-                actividad.
-              </p>
-            </div>
-
-            <div className={currentBrief ? "h-[min(720px,70vh)]" : "h-150"}>
+          <div className="h-full">
+            <div className="h-full">
               {currentBrief ? (
                 <ResizablePanelGroup
-                  className="overflow-hidden rounded-xl border shadow-sm"
+                  className="overflow-hidden"
                   orientation={isMobile ? "vertical" : "horizontal"}
                 >
                   <ResizablePanel defaultSize={45} minSize={30}>
@@ -789,12 +764,13 @@ export default function CreateExercisePage() {
                     <RequirementsDocument
                       brief={currentBrief.input.brief}
                       creating={creating}
+                      creationError={creationError}
                       onCreate={() => handleCreate(currentBrief.input.brief)}
                     />
                   </ResizablePanel>
                 </ResizablePanelGroup>
               ) : (
-                <div className="h-full overflow-hidden rounded-xl border bg-card shadow-sm">
+                <div className="h-full overflow-hidden">
                   <RefinementConversation
                     addToolOutput={addToolOutput}
                     busy={busy}
@@ -809,14 +785,6 @@ export default function CreateExercisePage() {
                 </div>
               )}
             </div>
-            {creationError ? (
-              <div
-                className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm"
-                role="alert"
-              >
-                {creationError}
-              </div>
-            ) : null}
           </div>
         ) : (
           <div className="mt-12 md:mt-20">

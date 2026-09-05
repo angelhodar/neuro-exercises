@@ -7,7 +7,7 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import { ArrowRight, Brain, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Brain, FileText, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -391,6 +391,21 @@ function RequirementsDocument({
   );
 }
 
+function EmptyRequirementsDocument() {
+  return (
+    <section className="flex h-full flex-col items-center justify-center bg-card p-8 text-center">
+      <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+        <FileText className="size-5" />
+      </div>
+      <h2 className="mt-4 font-medium">Preparando los requisitos</h2>
+      <p className="mt-2 max-w-sm text-muted-foreground text-sm">
+        El documento aparecerá aquí cuando hayamos definido los detalles del
+        ejercicio.
+      </p>
+    </section>
+  );
+}
+
 function ToolPart({
   addToolOutput,
   disabled,
@@ -741,40 +756,15 @@ export default function CreateExercisePage() {
         {started ? (
           <div className="h-full">
             <div className="h-full">
-              {currentBrief ? (
-                <ResizablePanelGroup
-                  className="overflow-hidden"
-                  orientation={isMobile ? "vertical" : "horizontal"}
-                >
-                  <ResizablePanel defaultSize={45} minSize={30}>
-                    <RefinementConversation
-                      addToolOutput={addToolOutput}
-                      busy={busy}
-                      currentBrief={currentBrief}
-                      error={error}
-                      messages={messages}
-                      onRetry={retryRefinement}
-                      onRevise={reviseBrief}
-                      status={status}
-                      stop={stop}
-                    />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={55} minSize={30}>
-                    <RequirementsDocument
-                      brief={currentBrief.input.brief}
-                      creating={creating}
-                      creationError={creationError}
-                      onCreate={() => handleCreate(currentBrief.input.brief)}
-                    />
-                  </ResizablePanel>
-                </ResizablePanelGroup>
-              ) : (
-                <div className="h-full overflow-hidden">
+              <ResizablePanelGroup
+                className="overflow-hidden"
+                orientation={isMobile ? "vertical" : "horizontal"}
+              >
+                <ResizablePanel defaultSize={45} minSize={30}>
                   <RefinementConversation
                     addToolOutput={addToolOutput}
                     busy={busy}
-                    currentBrief={undefined}
+                    currentBrief={currentBrief}
                     error={error}
                     messages={messages}
                     onRetry={retryRefinement}
@@ -782,8 +772,21 @@ export default function CreateExercisePage() {
                     status={status}
                     stop={stop}
                   />
-                </div>
-              )}
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={55} minSize={30}>
+                  {currentBrief ? (
+                    <RequirementsDocument
+                      brief={currentBrief.input.brief}
+                      creating={creating}
+                      creationError={creationError}
+                      onCreate={() => handleCreate(currentBrief.input.brief)}
+                    />
+                  ) : (
+                    <EmptyRequirementsDocument />
+                  )}
+                </ResizablePanel>
+              </ResizablePanelGroup>
             </div>
           </div>
         ) : (

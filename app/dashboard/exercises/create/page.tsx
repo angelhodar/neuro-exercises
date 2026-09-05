@@ -309,6 +309,7 @@ function QuestionCard({
             </QuestionnaireItem>
             <QuestionnaireActions>
               <Button
+                className="col-start-3 justify-self-end"
                 disabled={
                   disabled || (selected.length === 0 && freeText.trim() === "")
                 }

@@ -24,6 +24,26 @@ function countAskedQuestions(messages: UIMessage[]) {
   );
 }
 
+function isRevisingBrief(messages: ExerciseRefinementMessage[]) {
+  const lastMessage = messages.at(-1);
+  if (lastMessage?.role !== "assistant") {
+    return false;
+  }
+
+  const latestBrief = lastMessage.parts.findLast(
+    (part): part is ProposeBriefPart =>
+      part.type === "tool-proposeExerciseBrief"
+  );
+  return (
+    latestBrief?.state === "output-available" && !latestBrief.output.accepted
+  );
+}
+
+type ProposeBriefPart = Extract<
+  ExerciseRefinementMessage["parts"][number],
+  { type: "tool-proposeExerciseBrief" }
+>;
+
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session?.user) {
@@ -65,6 +85,7 @@ export async function POST(request: NextRequest) {
     agent: exerciseRefinementAgent,
     options: {
       canAskQuestion: questionsAsked < MAX_REFINEMENT_QUESTIONS,
+      isRevisingBrief: isRevisingBrief(messages),
       questionsAsked,
     },
     uiMessages: messages,

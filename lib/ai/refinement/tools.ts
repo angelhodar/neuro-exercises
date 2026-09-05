@@ -15,7 +15,7 @@ export const askUserQuestionTool = tool({
 
 export const proposeExerciseBriefTool = tool({
   description:
-    "Present the complete exercise specification for approval. Call this as soon as the request is sufficiently clear or the question limit has been reached.",
+    "Present the complete exercise specification for approval. A result with accepted false and feedback requests a revision of this exact proposal. Call this as soon as the request is sufficiently clear or the question limit has been reached.",
   inputSchema: proposeExerciseBriefInputSchema,
   outputSchema: proposeExerciseBriefOutputSchema,
 });

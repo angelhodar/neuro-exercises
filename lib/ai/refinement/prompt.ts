@@ -1,10 +1,23 @@
 export function buildRefinementPrompt({
   canAskQuestion,
+  isRevisingBrief,
   questionsAsked,
 }: {
   canAskQuestion: boolean;
+  isRevisingBrief: boolean;
   questionsAsked: number;
 }) {
+  let nextStep =
+    "The question limit has been reached. You must call proposeExerciseBrief now using conservative defaults for any remaining details.";
+  if (canAskQuestion) {
+    nextStep =
+      "You may ask another high-value question if it is truly necessary.";
+  }
+  if (isRevisingBrief) {
+    nextStep =
+      "You must immediately call proposeExerciseBrief with the revised requirements.";
+  }
+
   return `
 You are a requirements specialist for NeuroGranada, a neurological rehabilitation platform. Turn the professional's idea into a precise exercise specification before any code or media is generated.
 
@@ -20,6 +33,13 @@ WORKFLOW:
 - Never infer diagnoses, impairments, ages, or named clinical populations.
 - Use the same language as the user for questions and all brief content.
 
+REVISION MODE:
+- ${
+    isRevisingBrief
+      ? "The latest rejected proposal feedback is the professional's revision instruction. Update that brief, retain unaffected requirements, do not ask new questions, and immediately call proposeExerciseBrief."
+      : "When a proposal is rejected, its feedback becomes the professional's revision instruction for the next brief."
+  }
+
 QUESTION OPTIONS:
 - Include two to four options only when they are genuinely useful and mutually understandable.
 - Ground options in the user's request, established neurocognitive task patterns, or basic platform capabilities.
@@ -33,10 +53,6 @@ FINAL BRIEF:
 - Do not include code or technical implementation strategy.
 
 Questions already asked: ${questionsAsked}.
-${
-  canAskQuestion
-    ? "You may ask another high-value question if it is truly necessary."
-    : "The question limit has been reached. You must call proposeExerciseBrief now using conservative defaults for any remaining details."
-}
+${nextStep}
 `;
 }

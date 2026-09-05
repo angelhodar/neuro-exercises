@@ -7,33 +7,32 @@ import {
   DefaultChatTransport,
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
-import type { LucideIcon } from "lucide-react";
 import {
-  Accessibility,
   ArrowRight,
   Brain,
-  ChartNoAxesColumnIncreasing,
-  ListChecks,
+  FileText,
   Loader2,
   MessageSquareText,
-  Pencil,
-  Settings2,
   Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { z } from "zod";
 import { createExercise } from "@/app/actions/exercises";
-import { Button } from "@/components/ui/button";
+import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  PromptInput,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -41,6 +40,15 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
+import { Message, MessageContent } from "@/components/ui/message";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller";
 import {
   Questionnaire,
   QuestionnaireActions,
@@ -53,9 +61,15 @@ import {
   QuestionnaireItem,
   QuestionnaireTitle,
 } from "@/components/ui/questionnaire";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { ExerciseRefinementMessage } from "@/lib/ai/refinement/agent";
+import { formatExerciseBrief } from "@/lib/ai/refinement/format-brief";
 import type {
   AskUserQuestionInput,
   AskUserQuestionOutput,
@@ -107,12 +121,7 @@ const questionAnswerSchema = z
     }
   );
 
-const briefFeedbackSchema = z.object({
-  feedback: z.string().trim().min(1, "Explica qué quieres ajustar").max(2000),
-});
-
 type QuestionAnswerForm = z.infer<typeof questionAnswerSchema>;
-type BriefFeedbackForm = z.infer<typeof briefFeedbackSchema>;
 
 function shouldContinueRefinement({
   messages,
@@ -336,203 +345,67 @@ function QuestionCard({
   );
 }
 
-type BriefSectionKey = Exclude<keyof ExerciseBrief, "summary">;
-
-const briefTabs: Array<{
-  icon: LucideIcon;
-  label: string;
-  sections: Array<{ key: BriefSectionKey; label: string }>;
-  value: string;
-}> = [
-  {
-    icon: Settings2,
-    label: "Configuración",
-    sections: [
-      { key: "configurableParameters", label: "Parámetros configurables" },
-      { key: "difficultyAndProgression", label: "Dificultad y progresión" },
-    ],
-    value: "configuration",
-  },
-  {
-    icon: ListChecks,
-    label: "Actividad",
-    sections: [
-      { key: "stimuli", label: "Estímulos" },
-      { key: "taskFlow", label: "Flujo de la tarea" },
-      { key: "completionCriteria", label: "Finalización" },
-      { key: "feedback", label: "Feedback" },
-    ],
-    value: "activity",
-  },
-  {
-    icon: ChartNoAxesColumnIncreasing,
-    label: "Resultados",
-    sections: [{ key: "resultsToRecord", label: "Resultados" }],
-    value: "results",
-  },
-  {
-    icon: Accessibility,
-    label: "Accesibilidad",
-    sections: [
-      { key: "accessibilityConsiderations", label: "Consideraciones" },
-    ],
-    value: "accessibility",
-  },
-];
-
-function BriefValue({ value }: { value: string | string[] }) {
-  if (Array.isArray(value)) {
-    if (value.length === 0) {
-      return (
-        <p className="text-muted-foreground">Sin requisitos adicionales</p>
-      );
+function getPendingBrief(messages: ExerciseRefinementMessage[]) {
+  for (const message of [...messages].reverse()) {
+    if (message.role !== "assistant") {
+      continue;
     }
-    return (
-      <ul className="space-y-1">
-        {value.map((item) => (
-          <li className="flex gap-2" key={item}>
-            <span className="mt-2 size-1 shrink-0 rounded-full bg-blue-500" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    );
+    for (const part of [...message.parts].reverse()) {
+      if (
+        part.type === "tool-proposeExerciseBrief" &&
+        part.state === "input-available"
+      ) {
+        return part;
+      }
+    }
   }
-
-  return <p>{value}</p>;
 }
 
-function BriefCard({
+function RequirementsDocument({
   brief,
   creating,
-  disabled,
   onCreate,
-  onRevise,
 }: {
   brief: ExerciseBrief;
   creating: boolean;
-  disabled: boolean;
   onCreate: () => void;
-  onRevise: (feedback: string) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const form = useForm<BriefFeedbackForm>({
-    defaultValues: { feedback: "" },
-    resolver: zodResolver(briefFeedbackSchema),
-  });
-
-  function submitFeedback(values: BriefFeedbackForm) {
-    onRevise(values.feedback);
-  }
-
   return (
-    <Card className="gap-0 border-blue-200 py-0 shadow-md">
-      <CardHeader className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0 border-b bg-blue-50/70 py-5">
-        <div className="row-span-2 flex size-9 items-center justify-center rounded-lg bg-blue-700 text-white">
-          <Sparkles className="size-4" />
+    <section className="flex h-full min-h-0 flex-col bg-card">
+      <header className="flex items-center gap-3 border-b px-5 py-4">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+          <FileText className="size-4" />
         </div>
-        <CardTitle>Requisitos del ejercicio</CardTitle>
-        <CardDescription className="mt-0.5">{brief.summary}</CardDescription>
-      </CardHeader>
-      <Tabs className="gap-4 p-6" defaultValue="configuration">
-        <TabsList className="flex w-full">
-          {briefTabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <TabsTrigger className="flex-1" key={tab.value} value={tab.value}>
-                <Icon />
-                {tab.label}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-        {briefTabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
-            <CardContent className="space-y-5 px-0">
-              {tab.sections.map(({ key, label }) => (
-                <div key={key}>
-                  <p className="mb-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
-                    {label}
-                  </p>
-                  <BriefValue value={brief[key]} />
-                </div>
-              ))}
-            </CardContent>
-          </TabsContent>
-        ))}
-      </Tabs>
-      {editing ? (
-        <CardFooter className="border-t bg-muted/30 py-4">
-          <Form {...form}>
-            <form
-              className="w-full space-y-3"
-              onSubmit={form.handleSubmit(submitFeedback)}
-            >
-              <FormField
-                control={form.control}
-                name="feedback"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        autoFocus
-                        placeholder="Describe qué cambiarías de la propuesta..."
-                        rows={3}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end gap-2">
-                <Button
-                  onClick={() => setEditing(false)}
-                  type="button"
-                  variant="ghost"
-                >
-                  Cancelar
-                </Button>
-                <Button disabled={disabled} type="submit">
-                  Enviar cambios
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardFooter>
-      ) : (
-        <CardFooter className="justify-end gap-2 border-t bg-muted/30 py-4">
-          <Button
-            disabled={disabled || creating}
-            onClick={() => setEditing(true)}
-            type="button"
-            variant="outline"
-          >
-            <Pencil />
-            Ajustar
-          </Button>
-          <Button disabled={disabled || creating} onClick={onCreate}>
-            {creating ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {creating ? "Preparando ejercicio..." : "Crear ejercicio"}
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
+        <div>
+          <h2 className="font-medium">Requisitos del ejercicio</h2>
+          <p className="text-muted-foreground text-sm">{brief.summary}</p>
+        </div>
+      </header>
+      <div className="min-h-0 flex-1 overflow-y-auto p-6">
+        <div className="prose prose-sm prose-li:my-1 prose-h1:mt-0 prose-headings:mt-6 prose-headings:mb-2 max-w-none">
+          <Markdown remarkPlugins={[remarkGfm]}>
+            {formatExerciseBrief(brief)}
+          </Markdown>
+        </div>
+      </div>
+      <footer className="flex justify-end border-t p-4">
+        <Button disabled={creating} onClick={onCreate}>
+          {creating ? <Loader2 className="animate-spin" /> : <Sparkles />}
+          {creating ? "Preparando ejercicio..." : "Crear ejercicio"}
+        </Button>
+      </footer>
+    </section>
   );
 }
 
 function ToolPart({
   addToolOutput,
-  creating,
   disabled,
-  onCreate,
   part,
   pendingSiblingBriefs,
 }: {
   addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
-  creating: boolean;
   disabled: boolean;
-  onCreate: (brief: ExerciseBrief) => void;
   part: AskQuestionPart | ProposeBriefPart;
   pendingSiblingBriefs: ProposeBriefPart[];
 }) {
@@ -588,39 +461,17 @@ function ToolPart({
 
   if (part.type === "tool-proposeExerciseBrief") {
     if (part.state === "input-available") {
-      return (
-        <BriefCard
-          brief={part.input.brief}
-          creating={creating}
-          disabled={disabled}
-          onCreate={() => onCreate(part.input.brief)}
-          onRevise={(feedback) => {
-            addToolOutput({
-              output: { accepted: false, feedback },
-              tool: "proposeExerciseBrief",
-              toolCallId: part.toolCallId,
-            });
-            for (const briefPart of pendingSiblingBriefs) {
-              addToolOutput({
-                output: {
-                  accepted: false,
-                  feedback:
-                    "Descarta esta propuesta duplicada y genera una sola versión revisada.",
-                },
-                tool: "proposeExerciseBrief",
-                toolCallId: briefPart.toolCallId,
-              });
-            }
-          }}
-        />
-      );
+      return null;
     }
     if (part.state === "output-available") {
       return (
-        <div className="rounded-lg border bg-muted/30 p-4 text-sm">
-          <p className="font-medium">Cambios solicitados</p>
-          <p className="mt-1 text-muted-foreground">{part.output.feedback}</p>
-        </div>
+        <Message align="end">
+          <MessageContent>
+            <Bubble align="end" variant="default">
+              <BubbleContent>{part.output.feedback}</BubbleContent>
+            </Bubble>
+          </MessageContent>
+        </Message>
       );
     }
   }
@@ -637,21 +488,15 @@ function ToolPart({
 }
 
 function AssistantPart({
-  activeBriefId,
   addToolOutput,
-  creating,
   disabled,
   hasPendingQuestion,
-  onCreate,
   part,
   pendingSiblingBriefs,
 }: {
-  activeBriefId: string | undefined;
   addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
-  creating: boolean;
   disabled: boolean;
   hasPendingQuestion: boolean;
-  onCreate: (brief: ExerciseBrief) => void;
   part: AskQuestionPart | ProposeBriefPart | RefinementTextPart;
   pendingSiblingBriefs: ProposeBriefPart[];
 }) {
@@ -663,23 +508,171 @@ function AssistantPart({
     ) : null;
   }
 
-  if (
-    part.type === "tool-proposeExerciseBrief" &&
-    part.state === "input-available" &&
-    (hasPendingQuestion || part.toolCallId !== activeBriefId)
-  ) {
+  if (part.type === "tool-proposeExerciseBrief" && hasPendingQuestion) {
     return null;
   }
 
   return (
     <ToolPart
       addToolOutput={addToolOutput}
-      creating={creating}
       disabled={disabled}
-      onCreate={onCreate}
       part={part}
       pendingSiblingBriefs={pendingSiblingBriefs}
     />
+  );
+}
+
+function RefinementConversation({
+  addToolOutput,
+  busy,
+  currentBrief,
+  error,
+  messages,
+  onRetry,
+  onRevise,
+  status,
+  stop,
+}: {
+  addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
+  busy: boolean;
+  currentBrief: ProposeBriefPart | undefined;
+  error: Error | undefined;
+  messages: ExerciseRefinementMessage[];
+  onRetry: () => Promise<void>;
+  onRevise: (feedback: string) => void;
+  status: "error" | "ready" | "streaming" | "submitted";
+  stop: () => void;
+}) {
+  function submitRevision(message: PromptInputMessage) {
+    if (currentBrief && message.text.trim()) {
+      onRevise(message.text);
+    }
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-card">
+      <header className="flex items-center gap-3 border-b px-5 py-4">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+          <MessageSquareText className="size-4" />
+        </div>
+        <div>
+          <h2 className="font-medium">Conversación</h2>
+          <p className="text-muted-foreground text-sm">
+            Ajusta los requisitos antes de crear el ejercicio.
+          </p>
+        </div>
+      </header>
+      <MessageScrollerProvider autoScroll defaultScrollPosition="last-anchor">
+        <MessageScroller className="min-h-0 flex-1">
+          <MessageScrollerViewport>
+            <MessageScrollerContent className="gap-5 p-5">
+              {messages.map((message) => {
+                const latestStepStart = message.parts.findLastIndex(
+                  (part) => part.type === "step-start"
+                );
+                const latestStepParts = message.parts.slice(
+                  latestStepStart + 1
+                );
+                const pendingQuestions = latestStepParts.filter(
+                  (part) =>
+                    part.type === "tool-askUserQuestion" &&
+                    part.state === "input-available"
+                );
+                const pendingBriefs = latestStepParts.filter(
+                  (part) =>
+                    part.type === "tool-proposeExerciseBrief" &&
+                    part.state === "input-available"
+                );
+
+                return (
+                  <MessageScrollerItem key={message.id} messageId={message.id}>
+                    {message.role === "user" ? (
+                      <Message align="end">
+                        <MessageContent>
+                          <Bubble align="end" variant="default">
+                            <BubbleContent>
+                              {message.parts
+                                .filter((part) => part.type === "text")
+                                .map((part) => part.text)
+                                .join("")}
+                            </BubbleContent>
+                          </Bubble>
+                        </MessageContent>
+                      </Message>
+                    ) : null}
+                    {message.role === "assistant"
+                      ? message.parts
+                          .filter(
+                            (part) =>
+                              part.type === "text" ||
+                              part.type === "tool-askUserQuestion" ||
+                              part.type === "tool-proposeExerciseBrief"
+                          )
+                          .map((part) => (
+                            <AssistantPart
+                              addToolOutput={addToolOutput}
+                              disabled={busy}
+                              hasPendingQuestion={pendingQuestions.length > 0}
+                              key={
+                                part.type === "text"
+                                  ? part.text
+                                  : part.toolCallId
+                              }
+                              part={part}
+                              pendingSiblingBriefs={getPendingSiblingBriefs(
+                                part,
+                                pendingBriefs
+                              )}
+                            />
+                          ))
+                      : null}
+                  </MessageScrollerItem>
+                );
+              })}
+
+              {busy ? (
+                <MessageScrollerItem messageId="streaming-status">
+                  <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-blue-800 text-sm">
+                    <Loader2 className="size-4 animate-spin" />
+                    Revisando los requisitos...
+                  </div>
+                </MessageScrollerItem>
+              ) : null}
+
+              {error ? (
+                <MessageScrollerItem messageId="error">
+                  <div
+                    className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm"
+                    role="alert"
+                  >
+                    <span>No se pudo continuar: {error.message}</span>
+                    <Button onClick={onRetry} size="sm" variant="outline">
+                      Reintentar
+                    </Button>
+                  </div>
+                </MessageScrollerItem>
+              ) : null}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+          <MessageScrollerButton />
+        </MessageScroller>
+      </MessageScrollerProvider>
+      {currentBrief ? (
+        <div className="shrink-0 border-t p-3">
+          <PromptInput onSubmit={submitRevision}>
+            <PromptInputBody>
+              <PromptInputTextarea placeholder="Describe qué quieres cambiar en los requisitos..." />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <p className="text-muted-foreground text-xs">
+                El documento se actualizará con tu mensaje.
+              </p>
+              <PromptInputSubmit onStop={stop} status={status} />
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -694,16 +687,25 @@ export default function CreateExercisePage() {
     resolver: zodResolver(exerciseIdeaSchema),
   });
 
-  const { addToolOutput, error, messages, sendMessage, setMessages, status } =
-    useChat<ExerciseRefinementMessage>({
-      sendAutomaticallyWhen: shouldContinueRefinement,
-      transport: new DefaultChatTransport({
-        api: "/api/exercise-refinement",
-        credentials: "include",
-      }),
-    });
+  const {
+    addToolOutput,
+    error,
+    messages,
+    sendMessage,
+    setMessages,
+    status,
+    stop,
+  } = useChat<ExerciseRefinementMessage>({
+    sendAutomaticallyWhen: shouldContinueRefinement,
+    transport: new DefaultChatTransport({
+      api: "/api/exercise-refinement",
+      credentials: "include",
+    }),
+  });
 
   const busy = status === "submitted" || status === "streaming";
+  const isMobile = useIsMobile();
+  const currentBrief = getPendingBrief(messages);
 
   async function startRefinement(values: ExerciseIdeaSchema) {
     setStarted(true);
@@ -734,6 +736,17 @@ export default function CreateExercisePage() {
     return sendMessage();
   }
 
+  function reviseBrief(feedback: string) {
+    if (!currentBrief) {
+      return;
+    }
+    addToolOutput({
+      output: { accepted: false, feedback },
+      tool: "proposeExerciseBrief",
+      toolCallId: currentBrief.toolCallId,
+    });
+  }
+
   return (
     <div className="-m-4 min-h-[calc(100vh-3rem)] w-[calc(100%+2rem)] bg-linear-to-b from-blue-50/70 via-white to-white px-4 py-8 pb-12 sm:px-6 md:py-10 md:pb-16 lg:px-8">
       <main className="mx-auto w-full max-w-4xl">
@@ -752,110 +765,58 @@ export default function CreateExercisePage() {
               </p>
             </div>
 
-            <div className="space-y-5">
-              {messages.map((message) => {
-                const latestStepStart = message.parts.findLastIndex(
-                  (part) => part.type === "step-start"
-                );
-                const latestStepParts = message.parts.slice(
-                  latestStepStart + 1
-                );
-                const pendingQuestions = latestStepParts.filter(
-                  (part) =>
-                    part.type === "tool-askUserQuestion" &&
-                    part.state === "input-available"
-                );
-                const pendingBriefs = latestStepParts.filter(
-                  (part) =>
-                    part.type === "tool-proposeExerciseBrief" &&
-                    part.state === "input-available"
-                );
-                const activeBriefId = pendingBriefs.at(-1)?.toolCallId;
-
-                return (
-                  <div className="space-y-3" key={message.id}>
-                    {message.role === "user" ? (
-                      <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-blue-700 px-4 py-3 text-sm text-white shadow-sm">
-                        {message.parts.map((part) => {
-                          if (part.type === "text") {
-                            return (
-                              <p
-                                className="whitespace-pre-wrap"
-                                key={part.text}
-                              >
-                                {part.text}
-                              </p>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    ) : null}
-
-                    {message.role === "assistant"
-                      ? message.parts
-                          .filter(
-                            (part) =>
-                              part.type === "text" ||
-                              part.type === "tool-askUserQuestion" ||
-                              part.type === "tool-proposeExerciseBrief"
-                          )
-                          .map((part) => (
-                            <AssistantPart
-                              activeBriefId={activeBriefId}
-                              addToolOutput={addToolOutput}
-                              creating={creating}
-                              disabled={busy}
-                              hasPendingQuestion={pendingQuestions.length > 0}
-                              key={
-                                part.type === "text"
-                                  ? part.text
-                                  : part.toolCallId
-                              }
-                              onCreate={handleCreate}
-                              part={part}
-                              pendingSiblingBriefs={getPendingSiblingBriefs(
-                                part,
-                                pendingBriefs
-                              )}
-                            />
-                          ))
-                      : null}
-                  </div>
-                );
-              })}
-
-              {busy ? (
-                <div
-                  aria-live="polite"
-                  className="flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-blue-800 text-sm"
+            <div className={currentBrief ? "h-[min(720px,70vh)]" : "h-150"}>
+              {currentBrief ? (
+                <ResizablePanelGroup
+                  className="overflow-hidden rounded-xl border shadow-sm"
+                  orientation={isMobile ? "vertical" : "horizontal"}
                 >
-                  <Loader2 className="size-4 animate-spin" />
-                  Revisando los detalles del ejercicio...
+                  <ResizablePanel defaultSize={45} minSize={30}>
+                    <RefinementConversation
+                      addToolOutput={addToolOutput}
+                      busy={busy}
+                      currentBrief={currentBrief}
+                      error={error}
+                      messages={messages}
+                      onRetry={retryRefinement}
+                      onRevise={reviseBrief}
+                      status={status}
+                      stop={stop}
+                    />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel defaultSize={55} minSize={30}>
+                    <RequirementsDocument
+                      brief={currentBrief.input.brief}
+                      creating={creating}
+                      onCreate={() => handleCreate(currentBrief.input.brief)}
+                    />
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              ) : (
+                <div className="h-full overflow-hidden rounded-xl border bg-card shadow-sm">
+                  <RefinementConversation
+                    addToolOutput={addToolOutput}
+                    busy={busy}
+                    currentBrief={undefined}
+                    error={error}
+                    messages={messages}
+                    onRetry={retryRefinement}
+                    onRevise={reviseBrief}
+                    status={status}
+                    stop={stop}
+                  />
                 </div>
-              ) : null}
-
-              {error ? (
-                <div
-                  className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm"
-                  role="alert"
-                >
-                  <span>No se pudo continuar: {error.message}</span>
-                  <Button onClick={retryRefinement} size="sm" variant="outline">
-                    Reintentar
-                  </Button>
-                </div>
-              ) : null}
-
-              {creationError ? (
-                <div
-                  className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm"
-                  role="alert"
-                >
-                  {creationError}
-                </div>
-              ) : null}
+              )}
             </div>
+            {creationError ? (
+              <div
+                className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 text-sm"
+                role="alert"
+              >
+                {creationError}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="mt-12 md:mt-20">

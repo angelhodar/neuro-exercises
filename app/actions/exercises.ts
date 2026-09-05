@@ -4,6 +4,7 @@ import { generateImage, generateText, Output } from "ai";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateAudio } from "@/lib/ai/audio";
+import { formatExerciseBrief } from "@/lib/ai/refinement/format-brief";
 import { assertCanEditExercise } from "@/lib/auth/can-edit-exercise";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
@@ -142,7 +143,7 @@ export async function createExercise(
 ): Promise<Exercise | null> {
   try {
     const parsed = createExerciseSchema.parse(data);
-    const { prompt } = parsed;
+    const prompt = formatExerciseBrief(parsed.brief);
     const user = await requireAuth();
 
     const generatedData = await generateExerciseData(prompt);
@@ -162,7 +163,7 @@ export async function createExercise(
       })
       .returning();
 
-    // Create the first generation with the original prompt
+    // The first Harness turn starts from the specification approved by the user.
     if (created) {
       await createExerciseGeneration({
         exerciseId: created.id,

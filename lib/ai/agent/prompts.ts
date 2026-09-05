@@ -25,7 +25,8 @@ export function buildSystemPrompt(slug: string) {
    - Helper TypeScript, JSON, or Markdown files are allowed inside that same folder
 
   GUIDELINES:
-  - Take existing files (if any) into account and modify them according to new instructions
+   - The first user message may contain an approved specification headed "Especificación acordada del ejercicio". Treat it as the source of truth and resolve implementation details yourself instead of reopening requirements discovery.
+   - Take existing files (if any) into account and modify them according to new instructions
    - Only use UI components from "components/ui" — do NOT install dependencies or use components that don't exist in the project.
 
   USEFUL PROJECT DIRECTORIES:

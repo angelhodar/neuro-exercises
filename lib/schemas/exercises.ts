@@ -1,7 +1,16 @@
 import { z } from "zod";
+import { exerciseBriefSchema } from "./exercise-refinement";
+
+export const exerciseIdeaSchema = z.object({
+  prompt: z
+    .string()
+    .trim()
+    .min(1, "El prompt es obligatorio")
+    .max(5000, "La descripción es demasiado larga"),
+});
 
 export const createExerciseSchema = z.object({
-  prompt: z.string().min(1, "El prompt es obligatorio"),
+  brief: exerciseBriefSchema,
 });
 
 // Schema para editar ejercicios existentes
@@ -60,6 +69,7 @@ export const registerExerciseSchema = z.object({
 });
 
 export type CreateExerciseSchema = z.infer<typeof createExerciseSchema>;
+export type ExerciseIdeaSchema = z.infer<typeof exerciseIdeaSchema>;
 export type UpdateExerciseSchema = z.infer<typeof updateExerciseSchema>;
 export type GeneratedExerciseSchema = z.infer<typeof generatedExerciseSchema>;
 export type RegisterExerciseSchema = z.infer<typeof registerExerciseSchema>;

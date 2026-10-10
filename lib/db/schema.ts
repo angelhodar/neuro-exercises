@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   foreignKey,
   index,
@@ -55,7 +56,7 @@ export const users = pgTable(
     emailVerified: boolean("email_verified").default(false).notNull(),
     id: text().primaryKey(),
     image: text(),
-    name: text(),
+    name: text().notNull(),
     role: text("role"),
     ...timestamps,
   },
@@ -95,7 +96,7 @@ export const accounts = pgTable(
     accountId: text("account_id").notNull(),
     id: text().primaryKey(),
     idToken: text("id_token"),
-    issuer: text().notNull(),
+    issuer: text(),
     password: text(),
     providerId: text("provider_id").notNull(),
     refreshToken: text("refresh_token"),
@@ -105,10 +106,6 @@ export const accounts = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("accounts_issuer_account_id_unique").on(
-      table.issuer,
-      table.accountId
-    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
@@ -130,8 +127,15 @@ export const organization = pgTable("organizations", {
   logo: text("logo"),
   metadata: text("metadata"),
   name: text("name").notNull(),
-  slug: text("slug").unique(),
+  slug: text("slug").notNull().unique(),
   ...timestamps,
+});
+
+export const rateLimit = pgTable("auth_rate_limits", {
+  count: integer().notNull(),
+  id: text().primaryKey(),
+  key: text().notNull().unique(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
 
 export const member = pgTable(

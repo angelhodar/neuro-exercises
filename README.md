@@ -53,6 +53,7 @@ npm run db:push
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string (Neon) |
 | `BETTER_AUTH_SECRET` | Auth secret for Better Auth |
+| `BETTER_AUTH_URL` | Canonical auth origin, including protocol (e.g. `https://example.com`). Legacy `BETTER_AUTH_BASE_URL` is also accepted. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
 | `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key (speech transcription) |
 | `CARTESIA_API_KEY` | Cartesia TTS API key |
@@ -62,6 +63,16 @@ npm run db:push
 | `E2B_API_KEY` | E2B API key (sandboxed execution) |
 | `E2B_TEMPLATE_ID` | E2B sandbox template ID (optional) |
 
+### Authentication and authorization
+
+Public sign-up is disabled; platform administrators provision users. Set a randomly generated `BETTER_AUTH_SECRET` of at least 32 characters and a canonical `BETTER_AUTH_URL` in each deployment.
+
+Apply generated Drizzle migrations before deploying auth changes (`npm run db:migrate`). Authentication rate limits use the shared `auth_rate_limits` table; server-side Better Auth API calls are authorized separately because their rate limits only apply to HTTP endpoints.
+
+Privileged actions revalidate database sessions instead of trusting the short-lived cookie cache. Platform user management requires the `admin` role. Organization management follows Better Auth's organization roles: owners/admins can manage members and settings, only owners can grant ownership or delete an organization, and the last owner cannot be removed. Patient records, sessions, and tests are scoped to their creator.
+
+Organization invitations use Better Auth's lifecycle and require verified recipient email. Email delivery and self-service password recovery require configuring an email provider before enabling those workflows.
+
 ## Available Scripts
 
 | Script | Description |
@@ -69,7 +80,9 @@ npm run db:push
 | `npm run dev` | Start dev server with Turbopack |
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
+| `npm run check` | Check lint and formatting |
+| `npm run ts-check` | Check TypeScript types |
+| `npm run test:auth` | Run isolated PostgreSQL-backed auth and authorization regression tests |
 | `npm run db:studio` | Open Drizzle Studio |
 | `npm run db:generate` | Generate Drizzle migrations |
 | `npm run db:migrate` | Run Drizzle migrations |

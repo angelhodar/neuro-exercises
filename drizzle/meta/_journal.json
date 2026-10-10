@@ -57,6 +57,20 @@
       "when": 1788431769199,
       "tag": "0007_boring_the_spike",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791641284184,
+      "tag": "0008_last_jackpot",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791643874293,
+      "tag": "0009_public_sage",
+      "breakpoints": true
     }
   ]
 }

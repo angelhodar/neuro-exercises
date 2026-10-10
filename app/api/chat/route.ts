@@ -53,7 +53,10 @@ function serializableResumeState(state: unknown) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
+  const session = await auth.api.getSession({
+    headers: req.headers,
+    query: { disableCookieCache: true },
+  });
   if (!session?.user) {
     return new Response("No autorizado", { status: 401 });
   }

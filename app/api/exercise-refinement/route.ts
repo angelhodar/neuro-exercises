@@ -8,7 +8,7 @@ import {
   type ExerciseRefinementMessage,
   exerciseRefinementAgent,
 } from "@/lib/ai/refinement/agent";
-import { auth } from "@/lib/auth/auth.server";
+import { getAuthSession } from "@/lib/auth/require-auth";
 
 const MAX_REFINEMENT_QUESTIONS = 3;
 const MAX_REFINEMENT_PAYLOAD_LENGTH = 250_000;
@@ -45,7 +45,7 @@ type ProposeBriefPart = Extract<
 >;
 
 export async function POST(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: request.headers });
+  const session = await getAuthSession(request.headers);
   if (!session?.user) {
     return new Response("No autorizado", { status: 401 });
   }

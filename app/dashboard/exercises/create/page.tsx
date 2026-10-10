@@ -9,13 +9,12 @@ import {
 } from "ai";
 import { ArrowRight, Brain, FileText, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { z } from "zod";
 import { createExercise } from "@/app/actions/exercises";
-import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
   PromptInput,
   PromptInputBody,
@@ -63,10 +62,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ExerciseRefinementMessage } from "@/lib/ai/refinement/agent";
 import { formatExerciseBrief } from "@/lib/ai/refinement/format-brief";
+import { getRefinementState } from "@/lib/ai/refinement/state";
 import type {
   AskUserQuestionInput,
   AskUserQuestionOutput,
   ExerciseBrief,
+} from "@/lib/schemas/exercise-refinement";
+import {
+  exerciseRevisionSchema,
+  MAX_BRIEF_FEEDBACK_LENGTH,
 } from "@/lib/schemas/exercise-refinement";
 import {
   type ExerciseIdeaSchema,
@@ -327,32 +331,20 @@ function QuestionCard({
   );
 }
 
-function getPendingBrief(messages: ExerciseRefinementMessage[]) {
-  for (const message of [...messages].reverse()) {
-    if (message.role !== "assistant") {
-      continue;
-    }
-    for (const part of [...message.parts].reverse()) {
-      if (
-        part.type === "tool-proposeExerciseBrief" &&
-        part.state === "input-available"
-      ) {
-        return part;
-      }
-    }
-  }
-}
-
 function RequirementsDocument({
   brief,
+  canCreate,
   creationError,
   creating,
   onCreate,
+  statusMessage,
 }: {
   brief: ExerciseBrief;
+  canCreate: boolean;
   creationError: string | null;
   creating: boolean;
   onCreate: () => void;
+  statusMessage: string | undefined;
 }) {
   return (
     <section className="flex h-full min-h-0 flex-col bg-card">
@@ -369,9 +361,11 @@ function RequirementsDocument({
             {creationError}
           </p>
         ) : (
-          <span />
+          <p className="text-muted-foreground text-sm" role="status">
+            {statusMessage}
+          </p>
         )}
-        <Button disabled={creating} onClick={onCreate}>
+        <Button disabled={!canCreate || creating} onClick={onCreate}>
           {creating ? <Loader2 className="animate-spin" /> : <Sparkles />}
           {creating ? "Preparando ejercicio..." : "Crear ejercicio"}
         </Button>
@@ -522,7 +516,9 @@ function AssistantPart({
 function RefinementConversation({
   addToolOutput,
   busy,
-  currentBrief,
+  canRevise,
+  creating,
+  hasBrief,
   error,
   messages,
   onRetry,
@@ -532,18 +528,36 @@ function RefinementConversation({
 }: {
   addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
   busy: boolean;
-  currentBrief: ProposeBriefPart | undefined;
+  canRevise: boolean;
+  creating: boolean;
+  hasBrief: boolean;
   error: Error | undefined;
   messages: ExerciseRefinementMessage[];
   onRetry: () => Promise<void>;
-  onRevise: (feedback: string) => void;
+  onRevise: (feedback: string) => Promise<void>;
   status: "error" | "ready" | "streaming" | "submitted";
   stop: () => void;
 }) {
-  function submitRevision(message: PromptInputMessage) {
-    if (currentBrief && message.text.trim()) {
-      onRevise(message.text);
+  const revisionForm = useForm<z.infer<typeof exerciseRevisionSchema>>({
+    defaultValues: { feedback: "" },
+    resolver: zodResolver(exerciseRevisionSchema),
+  });
+
+  function submitRevision() {
+    if (!canRevise || creating) {
+      return Promise.reject(
+        new Error("Espera a que termine la operación actual")
+      );
     }
+    return revisionForm.handleSubmit(
+      async ({ feedback }) => {
+        await onRevise(feedback);
+        revisionForm.reset();
+      },
+      () => {
+        throw new Error("Revisa los cambios antes de enviarlos");
+      }
+    )();
   }
 
   return (
@@ -597,7 +611,7 @@ function RefinementConversation({
                           .map((part) => (
                             <AssistantPart
                               addToolOutput={addToolOutput}
-                              disabled={busy}
+                              disabled={busy || creating}
                               hasPendingQuestion={pendingQuestions.length > 0}
                               key={
                                 part.type === "text"
@@ -632,7 +646,12 @@ function RefinementConversation({
                     role="alert"
                   >
                     <span>No se pudo continuar: {error.message}</span>
-                    <Button onClick={onRetry} size="sm" variant="outline">
+                    <Button
+                      disabled={busy || creating}
+                      onClick={onRetry}
+                      size="sm"
+                      variant="outline"
+                    >
                       Reintentar
                     </Button>
                   </div>
@@ -643,19 +662,45 @@ function RefinementConversation({
           <MessageScrollerButton />
         </MessageScroller>
       </MessageScrollerProvider>
-      {currentBrief ? (
+      {hasBrief ? (
         <div className="shrink-0 border-t p-3">
-          <PromptInput onSubmit={submitRevision}>
-            <PromptInputBody>
-              <PromptInputTextarea placeholder="Describe qué quieres cambiar en los requisitos..." />
-            </PromptInputBody>
-            <PromptInputFooter>
-              <p className="text-muted-foreground text-xs">
-                El documento se actualizará con tu mensaje.
-              </p>
-              <PromptInputSubmit onStop={stop} status={status} />
-            </PromptInputFooter>
-          </PromptInput>
+          <Form {...revisionForm}>
+            <PromptInput onSubmit={submitRevision}>
+              <PromptInputBody>
+                <FormField
+                  control={revisionForm.control}
+                  name="feedback"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <PromptInputTextarea
+                          {...field}
+                          aria-label="Cambios en los requisitos"
+                          disabled={!canRevise || creating}
+                          maxLength={MAX_BRIEF_FEEDBACK_LENGTH}
+                          name="message"
+                          placeholder="Describe qué quieres cambiar en los requisitos..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </PromptInputBody>
+              <PromptInputFooter>
+                <p className="text-muted-foreground text-xs">
+                  {creating
+                    ? "Creando el ejercicio con esta especificación."
+                    : "El documento se actualizará con tu mensaje."}
+                </p>
+                <PromptInputSubmit
+                  disabled={creating || !(busy || canRevise)}
+                  onStop={stop}
+                  status={status}
+                />
+              </PromptInputFooter>
+            </PromptInput>
+          </Form>
         </div>
       ) : null}
     </div>
@@ -667,6 +712,7 @@ export default function CreateExercisePage() {
   const [started, setStarted] = useState(false);
   const [creating, setCreating] = useState(false);
   const [creationError, setCreationError] = useState<string | null>(null);
+  const creationInProgress = useRef<boolean>(false);
 
   const form = useForm<ExerciseIdeaSchema>({
     defaultValues: { prompt: "" },
@@ -691,14 +737,45 @@ export default function CreateExercisePage() {
 
   const busy = status === "submitted" || status === "streaming";
   const isMobile = useIsMobile();
-  const currentBrief = getPendingBrief(messages);
+  const { displayBrief, pendingBrief, hasPendingQuestion, canUseBrief } =
+    getRefinementState({
+      creating,
+      hasError: Boolean(error),
+      messages,
+      status,
+    });
+  let requirementsStatus: string | undefined;
+  if (creating) {
+    requirementsStatus = "Creando el ejercicio con esta especificación.";
+  } else if (busy) {
+    requirementsStatus = "Actualizando los requisitos...";
+  } else if (hasPendingQuestion) {
+    requirementsStatus =
+      "Responde a las preguntas pendientes antes de crear el ejercicio.";
+  } else if (!canUseBrief) {
+    requirementsStatus = "Reintenta la revisión para completar la propuesta.";
+  }
+
+  const addRefinementToolOutput: ChatAddToolOutputFunction<
+    ExerciseRefinementMessage
+  > = async (options) => {
+    if (creationInProgress.current) {
+      return;
+    }
+    await addToolOutput(options);
+  };
 
   async function startRefinement(values: ExerciseIdeaSchema) {
     setStarted(true);
     await sendMessage({ text: values.prompt });
   }
 
-  async function handleCreate(brief: ExerciseBrief) {
+  async function handleCreate() {
+    if (!(canUseBrief && pendingBrief) || creationInProgress.current) {
+      return;
+    }
+    const { brief } = pendingBrief.input;
+    creationInProgress.current = true;
     setCreating(true);
     setCreationError(null);
     try {
@@ -710,6 +787,7 @@ export default function CreateExercisePage() {
       }
       router.push(`/dashboard/exercises/${created.slug}`);
     } catch {
+      creationInProgress.current = false;
       setCreationError(
         "No se pudo preparar el ejercicio. Revisa la propuesta e inténtalo de nuevo."
       );
@@ -718,18 +796,23 @@ export default function CreateExercisePage() {
   }
 
   function retryRefinement() {
+    if (creationInProgress.current) {
+      return Promise.resolve();
+    }
     setMessages(withoutUnfinishedStep);
     return sendMessage();
   }
 
-  function reviseBrief(feedback: string) {
-    if (!currentBrief) {
-      return;
+  async function reviseBrief(feedback: string) {
+    if (!(canUseBrief && pendingBrief) || creationInProgress.current) {
+      throw new Error("La propuesta todavía no está lista para editarse");
     }
-    addToolOutput({
-      output: { accepted: false, feedback },
+    const input = exerciseRevisionSchema.parse({ feedback });
+    setCreationError(null);
+    await addRefinementToolOutput({
+      output: { accepted: false, feedback: input.feedback },
       tool: "proposeExerciseBrief",
-      toolCallId: currentBrief.toolCallId,
+      toolCallId: pendingBrief.toolCallId,
     });
   }
 
@@ -751,10 +834,12 @@ export default function CreateExercisePage() {
               >
                 <ResizablePanel defaultSize={45} minSize={30}>
                   <RefinementConversation
-                    addToolOutput={addToolOutput}
+                    addToolOutput={addRefinementToolOutput}
                     busy={busy}
-                    currentBrief={currentBrief}
+                    canRevise={canUseBrief}
+                    creating={creating}
                     error={error}
+                    hasBrief={Boolean(displayBrief)}
                     messages={messages}
                     onRetry={retryRefinement}
                     onRevise={reviseBrief}
@@ -764,12 +849,14 @@ export default function CreateExercisePage() {
                 </ResizablePanel>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={55} minSize={30}>
-                  {currentBrief ? (
+                  {displayBrief ? (
                     <RequirementsDocument
-                      brief={currentBrief.input.brief}
+                      brief={displayBrief.input.brief}
+                      canCreate={canUseBrief}
                       creating={creating}
                       creationError={creationError}
-                      onCreate={() => handleCreate(currentBrief.input.brief)}
+                      onCreate={handleCreate}
+                      statusMessage={requirementsStatus}
                     />
                   ) : (
                     <EmptyRequirementsDocument />

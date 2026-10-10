@@ -106,10 +106,24 @@ export const proposeExerciseBriefInputSchema = z.object({
   brief: exerciseBriefSchema,
 });
 
+export const MAX_BRIEF_FEEDBACK_LENGTH = 2000;
+
+const briefFeedbackSchema = z
+  .string()
+  .trim()
+  .max(
+    MAX_BRIEF_FEEDBACK_LENGTH,
+    "Los cambios no pueden superar los 2000 caracteres"
+  );
+
+export const exerciseRevisionSchema = z.object({
+  feedback: briefFeedbackSchema.min(1, "Explica qué quieres ajustar"),
+});
+
 export const proposeExerciseBriefOutputSchema = z
   .object({
     accepted: z.boolean(),
-    feedback: z.string().trim().max(2000).optional(),
+    feedback: briefFeedbackSchema.optional(),
   })
   .superRefine((answer, context) => {
     if (!(answer.accepted || answer.feedback)) {

@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../load-env";
 
 import { drizzle } from "drizzle-orm/neon-http";
 // biome-ignore lint/performance/noNamespaceImport: drizzle requires namespace import for schema

@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../lib/load-env";
 
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { generateEmbeddings } from "@/lib/ai/embedding";

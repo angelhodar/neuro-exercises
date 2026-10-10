@@ -5,7 +5,7 @@ import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import type { z } from "zod";
 import { createUser } from "@/app/actions/users";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,16 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const createUserSchema = z.object({
-  email: z.string().email("Introduce un email válido"),
-  name: z
-    .string()
-    .min(2, "El nombre debe tener al menos 2 caracteres")
-    .max(50, "El nombre no puede exceder 50 caracteres"),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  role: z.enum(["user", "admin"]),
-});
+import { createUserSchema } from "@/lib/schemas/auth";
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 

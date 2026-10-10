@@ -1,25 +1,7 @@
 import { adminClient, organizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-const getBaseURL = () => {
-  if (typeof window !== "undefined") {
-    return window.location.origin;
-  }
-
-  if (!process.env.NEXT_PUBLIC_VERCEL_ENV) {
-    return "http://localhost:3000";
-  }
-
-  const url =
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-      ? process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
-      : process.env.NEXT_PUBLIC_VERCEL_URL;
-
-  return `https://${url}`;
-};
-
 export const authClient = createAuthClient({
-  baseURL: getBaseURL(),
   plugins: [adminClient(), organizationClient()],
 });
 

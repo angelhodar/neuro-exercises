@@ -17,6 +17,7 @@
     "sandbox": "sandbox",
     "sandbox:snapshot": "npx tsx scripts/sandbox.ts",
     "start": "next start",
+    "test:auth": "npx tsx --test scripts/auth-security.test.ts",
     "ts-check": "tsc --noEmit --pretty"
   },
   "dependencies": {

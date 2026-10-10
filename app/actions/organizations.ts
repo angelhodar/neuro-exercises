@@ -1,35 +1,52 @@
 "use server";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { z } from "zod";
 import { auth } from "@/lib/auth/auth.server";
+import { AuthError, requireAdmin, requireAuth } from "@/lib/auth/require-auth";
+import {
+  requireOrganizationManager,
+  requireOrganizationMember,
+} from "@/lib/auth/require-organization";
+import { hasRole } from "@/lib/auth/roles";
 import { db } from "@/lib/db";
 import {
   invitation,
   member,
-  type NewOrganization,
   organization,
   type UpdateOrganization,
+  users,
 } from "@/lib/db/schema";
-import { getCurrentUser } from "./users";
+import {
+  addOrganizationMemberSchema,
+  organizationInputSchema,
+  organizationRoleSchema,
+  organizationSlugSchema,
+} from "@/lib/schemas/auth";
+
+function parseMetadata(value: string | null | undefined) {
+  if (!value) {
+    return;
+  }
+  try {
+    return z.record(z.string(), z.unknown()).parse(JSON.parse(value));
+  } catch {
+    // Preserve legacy free-text metadata when using Better Auth's object API.
+    return { description: value };
+  }
+}
 
 export async function getCurrentUserOrganizations() {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return [];
-    }
-
-    const userOrganizations = await db.query.member.findMany({
+    const user = await requireAuth();
+    const memberships = await db.query.member.findMany({
       orderBy: desc(member.createdAt),
       where: eq(member.userId, user.id),
-      with: {
-        organization: true,
-      },
+      with: { organization: true },
     });
-
-    return userOrganizations.map((m) => m.organization);
+    return memberships.map((membership) => membership.organization);
   } catch (error) {
     console.error("Error getting user organizations:", error);
     return [];
@@ -38,96 +55,85 @@ export async function getCurrentUserOrganizations() {
 
 export async function getAllOrganizations() {
   try {
-    const organizations = await db.query.organization.findMany({
+    const user = await requireAuth();
+    const organizationIds = db
+      .select({ id: member.organizationId })
+      .from(member)
+      .where(eq(member.userId, user.id));
+    return await db.query.organization.findMany({
       orderBy: desc(organization.createdAt),
+      where: hasRole(user.role, "admin")
+        ? undefined
+        : inArray(organization.id, organizationIds),
       with: {
-        invitations: true,
-        members: {
-          with: {
-            user: {
-              columns: {
-                email: true,
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
+        invitations: { columns: { status: true } },
+        members: { columns: { id: true, role: true, userId: true } },
       },
     });
-
-    return organizations;
   } catch (error) {
-    console.error("Error getting all organizations:", error);
+    console.error("Error getting organizations:", error);
     throw error;
   }
 }
 
 export async function getOrganizationById(id: string) {
   try {
+    const user = await requireAuth();
+    const membership = hasRole(user.role, "admin")
+      ? null
+      : await requireOrganizationMember(id);
+    const canManage =
+      hasRole(user.role, "admin") ||
+      hasRole(membership?.role, "admin") ||
+      hasRole(membership?.role, "owner");
     const org = await db.query.organization.findFirst({
       where: eq(organization.id, id),
       with: {
-        invitations: true,
         members: {
-          with: {
-            user: {
-              columns: {
-                email: true,
-                id: true,
-                name: true,
-              },
-            },
-          },
+          with: { user: { columns: { email: true, id: true, name: true } } },
         },
       },
     });
-
-    return org;
+    if (!org) {
+      return;
+    }
+    const invitations = canManage
+      ? await db.query.invitation.findMany({
+          where: eq(invitation.organizationId, id),
+        })
+      : [];
+    return { ...org, invitations };
   } catch (error) {
-    console.error("Error getting organization by id:", error);
+    console.error("Error getting organization:", error);
     throw error;
   }
 }
 
-export async function createOrganization(data: NewOrganization) {
+export async function createOrganization(
+  data: z.input<typeof organizationInputSchema>
+) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = crypto.randomUUID();
+    await requireAuth();
+    const input = organizationInputSchema.parse(data);
     const slug =
-      data.slug ||
-      data.name
+      input.slug ||
+      input.name
         .toLowerCase()
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
-
-    const [newOrg] = await db
-      .insert(organization)
-      .values({
-        id: orgId,
-        logo: data.logo,
-        metadata: data.metadata,
-        name: data.name,
-        slug,
-      })
-      .returning();
-
-    // Add the creator as admin member
-    await db.insert(member).values({
-      id: crypto.randomUUID(),
-      organizationId: orgId,
-      role: "admin",
-      userId: user.id,
+    const parsedSlug = organizationSlugSchema.parse(slug);
+    const created = await auth.api.createOrganization({
+      body: {
+        keepCurrentActiveOrganization: true,
+        logo: input.logo || undefined,
+        metadata: parseMetadata(input.metadata),
+        name: input.name,
+        slug: parsedSlug,
+      },
+      headers: await headers(),
     });
-
-    // Revalidate the main organizations page to show the new organization
     revalidatePath("/dashboard/organizations");
-    return newOrg;
+    return created;
   } catch (error) {
     console.error("Error creating organization:", error);
     throw error;
@@ -136,30 +142,23 @@ export async function createOrganization(data: NewOrganization) {
 
 export async function updateOrganization(id: string, data: UpdateOrganization) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    // Check if user is admin of the organization
-    const userMember = await db.query.member.findFirst({
-      where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
+    await requireOrganizationManager(id);
+    const input = organizationInputSchema.partial().parse(data);
+    const updated = await auth.api.updateOrganization({
+      body: {
+        data: {
+          logo: input.logo,
+          metadata: parseMetadata(input.metadata),
+          name: input.name,
+          slug: input.slug || undefined,
+        },
+        organizationId: id,
+      },
+      headers: await headers(),
     });
-
-    if (userMember?.role !== "admin") {
-      throw new Error("You don't have permission to edit this organization");
-    }
-
-    const updatedOrg = await db
-      .update(organization)
-      .set(data)
-      .where(eq(organization.id, id))
-      .returning();
-
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${id}`);
-    return updatedOrg[0];
+    return updated;
   } catch (error) {
     console.error("Error updating organization:", error);
     throw error;
@@ -168,23 +167,17 @@ export async function updateOrganization(id: string, data: UpdateOrganization) {
 
 export async function deleteOrganization(id: string) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
+    const membership = await requireOrganizationManager(id);
+    if (!hasRole(membership.role, "owner")) {
+      throw new AuthError(
+        "Solo un propietario puede eliminar la organización.",
+        403
+      );
     }
-
-    // Check if user is admin of the organization
-    const userMember = await db.query.member.findFirst({
-      where: and(eq(member.organizationId, id), eq(member.userId, user.id)),
+    await auth.api.deleteOrganization({
+      body: { organizationId: id },
+      headers: await headers(),
     });
-
-    if (userMember?.role !== "admin") {
-      throw new Error("You don't have permission to delete this organization");
-    }
-
-    await db.delete(organization).where(eq(organization.id, id));
-
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${id}`);
   } catch (error) {
@@ -199,42 +192,22 @@ export async function inviteUserToOrganization(
   role = "member"
 ) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    // Check if user is admin of the organization
-    const userMember = await db.query.member.findFirst({
-      where: and(
-        eq(member.organizationId, organizationId),
-        eq(member.userId, user.id)
-      ),
-    });
-
-    if (userMember?.role !== "admin") {
-      throw new Error(
-        "You don't have permission to invite users to this organization"
+    const membership = await requireOrganizationManager(organizationId);
+    const parsedRole = organizationRoleSchema.parse(role);
+    if (parsedRole === "owner" && !hasRole(membership.role, "owner")) {
+      throw new AuthError(
+        "Solo un propietario puede asignar el rol de propietario.",
+        403
       );
     }
-
-    const newInvitation = await db
-      .insert(invitation)
-      .values({
-        email,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        id: crypto.randomUUID(),
-        inviterId: user.id,
-        organizationId,
-        role,
-      })
-      .returning();
-
+    const created = await auth.api.createInvitation({
+      body: { email: z.email().parse(email), organizationId, role: parsedRole },
+      headers: await headers(),
+    });
     revalidatePath("/dashboard/organizations");
-    return newInvitation[0];
+    return created;
   } catch (error) {
-    console.error("Error inviting user to organization:", error);
+    console.error("Error inviting user:", error);
     throw error;
   }
 }
@@ -244,72 +217,48 @@ export async function removeMemberFromOrganization(
   userId: string
 ) {
   try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    // Check if user is admin of the organization
-    const userMember = await db.query.member.findFirst({
+    await requireOrganizationManager(organizationId);
+    const target = await db.query.member.findFirst({
       where: and(
         eq(member.organizationId, organizationId),
-        eq(member.userId, user.id)
+        eq(member.userId, userId)
       ),
     });
-
-    if (userMember?.role !== "admin") {
-      throw new Error(
-        "You don't have permission to remove members from this organization"
-      );
+    if (!target) {
+      throw new Error("Miembro no encontrado.");
     }
-
-    await db
-      .delete(member)
-      .where(
-        and(
-          eq(member.organizationId, organizationId),
-          eq(member.userId, userId)
-        )
-      );
-
+    await auth.api.removeMember({
+      body: { memberIdOrEmail: target.id, organizationId },
+      headers: await headers(),
+    });
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${organizationId}`);
   } catch (error) {
-    console.error("Error removing member from organization:", error);
+    console.error("Error removing member:", error);
     throw error;
   }
 }
 
 export async function getOrgMembers(organizationId?: string) {
   try {
-    const whereClause = organizationId
-      ? eq(member.organizationId, organizationId)
-      : undefined;
-
-    const members = await db.query.member.findMany({
+    const user = await requireAuth();
+    if (organizationId && !hasRole(user.role, "admin")) {
+      await requireOrganizationMember(organizationId);
+    } else if (!organizationId) {
+      await requireAdmin();
+    }
+    return await db.query.member.findMany({
       orderBy: member.createdAt,
-      where: whereClause,
+      where: organizationId
+        ? eq(member.organizationId, organizationId)
+        : undefined,
       with: {
-        organization: {
-          columns: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
+        organization: { columns: { id: true, name: true, slug: true } },
         user: {
-          columns: {
-            createdAt: true,
-            email: true,
-            id: true,
-            name: true,
-          },
+          columns: { createdAt: true, email: true, id: true, name: true },
         },
       },
     });
-
-    return members;
   } catch (error) {
     console.error("Error getting organization members:", error);
     throw error;
@@ -317,33 +266,47 @@ export async function getOrgMembers(organizationId?: string) {
 }
 
 export async function addMemberToOrganization(
-  userId: string,
+  email: string,
   role: "member" | "admin" | "owner",
   organizationId: string
 ) {
   try {
-    if (!(userId && role && organizationId)) {
-      return { error: "Faltan campos requeridos" };
+    const membership = await requireOrganizationManager(organizationId);
+    const input = addOrganizationMemberSchema.parse({
+      email,
+      organizationId,
+      role,
+    });
+    if (input.role === "owner" && !hasRole(membership.role, "owner")) {
+      throw new AuthError(
+        "Solo un propietario puede asignar el rol de propietario.",
+        403
+      );
     }
-
-    // Add the member to the organization using Better Auth API
-    const result = await auth.api.addMember({
+    const target = await db.query.users.findFirst({
+      columns: { id: true },
+      where: eq(users.email, input.email),
+    });
+    if (!target) {
+      return { error: "No se encontró un usuario con ese email" };
+    }
+    await auth.api.addMember({
       body: {
-        organizationId,
-        role,
-        userId,
+        organizationId: input.organizationId,
+        role: input.role,
+        userId: target.id,
       },
     });
-
-    if (!result) {
-      return { error: "Error al agregar miembro" };
-    }
-
     revalidatePath(`/dashboard/organizations/${organizationId}`);
     revalidatePath("/dashboard/organizations");
     return { success: true };
   } catch (error) {
     console.error("Error adding member:", error);
-    return { error: "Error interno del servidor" };
+    return {
+      error:
+        error instanceof AuthError
+          ? error.message
+          : "No se pudo agregar el miembro",
+    };
   }
 }

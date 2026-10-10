@@ -145,7 +145,10 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  isAdmin,
+  ...props
+}: ComponentProps<typeof Sidebar> & { isAdmin: boolean }) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -197,14 +200,16 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Gestión</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.management.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton render={<Link href={item.url} />}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {data.management
+                .filter((item) => isAdmin || item.url !== "/dashboard/users")
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton render={<Link href={item.url} />}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

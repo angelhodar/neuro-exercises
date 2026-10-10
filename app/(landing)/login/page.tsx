@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,13 +53,16 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        console.log(result.error);
+        toast.error(
+          "No se pudo iniciar sesión. Comprueba tus credenciales e inténtalo de nuevo."
+        );
         return;
       }
 
       router.push("/dashboard");
     } catch (error) {
       console.error("Error en login:", error);
+      toast.error("No se pudo iniciar sesión. Inténtalo de nuevo.");
     } finally {
       setIsLoading(false);
     }

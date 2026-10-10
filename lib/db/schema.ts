@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   foreignKey,
   index,
@@ -55,7 +56,7 @@ export const users = pgTable(
     emailVerified: boolean("email_verified").default(false).notNull(),
     id: text().primaryKey(),
     image: text(),
-    name: text(),
+    name: text().notNull(),
     role: text("role"),
     ...timestamps,
   },
@@ -126,8 +127,15 @@ export const organization = pgTable("organizations", {
   logo: text("logo"),
   metadata: text("metadata"),
   name: text("name").notNull(),
-  slug: text("slug").unique(),
+  slug: text("slug").notNull().unique(),
   ...timestamps,
+});
+
+export const rateLimit = pgTable("auth_rate_limits", {
+  count: integer().notNull(),
+  id: text().primaryKey(),
+  key: text().notNull().unique(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });
 
 export const member = pgTable(

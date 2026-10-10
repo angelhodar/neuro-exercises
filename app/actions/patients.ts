@@ -1,17 +1,93 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import {
   type NewPatient,
   type NewPatientSession,
   type NewPatientTest,
+  patientInsertSchema,
+  patientSessionInsertSchema,
   patientSessions,
+  patientSessionUpdateSchema,
   patients,
+  patientTestInsertSchema,
   patientTests,
+  patientTestUpdateSchema,
+  patientUpdateSchema,
 } from "@/lib/db/schema";
 import { getCurrentUser } from "./users";
+
+const patientInputSchema = patientInsertSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  updatedAt: true,
+});
+const patientEditSchema = patientUpdateSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  updatedAt: true,
+});
+const sessionInputSchema = patientSessionInsertSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  updatedAt: true,
+});
+const sessionEditSchema = patientSessionUpdateSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  patientId: true,
+  updatedAt: true,
+});
+const testInputSchema = patientTestInsertSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  updatedAt: true,
+});
+const testEditSchema = patientTestUpdateSchema.omit({
+  createdAt: true,
+  creatorId: true,
+  id: true,
+  patientId: true,
+  updatedAt: true,
+});
+
+async function assertPatientAccess(patientId: number, userId: string) {
+  const patient = await db.query.patients.findFirst({
+    columns: { id: true },
+    where: and(eq(patients.id, patientId), eq(patients.creatorId, userId)),
+  });
+  if (!patient) {
+    throw new Error("Paciente no encontrado.");
+  }
+}
+
+async function assertSessionAccess(
+  sessionId: number | null | undefined,
+  patientId: number,
+  userId: string
+) {
+  if (sessionId === null || sessionId === undefined) {
+    return;
+  }
+  const session = await db.query.patientSessions.findFirst({
+    columns: { id: true },
+    where: and(
+      eq(patientSessions.id, sessionId),
+      eq(patientSessions.patientId, patientId),
+      eq(patientSessions.creatorId, userId)
+    ),
+  });
+  if (!session) {
+    throw new Error("Sesión no encontrada.");
+  }
+}
 
 // --- Patients ---
 
@@ -40,7 +116,7 @@ export async function getPatientById(id: number) {
     }
 
     return await db.query.patients.findFirst({
-      where: eq(patients.id, id),
+      where: and(eq(patients.id, id), eq(patients.creatorId, user.id)),
       with: {
         patientSessions: {
           orderBy: desc(patientSessions.date),
@@ -67,7 +143,7 @@ export async function createPatient(
 
     const [newPatient] = await db
       .insert(patients)
-      .values({ ...data, creatorId: user.id })
+      .values({ ...patientInputSchema.parse(data), creatorId: user.id })
       .returning();
 
     revalidatePath("/dashboard/patients");
@@ -92,9 +168,13 @@ export async function updatePatient(
 
     const [updated] = await db
       .update(patients)
-      .set(data)
-      .where(eq(patients.id, id))
+      .set(patientEditSchema.parse(data))
+      .where(and(eq(patients.id, id), eq(patients.creatorId, user.id)))
       .returning();
+
+    if (!updated) {
+      throw new Error("Paciente no encontrado.");
+    }
 
     revalidatePath("/dashboard/patients");
     revalidatePath(`/dashboard/patients/${id}`);
@@ -112,7 +192,13 @@ export async function deletePatient(id: number) {
       throw new Error("Unauthorized");
     }
 
-    await db.delete(patients).where(eq(patients.id, id));
+    const [deleted] = await db
+      .delete(patients)
+      .where(and(eq(patients.id, id), eq(patients.creatorId, user.id)))
+      .returning({ id: patients.id });
+    if (!deleted) {
+      throw new Error("Paciente no encontrado.");
+    }
 
     revalidatePath("/dashboard/patients");
   } catch (error) {
@@ -132,9 +218,11 @@ export async function createPatientSession(
       throw new Error("Unauthorized");
     }
 
+    const input = sessionInputSchema.parse(data);
+    await assertPatientAccess(input.patientId, user.id);
     const [newSession] = await db
       .insert(patientSessions)
-      .values({ ...data, creatorId: user.id })
+      .values({ ...input, creatorId: user.id })
       .returning();
 
     revalidatePath(`/dashboard/patients/${data.patientId}`);
@@ -158,11 +246,22 @@ export async function updatePatientSession(
       throw new Error("Unauthorized");
     }
 
+    await assertPatientAccess(patientId, user.id);
     const [updated] = await db
       .update(patientSessions)
-      .set(data)
-      .where(eq(patientSessions.id, id))
+      .set(sessionEditSchema.parse(data))
+      .where(
+        and(
+          eq(patientSessions.id, id),
+          eq(patientSessions.patientId, patientId),
+          eq(patientSessions.creatorId, user.id)
+        )
+      )
       .returning();
+
+    if (!updated) {
+      throw new Error("Sesión no encontrada.");
+    }
 
     revalidatePath(`/dashboard/patients/${patientId}`);
     return updated;
@@ -179,7 +278,20 @@ export async function deletePatientSession(id: number, patientId: number) {
       throw new Error("Unauthorized");
     }
 
-    await db.delete(patientSessions).where(eq(patientSessions.id, id));
+    await assertPatientAccess(patientId, user.id);
+    const [deleted] = await db
+      .delete(patientSessions)
+      .where(
+        and(
+          eq(patientSessions.id, id),
+          eq(patientSessions.patientId, patientId),
+          eq(patientSessions.creatorId, user.id)
+        )
+      )
+      .returning({ id: patientSessions.id });
+    if (!deleted) {
+      throw new Error("Sesión no encontrada.");
+    }
 
     revalidatePath(`/dashboard/patients/${patientId}`);
   } catch (error) {
@@ -199,9 +311,12 @@ export async function createPatientTest(
       throw new Error("Unauthorized");
     }
 
+    const input = testInputSchema.parse(data);
+    await assertPatientAccess(input.patientId, user.id);
+    await assertSessionAccess(input.sessionId, input.patientId, user.id);
     const [newTest] = await db
       .insert(patientTests)
-      .values({ ...data, creatorId: user.id })
+      .values({ ...input, creatorId: user.id })
       .returning();
 
     revalidatePath(`/dashboard/patients/${data.patientId}`);
@@ -225,11 +340,24 @@ export async function updatePatientTest(
       throw new Error("Unauthorized");
     }
 
+    const input = testEditSchema.parse(data);
+    await assertPatientAccess(patientId, user.id);
+    await assertSessionAccess(input.sessionId, patientId, user.id);
     const [updated] = await db
       .update(patientTests)
-      .set(data)
-      .where(eq(patientTests.id, id))
+      .set(input)
+      .where(
+        and(
+          eq(patientTests.id, id),
+          eq(patientTests.patientId, patientId),
+          eq(patientTests.creatorId, user.id)
+        )
+      )
       .returning();
+
+    if (!updated) {
+      throw new Error("Prueba no encontrada.");
+    }
 
     revalidatePath(`/dashboard/patients/${patientId}`);
     return updated;
@@ -246,7 +374,20 @@ export async function deletePatientTest(id: number, patientId: number) {
       throw new Error("Unauthorized");
     }
 
-    await db.delete(patientTests).where(eq(patientTests.id, id));
+    await assertPatientAccess(patientId, user.id);
+    const [deleted] = await db
+      .delete(patientTests)
+      .where(
+        and(
+          eq(patientTests.id, id),
+          eq(patientTests.patientId, patientId),
+          eq(patientTests.creatorId, user.id)
+        )
+      )
+      .returning({ id: patientTests.id });
+    if (!deleted) {
+      throw new Error("Prueba no encontrada.");
+    }
 
     revalidatePath(`/dashboard/patients/${patientId}`);
   } catch (error) {

@@ -1,4 +1,5 @@
 import { Building2, User } from "lucide-react";
+import { redirect } from "next/navigation";
 import { getUsers } from "@/app/actions/users";
 import {
   DashboardHeader,
@@ -14,12 +15,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { hasRole } from "@/lib/auth/roles";
 import { formatDate } from "@/lib/utils";
 import AddUserButton from "./add-user-button";
 
 export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
+  const currentUser = await requireAuth();
+  if (!hasRole(currentUser.role, "admin")) {
+    redirect("/dashboard");
+  }
   const users = await getUsers();
 
   return (

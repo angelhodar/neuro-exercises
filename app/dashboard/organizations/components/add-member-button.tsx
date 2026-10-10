@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { authClient } from "@/lib/auth/auth.client";
 
 const addMemberSchema = z.object({
   email: z.string().email("Introduce un email válido"),
@@ -42,10 +41,12 @@ const addMemberSchema = z.object({
 type AddMemberFormValues = z.infer<typeof addMemberSchema>;
 
 interface AddMemberButtonProps {
+  allowOwnerRole: boolean;
   organizationId: string;
 }
 
 export default function AddMemberButton({
+  allowOwnerRole,
   organizationId,
 }: AddMemberButtonProps) {
   const [open, setOpen] = useState(false);
@@ -62,31 +63,8 @@ export default function AddMemberButton({
   const onAddMemberSubmit = async (values: AddMemberFormValues) => {
     setIsLoading(true);
     try {
-      // First, we need to find the user by email
-      const users = await authClient.admin.listUsers({
-        query: {
-          searchField: "email",
-          searchOperator: "contains",
-          searchValue: values.email,
-        },
-      });
-
-      if (users.error) {
-        toast.error(`Error al buscar usuario: ${users.error}`);
-        return;
-      }
-
-      const userList = users.data?.users || [];
-      const user = userList.find((u) => u.email === values.email);
-
-      if (!user) {
-        toast.error("No se encontró un usuario con ese email");
-        return;
-      }
-
-      // Add the user to the organization using the server action
       const result = await addMemberToOrganization(
-        user.id,
+        values.email,
         values.role,
         organizationId
       );
@@ -152,7 +130,9 @@ export default function AddMemberButton({
                       items={[
                         { label: "Miembro", value: "member" },
                         { label: "Administrador", value: "admin" },
-                        { label: "Propietario", value: "owner" },
+                        ...(allowOwnerRole
+                          ? [{ label: "Propietario", value: "owner" }]
+                          : []),
                       ]}
                       onValueChange={field.onChange}
                     >
@@ -164,7 +144,9 @@ export default function AddMemberButton({
                       <SelectContent>
                         <SelectItem value="member">Miembro</SelectItem>
                         <SelectItem value="admin">Administrador</SelectItem>
-                        <SelectItem value="owner">Propietario</SelectItem>
+                        {!!allowOwnerRole && (
+                          <SelectItem value="owner">Propietario</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

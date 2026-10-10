@@ -20,6 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { hasRole } from "@/lib/auth/roles";
 import { formatDate } from "@/lib/utils";
 import AddMemberButton from "../components/add-member-button";
 import EditOrganizationButton from "../components/edit-organization-button";
@@ -30,6 +32,7 @@ export default async function OrganizationPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
+  const user = await requireAuth();
 
   const [organization, members] = await Promise.all([
     getOrganizationById(resolvedParams.id),
@@ -39,6 +42,9 @@ export default async function OrganizationPage({
   if (!organization) {
     notFound();
   }
+  const membership = members.find((entry) => entry.userId === user.id);
+  const isOwner = hasRole(membership?.role, "owner");
+  const canManage = isOwner || hasRole(membership?.role, "admin");
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
@@ -50,11 +56,18 @@ export default async function OrganizationPage({
           </DashboardHeaderDescription>
         </div>
         <div className="flex items-center gap-2">
-          <EditOrganizationButton organization={organization}>
-            <Edit className="h-4 w-4" />
-            Editar
-          </EditOrganizationButton>
-          <AddMemberButton organizationId={resolvedParams.id} />
+          {!!canManage && (
+            <EditOrganizationButton organization={organization}>
+              <Edit className="h-4 w-4" />
+              Editar
+            </EditOrganizationButton>
+          )}
+          {!!canManage && (
+            <AddMemberButton
+              allowOwnerRole={isOwner}
+              organizationId={resolvedParams.id}
+            />
+          )}
           {/*<Button variant="outline" render={<Link
               href={`/dashboard/organizations/${resolvedParams.id}/invitations`}
             />}>

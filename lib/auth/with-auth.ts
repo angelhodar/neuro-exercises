@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth.server";
-import type { User } from "@/lib/db/schema";
+import { AuthError, type AuthUser, requireAuth } from "./require-auth";
 
 interface AuthContext<T = unknown> {
   params: T;
-  user: User;
+  user: AuthUser;
 }
 
 type AuthenticatedHandler<T = unknown> = (
@@ -22,24 +21,21 @@ export function withAuth<T = unknown>(
 ): OriginalHandler<T> {
   return async (request: NextRequest, context: { params: T }) => {
     try {
-      const session = await auth.api.getSession({
-        headers: request.headers,
-      });
-
-      if (!session?.user) {
-        return NextResponse.json(
-          { error: "No autorizado. Debes iniciar sesión." },
-          { status: 401 }
-        );
-      }
+      const user = await requireAuth(request.headers);
 
       const authContext: AuthContext<T> = {
         params: context.params,
-        user: session.user as User,
+        user,
       };
 
       return await handler(request, authContext);
     } catch (error) {
+      if (error instanceof AuthError) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: error.status }
+        );
+      }
       console.error("Error en withAuth middleware:", error);
       return NextResponse.json(
         { error: "Error interno del servidor" },

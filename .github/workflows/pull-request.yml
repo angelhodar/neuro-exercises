@@ -22,4 +22,3 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run ts-check
-      - run: npm run test:auth

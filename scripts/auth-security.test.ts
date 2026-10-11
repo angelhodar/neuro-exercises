@@ -9,6 +9,7 @@ import { admin } from "better-auth/plugins/admin";
 import { organization as organizationPlugin } from "better-auth/plugins/organization";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
+import type { ExerciseRefinementMessage } from "../lib/ai/refinement/agent";
 // biome-ignore lint/performance/noNamespaceImport: Drizzle requires the relation schema
 import * as schema from "../lib/db/schema";
 
@@ -108,6 +109,9 @@ before(async () => {
       ('existing-owner', 'owned-org', 'legacy-user', 'owner', '2020-01-02');
   `);
   await postgres.exec(await readFile("drizzle/0009_public_sage.sql", "utf8"));
+  await postgres.exec(
+    await readFile("drizzle/0010_exercise_requirement_drafts.sql", "utf8")
+  );
 
   const nextHeaders = require("next/headers") as typeof import("next/headers");
   const nextCache = require("next/cache") as typeof import("next/cache");
@@ -520,6 +524,174 @@ test("patient data and child records cannot be accessed or mutated by another us
   await patientsActions.updatePatientTest(result.id, patient.id, {
     score: "Updated",
   });
+});
+
+test("requirements drafts persist messages and are private to their creator", async () => {
+  const { createRequirementDraft } = await import(
+    "../app/actions/exercise-requirement-drafts"
+  );
+  const {
+    findRequirementDraft,
+    listRequirementDrafts,
+    saveRequirementDraftTurn,
+    saveRequirementDraftResponse,
+  } = await import("../lib/ai/refinement/draft-repository");
+  setRequestCookie();
+  await assert.rejects(createRequirementDraft("Private idea"));
+  setRequestCookie(ownerCookie);
+  await assert.rejects(createRequirementDraft(" "));
+  const { id } = await createRequirementDraft("An attention exercise");
+  const initial = await findRequirementDraft(id, ownerId);
+  assert.ok(initial);
+  assert.equal(initial.revision, 0);
+  assert.equal(initial.messages[0].parts[0].type, "text");
+  assert.ok(
+    (await listRequirementDrafts(ownerId)).some((draft) => draft.id === id)
+  );
+  const memberUser = await localAuth.api.getSession({
+    headers: new Headers({ cookie: memberCookie }),
+    query: { disableCookieCache: true },
+  });
+  assert.ok(memberUser);
+  assert.equal(await findRequirementDraft(id, memberUser.user.id), undefined);
+  assert.ok(
+    !(await listRequirementDrafts(memberUser.user.id)).some(
+      (draft) => draft.id === id
+    )
+  );
+  assert.equal(
+    await saveRequirementDraftTurn({
+      creatorId: memberUser.user.id,
+      id,
+      messages: [],
+      revision: 0,
+    }),
+    undefined
+  );
+
+  const claimed = await saveRequirementDraftTurn({
+    creatorId: ownerId,
+    id,
+    messages: initial.messages,
+    revision: 0,
+  });
+  assert.equal(claimed?.revision, 1);
+  const messages: ExerciseRefinementMessage[] = [
+    ...initial.messages,
+    {
+      id: "saved-question",
+      parts: [
+        { type: "step-start" },
+        {
+          input: { question: "How long?" },
+          state: "input-available",
+          toolCallId: "question-1",
+          type: "tool-askUserQuestion",
+        },
+      ],
+      role: "assistant",
+    },
+  ];
+  await saveRequirementDraftResponse({
+    creatorId: ownerId,
+    id,
+    messages,
+    revision: 1,
+  });
+  assert.deepEqual(
+    (await findRequirementDraft(id, ownerId))?.messages,
+    messages
+  );
+  assert.equal(
+    await saveRequirementDraftTurn({
+      creatorId: ownerId,
+      id,
+      messages: [],
+      revision: 0,
+    }),
+    undefined
+  );
+  assert.deepEqual(
+    (await findRequirementDraft(id, ownerId))?.messages,
+    messages
+  );
+  await assert.rejects(
+    saveRequirementDraftResponse({
+      creatorId: memberUser.user.id,
+      id,
+      messages: [],
+      revision: 1,
+    })
+  );
+
+  const answered: ExerciseRefinementMessage[] = [
+    messages[0],
+    {
+      ...messages[1],
+      parts: [
+        {
+          input: { question: "How long?" },
+          output: { selected: ["Two minutes"] },
+          state: "output-available",
+          toolCallId: "question-1",
+          type: "tool-askUserQuestion",
+        },
+      ],
+    },
+  ];
+  assert.equal(
+    (
+      await saveRequirementDraftTurn({
+        creatorId: ownerId,
+        id,
+        messages: answered,
+        revision: 1,
+      })
+    )?.revision,
+    2
+  );
+  await assert.rejects(
+    saveRequirementDraftResponse({
+      creatorId: ownerId,
+      id,
+      messages,
+      revision: 1,
+    })
+  );
+  assert.deepEqual(
+    (await findRequirementDraft(id, ownerId))?.messages,
+    answered
+  );
+});
+
+test("requirements API rejects foreign and stale drafts before calling the agent", async () => {
+  const { createRequirementDraft } = await import(
+    "../app/actions/exercise-requirement-drafts"
+  );
+  const { POST } = await import("../app/api/exercise-refinement/route");
+  const { findRequirementDraft } = await import(
+    "../lib/ai/refinement/draft-repository"
+  );
+  setRequestCookie(ownerCookie);
+  const { id } = await createRequirementDraft("Private requirements");
+  const draft = await findRequirementDraft(id, ownerId);
+  assert.ok(draft);
+  const request = (cookie: string, revision: number) =>
+    new Request("http://localhost:3000/api/exercise-refinement", {
+      body: JSON.stringify({ draftId: id, messages: draft.messages, revision }),
+      headers: { "content-type": "application/json", cookie },
+      method: "POST",
+    });
+  const { NextRequest } = await import("next/server");
+  assert.equal(
+    (await POST(new NextRequest(request(memberCookie, 0)))).status,
+    404
+  );
+  assert.equal(
+    (await POST(new NextRequest(request(ownerCookie, 99)))).status,
+    409
+  );
+  assert.equal((await findRequirementDraft(id, ownerId))?.revision, 0);
 });
 
 test("revoked sessions are rejected even with an unexpired cookie cache", async () => {

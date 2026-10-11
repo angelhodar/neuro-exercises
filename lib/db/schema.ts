@@ -21,6 +21,7 @@ import {
   createSelectSchema,
   createUpdateSchema,
 } from "drizzle-zod";
+import type { ExerciseRefinementMessage } from "../ai/refinement/agent";
 import type { BaseExerciseConfig } from "../schemas/base-schemas";
 
 interface ConfigSchema extends BaseExerciseConfig {
@@ -218,6 +219,35 @@ export const exercises = pgTable(
       columns: [table.creatorId],
       foreignColumns: [users.id],
       name: "exercises_creator_fk",
+    }).onDelete("set null"),
+  ]
+);
+
+export const exerciseRequirementDrafts = pgTable(
+  "exercise_requirement_drafts",
+  {
+    createdExerciseId: integer("created_exercise_id"),
+    creatorId: text("creator_id").notNull(),
+    id: text().primaryKey(),
+    messages: jsonb()
+      .$type<ExerciseRefinementMessage[]>()
+      .notNull()
+      .default([]),
+    revision: integer().notNull().default(0),
+    title: text().notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("exercise_requirement_drafts_creator_idx").on(table.creatorId),
+    foreignKey({
+      columns: [table.creatorId],
+      foreignColumns: [users.id],
+      name: "exercise_requirement_drafts_creator_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.createdExerciseId],
+      foreignColumns: [exercises.id],
+      name: "exercise_requirement_drafts_exercise_fk",
     }).onDelete("set null"),
   ]
 );

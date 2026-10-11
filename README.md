@@ -7,6 +7,7 @@ A neurological rehabilitation platform with AI-powered cognitive exercises, spee
 ## Features
 
 - **AI-powered exercise generation** — Create cognitive exercises via a natural language chat interface using AI (Google Gemini, Together AI, Groq)
+- **Saved exercise requirements drafts** — Submitted ideas, refinement questions/answers, revisions, and proposed briefs are saved privately per user. Reopen drafts from “Mis borradores” on the creation page or their `?draft=` URL. Unsubmitted text is not saved. Interrupted refinements can be retried with “Continuar borrador”; live streams are not resumed.
 - **Speech recognition & text-to-speech** — Cartesia-based Spanish TTS and speech transcription via Groq
 - **Media management** — Upload and manage images, audio, and video via Vercel Blob
 - **Exercise templates** — Configurable presets (easy/medium/hard) with shareable exercise links
@@ -42,6 +43,12 @@ npm run dev
 ```
 
 ### Database Setup
+
+Apply migrations (including `0010_exercise_requirement_drafts.sql`) before using saved requirements drafts:
+
+```bash
+npm run db:migrate
+```
 
 ```bash
 npm run db:push

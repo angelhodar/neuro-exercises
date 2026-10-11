@@ -1,15 +1,17 @@
 "use server";
 
 import { generateImage, generateText, Output } from "ai";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateAudio } from "@/lib/ai/audio";
+import { findRequirementDraft } from "@/lib/ai/refinement/draft-repository";
 import { formatExerciseBrief } from "@/lib/ai/refinement/format-brief";
+import { getRefinementState } from "@/lib/ai/refinement/state";
 import { assertCanEditExercise } from "@/lib/auth/can-edit-exercise";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import type { Exercise } from "@/lib/db/schema";
-import { exercises } from "@/lib/db/schema";
+import { exerciseRequirementDrafts, exercises } from "@/lib/db/schema";
 import {
   type CreateExerciseSchema,
   createExerciseSchema,
@@ -143,8 +145,30 @@ export async function createExercise(
 ): Promise<Exercise | null> {
   try {
     const parsed = createExerciseSchema.parse(data);
-    const prompt = formatExerciseBrief(parsed.brief);
     const user = await requireAuth();
+    let { brief } = parsed;
+    if (parsed.draftId) {
+      const draft = await findRequirementDraft(parsed.draftId, user.id);
+      if (!draft || draft.revision !== parsed.draftRevision) {
+        throw new Error(
+          "El borrador cambió. Recarga antes de crear el ejercicio."
+        );
+      }
+      if (draft.createdExerciseId) {
+        return getExerciseById(draft.createdExerciseId);
+      }
+      const { pendingBrief, canUseBrief } = getRefinementState({
+        creating: false,
+        hasError: false,
+        messages: draft.messages,
+        status: "ready",
+      });
+      if (!(canUseBrief && pendingBrief)) {
+        throw new Error("El borrador no está listo para crear el ejercicio.");
+      }
+      ({ brief } = pendingBrief.input);
+    }
+    const prompt = formatExerciseBrief(brief);
 
     const generatedData = await generateExerciseData(prompt);
 
@@ -169,6 +193,17 @@ export async function createExercise(
         exerciseId: created.id,
         prompt,
       });
+      if (parsed.draftId) {
+        await db
+          .update(exerciseRequirementDrafts)
+          .set({ createdExerciseId: created.id })
+          .where(
+            and(
+              eq(exerciseRequirementDrafts.id, parsed.draftId),
+              eq(exerciseRequirementDrafts.creatorId, user.id)
+            )
+          );
+      }
     }
 
     revalidatePath("/dashboard");

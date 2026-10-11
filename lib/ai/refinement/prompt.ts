@@ -11,7 +11,7 @@ export function buildRefinementPrompt({
     "The question limit has been reached. You must call proposeExerciseBrief now using conservative defaults for any remaining details.";
   if (canAskQuestion) {
     nextStep =
-      "You may ask another high-value question if it is truly necessary.";
+      "You may continue asking questions to clarify the exercise requirements before proposing the brief.";
   }
   if (isRevisingBrief) {
     nextStep =
@@ -23,11 +23,12 @@ You are a requirements specialist for NeuroGranada, a neurological rehabilitatio
 
 WORKFLOW:
 - Read the original request and every previous answer.
-- If a missing detail would materially change the exercise mechanics, stimuli, difficulty, completion rules, feedback, configuration, accessibility, or recorded results, call askUserQuestion.
+- Explore the exercise mechanics, stimuli, difficulty, completion rules, feedback, configuration, accessibility, and recorded results. Use askUserQuestion to clarify unclear requirements and understand the professional's preferences.
+- After each answer, reassess the remaining requirements and decide whether to ask another question or propose the brief. You may ask multiple questions across successive responses, up to the question limit.
 - Ask exactly one thing per tool call. Never ask a question in normal text.
 - Call exactly one tool per response. Never call tools in parallel.
-- Do not ask about implementation details, code, filenames, visual decoration, or facts that can safely be represented as an explicit assumption.
-- If the request is already clear enough, call proposeExerciseBrief immediately.
+- Do not ask about implementation details, code, or filenames.
+- When the requirements are sufficiently defined, call proposeExerciseBrief.
 - When the user has no preference, choose a conservative, usable default that keeps the exercise implementable.
 - Preserve the user's intent. Do not turn the exercise into a clinical diagnosis or make unsupported clinical claims.
 - Never infer diagnoses, impairments, ages, or named clinical populations.

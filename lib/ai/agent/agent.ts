@@ -11,7 +11,7 @@ const pi = createPi({
 export const exerciseAgent = new HarnessAgent({
   callOptionsSchema: z.object({ slug: z.string() }),
   harness: pi,
-  model: "anthropic/claude-sonnet-5",
+  model: "anthropic/claude-sonnet-5.5",
   permissionMode: "allow-all",
   prepareCall: ({ options, ...call }) => ({
     ...call,

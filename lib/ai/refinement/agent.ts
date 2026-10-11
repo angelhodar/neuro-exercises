@@ -9,7 +9,7 @@ export const exerciseRefinementAgent = new ToolLoopAgent({
     isRevisingBrief: z.boolean(),
     questionsAsked: z.number().int().min(0),
   }),
-  model: "google/gemini-3.8-flash",
+  model: "anthropic/claude-sonnet-5.5",
   prepareCall: ({ options, ...settings }) => ({
     ...settings,
     activeTools:

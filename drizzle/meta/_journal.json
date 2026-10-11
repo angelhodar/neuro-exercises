@@ -71,6 +71,13 @@
       "when": 1791643874293,
       "tag": "0009_public_sage",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791725517352,
+      "tag": "0010_exercise_requirement_drafts",
+      "breakpoints": true
     }
   ]
 }

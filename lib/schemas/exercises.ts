@@ -11,6 +11,8 @@ export const exerciseIdeaSchema = z.object({
 
 export const createExerciseSchema = z.object({
   brief: exerciseBriefSchema,
+  draftId: z.uuid().optional(),
+  draftRevision: z.number().int().min(0).optional(),
 });
 
 // Schema para editar ejercicios existentes

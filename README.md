@@ -1,121 +1,55 @@
 # NeuroGranada
 
-A neurological rehabilitation platform with AI-powered cognitive exercises, speech recognition, and media management.
+[neurogranada.com](https://neurogranada.com) · Cognitive rehabilitation exercises created and refined through natural-language chat.
 
-**[neurogranada.com](https://neurogranada.com)**
+The goal is to let non-technical rehabilitation professionals describe an interactive exercise, refine it with AI, preview it alongside the chat, and configure it for a rehabilitation session. A media library supplies reusable images, audio, and video.
 
-## Features
+## Current implementation
 
-- **AI-powered exercise generation** — Create cognitive exercises via a natural language chat interface using AI (Google Gemini, Together AI, Groq)
-- **Saved exercise requirements drafts** — Submitted ideas, refinement questions/answers, revisions, and proposed briefs are saved privately per user. Reopen drafts from “Mis borradores” on the creation page or their `?draft=` URL. Unsubmitted text is not saved. Interrupted refinements can be retried with “Continuar borrador”; live streams are not resumed.
-- **Speech recognition & text-to-speech** — Cartesia-based Spanish TTS and speech transcription via Groq
-- **Media management** — Upload and manage images, audio, and video via Vercel Blob
-- **Exercise templates** — Configurable presets (easy/medium/hard) with shareable exercise links
-- **Results tracking** — Record and review exercise results per patient
-- **Organization & user management** — Role-based auth with organizations via Better Auth
+- Two exercise agents: requirements refinement and code implementation with persistent Vercel Sandbox workspaces.
+- Saved, user-private requirements drafts and ZIP checkpoints of generated exercises.
+- Eight checked-in exercise implementations, configuration forms, built-in and user-created presets.
+- Media uploads, image generation/editing, web image search, and pgvector semantic search.
+- Patient records, sessions/tests, exercise templates, share links, results, and speech workflows.
+- Email/password authentication, administrator-provisioned accounts, and organization management.
 
-## Tech Stack
+Share links already exist but are ahead of the intended clinician-led release scope. A browser reviewer agent and cross-organization exercise/template sharing are **future direction**, not implemented guarantees. See [project idea and scope](docs/project-idea.md).
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 15 (App Router, React 19, Turbopack) |
-| Language | TypeScript |
-| Styling | Tailwind CSS, ShadCN / Radix UI |
-| Database | PostgreSQL (Neon) + Drizzle ORM |
-| Auth | Better Auth (email/password, organizations, admin) |
-| AI | Vercel AI SDK (Google Gemini, Together AI, Groq) |
-| Media Storage | Vercel Blob |
-| TTS | Cartesia |
-| Sandboxed Execution | E2B |
+## Stack
 
-## Getting Started
+Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · shadcn/Base UI · Drizzle/PostgreSQL + pgvector · Better Auth · AI SDK 7 + Pi harness · Vercel AI Gateway, Blob, and Sandbox · Cartesia · Serper.
 
-### Prerequisites
+## Local development
 
-- Node.js 18+
-- PostgreSQL database (e.g. [Neon](https://neon.tech))
-
-### Install & Run
+Use Node.js **24** (`.nvmrc`) and Docker Compose for the local PostgreSQL database.
 
 ```bash
-npm install
-npm run dev
+nvm use
+npm ci
+cp .env.example .env  # only if you do not already have a .env
+docker compose up -d --wait
 ```
 
-### Database Setup
-
-Apply migrations (including `0010_exercise_requirement_drafts.sql`) before using saved requirements drafts:
+Set `BETTER_AUTH_SECRET` to a freshly generated secret (`openssl rand -base64 32`). Verify that `DATABASE_URL` points to your local database, then:
 
 ```bash
 npm run db:migrate
+# Set BOOTSTRAP_ADMIN_EMAIL / NAME / PASSWORD in .env first.
+npm run db:bootstrap-admin -- --confirm
+npm run dev
 ```
 
-```bash
-npm run db:push
-```
+Open <http://localhost:3000/login>. Remove bootstrap credentials after provisioning. AI/media/sandbox features require additional service credentials; basic login and database-backed development do not require all external services.
 
-## Environment Variables
+**Warning:** `npm run build` applies database migrations before building. Never run it with an unintended production database URL.
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string (Neon) |
-| `BETTER_AUTH_SECRET` | Auth secret for Better Auth |
-| `BETTER_AUTH_URL` | Canonical auth origin, including protocol (e.g. `https://example.com`). Legacy `BETTER_AUTH_BASE_URL` is also accepted. |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway API key (speech transcription) |
-| `CARTESIA_API_KEY` | Cartesia TTS API key |
-| `SERPER_API_KEY` | Serper image search API key |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob read/write token |
-| `NEXT_PUBLIC_BLOB_URL` | Public blob base URL |
-| `E2B_API_KEY` | E2B API key (sandboxed execution) |
-| `E2B_TEMPLATE_ID` | E2B sandbox template ID (optional) |
+## Documentation
 
-### Authentication and authorization
+Start with the [documentation index](docs/README.md):
 
-Public sign-up is disabled; platform administrators provision users. Set a randomly generated `BETTER_AUTH_SECRET` of at least 32 characters and a canonical `BETTER_AUTH_URL` in each deployment.
+- [Local setup](docs/local-development.md) and [environment variables](docs/environment-variables.md)
+- [Architecture](docs/architecture.md), [database](docs/database.md), and [authentication](docs/authentication.md)
+- [Exercises](docs/exercises.md), [agents](docs/agents.md), and [media management](docs/media-management.md)
+- [Deployment](docs/deployment.md) and [known gaps](docs/known-gaps.md)
 
-Apply generated Drizzle migrations before deploying auth changes (`npm run db:migrate`). Authentication rate limits use the shared `auth_rate_limits` table; server-side Better Auth API calls are authorized separately because their rate limits only apply to HTTP endpoints.
-
-Privileged actions revalidate database sessions instead of trusting the short-lived cookie cache. Platform user management requires the `admin` role. Organization management follows Better Auth's organization roles: owners/admins can manage members and settings, only owners can grant ownership or delete an organization, and the last owner cannot be removed. Patient records, sessions, and tests are scoped to their creator.
-
-Organization invitations use Better Auth's lifecycle and require verified recipient email. Email delivery and self-service password recovery require configuring an email provider before enabling those workflows.
-
-## Available Scripts
-
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start dev server with Turbopack |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run check` | Check lint and formatting |
-| `npm run ts-check` | Check TypeScript types |
-| `npm run test:auth` | Run isolated PostgreSQL-backed auth and authorization regression tests |
-| `npm run db:studio` | Open Drizzle Studio |
-| `npm run db:generate` | Generate Drizzle migrations |
-| `npm run db:migrate` | Run Drizzle migrations |
-| `npm run db:push` | Push schema to database |
-| `npm run agent:generate-exercise` | AI agent to generate a new exercise |
-| `npm run generate-media-metadata` | Populate media metadata |
-
-## Project Structure
-
-```
-app/
-  (landing)/          # Public landing page
-  actions/            # Server actions (exercises, media, templates, etc.)
-  api/                # API routes (auth, chat, media)
-  dashboard/          # Dashboard pages
-  exercises/          # Exercise modules (one folder per exercise)
-    [slug]/           # Dynamic exercise routes
-    loader.tsx        # Dynamic exercise asset loading
-components/
-  exercises/          # Shared exercise components
-  ui/                 # ShadCN UI components
-hooks/                # Custom React hooks
-lib/
-  ai/                 # AI provider configuration
-  auth/               # Better Auth setup (server, client, middleware)
-  db/                 # Drizzle ORM schema & connection
-  schemas/            # Shared Zod schemas
-scripts/              # CLI scripts (e2B sandbox, media metadata)
-```
+Repository instructions for coding assistants live in [AGENTS.md](AGENTS.md).

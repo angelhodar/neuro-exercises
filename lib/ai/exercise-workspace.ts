@@ -2,6 +2,12 @@ import { Sandbox } from "@vercel/sandbox";
 import { getLatestSnapshot } from "@/app/actions/snapshots";
 import type { Exercise } from "@/lib/db/schema";
 import { createSnapshot, SANDBOX_PROJECT_DIR } from "@/lib/sandbox";
+import {
+  assertWorkspaceIdentity,
+  canReusePreviewSandbox,
+  getPreviewSandboxName,
+  getSandboxNamespace,
+} from "@/lib/sandbox-identity";
 import { createBlobUrl } from "@/lib/utils";
 import { extractFiles } from "@/lib/zip";
 import {
@@ -12,10 +18,6 @@ import {
 const DEV_SERVER_PORT = 3000;
 const SANDBOX_TIMEOUT_MS = 30 * 60 * 1000;
 const SNAPSHOT_EXPIRATION_MS = 30 * 24 * 60 * 60 * 1000;
-
-function workspaceSandboxName(exerciseId: number) {
-  return `exercise-workspace-${exerciseId}`;
-}
 
 function createSandboxEnv(exercise: Exercise) {
   const serializedExercise = JSON.stringify(exercise);
@@ -119,12 +121,12 @@ export async function getExerciseWorkspaceSandbox({
   exercise: Exercise;
 }) {
   const workspace = await getOrCreateExerciseWorkspace(exercise.id);
+  const identity = assertWorkspaceIdentity(workspace, exercise.id);
   const snapshot = await getOrCreateBaseSnapshot();
-  const name = workspace.sandboxName ?? workspaceSandboxName(exercise.id);
 
   const sandbox = await Sandbox.getOrCreate({
     keepLastSnapshots: { count: 1 },
-    name,
+    name: identity.sandboxName,
     onCreate: async (createdSandbox) => {
       await restoreCheckpoint(createdSandbox, checkpointBlobKey);
     },
@@ -132,7 +134,11 @@ export async function getExerciseWorkspaceSandbox({
     resume: true,
     snapshotExpiration: SNAPSHOT_EXPIRATION_MS,
     source: { snapshotId: snapshot.snapshotId, type: "snapshot" },
-    tags: { exerciseId: String(exercise.id), purpose: "exercise-workspace" },
+    tags: {
+      exerciseId: String(exercise.id),
+      namespace: identity.namespace,
+      purpose: "exercise-workspace",
+    },
     timeout: SANDBOX_TIMEOUT_MS,
   });
 
@@ -157,7 +163,8 @@ export async function getGenerationPreviewSandbox({
   generationId: number;
   sandboxName: string | null;
 }) {
-  if (sandboxName) {
+  const namespace = getSandboxNamespace();
+  if (sandboxName && canReusePreviewSandbox(sandboxName, generationId)) {
     try {
       const existingSandbox = await Sandbox.get({ name: sandboxName });
       await existingSandbox.extendTimeout(15 * 60 * 1000);
@@ -176,13 +183,14 @@ export async function getGenerationPreviewSandbox({
 
   const snapshot = await getOrCreateBaseSnapshot();
   const sandbox = await Sandbox.create({
-    name: `exercise-preview-${generationId}-${crypto.randomUUID().slice(0, 8)}`,
+    name: getPreviewSandboxName(generationId),
     persistent: false,
     ports: [DEV_SERVER_PORT],
     source: { snapshotId: snapshot.snapshotId, type: "snapshot" },
     tags: {
       exerciseId: String(exercise.id),
       generationId: String(generationId),
+      namespace,
       purpose: "exercise-preview",
     },
     timeout: 15 * 60 * 1000,

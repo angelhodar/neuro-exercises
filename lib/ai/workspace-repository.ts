@@ -1,19 +1,20 @@
 import { and, eq, isNull, lt, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { type ExerciseWorkspace, exerciseWorkspaces } from "@/lib/db/schema";
+import {
+  assertWorkspaceIdentity,
+  getWorkspaceIdentity,
+} from "@/lib/sandbox-identity";
 
 const WORKSPACE_LOCK_MS = 30 * 60 * 1000;
 
-function harnessSessionId(exerciseId: number) {
-  return `exercise-${exerciseId}`;
-}
-
 export async function getOrCreateExerciseWorkspace(exerciseId: number) {
+  const identity = getWorkspaceIdentity(exerciseId);
   await db
     .insert(exerciseWorkspaces)
     .values({
       exerciseId,
-      harnessSessionId: harnessSessionId(exerciseId),
+      harnessSessionId: identity.harnessSessionId,
     })
     .onConflictDoNothing({ target: exerciseWorkspaces.exerciseId });
 
@@ -25,6 +26,7 @@ export async function getOrCreateExerciseWorkspace(exerciseId: number) {
     throw new Error("No se pudo crear el espacio de trabajo del ejercicio");
   }
 
+  assertWorkspaceIdentity(workspace, exerciseId);
   return workspace;
 }
 
@@ -47,6 +49,10 @@ export async function claimExerciseWorkspace(
     .where(
       and(
         eq(exerciseWorkspaces.exerciseId, exerciseId),
+        eq(
+          exerciseWorkspaces.harnessSessionId,
+          getWorkspaceIdentity(exerciseId).harnessSessionId
+        ),
         or(
           isNull(exerciseWorkspaces.activeGenerationId),
           isNull(exerciseWorkspaces.lockExpiresAt),
@@ -82,6 +88,10 @@ export async function releaseExerciseWorkspace(
     .where(
       and(
         eq(exerciseWorkspaces.exerciseId, exerciseId),
+        eq(
+          exerciseWorkspaces.harnessSessionId,
+          getWorkspaceIdentity(exerciseId).harnessSessionId
+        ),
         eq(exerciseWorkspaces.activeGenerationId, generationId)
       )
     )
@@ -105,6 +115,10 @@ export async function refreshExerciseWorkspaceLock(
     .where(
       and(
         eq(exerciseWorkspaces.exerciseId, exerciseId),
+        eq(
+          exerciseWorkspaces.harnessSessionId,
+          getWorkspaceIdentity(exerciseId).harnessSessionId
+        ),
         eq(exerciseWorkspaces.activeGenerationId, generationId)
       )
     )
@@ -122,10 +136,23 @@ export async function updateExerciseWorkspace(
     >
   >
 ) {
+  const identity = getWorkspaceIdentity(exerciseId);
+  if (
+    updates.sandboxName !== undefined &&
+    updates.sandboxName !== null &&
+    updates.sandboxName !== identity.sandboxName
+  ) {
+    throw new Error("Cannot persist a sandbox from a different namespace");
+  }
   const [workspace] = await db
     .update(exerciseWorkspaces)
     .set({ ...updates, updatedAt: new Date() })
-    .where(eq(exerciseWorkspaces.exerciseId, exerciseId))
+    .where(
+      and(
+        eq(exerciseWorkspaces.exerciseId, exerciseId),
+        eq(exerciseWorkspaces.harnessSessionId, identity.harnessSessionId)
+      )
+    )
     .returning();
 
   return workspace ?? null;

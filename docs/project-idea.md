@@ -1,33 +1,26 @@
-# Project idea and scope
+# Project idea
 
 ## Purpose
 
-Let non-technical rehabilitation professionals create interactive cognitive exercises using natural language rather than writing software. The intended primary setting is a rehabilitation session led by a professional, not an autonomous diagnostic or treatment system.
+NeuroGranada helps non-technical rehabilitation professionals create interactive cognitive exercises without writing software. The primary setting is a rehabilitation session led by a professional, rather than autonomous diagnosis or treatment.
 
-The author describes an idea to a chatbot, clarifies requirements, and iterates on the implementation with a preview beside the conversation. Each exercise exposes a configuration form so the professional can adjust execution behavior. A reusable media library lets them customize stimuli without rewriting the exercise.
+The author explains an idea to a chatbot, clarifies requirements, and improves the exercise through natural-language conversation. A preview alongside the chat makes the result visible. Configuration forms and a reusable media library let the professional adapt an exercise to a session without recreating it.
 
-The interface and many AI-facing prompts are Spanish; developer documentation is English.
+## Current scope
 
-## Implemented workflow
+The project supports AI-assisted authoring, saved requirements drafts, previews, configurable exercises, reusable presets, and media management. It also includes patient records, session notes, templates, results, speech tools, accounts, and organizations.
 
-1. Describe an exercise on `/dashboard/exercises/create`.
-2. The requirements agent asks questions or proposes a structured brief. Submitted conversations are saved as private drafts.
-3. The author approves the brief; creation generates metadata, optionally a thumbnail/audio instructions, and the initial generation record.
-4. The implementation agent writes the exercise in a persistent Sandbox workspace.
-5. A completed, validated ZIP checkpoint supplies a separate preview. Further chat messages iterate on the exercise.
-6. Checked-in/catalog exercise modules provide configuration, execution, and results screens. Presets and templates reuse configurations.
+Share links are already implemented, but were introduced earlier than the owner now considers appropriate. Independent patient use is not the primary release focus. Their presence does not imply a complete unsupervised rehabilitation workflow.
 
-Other implemented areas include media management, patients/sessions/tests, organizations, user administration, speech tools, and share links. Their presence does not imply a complete clinical review process or organization-isolated marketplace.
+## Future direction
 
-## Intended direction — not yet implemented
+- **Automated browser review:** an additional agent runs the exercise and reports functional problems alongside human review.
+- **Shared exercise catalog:** rehabilitation organizations deliberately share and reuse exercises with clear permissions.
+- **Shared session templates:** reusable combinations of exercises and predefined configurations.
+- **Clear human approval:** define who reviews an exercise and what is required before using it with patients.
 
-- **Browser reviewer agent:** a third exercise agent using `agent-browser` to run the exercise, exercise its controls, and report functional failures alongside human review. Current type/lint checks do not substitute for this.
-- **Shared rehabilitation catalog:** organizations can deliberately share and execute exercises. Existing global reads are not a designed sharing/permissions model.
-- **Shared rehabilitation templates:** reusable sets of exercises with predefined configuration and ordering, extending today's template foundations.
-- **Human review:** the owner envisions an automated reviewer alongside the human. Who signs off, what clinical criteria apply, and how approval is enforced remain to be designed.
+These are goals, not implemented guarantees. Existing globally accessible resources do not constitute a designed organization-sharing system.
 
-Share links already exist, but the owner considers them premature for the current release focus. They are not removed or disabled by this documentation work. Independent patient use should not be presented as the primary intended workflow.
+## Boundaries
 
-## Non-guarantees
-
-Generated exercises are not automatically clinically validated. The repository does not establish medical-device compliance, patient-data compliance, media licensing, retention rules, or safe unsupervised rehabilitation. See [known gaps](known-gaps.md) before using real patient information or expanding access.
+Generated exercises are not automatically clinically validated. Privacy, media licensing, retention, clinical approval, and any applicable regulatory obligations need explicit decisions. See [known gaps](known-gaps.md).

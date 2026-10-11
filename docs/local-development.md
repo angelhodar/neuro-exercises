@@ -1,14 +1,10 @@
 # Local development
 
-## Prerequisites
+Use the Node version specified in `.nvmrc`, npm, and Docker Compose. The local database includes PostgreSQL and the extension needed for semantic media search.
 
-- Node.js **24**, as specified in `.nvmrc`, and npm.
-- Docker with Compose, or an existing PostgreSQL installation with **pgvector** available.
-- Optional external-service access for the features you need: [environment variables](environment-variables.md).
+Keep development data separate from production and use synthetic patient information.
 
-Use synthetic patients and a dedicated development database. Never point a local checkout or PR preview at the production database.
-
-## First checkout
+## First setup
 
 ```bash
 nvm use
@@ -17,79 +13,48 @@ cp .env.example .env
 docker compose up -d --wait
 ```
 
-Do not overwrite an existing `.env`; copy missing keys manually instead. The Compose service is PostgreSQL 17 with pgvector, bound to loopback on port 5432. Its development-only credentials match `.env.example`; data persists in the `postgres-data` volume.
-
-Set `BETTER_AUTH_SECRET` in `.env` using a fresh `openssl rand -base64 32` value, and keep `BETTER_AUTH_URL=http://localhost:3000`. Confirm `DATABASE_URL` is local before running:
+Do not overwrite an existing `.env`; add missing settings manually instead. Set `BETTER_AUTH_SECRET` to a fresh value generated with `openssl rand -base64 32`. Verify that `DATABASE_URL` points to your development database, then run:
 
 ```bash
 npm run db:migrate
 ```
 
-Migrations create the vector extension and schema. A plain PostgreSQL image without pgvector is insufficient. For an existing local installation, use an equivalent isolated database/user with permission to apply the migrations.
+The example configuration matches the local database service. If using your own PostgreSQL installation, it must support the vector-search extension.
 
-## Provision the first administrator
+## First administrator
 
-Public sign-up is disabled. In the ignored `.env`, set:
-
-- `BOOTSTRAP_ADMIN_EMAIL`: administrator login email.
-- `BOOTSTRAP_ADMIN_NAME`: display name.
-- `BOOTSTRAP_ADMIN_PASSWORD`: unique password, 12–128 characters; never a committed default.
+Public sign-up is disabled. Set `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_NAME`, and a unique `BOOTSTRAP_ADMIN_PASSWORD` (12–128 characters) in the ignored environment file:
 
 ```bash
-npm run db:bootstrap-admin             # prints target, refuses to write
 npm run db:bootstrap-admin -- --confirm
 npm run dev
 ```
 
-Sign in at <http://localhost:3000/login>. Remove the three bootstrap values from `.env` afterward. The script does not create an organization, media, or exercise catalog rows. Create further accounts through `/dashboard/users`. See [authentication](authentication.md) for the bootstrap safety rules.
+Sign in at <http://localhost:3000/login> and remove the bootstrap credentials afterward. Create subsequent accounts through the administration UI. Bootstrap does not seed organizations, exercises, or media; existing exercise implementations can be registered through the dashboard.
 
-Checked-in exercise folders are not automatically seeded into the database. Use the dashboard's existing-exercise registration flow, supplying the corresponding slug. Registering without a thumbnail file/prompt avoids image-generation dependencies.
+## External features
 
-## Feature-specific setup
+Basic account/database work does not need every external service. AI authoring, media, speech, and remote previews require the corresponding [environment variables](environment-variables.md).
 
-- Database/auth development needs the database and auth settings, not every paid API.
-- AI creation/refinement needs Gateway credentials; media/checkpoints need Blob; implementation/preview needs Sandbox access.
-- Set a unique stable `SANDBOX_NAMESPACE`, e.g. `local-angel`, before generation/preview. The example leaves it blank intentionally; each independent local DB/developer and PR must choose its own value. No namespace is needed for ordinary database/auth development.
-- Generated previews clone a **remote** Git revision. `SANDBOX_BRANCH=main` in the example deliberately avoids an unpushed local branch. It also means previews use main's snapshot code, not your uncommitted changes.
-- Native `lib/load-env.ts` loads `.env` for scripts. Next.js has its own environment-file loading. Keeping common local values in `.env` avoids `.env.local`-only values being absent from standalone scripts.
+Before using generation or previews, choose a unique stable `SANDBOX_NAMESPACE` for your database, such as `local-angel`. Never share it with production or another independent development database.
 
-## Commands
+Remote previews use a published source revision, not your uncommitted local changes. The example selects `main`; choose another published revision deliberately when needed.
 
-| Command | Behavior |
-| --- | --- |
-| `npm run dev` | Next.js development server |
-| `npm run check` / `npm run fix -- <paths>` | Check / fix lint and formatting |
-| `npm run ts-check` | TypeScript checking |
-| `npm run test:auth` | PGlite-backed authentication/authorization regressions |
-| `npm run test:refinement` | Requirements state and endpoint regressions |
-| `npm run test:setup` | Driver selection and atomic/idempotent bootstrap regressions |
-| `npm run test:sandbox` | Namespaced identity, clone rejection, preview reuse and reference reset regressions; mocked SDK, no remote resources |
-| `npm run db:generate` / `db:migrate` | Generate / apply versioned migrations |
-| `npm run db:studio` | Browse configured database; check the target first |
-| `npm run db:push` | Direct schema synchronization; use only deliberately on disposable databases |
-| `npm run db:bootstrap-admin -- --confirm` | One-time initial admin provisioning |
-| `npm run db:backfill-embeddings` | Write missing media embeddings; incurs Gateway usage |
-| `npm run sandbox -- <command>` | Official Vercel Sandbox CLI |
-| `npm run sandbox:snapshot` | Create a base snapshot from a remotely available Git revision |
-| `npm run sandbox:reset-references -- --confirm` | Reset all workspace/resume/preview DB references to the namespace; stop traffic and verify the target first |
-| `npm run build` | **Migrate DB**, build Next.js, then run deployment snapshot helper |
-| `npm run start` | Serve a completed production build |
-
-`agent:generate-exercise` and `generate-media-metadata` remain in `package.json`, but their target files (`scripts/agent/run.ts` and `scripts/populate-media-metadata.ts`) are absent. They are not working setup commands.
-
-The regression suites use isolated PGlite engines and mocks; they do not require your configured Neon database or real AI services. They do not cover the full browser UI or all application permissions.
-
-## Stop and troubleshoot
+## Everyday commands
 
 ```bash
-docker compose stop  # preserves local database data
+npm run dev
+npm run check
+npm run ts-check
+npm run fix -- <changed-paths>
 ```
 
-- Port 5432 occupied: stop the conflicting local service, or change the Compose host port and `DATABASE_URL` together.
-- `extension "vector" is not available`: use the provided pgvector image or install pgvector in your PostgreSQL server.
-- Unexpected remote database calls: verify `DATABASE_URL` and `DATABASE_DRIVER`; Neon URLs use HTTP by default, ordinary PostgreSQL URLs use TCP.
-- Cannot register/login: apply migrations and bootstrap first; there is no public sign-up page.
-- Missing media URLs: ensure `NEXT_PUBLIC_BLOB_URL` corresponds to the store selected by `BLOB_READ_WRITE_TOKEN`.
-- Sandbox cannot clone branch: publish the revision first or select a known remote branch with `SANDBOX_BRANCH`.
-- Legacy/foreign workspace configuration error: verify the namespace and follow the explicit target-database reset procedure in [deployment](deployment.md). No live sandboxes does not imply no stored references.
-- Local DB but shared remote services: read [deployment](deployment.md); namespacing prevents accidental Sandbox identity collisions, not shared-credential access or Blob deletion.
+The regression commands are `test:auth`, `test:refinement`, `test:setup`, and `test:sandbox`. They run in isolation without production data or paid service calls. Consult `package.json` and the scripts themselves for the current command inventory.
+
+**Do not treat `npm run build` as a harmless check:** it applies migrations to the configured database. Confirm targets before maintenance, backfills, or reset commands.
+
+## Stopping and troubleshooting
+
+`docker compose stop` preserves local database data. If the database port is occupied, change the host port and connection URL together. Missing vector support usually means the database image or installation lacks the required extension.
+
+Standalone scripts load `.env`; keep shared local settings there rather than only in a Next.js-specific environment file. For legacy/copied workspace references or shared-service concerns, follow [deployment](deployment.md).

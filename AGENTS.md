@@ -1,54 +1,36 @@
 # Repository instructions
 
-NeuroGranada is a Next.js 16 / React 19 cognitive rehabilitation application. Read [docs/README.md](docs/README.md) and the relevant subsystem documentation before changing behavior. [docs/project-idea.md](docs/project-idea.md) separates implemented features from product direction.
+NeuroGranada helps rehabilitation professionals create and configure cognitive exercises through AI-assisted conversation. Read the [documentation index](docs/README.md) and relevant topic before changing behavior. Keep implemented capabilities distinct from the [product vision](docs/project-idea.md).
 
-## Development and validation
+## Working in the project
 
-- Use Node.js 24 and npm with the committed `package-lock.json`.
-- `npm run dev`: development server.
-- `npm run check`: Ultracite/Biome lint and formatting checks.
-- `npm run ts-check`: TypeScript checks.
-- `npm run test:auth`, `npm run test:refinement`, `npm run test:setup`, `npm run test:sandbox`: isolated regression tests; no production DB or paid services needed.
-- Run targeted formatting with `npm run fix -- <changed-paths>` rather than rewriting unrelated work.
-- **Do not use `npm run build` as a routine validation command:** it migrates the configured database and, on Vercel main deployments, attempts a Sandbox snapshot.
-- Do not run migrations, schema pushes, admin bootstrap, media backfills, or paid AI/Sandbox commands against shared resources without confirming the target and authorization.
+- Use the Node version in `.nvmrc`, npm, and the committed lockfile.
+- Follow nearby code and existing components, forms, validation, and exercise lifecycle conventions. Inspect the implementation rather than relying on a fixed source-location map.
+- Prefer server-rendered components; keep browser-only behavior and interactivity on the client.
+- Enforce authentication, ownership, and organization permissions on the server. Navigation checks are not authorization.
+- Preserve support for local PostgreSQL and hosted databases, and keep previews separate from the application's production data access.
+- Use versioned database migrations; do not rewrite applied history.
+- Keep changes scoped. Do not overwrite unrelated user work or broadly reformat the repository.
 
-## Architecture and style
+## Validation and operational safety
 
-- Prefer server components; add `"use client"` only for interactivity/browser APIs.
-- Database operations generally live in `app/actions/` server actions; streaming and upload handlers live in `app/api/`.
-- Use existing React Query, react-hook-form/Zod, `nuqs`, Sonner, and shared UI conventions.
-- UI components come from `components/ui/` (shadcn/Base UI, currently `base-vega`); styling uses Tailwind 4 and `app/globals.css`.
-- Files use kebab-case; component exports use PascalCase; hooks live in `hooks/`.
-- Use `@/` imports for project modules and let Biome enforce import ordering.
-- Schema and relations live in `lib/db/schema.ts`; migration history is in `drizzle/`. Generate migrations deliberately; never rewrite applied migration history.
-- `lib/db/index.ts` selects Neon HTTP or node-postgres. Keep both transports working. Sandbox previews use the separate `lib/db/index.sandbox.ts` PGlite variant.
+- Run `npm run check`, `npm run ts-check`, and relevant regression tests listed in `package.json`.
+- Apply formatting only to changed paths with `npm run fix -- <paths>`.
+- **Do not use `npm run build` as routine validation:** it applies migrations and may create a remote snapshot during deployment.
+- Confirm the target and authorization before database maintenance, administrator provisioning, reference resets, destructive media operations, or paid service calls.
+- Public sign-up is disabled. Initial-admin provisioning is an operator action, not a public endpoint or account-recovery mechanism.
+- Never place secrets in browser-visible configuration, generated exercises, logs, or documentation.
+- Each independent database/environment needs a unique stable `SANDBOX_NAMESPACE`. Never bypass checks on stored workspace/session references. Shared service credentials are not an environment security boundary.
 
-## Authorization and data safety
+## Exercises and agents
 
-- Use `requireAuth` / `requireAdmin` from `lib/auth/require-auth.ts`; these bypass stale cookie-cache data. For route authentication, use `withAuth` where appropriate or explicitly revalidate sessions.
-- Cookie presence in `proxy.ts` is only a navigation check, not authorization.
-- Check ownership/organization permissions server-side. Exercise editing and previews use `assertCanEditExercise`; patient data is creator-scoped.
-- Public sign-up stays disabled. Bootstrap is a one-time operator CLI, not a public route or password-reset mechanism.
-- Never expose secrets through `NEXT_PUBLIC_*`, generated exercise code, sandbox environment files, logs, or documentation.
-- Gateway, Blob, and Sandbox resources are currently shared across environments. A unique stable `SANDBOX_NAMESPACE` per database/developer/PR is mandatory for workspace/session/preview identity. Never reuse foreign stored workspace state or bypass its namespace checks. `sandbox:reset-references` is a confirmed operator action that clears target DB resume state, not a routine migration. Shared credentials/Blob assets remain unisolated; see [deployment risks](docs/deployment.md).
-- Do not assume organization-wide data isolation, private Blob storage, clinical approval, or complete security coverage. Existing gaps are tracked in [docs/known-gaps.md](docs/known-gaps.md).
+- Preserve the exercise contract: configuration and validation, interactive execution, and results presentation. Use comparable existing exercises as examples.
+- Keep requirements discovery separate from implementation. Treat an approved brief as the authoring specification.
+- Preserve validated checkpoints and safe preview behavior. Generated code remains untrusted; structural checks and prompt instructions are not clinical approval or hard permission boundaries.
+- Do not imply that a browser reviewer or enforced clinical review process exists until it is actually implemented.
 
-## Exercise contract
+## Documentation style
 
-Every `app/exercises/<slug>/` module must provide:
+Keep `docs/` focused on concepts, user workflows, setup, and meaningful safety boundaries. Avoid inventories of source paths, internal APIs, model names, dependency versions, table names, or transient tuning values. Use the code as the reference for those details.
 
-| File | Required exports |
-| --- | --- |
-| `<slug>.schema.ts` | `configSchema`, `resultSchema`, `defaultConfig` |
-| `<slug>.exercise.tsx` | `Exercise` |
-| `<slug>.config.tsx` | `ConfigFields` |
-| `<slug>.results.tsx` | `Results` |
-
-Use `hooks/use-exercise-execution.tsx` and extend `lib/schemas/base-schemas.ts`. Read comparable checked-in exercises rather than inventing a new runtime convention. Preserve validation and sandbox variants when changing exercise routes.
-
-The requirements agent lives in `lib/ai/refinement/`; the implementation agent lives in `lib/ai/agent/`. Checkpoint validation is in `lib/ai/exercise-checkpoint.ts`. There is **no browser reviewer agent yet**. The implementation agent's folder-only prompt is not a hard filesystem permission boundary (`permissionMode: "allow-all"`).
-
-## Documentation maintenance
-
-Update the relevant `docs/` page alongside changes to setup, environment variables, permissions, exercise contracts, media, agents, or deployment. Keep the root README a concise entry point and this file focused on contributor instructions. Document actual behavior, explicitly label proposals, and never copy real `.env` values.
+Retain exact commands and environment keys when people need them to operate the project safely. Update documentation when behavior, setup, permissions, or product scope changes—not merely when code moves or a model is replaced. Keep the root README a short entry point.

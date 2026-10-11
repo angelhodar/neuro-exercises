@@ -1,40 +1,30 @@
-# Known gaps and deferred decisions
+# Known gaps
 
-This is a factual boundary map, not a claim that the listed areas are the only remaining risks. Documentation refresh, PostgreSQL support and bootstrap do not remediate unrelated application behavior.
+The project has useful working foundations, but should not be presented as a complete clinical or operational system.
 
-## Product workflow
+## Product and review
 
-- No third browser reviewer agent; current automated generation checks are types, lint and file structure.
-- No enforced clinical approval lifecycle or completed generated-exercise publication pipeline. Metadata/checkpoints are not automatically checked-in/deployed implementations.
-- Cross-organization catalog/template sharing is a product goal, not a complete implemented permissions system.
-- Share links exist but are considered premature by the owner. They have not been disabled; independent patient execution should not be the release's main promise.
-- Patient notes/sessions/tests and link-based exercise results are different data paths, not a unified patient outcome system.
+- Generated previews do not automatically become published catalog exercises.
+- Automated browser review and enforced clinical approval are not implemented.
+- Deliberate cross-organization exercise and template sharing remains a future direction.
+- Share links exist, but independent patient use is ahead of the current release focus.
+- Exercise results and patient session records are not a unified outcomes workflow.
 
-## Authorization and privacy
+## Access and privacy
 
-- Organization membership does not isolate all catalog/media/template reads. Many resources are creator-scoped or globally read.
-- Media deletion lacks an action-level auth/ownership guard. Fix before exposing broader access or testing destructive operations.
-- Templates and share-link lookup/execution/results need an explicit authorization/expiry/integrity review. Do not infer safety from an authenticated dashboard alone.
-- Ad-hoc results/configuration are serialized into URLs and can enter browser history/logs. Do not include sensitive patient data.
-- Blob objects are public. Licensing, patient-identifying uploads, consent, retention/deletion and audit expectations are unresolved.
-- Email invitation delivery, verification delivery and self-service password reset are not configured. Initial-admin bootstrap does not solve account recovery or verification.
+- Organization membership does not provide comprehensive isolation of every resource.
+- Media operations, sharing, and result access need further authorization review.
+- Some ad-hoc execution information appears in URLs; avoid sensitive data.
+- Media URLs are public. Licensing, consent, privacy, retention, and deletion policies are unresolved.
+- Invitation delivery, verification, and account recovery need a complete operational setup.
 
-## Agent/operations boundaries
+## Operations
 
-- Pi runs with `permissionMode: "allow-all"`; folder restrictions are prompt-level. Checkpoint validation does not prove that the agent changed nothing outside the folder.
-- Sandbox namespacing prevents ID collisions only when each independent database/environment uses a distinct `SANDBOX_NAMESPACE`. Shared project credentials are still not a security boundary. Cloned databases need explicit reference resets; automated preview provisioning/namespace assignment is not implemented.
-- Shared Blob credentials allow cross-environment asset deletion; DB isolation does not prevent it.
-- Database/Blob writes are not one distributed transaction; orphaned uploads and dangling references need reconciliation.
-- Vercel build runs DB migrations; deployment rollback does not automatically roll back data/schema.
-- Neon PR branches and shared-service budgets/cleanup are not provisioned automatically by repository CI.
-- Base snapshots clone remote revisions and do not include unpushed local changes.
+- Generated code is untrusted; prompt constraints and code checks are not a complete security boundary.
+- Sandbox namespaces prevent accidental collisions only when configured uniquely. Shared credentials remain a broader access risk.
+- Separate databases do not isolate shared media assets or service budgets.
+- Database records and remote files are not updated as one atomic operation; reconciliation and cleanup need work.
+- Builds apply migrations, and application rollback does not undo database changes.
+- Preview provisioning and shared-resource cleanup are not fully automated.
 
-## Tooling
-
-- `agent:generate-exercise` and `generate-media-metadata` point to missing source files.
-- PR CI checks lint/types only. Regression commands exist but are not enabled there, and full browser coverage is absent.
-- Auth/refinement/setup tests are targeted and isolated; they are not a comprehensive security, clinical or integration certification.
-
-## New setup capabilities in this branch
-
-Local PostgreSQL/pgvector runtime support, an example env file, Compose configuration and safe one-time administrator bootstrap are implemented in this branch. They should be considered part of the documented setup once merged, not functionality already deployed to production.
+Tests cover selected regressions, not every workflow or security boundary. Check the current code and operational configuration before expanding use with real patients or additional organizations.

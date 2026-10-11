@@ -1,19 +1,21 @@
-# Documentation index
+# Documentation
 
-These pages describe the checked-in implementation, including local PostgreSQL support and the initial-admin bootstrap added with this documentation refresh. Product intent comes from the project owner; future plans are labeled explicitly. The code and `package.json` remain the source of truth as the project evolves.
+These pages explain what NeuroGranada does, how its main parts work together, and how to develop and operate it safely. They describe current capabilities separately from future plans.
 
-| Page | Covers |
+Implementation details—such as source locations, model selection, dependency versions, and internal APIs—belong in the code. These docs only retain technical specifics where they are needed for setup or safe operation.
+
+| Topic | What you will find |
 | --- | --- |
-| [Project idea](project-idea.md) | Intended users, workflow, implemented scope, future direction |
-| [Local development](local-development.md) | Node 24, PostgreSQL/pgvector, first admin, scripts, troubleshooting |
-| [Environment variables](environment-variables.md) | Core configuration, paid services, Sandbox and deployment variables |
-| [Architecture](architecture.md) | Source layout, server/client responsibilities, data flows |
-| [Database](database.md) | Drivers, migrations, domain tables, local/preview data isolation |
-| [Authentication](authentication.md) | Provisioning, roles, session validation, authorization boundaries |
-| [Exercises](exercises.md) | Four-file contract, configuration, runtime, presets, templates/results |
-| [Agents](agents.md) | Requirements refinement, Pi implementation, checkpoints and previews |
-| [Media management](media-management.md) | Blob uploads, generation, metadata, semantic search and deletion |
-| [Deployment](deployment.md) | Vercel build behavior, previews, snapshots, shared-resource risks |
-| [Known gaps](known-gaps.md) | Missing workflows, security/operations caveats, deferred decisions |
+| [Project idea](project-idea.md) | Purpose, intended users, current scope, and future direction |
+| [Local development](local-development.md) | Set up a development database, administrator, and running app |
+| [Environment variables](environment-variables.md) | Configuration needed for the app and external services |
+| [Architecture](architecture.md) | How the main parts fit together |
+| [Database](database.md) | What is stored, migrations, and data isolation |
+| [Authentication](authentication.md) | Accounts, permissions, organizations, and provisioning |
+| [Exercises](exercises.md) | Creation, configuration, execution, presets, and templates |
+| [Agents](agents.md) | Requirements discovery, implementation, previews, and review |
+| [Media management](media-management.md) | Reusable assets, search, uploads, and responsible handling |
+| [Deployment](deployment.md) | Environments, shared services, and safe rollout |
+| [Known gaps](known-gaps.md) | Important limitations and unresolved decisions |
 
-For coding-assistant conventions, read [AGENTS.md](../AGENTS.md). For a first checkout, start with local development; for exercise changes, read exercises and agents together.
+Start with local development for a first checkout. Contributor instructions are in [AGENTS.md](../AGENTS.md).

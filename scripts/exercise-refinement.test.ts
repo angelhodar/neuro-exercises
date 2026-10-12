@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import { mock, test } from "node:test";
 import { NextRequest } from "next/server";
 import type { ExerciseRefinementMessage } from "../lib/ai/refinement/agent";
+import {
+  getPendingSiblingBriefs,
+  getRequirementsStatus,
+  shouldContinueRefinement,
+  withoutUnfinishedStep,
+} from "../lib/ai/refinement/conversation";
 import { getRefinementState } from "../lib/ai/refinement/state";
 import {
   type ExerciseBrief,
@@ -51,6 +57,122 @@ function state(messages: ExerciseRefinementMessage[]) {
     status: "ready",
   });
 }
+
+test("automatic continuation waits for tool answers and stops after approval", () => {
+  const answered: Part = {
+    ...question,
+    output: { selected: ["Diez"] },
+    state: "output-available",
+  };
+  const rejected: Part = {
+    ...proposal,
+    output: { accepted: false, feedback: "Cambiar" },
+    state: "output-available",
+  };
+  const accepted: Part = {
+    ...proposal,
+    output: { accepted: true },
+    state: "output-available",
+  };
+  assert.equal(
+    shouldContinueRefinement({ messages: [assistant([question])] }),
+    false
+  );
+  assert.equal(
+    shouldContinueRefinement({ messages: [assistant([answered])] }),
+    true
+  );
+  assert.equal(
+    shouldContinueRefinement({ messages: [assistant([rejected])] }),
+    true
+  );
+  assert.equal(
+    shouldContinueRefinement({ messages: [assistant([accepted])] }),
+    false
+  );
+  assert.equal(
+    shouldContinueRefinement({ messages: [assistant([answered, proposal])] }),
+    false
+  );
+  assert.equal(
+    shouldContinueRefinement({
+      messages: [assistant([{ text: "Done", type: "text" }])],
+    }),
+    false
+  );
+  assert.equal(
+    shouldContinueRefinement({
+      messages: [
+        { id: "user", parts: [{ text: "Idea", type: "text" }], role: "user" },
+      ],
+    }),
+    false
+  );
+});
+
+test("continuation evaluates only the latest step, including tool errors", () => {
+  const failed: Part = {
+    ...question,
+    errorText: "Failed",
+    state: "output-error",
+  };
+  assert.equal(
+    shouldContinueRefinement({
+      messages: [assistant([proposal, { type: "step-start" }, failed])],
+    }),
+    true
+  );
+});
+
+test("retry drops only an unfinished latest step and does not mutate history", () => {
+  const text: Part = { text: "Earlier step", type: "text" };
+  const messages = [assistant([text, { type: "step-start" }, question])];
+  const before = structuredClone(messages);
+  assert.deepEqual(withoutUnfinishedStep(messages), [assistant([text])]);
+  assert.deepEqual(messages, before);
+  const noMarker: ExerciseRefinementMessage[] = [
+    { id: "assistant", parts: [question], role: "assistant" },
+  ];
+  assert.deepEqual(withoutUnfinishedStep(noMarker), []);
+  const complete = [assistant([text])];
+  assert.equal(withoutUnfinishedStep(complete), complete);
+  assert.equal(withoutUnfinishedStep([]).length, 0);
+});
+
+test("sibling proposals are invalidated for questions, not text or themselves", () => {
+  assert.deepEqual(getPendingSiblingBriefs(question, [proposal]), [proposal]);
+  assert.deepEqual(getPendingSiblingBriefs(proposal, [proposal]), []);
+  assert.deepEqual(
+    getPendingSiblingBriefs({ text: "Test", type: "text" }, [proposal]),
+    []
+  );
+});
+
+test("requirements status preserves priority and has no warning for ready briefs", () => {
+  const ready = {
+    busy: false,
+    canUseBrief: true,
+    creating: false,
+    hasPendingQuestion: false,
+  };
+  assert.equal(getRequirementsStatus(ready), undefined);
+  assert.equal(
+    getRequirementsStatus({ ...ready, canUseBrief: false }),
+    "Reintenta la revisión para completar la propuesta."
+  );
+  assert.equal(
+    getRequirementsStatus({ ...ready, hasPendingQuestion: true }),
+    "Responde a las preguntas pendientes antes de crear el ejercicio."
+  );
+  assert.equal(
+    getRequirementsStatus({ ...ready, busy: true, hasPendingQuestion: true }),
+    "Actualizando los requisitos..."
+  );
+  assert.equal(
+    getRequirementsStatus({ ...ready, busy: true, creating: true }),
+    "Creando el ejercicio con esta especificación."
+  );
+});
 
 test("valid revision feedback fits the tool output schema and is trimmed", () => {
   const input = exerciseRevisionSchema.parse({

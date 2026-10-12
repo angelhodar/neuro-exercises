@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
+import { createRequire, Module } from "node:module";
 import { after, before, mock, test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
@@ -435,6 +435,108 @@ test("anonymous upload-token requests return 401 before issuing a Blob token", a
     })
   );
   assert.equal(response.status, 401);
+});
+
+test("generation requests enforce authentication, validation, and exercise ownership", async (t) => {
+  // The Pi runtime is ESM-only; this suite runs through tsx's CommonJS loader.
+  // Substitute the agent before loading the route, also preventing paid calls.
+  const agentPath = require.resolve("./lib/ai/agent/agent.ts");
+  const previousAgent = require.cache[agentPath];
+  const agentModule = new Module(agentPath);
+  agentModule.exports = {
+    exerciseAgent: {
+      createSession() {
+        throw new Error("Unexpected agent session in authorization test");
+      },
+      stream() {
+        throw new Error("Unexpected agent call in authorization test");
+      },
+    },
+  };
+  require.cache[agentPath] = agentModule;
+  t.after(() => {
+    if (previousAgent) {
+      require.cache[agentPath] = previousAgent;
+    } else {
+      delete require.cache[agentPath];
+    }
+  });
+  const { NextRequest } = await import("next/server");
+  const { POST } = await import("../app/api/chat/route");
+  function request(body: unknown) {
+    return new NextRequest("http://localhost:3000/api/chat", {
+      body: JSON.stringify(body),
+      headers: requestHeaders,
+      method: "POST",
+    });
+  }
+  const messages = [
+    { id: "user", parts: [{ text: "Refine", type: "text" }], role: "user" },
+  ];
+  setRequestCookie();
+  const anonymous = await POST(
+    request({ messages, slug: "private-generation" })
+  );
+  assert.equal(anonymous.status, 401);
+  assert.equal(await anonymous.text(), "No autorizado");
+
+  setRequestCookie(ownerCookie);
+  assert.equal((await POST(request({ messages, slug: 123 }))).status, 400);
+  assert.equal(
+    (await POST(request({ messages, slug: "missing" }))).status,
+    404
+  );
+  await database.insert(schema.exercises).values({
+    creatorId: ownerId,
+    displayName: "Private generation",
+    slug: "private-generation",
+  });
+  setRequestCookie(memberCookie);
+  const foreign = await POST(request({ messages, slug: "private-generation" }));
+  assert.equal(foreign.status, 403);
+  assert.equal(await foreign.text(), "No autorizado");
+  setRequestCookie(ownerCookie);
+  const noGeneration = await POST(
+    request({ messages, slug: "private-generation" })
+  );
+  assert.equal(noGeneration.status, 400);
+  assert.equal(await noGeneration.text(), "No generation to process");
+});
+
+test("anonymous patient mutations retain their Unauthorized error and read fallbacks", async () => {
+  setRequestCookie();
+  assert.deepEqual(await patientsActions.getPatients(), []);
+  assert.equal(await patientsActions.getPatientById(1), null);
+  const mutations = [
+    () =>
+      patientsActions.createPatient({
+        firstName: "Private",
+        lastName: "Patient",
+      }),
+    () => patientsActions.updatePatient(1, { firstName: "Changed" }),
+    () => patientsActions.deletePatient(1),
+    () =>
+      patientsActions.createPatientSession({
+        discipline: "speech",
+        patientId: 1,
+        type: "therapy",
+      }),
+    () =>
+      patientsActions.updatePatientSession(1, 1, { observations: "Changed" }),
+    () => patientsActions.deletePatientSession(1, 1),
+    () =>
+      patientsActions.createPatientTest({
+        evaluatedProcess: "memory",
+        patientId: 1,
+      }),
+    () => patientsActions.updatePatientTest(1, 1, { score: "Changed" }),
+    () => patientsActions.deletePatientTest(1, 1),
+  ];
+  await Promise.all(
+    mutations.map((mutate) =>
+      assert.rejects(mutate, { message: "Unauthorized", name: "Error" })
+    )
+  );
 });
 
 test("patient data and child records cannot be accessed or mutated by another user", async () => {

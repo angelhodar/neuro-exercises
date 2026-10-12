@@ -5,16 +5,16 @@ import { PGlite } from "@electric-sql/pglite";
 import { Sandbox, Snapshot } from "@vercel/sandbox";
 import { drizzle } from "drizzle-orm/pglite";
 // biome-ignore lint/performance/noNamespaceImport: Drizzle requires relations
-import * as schema from "../lib/db/schema";
-import { resetSandboxReferences } from "../lib/reset-sandbox-references";
+import * as schema from "../../lib/db/schema";
+import { resetSandboxReferences } from "../../lib/reset-sandbox-references";
 import {
   assertWorkspaceIdentity,
   canReusePreviewSandbox,
   getPreviewSandboxName,
   getSandboxNamespace,
   getWorkspaceIdentity,
-} from "../lib/sandbox-identity";
-import { createZipBuffer } from "../lib/zip";
+} from "../../lib/sandbox-identity";
+import { createZipBuffer } from "../../lib/zip";
 
 const INVALID_NAMESPACE = /SANDBOX_NAMESPACE/;
 const WRONG_WORKSPACE = /legacy or different/;
@@ -29,8 +29,8 @@ const client = {
 const originalNamespace = process.env.SANDBOX_NAMESPACE;
 const calls: { method: string; name: string; tags?: Record<string, string> }[] =
   [];
-let repository: typeof import("../lib/ai/workspace-repository");
-let sandboxes: typeof import("../lib/ai/exercise-workspace");
+let repository: typeof import("../../lib/ai/workspace-repository");
+let sandboxes: typeof import("../../lib/ai/exercise-workspace");
 
 function fakeSandbox(name: string) {
   return {
@@ -67,7 +67,7 @@ before(async () => {
     INSERT INTO exercise_chat_generation (id, exercise_id, user_id, prompt, status, code_blob_key, sandbox_id)
       VALUES (1, 1, 'author', 'Test', 'COMPLETED', 'generations/test.zip', 'production-exercise-preview-1-1234abcd');
   `);
-  const { db } = await import("../lib/db");
+  const { db } = await import("../../lib/db");
   Object.assign(db.query, database.query);
   mock.method(
     db,
@@ -111,8 +111,8 @@ before(async () => {
       : new Response("ready")
   );
   process.env.NEXT_PUBLIC_BLOB_URL = "https://blob.example.invalid";
-  repository = await import("../lib/ai/workspace-repository");
-  sandboxes = await import("../lib/ai/exercise-workspace");
+  repository = await import("../../lib/ai/workspace-repository");
+  sandboxes = await import("../../lib/ai/exercise-workspace");
 });
 
 after(async () => {

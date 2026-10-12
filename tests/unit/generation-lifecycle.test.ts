@@ -3,7 +3,7 @@ import { type TestContext, test } from "node:test";
 import type { HarnessAgentResumeSessionState } from "@ai-sdk/harness/agent";
 import type { Sandbox } from "@vercel/sandbox";
 import type { UIMessage } from "ai";
-import { createGenerationLifecycle } from "../lib/ai/generation-lifecycle";
+import { createGenerationLifecycle } from "../../lib/ai/generation-lifecycle";
 
 const sandbox = {} as Sandbox;
 const responseMessage: UIMessage = {

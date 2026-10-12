@@ -6,7 +6,7 @@ import {
   toUIMessageStream,
   type UIMessageChunk,
 } from "ai";
-import { createGenerationSummaryStream } from "../lib/ai/generation-summary-stream";
+import { createGenerationSummaryStream } from "../../lib/ai/generation-summary-stream";
 
 function text(id: string, delta: string): UIMessageChunk[] {
   return [

@@ -1,5 +1,6 @@
 import { type InferAgentUIMessage, ToolLoopAgent } from "ai";
 import { z } from "zod";
+import { refinementModel } from "@/lib/ai/refinement/model";
 import { buildRefinementPrompt } from "./prompt";
 import { askUserQuestionTool, proposeExerciseBriefTool } from "./tools";
 
@@ -9,7 +10,7 @@ export const exerciseRefinementAgent = new ToolLoopAgent({
     isRevisingBrief: z.boolean(),
     questionsAsked: z.number().int().min(0),
   }),
-  model: "anthropic/claude-sonnet-5.5",
+  model: refinementModel,
   prepareCall: ({ options, ...settings }) => ({
     ...settings,
     activeTools:

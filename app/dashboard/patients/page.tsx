@@ -83,6 +83,7 @@ export default async function PatientsPage() {
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Button
+                    aria-label={`Ver paciente ${patient.firstName} ${patient.lastName}`}
                     render={<Link href={`/dashboard/patients/${patient.id}`} />}
                     size="sm"
                     variant="outline"

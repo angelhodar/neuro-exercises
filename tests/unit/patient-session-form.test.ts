@@ -3,7 +3,7 @@ import { test } from "node:test";
 import {
   sessionFormInput,
   sessionFormSchema,
-} from "../app/dashboard/patients/session-form-schema";
+} from "../../app/dashboard/patients/session-form-schema";
 
 test("session forms retain required fields and optional observations", () => {
   const input = { date: "2026-10-12", discipline: "test", type: "test" };

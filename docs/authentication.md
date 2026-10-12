@@ -4,6 +4,8 @@
 
 Users sign in with email and password. Public sign-up is disabled; administrators provision accounts.
 
+PR previews may enable token-protected smoke-test provisioning of fixed synthetic ordinary accounts. This cannot create administrators or recover existing accounts, and is unavailable in production. See [deployment](deployment.md).
+
 The first administrator is created explicitly by an operator after database setup:
 
 ```bash

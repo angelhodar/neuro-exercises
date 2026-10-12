@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 import { verifyPassword } from "better-auth/crypto";
-import { bootstrapAdmin } from "../lib/auth/bootstrap-admin";
-import { getDatabaseDriver } from "../lib/db/driver";
+import { bootstrapAdmin } from "../../lib/auth/bootstrap-admin";
+import { getDatabaseDriver } from "../../lib/db/driver";
 
 const INVALID_DRIVER = /DATABASE_DRIVER/;
 const EXISTING_ADMIN = /already exists/;

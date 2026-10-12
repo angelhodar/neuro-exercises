@@ -34,3 +34,13 @@ NeuroGranada helps rehabilitation professionals create and configure cognitive e
 Keep `docs/` focused on concepts, user workflows, setup, and meaningful safety boundaries. Avoid inventories of source paths, internal APIs, model names, dependency versions, table names, or transient tuning values. Use the code as the reference for those details.
 
 Retain exact commands and environment keys when people need them to operate the project safely. Update documentation when behavior, setup, permissions, or product scope changes—not merely when code moves or a model is replaced. Keep the root README a short entry point.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

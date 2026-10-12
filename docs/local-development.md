@@ -49,7 +49,7 @@ npm run ts-check
 npm run fix -- <changed-paths>
 ```
 
-The regression commands are `test:auth`, `test:refinement`, `test:setup`, and `test:sandbox`. They run in isolation without production data or paid service calls. Consult `package.json` and the scripts themselves for the current command inventory.
+The regression commands are `test:auth`, `test:refinement`, `test:setup`, `test:sandbox`, and `test:exercises`. They run in isolation without production data or paid service calls. Consult `package.json` and the scripts themselves for the current command inventory.
 
 **Do not treat `npm run build` as a harmless check:** it applies migrations to the configured database. Confirm targets before maintenance, backfills, or reset commands.
 

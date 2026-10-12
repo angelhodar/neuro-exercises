@@ -10,6 +10,8 @@ NeuroGranada is a web application with a few connected areas:
 
 The application uses a React-based framework with server-side operations and browser interactivity. Exact libraries, versions, and source organization are maintained in the code and package manifest.
 
+Browser configuration screens load only the configuration UI and validation they need. Exercise execution may depend on server-side data, so it is kept behind a separate server-only loading boundary.
+
 ## Authoring and execution are different flows
 
 Authoring turns an approved idea into a generated exercise and a saved checkpoint. A preview lets the professional try that version and request changes.

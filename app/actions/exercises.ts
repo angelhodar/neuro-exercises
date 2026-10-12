@@ -1,9 +1,12 @@
 "use server";
 
-import { generateImage, generateText, Output } from "ai";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { generateAudio } from "@/lib/ai/audio";
+import {
+  generateAudioInstructions,
+  generateExerciseData,
+  generateThumbnail,
+} from "@/lib/ai/exercise-metadata";
 import { findRequirementDraft } from "@/lib/ai/refinement/draft-repository";
 import { formatExerciseBrief } from "@/lib/ai/refinement/format-brief";
 import { getRefinementState } from "@/lib/ai/refinement/state";
@@ -15,7 +18,6 @@ import { exerciseRequirementDrafts, exercises } from "@/lib/db/schema";
 import {
   type CreateExerciseSchema,
   createExerciseSchema,
-  generatedExerciseSchema,
   type RegisterExerciseSchema,
   registerExerciseSchema,
   type UpdateExerciseSchema,
@@ -23,32 +25,6 @@ import {
 } from "@/lib/schemas/exercises";
 import { uploadBlobPathname } from "@/lib/storage";
 import { createExerciseGeneration } from "./generations";
-
-// Función para generar thumbnail
-async function generateThumbnail(
-  thumbnailPrompt: string,
-  slug: string
-): Promise<string | null> {
-  try {
-    const { images } = await generateImage({
-      model: "spacexai/grok-imagine-image-2.0",
-      prompt: `Generate an image of ${thumbnailPrompt.toLowerCase()}, clear and simple, centered, white background`,
-      size: "512x512",
-    });
-
-    const [image] = images;
-    if (!image) {
-      throw new Error("Error generating thumbnail");
-    }
-
-    const imageBuffer = Buffer.from(image.uint8Array);
-    const fileName = `thumbnails/${slug}.png`;
-    return await uploadBlobPathname(fileName, imageBuffer);
-  } catch (error) {
-    console.error("Error generando thumbnail:", error);
-    return null;
-  }
-}
 
 // Función para subir thumbnail manualmente
 async function uploadThumbnail(
@@ -60,20 +36,6 @@ async function uploadThumbnail(
     return await uploadBlobPathname(fileName, file);
   } catch (error) {
     console.error("Error subiendo thumbnail:", error);
-    return null;
-  }
-}
-
-async function generateAudioInstructions(
-  audioPrompt: string,
-  slug: string
-): Promise<string | null> {
-  try {
-    const audioBuffer = await generateAudio(audioPrompt);
-    const fileName = `audio/${slug}.mp3`;
-    return await uploadBlobPathname(fileName, audioBuffer);
-  } catch (error) {
-    console.error("Error generando audio:", error);
     return null;
   }
 }
@@ -122,22 +84,6 @@ export async function getExerciseBySlug(
     console.error("Error getting exercise by slug:", error);
     return null;
   }
-}
-
-async function generateExerciseData(prompt: string) {
-  const { output } = await generateText({
-    instructions:
-      "Eres un especialista en neuropsicología y diseño de ejercicios cognitivos. Tu tarea es generar metadatos completos para un ejercicio neurocognitivo basándote en la descripción del usuario. Cada campo del objeto que generes debe seguir exactamente las especificaciones descritas",
-    model: "google/gemini-3.8-flash",
-    output: Output.object({ schema: generatedExerciseSchema }),
-    prompt,
-  });
-
-  if (!output) {
-    throw new Error("Failed to generate exercise data");
-  }
-
-  return output;
 }
 
 export async function createExercise(

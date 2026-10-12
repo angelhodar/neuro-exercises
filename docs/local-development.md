@@ -49,7 +49,22 @@ npm run ts-check
 npm run fix -- <changed-paths>
 ```
 
-The regression commands are `test:auth`, `test:refinement`, `test:setup`, `test:sandbox`, and `test:exercises`. They run in isolation without production data or paid service calls. Consult `package.json` and the scripts themselves for the current command inventory.
+## Regression tests
+
+```bash
+npx playwright install chromium
+npm test -- unit
+npm test -- integration
+npm test -- e2e
+```
+
+`npm test` runs all three suites. Unit and integration tests run without a development database. Browser tests require Docker Compose and start a separate temporary PostgreSQL database, an application server, and a local preview fixture. They never migrate or reset your configured development database. Keep ports 3100 and 3101 available.
+
+The browser suite uses real authentication and persistence, but replaces paid AI, storage, and remote sandbox operations with deterministic local adapters. It verifies application workflows, not the quality of generated exercise code or clinical suitability. Failure reports include browser traces and screenshots; use synthetic data only.
+
+The runner provides `NEUROGRANADA_E2E=1` and an isolated database/environment automatically. Do not set this flag for ordinary development or deployment. Test adapters refuse production mode and non-test database targets. Pass a test file directly to run only that file, for example `npm test -- tests/e2e/auth.spec.ts` or `npm test -- tests/unit/patient-session-form.test.ts`.
+
+Contributor testing conventions are in [the test guide](../tests/README.md).
 
 **Do not treat `npm run build` as a harmless check:** it applies migrations to the configured database. Confirm targets before maintenance, backfills, or reset commands.
 

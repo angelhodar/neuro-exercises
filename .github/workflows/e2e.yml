@@ -1,0 +1,82 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: read
+  pull-requests: read
+
+jobs:
+  e2e:
+    name: Deployed preview smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Verify selected PR commit
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const pulls = await github.paginate(github.rest.repos.listPullRequestsAssociatedWithCommit, {
+              ...context.repo, commit_sha: context.sha,
+            });
+            const repository = `${context.repo.owner}/${context.repo.repo}`;
+            const pull = pulls.find(pr => pr.state === 'open' && pr.head.sha === context.sha && pr.head.repo?.full_name === repository);
+            if (!pull) {
+              throw new Error('Select the current head branch of an open, same-repository PR when running this workflow');
+            }
+
+      - name: Wait for Vercel preview deployment
+        id: preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: Preview
+          max_timeout: 600
+          check_interval: 5
+          vercel_protection_bypass_header: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          path: /login
+
+      - name: Validate preview origin
+        id: target
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        with:
+          script: |
+            const url = new URL(process.env.PREVIEW_URL);
+            if (url.protocol !== 'https:' || !url.hostname.endsWith('.vercel.app') || url.pathname !== '/' || url.username || url.password || url.search || url.hash) {
+              throw new Error('Expected a Vercel preview origin');
+            }
+            core.setOutput('url', url.origin);
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Test deployed preview
+        run: npm test -- e2e
+        env:
+          E2E_BASE_URL: ${{ steps.target.outputs.url }}
+          E2E_TOKEN: ${{ secrets.E2E_TOKEN }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: preview-smoke-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

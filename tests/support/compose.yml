@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: neurogranada_e2e
+      POSTGRES_USER: e2e
+      POSTGRES_PASSWORD: ${E2E_DATABASE_PASSWORD:?Provided by the test runner}
+    ports:
+      - "127.0.0.1::5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U e2e -d neurogranada_e2e"]
+      interval: 1s
+      timeout: 5s
+      retries: 30

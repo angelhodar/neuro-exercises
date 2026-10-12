@@ -106,11 +106,19 @@ export function Chat({
   });
 
   useEffect(() => {
-    if (autoStart && !hasAutoStarted.current) {
-      hasAutoStarted.current = true;
-      setGen(null);
-      regenerate();
-    }
+    let cancelled = false;
+    // The SDK stops its stream during effect cleanup. Defer until the effect
+    // survives Strict Mode's setup/cleanup cycle before consuming the guard.
+    queueMicrotask(() => {
+      if (autoStart && !cancelled && !hasAutoStarted.current) {
+        hasAutoStarted.current = true;
+        setGen(null);
+        regenerate();
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [autoStart, regenerate, setGen]);
 
   const filteredMessages = messages.filter(

@@ -9,18 +9,18 @@ import { admin } from "better-auth/plugins/admin";
 import { organization as organizationPlugin } from "better-auth/plugins/organization";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
-import type { ExerciseRefinementMessage } from "../lib/ai/refinement/agent";
+import type { ExerciseRefinementMessage } from "../../lib/ai/refinement/agent";
 // biome-ignore lint/performance/noNamespaceImport: Drizzle requires the relation schema
-import * as schema from "../lib/db/schema";
+import * as schema from "../../lib/db/schema";
 
 const require = createRequire(`${process.cwd()}/package.json`);
 const postgres = new PGlite();
 const database = drizzle(postgres, { schema });
 const password = "Audit-password-2026";
 let requestHeaders = new Headers();
-let usersActions: typeof import("../app/actions/users");
-let organizationsActions: typeof import("../app/actions/organizations");
-let patientsActions: typeof import("../app/actions/patients");
+let usersActions: typeof import("../../app/actions/users");
+let organizationsActions: typeof import("../../app/actions/organizations");
+let patientsActions: typeof import("../../app/actions/patients");
 let localAuth: ReturnType<typeof createLocalAuth>;
 let ownerCookie: string;
 let memberCookie: string;
@@ -118,7 +118,7 @@ before(async () => {
   mock.method(nextHeaders, "headers", () => Promise.resolve(requestHeaders));
   mock.method(nextCache, "revalidatePath", () => undefined);
 
-  const { db } = await import("../lib/db");
+  const { db } = await import("../../lib/db");
   Object.assign(db.query, database.query);
   mock.method(
     db,
@@ -141,7 +141,7 @@ before(async () => {
     database.delete.bind(database) as unknown as typeof db.delete
   );
 
-  const { auth } = await import("../lib/auth/auth.server");
+  const { auth } = await import("../../lib/auth/auth.server");
   localAuth = createLocalAuth(auth.options);
   type ApiMethods = Record<string, (...args: unknown[]) => unknown>;
   const appApi = auth.api as unknown as ApiMethods;
@@ -161,9 +161,9 @@ before(async () => {
     );
   }
 
-  usersActions = await import("../app/actions/users");
-  organizationsActions = await import("../app/actions/organizations");
-  patientsActions = await import("../app/actions/patients");
+  usersActions = await import("../../app/actions/users");
+  organizationsActions = await import("../../app/actions/organizations");
+  patientsActions = await import("../../app/actions/patients");
 
   const owner = await localAuth.api.createUser({
     body: {
@@ -418,23 +418,43 @@ test("accepting an invitation requires verified ownership of the recipient email
   );
 });
 
-test("anonymous upload-token requests return 401 before issuing a Blob token", async () => {
-  const { POST } = await import("../app/api/media/upload/route");
-  const response = await POST(
-    new Request("http://localhost:3000/api/media/upload", {
-      body: JSON.stringify({
-        payload: {
-          clientPayload: null,
-          multipart: false,
-          pathname: "audit.png",
-        },
-        type: "blob.generate-client-token",
-      }),
-      headers: { "content-type": "application/json" },
-      method: "POST",
-    })
-  );
-  assert.equal(response.status, 401);
+test("anonymous upload-token requests return 401 even without valid Blob credentials", async (t) => {
+  const { POST } = await import("../../app/api/media/upload/route");
+  const originalToken = process.env.BLOB_READ_WRITE_TOKEN;
+  t.after(() => {
+    if (originalToken === undefined) {
+      delete process.env.BLOB_READ_WRITE_TOKEN;
+    } else {
+      process.env.BLOB_READ_WRITE_TOKEN = originalToken;
+    }
+  });
+  const fetchMock = t.mock.method(globalThis, "fetch", () => {
+    throw new Error("Anonymous uploads must not call Blob services");
+  });
+  for (const token of [undefined, "invalid-blob-token"]) {
+    if (token === undefined) {
+      delete process.env.BLOB_READ_WRITE_TOKEN;
+    } else {
+      process.env.BLOB_READ_WRITE_TOKEN = token;
+    }
+    // biome-ignore lint/performance/noAwaitInLoops: verify each credential configuration sequentially
+    const response = await POST(
+      new Request("http://localhost:3000/api/media/upload", {
+        body: JSON.stringify({
+          payload: {
+            clientPayload: null,
+            multipart: false,
+            pathname: "audit.png",
+          },
+          type: "blob.generate-client-token",
+        }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      })
+    );
+    assert.equal(response.status, 401);
+  }
+  assert.equal(fetchMock.mock.callCount(), 0);
 });
 
 test("generation requests enforce authentication, validation, and exercise ownership", async (t) => {
@@ -462,7 +482,7 @@ test("generation requests enforce authentication, validation, and exercise owner
     }
   });
   const { NextRequest } = await import("next/server");
-  const { POST } = await import("../app/api/chat/route");
+  const { POST } = await import("../../app/api/chat/route");
   function request(body: unknown) {
     return new NextRequest("http://localhost:3000/api/chat", {
       body: JSON.stringify(body),
@@ -630,14 +650,14 @@ test("patient data and child records cannot be accessed or mutated by another us
 
 test("requirements drafts persist messages and are private to their creator", async () => {
   const { createRequirementDraft } = await import(
-    "../app/actions/exercise-requirement-drafts"
+    "../../app/actions/exercise-requirement-drafts"
   );
   const {
     findRequirementDraft,
     listRequirementDrafts,
     saveRequirementDraftTurn,
     saveRequirementDraftResponse,
-  } = await import("../lib/ai/refinement/draft-repository");
+  } = await import("../../lib/ai/refinement/draft-repository");
   setRequestCookie();
   await assert.rejects(createRequirementDraft("Private idea"));
   setRequestCookie(ownerCookie);
@@ -768,11 +788,11 @@ test("requirements drafts persist messages and are private to their creator", as
 
 test("requirements API rejects foreign and stale drafts before calling the agent", async () => {
   const { createRequirementDraft } = await import(
-    "../app/actions/exercise-requirement-drafts"
+    "../../app/actions/exercise-requirement-drafts"
   );
-  const { POST } = await import("../app/api/exercise-refinement/route");
+  const { POST } = await import("../../app/api/exercise-refinement/route");
   const { findRequirementDraft } = await import(
-    "../lib/ai/refinement/draft-repository"
+    "../../lib/ai/refinement/draft-repository"
   );
   setRequestCookie(ownerCookie);
   const { id } = await createRequirementDraft("Private requirements");

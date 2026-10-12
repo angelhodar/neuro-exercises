@@ -59,7 +59,11 @@ export default function EditSessionButton({
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger render={<Button size="sm" variant="outline" />}>
+      <DialogTrigger
+        render={
+          <Button aria-label="Editar sesión" size="sm" variant="outline" />
+        }
+      >
         <Edit className="h-4 w-4" />
       </DialogTrigger>
       <DialogContent className="max-w-lg">

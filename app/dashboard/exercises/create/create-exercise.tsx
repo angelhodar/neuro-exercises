@@ -187,7 +187,9 @@ function ExerciseCreationScreen({ drafts }: { drafts: DraftSummary[] }) {
                 <h2 className="font-semibold">Mis borradores</h2>
                 <div className="grid gap-3">
                   {drafts.map((draft) => (
-                    <Link
+                    // A saved draft must reload its authoritative server state,
+                    // not the router's cached screen from history.replaceState.
+                    <a
                       className="rounded-xl border bg-card p-4 text-sm transition-colors hover:bg-muted"
                       href={`/dashboard/exercises/create?draft=${draft.id}`}
                       key={draft.id}
@@ -197,7 +199,7 @@ function ExerciseCreationScreen({ drafts }: { drafts: DraftSummary[] }) {
                         Actualizado{" "}
                         {new Date(draft.updatedAt).toLocaleDateString("es-ES")}
                       </p>
-                    </Link>
+                    </a>
                   ))}
                 </div>
               </section>

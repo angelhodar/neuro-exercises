@@ -116,8 +116,8 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
-                    <FormControl>
-                      <div className="relative">
+                    <div className="relative">
+                      <FormControl>
                         <Input
                           className="pr-10"
                           disabled={isLoading}
@@ -125,22 +125,22 @@ export default function LoginPage() {
                           type={showPassword ? "text" : "password"}
                           {...field}
                         />
-                        <Button
-                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                          disabled={isLoading}
-                          onClick={() => setShowPassword(!showPassword)}
-                          size="sm"
-                          type="button"
-                          variant="ghost"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
+                      </FormControl>
+                      <Button
+                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                        disabled={isLoading}
+                        onClick={() => setShowPassword(!showPassword)}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

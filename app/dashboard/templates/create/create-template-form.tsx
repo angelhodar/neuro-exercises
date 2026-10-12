@@ -8,7 +8,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { createExerciseTemplate } from "@/app/actions/templates";
-import { loadClientAssets } from "@/app/exercises/loader";
+import { loadClientAssets } from "@/app/exercises/client-loader";
 import {
   ExerciseCard,
   ExerciseCardActions,

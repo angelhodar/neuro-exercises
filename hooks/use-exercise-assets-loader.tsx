@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type ClientAssets, loadClientAssets } from "@/app/exercises/loader";
+import type { ClientAssets } from "@/app/exercises/assets";
+import { loadClientAssets } from "@/app/exercises/client-loader";
 
-export type { ClientAssets } from "@/app/exercises/loader";
+export type { ClientAssets } from "@/app/exercises/assets";
 
 export function useExerciseAssetsLoader(slug: string) {
   const [assets, setAssets] = useState<ClientAssets | null>(null);

@@ -27,6 +27,7 @@ import { createExerciseCheckpoint } from "@/lib/ai/exercise-checkpoint";
 import { getExerciseWorkspaceSandbox } from "@/lib/ai/exercise-workspace";
 import {
   claimExerciseWorkspace,
+  getOrCreateExerciseWorkspace,
   refreshExerciseWorkspaceLock,
   releaseExerciseWorkspace,
 } from "@/lib/ai/workspace-repository";
@@ -95,6 +96,17 @@ export async function POST(req: NextRequest) {
   const generations = await getExerciseGenerations(exercise.id);
   if (generations.length === 0) {
     return new Response("No generation to process", { status: 400 });
+  }
+
+  // Fail before creating a generation or resuming foreign/legacy session state.
+  try {
+    await getOrCreateExerciseWorkspace(exercise.id);
+  } catch (error) {
+    console.error("Exercise workspace configuration error:", error);
+    return new Response(
+      "El espacio de trabajo requiere configuración. Contacta con el administrador.",
+      { status: 503 }
+    );
   }
 
   let generation = generations.at(-1);

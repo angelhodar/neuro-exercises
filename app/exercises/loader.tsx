@@ -1,19 +1,8 @@
-import type { ComponentType } from "react";
-import type { z } from "zod";
+import "server-only";
 
-export interface ExerciseAssets {
-  ConfigFieldsComponent: ComponentType<{ basePath?: string }>;
-  configSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
-  defaultConfig: Record<string, unknown>;
-  ExerciseComponent: ComponentType<{ config: Record<string, unknown> }>;
-  ResultsComponent: ComponentType<Record<string, unknown>>;
-  resultSchema: z.ZodType<Record<string, unknown>, Record<string, unknown>>;
-}
+import type { ExerciseAssets } from "./assets";
 
-export type ClientAssets = Omit<
-  ExerciseAssets,
-  "ExerciseComponent" | "ResultsComponent"
->;
+export type { ClientAssets, ExerciseAssets } from "./assets";
 
 export async function loadExerciseAssets(
   slug: string
@@ -41,28 +30,6 @@ export async function loadExerciseAssets(
     };
   } catch (error) {
     console.error(`Failed to load exercise assets for slug: ${slug}`, error);
-    return null;
-  }
-}
-
-export async function loadClientAssets(
-  slug: string
-): Promise<ClientAssets | null> {
-  try {
-    const [{ ConfigFields }, { configSchema, resultSchema, defaultConfig }] =
-      await Promise.all([
-        import(`./${slug}/${slug}.config`),
-        import(`./${slug}/${slug}.schema`),
-      ]);
-
-    return {
-      ConfigFieldsComponent: ConfigFields,
-      configSchema,
-      defaultConfig,
-      resultSchema,
-    };
-  } catch (error) {
-    console.error(`Failed to load client assets for slug: ${slug}`, error);
     return null;
   }
 }

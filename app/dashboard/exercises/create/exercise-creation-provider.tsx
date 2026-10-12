@@ -3,18 +3,28 @@
 import { useChat } from "@ai-sdk/react";
 import { type ChatAddToolOutputFunction, DefaultChatTransport } from "ai";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { createRequirementDraft } from "@/app/actions/exercise-requirement-drafts";
 import { createExercise } from "@/app/actions/exercises";
 import type { ExerciseRefinementMessage } from "@/lib/ai/refinement/agent";
 import {
   getRequirementsStatus,
+  type ProposeBriefPart,
   shouldContinueRefinement,
   withoutUnfinishedStep,
 } from "@/lib/ai/refinement/conversation";
 import { getRefinementState } from "@/lib/ai/refinement/state";
-import { exerciseRevisionSchema } from "@/lib/schemas/exercise-refinement";
+import {
+  type AskUserQuestionOutput,
+  exerciseRevisionSchema,
+} from "@/lib/schemas/exercise-refinement";
 import type { ExerciseIdeaSchema } from "@/lib/schemas/exercises";
+import {
+  type ExerciseCreationActions,
+  ExerciseCreationActionsContext,
+  type ExerciseCreationState,
+  ExerciseCreationStateContext,
+} from "./exercise-creation-context";
 
 export interface RequirementDraft {
   id: string;
@@ -22,7 +32,13 @@ export interface RequirementDraft {
   revision: number;
 }
 
-export function useExerciseCreation(initialDraft?: RequirementDraft) {
+export function ExerciseCreationProvider({
+  initialDraft,
+  children,
+}: {
+  initialDraft?: RequirementDraft;
+  children: ReactNode;
+}) {
   const router = useRouter();
   const [started, setStarted] = useState(Boolean(initialDraft));
   const draftId = useRef(initialDraft?.id);
@@ -85,6 +101,26 @@ export function useExerciseCreation(initialDraft?: RequirementDraft) {
     }
     await addToolOutput(options);
   };
+
+  function answerQuestion(
+    toolCallId: string,
+    output: AskUserQuestionOutput,
+    siblingBriefs: ProposeBriefPart[]
+  ) {
+    addRefinementToolOutput({ output, tool: "askUserQuestion", toolCallId });
+    // Submit sibling outputs without awaiting automatic continuation between them.
+    for (const brief of siblingBriefs) {
+      addRefinementToolOutput({
+        output: {
+          accepted: false,
+          feedback:
+            "Reformula la propuesta incorporando las respuestas pendientes.",
+        },
+        tool: "proposeExerciseBrief",
+        toolCallId: brief.toolCallId,
+      });
+    }
+  }
 
   async function startRefinement(values: ExerciseIdeaSchema) {
     setDraftError(null);
@@ -157,8 +193,7 @@ export function useExerciseCreation(initialDraft?: RequirementDraft) {
     router.refresh();
   }
 
-  return {
-    addRefinementToolOutput,
+  const state: ExerciseCreationState = {
     busy,
     canUseBrief,
     creating,
@@ -166,19 +201,30 @@ export function useExerciseCreation(initialDraft?: RequirementDraft) {
     displayBrief,
     draftError,
     error,
-    handleCreate,
     messages,
     needsContinuation:
       !(busy || error || creating) &&
       (messages.at(-1)?.role === "user" ||
         shouldContinueRefinement({ messages })),
     requirementsStatus,
+    started,
+    status,
+  };
+  const actions: ExerciseCreationActions = {
+    answerQuestion,
+    handleCreate,
     retryRefinement,
     reviseBrief,
     showDrafts,
-    started,
     startRefinement,
-    status,
     stop,
   };
+
+  return (
+    <ExerciseCreationStateContext value={state}>
+      <ExerciseCreationActionsContext value={actions}>
+        {children}
+      </ExerciseCreationActionsContext>
+    </ExerciseCreationStateContext>
+  );
 }

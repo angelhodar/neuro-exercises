@@ -26,22 +26,21 @@ interface ExerciseConfigFormProps extends PropsWithChildren {
   title: string;
 }
 
-interface ExerciseConfigFormContentProps extends ExerciseConfigFormProps {
+interface ExerciseConfigFormContentProps extends PropsWithChildren {
   assets: ClientAssets;
+  onSubmit?: ExerciseConfigFormProps["onSubmit"];
+  slug: string;
 }
 
 // Content component that only renders when assets are loaded
 function ExerciseConfigFormContent({
   slug,
-  title,
-  exerciseId,
-  presets,
   assets,
   onSubmit,
   children,
 }: ExerciseConfigFormContentProps) {
   const router = useRouter();
-  const { configSchema, defaultConfig, ConfigFieldsComponent } = assets;
+  const { configSchema, defaultConfig } = assets;
 
   const form = useForm<z.infer<typeof configSchema>>({
     defaultValues: defaultConfig,
@@ -64,49 +63,22 @@ function ExerciseConfigFormContent({
   }
 
   return (
-    <Card className="mx-auto w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Form {...form}>
-          <form
-            className="space-y-6"
-            onSubmit={form.handleSubmit(handleSubmit)}
-          >
-            {!!presets && (
-              <>
-                <ExerciseConfigPresetSelector
-                  exerciseId={exerciseId}
-                  initialPresets={presets}
-                />
-                <Separator />
-              </>
-            )}
-
-            <ExerciseBaseFields
-              hasIntrinsicGoal={!defaultConfig.endConditionType}
-            />
-            <Separator />
-
-            {children || <ConfigFieldsComponent />}
-            <Separator />
-
-            <div className="flex justify-end">
-              <Button type="submit">Comenzar</Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
+        {children}
+      </form>
+    </Form>
   );
 }
 
 // Main wrapper component that handles loading states
 export function ExerciseConfigForm({
   slug,
+  title,
+  exerciseId,
+  presets,
+  onSubmit,
   children,
-  ...rest
 }: ExerciseConfigFormProps) {
   const { assets, isLoading, error } = useExerciseAssetsLoader(slug);
 
@@ -142,9 +114,39 @@ export function ExerciseConfigForm({
     return null;
   }
 
+  const { defaultConfig, ConfigFieldsComponent } = assets;
+
   return (
-    <ExerciseConfigFormContent {...rest} assets={assets} slug={slug}>
-      {children}
-    </ExerciseConfigFormContent>
+    <Card className="mx-auto w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle className="text-2xl">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <ExerciseConfigFormContent
+          assets={assets}
+          onSubmit={onSubmit}
+          slug={slug}
+        >
+          {!!presets && (
+            <>
+              <ExerciseConfigPresetSelector
+                exerciseId={exerciseId}
+                initialPresets={presets}
+              />
+              <Separator />
+            </>
+          )}
+          <ExerciseBaseFields
+            hasIntrinsicGoal={!defaultConfig.endConditionType}
+          />
+          <Separator />
+          {children || <ConfigFieldsComponent />}
+          <Separator />
+          <div className="flex justify-end">
+            <Button type="submit">Comenzar</Button>
+          </div>
+        </ExerciseConfigFormContent>
+      </CardContent>
+    </Card>
   );
 }

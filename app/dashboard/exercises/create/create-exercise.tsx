@@ -23,43 +23,49 @@ import {
   type ExerciseIdeaSchema,
   exerciseIdeaSchema,
 } from "@/lib/schemas/exercises";
-import { RefinementConversation } from "./refinement-conversation";
-import { RequirementsDocument } from "./requirements-document";
 import {
+  useExerciseCreationActions,
+  useExerciseCreationState,
+} from "./exercise-creation-context";
+import {
+  ExerciseCreationProvider,
   type RequirementDraft,
-  useExerciseCreation,
-} from "./use-exercise-creation";
+} from "./exercise-creation-provider";
+import { RefinementConversation } from "./refinement-conversation";
+import {
+  ExerciseCreationControls,
+  RequirementsDocument,
+} from "./requirements-document";
+
+interface DraftSummary {
+  id: string;
+  title: string;
+  updatedAt: Date;
+}
 
 export default function CreateExercise({
   initialDraft,
   drafts,
 }: {
   initialDraft?: RequirementDraft;
-  drafts: { id: string; title: string; updatedAt: Date }[];
+  drafts: DraftSummary[];
 }) {
-  const workflow = useExerciseCreation(initialDraft);
-  const { started, displayBrief, creating, creationError, canUseBrief } =
-    workflow;
+  return (
+    <ExerciseCreationProvider initialDraft={initialDraft}>
+      <ExerciseCreationScreen drafts={drafts} />
+    </ExerciseCreationProvider>
+  );
+}
+
+function ExerciseCreationScreen({ drafts }: { drafts: DraftSummary[] }) {
+  const state = useExerciseCreationState();
+  const actions = useExerciseCreationActions();
+  const { started, displayBrief } = state;
   const isMobile = useIsMobile();
   const form = useForm<ExerciseIdeaSchema>({
     defaultValues: { prompt: "" },
     resolver: zodResolver(exerciseIdeaSchema),
   });
-  const conversation = (
-    <RefinementConversation
-      addToolOutput={workflow.addRefinementToolOutput}
-      busy={workflow.busy}
-      canRevise={canUseBrief}
-      creating={creating}
-      error={workflow.error}
-      hasBrief={Boolean(displayBrief)}
-      messages={workflow.messages}
-      onRetry={workflow.retryRefinement}
-      onRevise={workflow.reviseBrief}
-      status={workflow.status}
-      stop={workflow.stop}
-    />
-  );
   return (
     <div
       className={
@@ -76,18 +82,18 @@ export default function CreateExercise({
               <Link
                 className="text-primary hover:underline"
                 href="/dashboard/exercises/create"
-                onClick={workflow.showDrafts}
+                onClick={actions.showDrafts}
               >
                 Mis borradores
               </Link>
             </div>
-            {workflow.needsContinuation ? (
+            {state.needsContinuation ? (
               <div className="flex shrink-0 items-center justify-between gap-4 border-b px-5 py-2 text-sm">
                 <span>
                   La revisión quedó pendiente. Puedes continuar el borrador.
                 </span>
                 <Button
-                  onClick={workflow.retryRefinement}
+                  onClick={actions.retryRefinement}
                   size="sm"
                   variant="outline"
                 >
@@ -102,23 +108,18 @@ export default function CreateExercise({
                   orientation={isMobile ? "vertical" : "horizontal"}
                 >
                   <ResizablePanel defaultSize={45} minSize={30}>
-                    {conversation}
+                    <RefinementConversation />
                   </ResizablePanel>
                   <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={55} minSize={30}>
-                    <RequirementsDocument
-                      brief={displayBrief.input.brief}
-                      canCreate={canUseBrief}
-                      creating={creating}
-                      creationError={creationError}
-                      onCreate={workflow.handleCreate}
-                      statusMessage={workflow.requirementsStatus}
-                    />
+                    <RequirementsDocument brief={displayBrief.input.brief}>
+                      <ExerciseCreationControls />
+                    </RequirementsDocument>
                   </ResizablePanel>
                 </ResizablePanelGroup>
               ) : (
                 <div className="mx-auto h-full w-full max-w-3xl">
-                  {conversation}
+                  <RefinementConversation />
                 </div>
               )}
             </div>
@@ -140,11 +141,11 @@ export default function CreateExercise({
             <Form {...form}>
               <form
                 className="space-y-4"
-                onSubmit={form.handleSubmit(workflow.startRefinement)}
+                onSubmit={form.handleSubmit(actions.startRefinement)}
               >
-                {workflow.draftError ? (
+                {state.draftError ? (
                   <p className="text-destructive text-sm" role="alert">
-                    {workflow.draftError}
+                    {state.draftError}
                   </p>
                 ) : null}
                 <FormField

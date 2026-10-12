@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ChatAddToolOutputFunction } from "ai";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -31,7 +30,6 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller";
-import type { ExerciseRefinementMessage } from "@/lib/ai/refinement/agent";
 import {
   type AskQuestionPart,
   getPendingSiblingBriefs,
@@ -42,19 +40,21 @@ import {
   exerciseRevisionSchema,
   MAX_BRIEF_FEEDBACK_LENGTH,
 } from "@/lib/schemas/exercise-refinement";
+import {
+  useExerciseCreationActions,
+  useExerciseCreationState,
+} from "./exercise-creation-context";
 import { QuestionAnswer, QuestionCard } from "./refinement-question";
 
 function ToolPart({
-  addToolOutput,
-  disabled,
   part,
   pendingSiblingBriefs,
 }: {
-  addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
-  disabled: boolean;
   part: AskQuestionPart | ProposeBriefPart;
   pendingSiblingBriefs: ProposeBriefPart[];
 }) {
+  const { busy, creating } = useExerciseCreationState();
+  const { answerQuestion } = useExerciseCreationActions();
   if (part.state === "input-streaming") {
     return (
       <div className="flex items-center gap-2 rounded-lg border bg-white p-4 text-muted-foreground text-sm">
@@ -67,25 +67,10 @@ function ToolPart({
     if (part.state === "input-available") {
       return (
         <QuestionCard
-          disabled={disabled}
+          disabled={busy || creating}
           input={part.input}
           onAnswer={(output) => {
-            addToolOutput({
-              output,
-              tool: "askUserQuestion",
-              toolCallId: part.toolCallId,
-            });
-            for (const briefPart of pendingSiblingBriefs) {
-              addToolOutput({
-                output: {
-                  accepted: false,
-                  feedback:
-                    "Reformula la propuesta incorporando las respuestas pendientes.",
-                },
-                tool: "proposeExerciseBrief",
-                toolCallId: briefPart.toolCallId,
-              });
-            }
+            answerQuestion(part.toolCallId, output, pendingSiblingBriefs);
           }}
         />
       );
@@ -130,14 +115,10 @@ function ToolPart({
 }
 
 function AssistantPart({
-  addToolOutput,
-  disabled,
   hasPendingQuestion,
   part,
   pendingSiblingBriefs,
 }: {
-  addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
-  disabled: boolean;
   hasPendingQuestion: boolean;
   part: AskQuestionPart | ProposeBriefPart | RefinementTextPart;
   pendingSiblingBriefs: ProposeBriefPart[];
@@ -152,54 +133,26 @@ function AssistantPart({
   if (part.type === "tool-proposeExerciseBrief" && hasPendingQuestion) {
     return null;
   }
-  return (
-    <ToolPart
-      addToolOutput={addToolOutput}
-      disabled={disabled}
-      part={part}
-      pendingSiblingBriefs={pendingSiblingBriefs}
-    />
-  );
+  return <ToolPart part={part} pendingSiblingBriefs={pendingSiblingBriefs} />;
 }
 
-export function RefinementConversation({
-  addToolOutput,
-  busy,
-  canRevise,
-  creating,
-  hasBrief,
-  error,
-  messages,
-  onRetry,
-  onRevise,
-  status,
-  stop,
-}: {
-  addToolOutput: ChatAddToolOutputFunction<ExerciseRefinementMessage>;
-  busy: boolean;
-  canRevise: boolean;
-  creating: boolean;
-  hasBrief: boolean;
-  error: Error | undefined;
-  messages: ExerciseRefinementMessage[];
-  onRetry: () => Promise<void>;
-  onRevise: (feedback: string) => Promise<void>;
-  status: "error" | "ready" | "streaming" | "submitted";
-  stop: () => void;
-}) {
+function BriefRevisionInput() {
+  const { busy, canUseBrief, creating, displayBrief, status } =
+    useExerciseCreationState();
+  const { reviseBrief, stop } = useExerciseCreationActions();
   const revisionForm = useForm<z.infer<typeof exerciseRevisionSchema>>({
     defaultValues: { feedback: "" },
     resolver: zodResolver(exerciseRevisionSchema),
   });
   function submitRevision() {
-    if (!canRevise || creating) {
+    if (!canUseBrief || creating) {
       return Promise.reject(
         new Error("Espera a que termine la operación actual")
       );
     }
     return revisionForm.handleSubmit(
       async ({ feedback }) => {
-        await onRevise(feedback);
+        await reviseBrief(feedback);
         revisionForm.reset();
       },
       () => {
@@ -207,6 +160,57 @@ export function RefinementConversation({
       }
     )();
   }
+
+  if (!displayBrief) {
+    return null;
+  }
+
+  return (
+    <div className="shrink-0 border-t p-3">
+      <Form {...revisionForm}>
+        <PromptInput onSubmit={submitRevision}>
+          <PromptInputBody>
+            <FormField
+              control={revisionForm.control}
+              name="feedback"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <PromptInputTextarea
+                      {...field}
+                      aria-label="Cambios en los requisitos"
+                      disabled={!canUseBrief || creating}
+                      maxLength={MAX_BRIEF_FEEDBACK_LENGTH}
+                      name="message"
+                      placeholder="Describe qué quieres cambiar en los requisitos..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </PromptInputBody>
+          <PromptInputFooter>
+            <p className="text-muted-foreground text-xs">
+              {creating
+                ? "Creando el ejercicio con esta especificación."
+                : "El documento se actualizará con tu mensaje."}
+            </p>
+            <PromptInputSubmit
+              disabled={creating || !(busy || canUseBrief)}
+              onStop={stop}
+              status={status}
+            />
+          </PromptInputFooter>
+        </PromptInput>
+      </Form>
+    </div>
+  );
+}
+
+export function RefinementConversation() {
+  const { busy, creating, error, messages } = useExerciseCreationState();
+  const { retryRefinement } = useExerciseCreationActions();
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-card">
@@ -261,8 +265,6 @@ export function RefinementConversation({
                           )
                           .map((part) => (
                             <AssistantPart
-                              addToolOutput={addToolOutput}
-                              disabled={busy || creating}
                               hasPendingQuestion={pendingQuestions.length > 0}
                               key={
                                 part.type === "text"
@@ -297,7 +299,7 @@ export function RefinementConversation({
                     <span>No se pudo continuar: {error.message}</span>
                     <Button
                       disabled={busy || creating}
-                      onClick={onRetry}
+                      onClick={retryRefinement}
                       size="sm"
                       variant="outline"
                     >
@@ -311,47 +313,7 @@ export function RefinementConversation({
           <MessageScrollerButton />
         </MessageScroller>
       </MessageScrollerProvider>
-      {hasBrief ? (
-        <div className="shrink-0 border-t p-3">
-          <Form {...revisionForm}>
-            <PromptInput onSubmit={submitRevision}>
-              <PromptInputBody>
-                <FormField
-                  control={revisionForm.control}
-                  name="feedback"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <PromptInputTextarea
-                          {...field}
-                          aria-label="Cambios en los requisitos"
-                          disabled={!canRevise || creating}
-                          maxLength={MAX_BRIEF_FEEDBACK_LENGTH}
-                          name="message"
-                          placeholder="Describe qué quieres cambiar en los requisitos..."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </PromptInputBody>
-              <PromptInputFooter>
-                <p className="text-muted-foreground text-xs">
-                  {creating
-                    ? "Creando el ejercicio con esta especificación."
-                    : "El documento se actualizará con tu mensaje."}
-                </p>
-                <PromptInputSubmit
-                  disabled={creating || !(busy || canRevise)}
-                  onStop={stop}
-                  status={status}
-                />
-              </PromptInputFooter>
-            </PromptInput>
-          </Form>
-        </div>
-      ) : null}
+      <BriefRevisionInput />
     </div>
   );
 }

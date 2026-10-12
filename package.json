@@ -22,6 +22,7 @@
     "test:auth": "npx tsx --test scripts/auth-security.test.ts",
     "test:exercises": "npx tsx --test scripts/exercise-loading.test.ts",
     "test:forms": "npx tsx --test scripts/patient-session-form.test.ts",
+    "test:generation": "npx tsx --test scripts/generation-stream.test.ts scripts/generation-lifecycle.test.ts",
     "test:refinement": "npx tsx --test scripts/exercise-refinement.test.ts",
     "test:sandbox": "npx tsx --test scripts/sandbox-isolation.test.ts",
     "test:setup": "npx tsx --test scripts/setup.test.ts",

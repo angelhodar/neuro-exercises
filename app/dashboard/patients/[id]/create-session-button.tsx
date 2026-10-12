@@ -5,7 +5,6 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { createPatientSession } from "@/app/actions/patients";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,69 +15,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
+import { SessionFormFields } from "../session-form-fields";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  DISCIPLINE_LABELS,
-  DISCIPLINES,
-  SESSION_TYPE_LABELS,
-  SESSION_TYPES,
-} from "../constants";
-
-const createSessionSchema = z.object({
-  date: z.string().min(1, "La fecha es obligatoria"),
-  discipline: z.string().min(1, "La disciplina es obligatoria"),
-  observations: z.string().optional(),
-  type: z.string().min(1, "El tipo de sesión es obligatorio"),
-});
-
-type CreateSessionFormValues = z.infer<typeof createSessionSchema>;
-
-interface CreateSessionButtonProps {
-  patientId: number;
-}
+  type SessionFormValues,
+  sessionFormInput,
+  sessionFormSchema,
+} from "../session-form-schema";
 
 export default function CreateSessionButton({
   patientId,
-}: CreateSessionButtonProps) {
+}: {
+  patientId: number;
+}) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const form = useForm<CreateSessionFormValues>({
+  const form = useForm<SessionFormValues>({
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
       discipline: "",
       observations: "",
       type: "",
     },
-    resolver: zodResolver(createSessionSchema),
+    resolver: zodResolver(sessionFormSchema),
   });
 
-  const onSubmit = async (data: CreateSessionFormValues) => {
+  const onSubmit = async (data: SessionFormValues) => {
     setIsLoading(true);
     try {
-      await createPatientSession({
-        date: new Date(data.date),
-        discipline: data.discipline,
-        observations: data.observations || null,
-        patientId,
-        type: data.type,
-      });
+      await createPatientSession({ ...sessionFormInput(data), patientId });
       toast.success("Sesión creada exitosamente");
       form.reset();
       setOpen(false);
@@ -102,116 +67,7 @@ export default function CreateSessionButton({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid gap-4 py-4">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha *</FormLabel>
-                    <FormControl>
-                      <Input disabled={isLoading} type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de sesión *</FormLabel>
-                      <Select
-                        disabled={isLoading}
-                        items={SESSION_TYPES.map((type) => ({
-                          label: SESSION_TYPE_LABELS[type],
-                          value: type,
-                        }))}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SESSION_TYPES.map((type) => (
-                            <SelectItem
-                              key={type}
-                              label={SESSION_TYPE_LABELS[type]}
-                              value={type}
-                            >
-                              {SESSION_TYPE_LABELS[type]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="discipline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Disciplina *</FormLabel>
-                      <Select
-                        disabled={isLoading}
-                        items={DISCIPLINES.map((discipline) => ({
-                          label: DISCIPLINE_LABELS[discipline],
-                          value: discipline,
-                        }))}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Seleccionar disciplina" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {DISCIPLINES.map((discipline) => (
-                            <SelectItem
-                              key={discipline}
-                              label={DISCIPLINE_LABELS[discipline]}
-                              value={discipline}
-                            >
-                              {DISCIPLINE_LABELS[discipline]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="observations"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observaciones</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        disabled={isLoading}
-                        placeholder="Observaciones de la sesión..."
-                        rows={4}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <SessionFormFields disabled={isLoading} />
             <DialogFooter>
               <Button
                 disabled={isLoading}

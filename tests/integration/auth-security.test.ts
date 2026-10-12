@@ -418,23 +418,43 @@ test("accepting an invitation requires verified ownership of the recipient email
   );
 });
 
-test("anonymous upload-token requests return 401 before issuing a Blob token", async () => {
+test("anonymous upload-token requests return 401 even without valid Blob credentials", async (t) => {
   const { POST } = await import("../../app/api/media/upload/route");
-  const response = await POST(
-    new Request("http://localhost:3000/api/media/upload", {
-      body: JSON.stringify({
-        payload: {
-          clientPayload: null,
-          multipart: false,
-          pathname: "audit.png",
-        },
-        type: "blob.generate-client-token",
-      }),
-      headers: { "content-type": "application/json" },
-      method: "POST",
-    })
-  );
-  assert.equal(response.status, 401);
+  const originalToken = process.env.BLOB_READ_WRITE_TOKEN;
+  t.after(() => {
+    if (originalToken === undefined) {
+      delete process.env.BLOB_READ_WRITE_TOKEN;
+    } else {
+      process.env.BLOB_READ_WRITE_TOKEN = originalToken;
+    }
+  });
+  const fetchMock = t.mock.method(globalThis, "fetch", () => {
+    throw new Error("Anonymous uploads must not call Blob services");
+  });
+  for (const token of [undefined, "invalid-blob-token"]) {
+    if (token === undefined) {
+      delete process.env.BLOB_READ_WRITE_TOKEN;
+    } else {
+      process.env.BLOB_READ_WRITE_TOKEN = token;
+    }
+    // biome-ignore lint/performance/noAwaitInLoops: verify each credential configuration sequentially
+    const response = await POST(
+      new Request("http://localhost:3000/api/media/upload", {
+        body: JSON.stringify({
+          payload: {
+            clientPayload: null,
+            multipart: false,
+            pathname: "audit.png",
+          },
+          type: "blob.generate-client-token",
+        }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      })
+    );
+    assert.equal(response.status, 401);
+  }
+  assert.equal(fetchMock.mock.callCount(), 0);
 });
 
 test("generation requests enforce authentication, validation, and exercise ownership", async (t) => {

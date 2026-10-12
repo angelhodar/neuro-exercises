@@ -58,6 +58,15 @@ const testEditSchema = patientTestUpdateSchema.omit({
   updatedAt: true,
 });
 
+async function requirePatientUser() {
+  // Preserve the existing mutation error and getCurrentUser's session handling.
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
+
 async function assertPatientAccess(patientId: number, userId: string) {
   const patient = await db.query.patients.findFirst({
     columns: { id: true },
@@ -136,10 +145,7 @@ export async function createPatient(
   data: Omit<NewPatient, "id" | "creatorId" | "createdAt" | "updatedAt">
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const [newPatient] = await db
       .insert(patients)
@@ -161,10 +167,7 @@ export async function updatePatient(
   >
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const [updated] = await db
       .update(patients)
@@ -187,10 +190,7 @@ export async function updatePatient(
 
 export async function deletePatient(id: number) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const [deleted] = await db
       .delete(patients)
@@ -213,10 +213,7 @@ export async function createPatientSession(
   data: Omit<NewPatientSession, "id" | "creatorId" | "createdAt" | "updatedAt">
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const input = sessionInputSchema.parse(data);
     await assertPatientAccess(input.patientId, user.id);
@@ -241,10 +238,7 @@ export async function updatePatientSession(
   >
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     await assertPatientAccess(patientId, user.id);
     const [updated] = await db
@@ -273,10 +267,7 @@ export async function updatePatientSession(
 
 export async function deletePatientSession(id: number, patientId: number) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     await assertPatientAccess(patientId, user.id);
     const [deleted] = await db
@@ -306,10 +297,7 @@ export async function createPatientTest(
   data: Omit<NewPatientTest, "id" | "creatorId" | "createdAt" | "updatedAt">
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const input = testInputSchema.parse(data);
     await assertPatientAccess(input.patientId, user.id);
@@ -335,10 +323,7 @@ export async function updatePatientTest(
   >
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     const input = testEditSchema.parse(data);
     await assertPatientAccess(patientId, user.id);
@@ -369,10 +354,7 @@ export async function updatePatientTest(
 
 export async function deletePatientTest(id: number, patientId: number) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
+    const user = await requirePatientUser();
 
     await assertPatientAccess(patientId, user.id);
     const [deleted] = await db

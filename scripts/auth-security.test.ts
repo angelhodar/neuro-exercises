@@ -437,6 +437,42 @@ test("anonymous upload-token requests return 401 before issuing a Blob token", a
   assert.equal(response.status, 401);
 });
 
+test("anonymous patient mutations retain their Unauthorized error and read fallbacks", async () => {
+  setRequestCookie();
+  assert.deepEqual(await patientsActions.getPatients(), []);
+  assert.equal(await patientsActions.getPatientById(1), null);
+  const mutations = [
+    () =>
+      patientsActions.createPatient({
+        firstName: "Private",
+        lastName: "Patient",
+      }),
+    () => patientsActions.updatePatient(1, { firstName: "Changed" }),
+    () => patientsActions.deletePatient(1),
+    () =>
+      patientsActions.createPatientSession({
+        discipline: "speech",
+        patientId: 1,
+        type: "therapy",
+      }),
+    () =>
+      patientsActions.updatePatientSession(1, 1, { observations: "Changed" }),
+    () => patientsActions.deletePatientSession(1, 1),
+    () =>
+      patientsActions.createPatientTest({
+        evaluatedProcess: "memory",
+        patientId: 1,
+      }),
+    () => patientsActions.updatePatientTest(1, 1, { score: "Changed" }),
+    () => patientsActions.deletePatientTest(1, 1),
+  ];
+  await Promise.all(
+    mutations.map((mutate) =>
+      assert.rejects(mutate, { message: "Unauthorized", name: "Error" })
+    )
+  );
+});
+
 test("patient data and child records cannot be accessed or mutated by another user", async () => {
   setRequestCookie(ownerCookie);
   const patient = await patientsActions.createPatient({
